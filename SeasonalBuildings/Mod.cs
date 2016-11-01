@@ -30,7 +30,7 @@ namespace Entoarox.SeasonalBuildings
             string mode = "xna";
             if(Type.GetType("Microsoft.Xna.Framework.Input.Joystick")!=null)
                 mode = "mono";
-            StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] Version "+GetType().Assembly.GetName().Version+"/"+mode+" by Entoarox, do not redistribute", ConsoleColor.Cyan);
+            StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] Version "+GetType().Assembly.GetName().Version+'/'+mode+" by Entoarox, do not redistribute", ConsoleColor.Cyan);
         }
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
@@ -49,6 +49,7 @@ namespace Entoarox.SeasonalBuildings
                     StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] Could not resolve the ContentPack.zip file, did you forget to download one?", ConsoleColor.Red);
                     return;
                 }
+                StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] No ContentPack.zip file found, using the embedded content pack", ConsoleColor.Yellow);
                 zip = new ZipArchive(stream,ZipArchiveMode.Update);
             }
             ZipArchiveEntry manifestData = zip.GetEntry("manifest.json");

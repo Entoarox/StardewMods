@@ -1,0 +1,10 @@
+﻿{
+    "teleporter": "Choose your destination:",
+    "gold": "Gold",
+    "no": "No",
+    "cancel": "Cancel",
+    /* 0 = Amount of item; 1 = Name of item */
+    "yesPrice": "Yes (Costs {$0} {$1})",
+    /* 0 = Name of item */
+    "notEnough":"You do not have enough {$0} for this.",
+}
