@@ -14,6 +14,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         {
             return this as T;
         }
+        public int ParserVersion;
         public string Portrait;
         public string Owner;
         public List<string> Messages;

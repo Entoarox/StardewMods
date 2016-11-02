@@ -16,7 +16,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
 {
     static class Loader1_2
     {
-        private static List<string> LocationTypes = new List<string> { "Default", "Cellar"};
+        private static List<string> LocationTypes = new List<string> { "Default", "Cellar", "Greenhouse", "Sewer", "BathHousePool", "Desert", "Decoratable" };
         private static List<string> Layers = new List<string>() { "Back", "Buildings", "Paths", "Front", "AlwaysFront" };
         private static List<string> AffectedLocations = new List<string>();
         private static List<string> Conditionals = new List<string>();
@@ -24,7 +24,24 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         private static Dictionary<string, Point> MapSizes = new Dictionary<string, Point>();
         public static void Load(string filepath)
         {
-            Parse(Path.GetDirectoryName(filepath),JsonConvert.DeserializeObject<LocationConfig1_2>(File.ReadAllText(filepath)));
+            LocationConfig1_2 conf;
+            try
+            {
+                conf = JsonConvert.DeserializeObject<LocationConfig1_2>(File.ReadAllText(filepath));
+            }
+            catch (Exception err)
+            {
+                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, json cannot be parsed: " + filepath, err);
+                return;
+            }
+            try
+            {
+                Parse(Path.GetDirectoryName(filepath), conf);
+            }
+            catch (Exception err)
+            {
+                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, a unexpected error occured: " + filepath, err);
+            }
         }
         private static bool FileCheck(string path, string file)
         {
@@ -42,7 +59,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 return false;
             if (AffectedLocations.Contains(name))
             {
-                AdvancedLocationLoaderMod.Logger.Error("Location is already being modified: "+name);
+                AdvancedLocationLoaderMod.Logger.Error("Location is already being modified: " + name);
                 return false;
             }
             AffectedLocations.Add(name);
@@ -51,37 +68,37 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         public static void Parse(string filepath, LocationConfig1_2 config)
         {
             // Print mod info into the log
-            AdvancedLocationLoaderMod.Logger.Log("INFO",(config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author,ConsoleColor.Magenta);
+            AdvancedLocationLoaderMod.Logger.Log("INFO", (config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, ConsoleColor.Magenta);
             // Parse locations
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Locations` section...");
-            if(config.Locations!=null)
-            foreach (Location loc in config.Locations)
-                if (LocationChecks(filepath, loc.FileName, loc.MapName))
-                {
-                    if(LocationTypes.Contains(loc.Type))
+            if (config.Locations != null)
+                foreach (Location loc in config.Locations)
+                    if (LocationChecks(filepath, loc.FileName, loc.MapName))
                     {
+                        if (!LocationTypes.Contains(loc.Type))
+                        {
+                            AdvancedLocationLoaderMod.Logger.Error("Unknown location Type, using `Default` instead: " + loc.ToString());
+                            loc.Type = "Default";
+                        }
                         loc.FileName = Path.Combine(filepath, loc.FileName);
                         Compound.Locations.Add(loc);
-                    }
-                    else
-                        AdvancedLocationLoaderMod.Logger.Error("Unable to add location, the selected type is unknown: " + loc.ToString());
 
-                }
+                    }
             // Parse overrides
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Overrides` section...");
             if (config.Overrides != null)
                 foreach (Override ovr in config.Overrides)
-                if (LocationChecks(filepath, ovr.FileName, ovr.MapName))
-                {
-                    ovr.FileName = Path.Combine(filepath, ovr.FileName);
-                    Compound.Overrides.Add(ovr);
-                }
+                    if (LocationChecks(filepath, ovr.FileName, ovr.MapName))
+                    {
+                        ovr.FileName = Path.Combine(filepath, ovr.FileName);
+                        Compound.Overrides.Add(ovr);
+                    }
             // Parse redirects
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Redirects` section...");
             if (config.Redirects != null)
                 foreach (Redirect red in config.Redirects)
-                if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
-                    EntoFramework.GetContentRegistry().RegisterXnb(red.FromFile, Path.Combine(filepath, red.ToFile));
+                    if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
+                        EntoFramework.GetContentRegistry().RegisterXnb(red.FromFile, Path.Combine(filepath, red.ToFile));
             // Parse tilesheets
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Tilesheets` section...");
             if (config.Tilesheets != null)
@@ -107,110 +124,110 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `tiles` section...");
             if (config.Tiles != null)
                 foreach (Tile til in config.Tiles)
-            {
-                if (til.Conditions != null)
                 {
-                    string err = Conditions.FindConflictingConditions(til.Conditions.Split(','), 5, true);
-                    if (err != null)
+                    if (til.Conditions != null)
                     {
-                        AdvancedLocationLoaderMod.Logger.Error("Tile `" + til.ToString() + "` Condition Error: " + err);
-                        continue;
+                        string err = Conditions.FindConflictingConditions(til.Conditions.Split(','), 5, true);
+                        if (err != null)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Error("Tile `" + til.ToString() + "` Condition Error: " + err);
+                            continue;
+                        }
                     }
+                    if (!Layers.Contains(til.LayerId))
+                        AdvancedLocationLoaderMod.Logger.Error("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId);
+                    else
+                        Compound.Tiles.Add(til);
                 }
-                if (!Layers.Contains(til.LayerId))
-                    AdvancedLocationLoaderMod.Logger.Error("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId);
-                else
-                    Compound.Tiles.Add(til);
-            }
             // Parse properties
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Properties` section...");
             if (config.Properties != null)
                 foreach (Property pro in config.Properties)
-            {
-                if (pro.Conditions != null)
                 {
-                    string err = Conditions.FindConflictingConditions(pro.Conditions.Split(','), 5, true);
-                    if (err != null)
+                    if (pro.Conditions != null)
                     {
-                        AdvancedLocationLoaderMod.Logger.Error("Property `" + pro.ToString() + "` Condition Error: " + err);
-                        continue;
+                        string err = Conditions.FindConflictingConditions(pro.Conditions.Split(','), 5, true);
+                        if (err != null)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Error("Property `" + pro.ToString() + "` Condition Error: " + err);
+                            continue;
+                        }
                     }
+                    if (!Layers.Contains(pro.LayerId))
+                        AdvancedLocationLoaderMod.Logger.Error("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId);
+                    else
+                        Compound.Properties.Add(pro);
                 }
-                if (!Layers.Contains(pro.LayerId))
-                    AdvancedLocationLoaderMod.Logger.Error("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId);
-                else
-                    Compound.Properties.Add(pro);
-            }
             // Parse warps
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Warps` section...");
             if (config.Warps != null)
                 foreach (Warp war in config.Warps)
-            {
-                if (war.Conditions != null)
                 {
-                    string err = Conditions.FindConflictingConditions(war.Conditions.Split(','), 5, true);
-                    if (err != null)
+                    if (war.Conditions != null)
                     {
-                        AdvancedLocationLoaderMod.Logger.Error("Warp `" + war.ToString() + "` Condition Error: " + err);
-                        continue;
+                        string err = Conditions.FindConflictingConditions(war.Conditions.Split(','), 5, true);
+                        if (err != null)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Error("Warp `" + war.ToString() + "` Condition Error: " + err);
+                            continue;
+                        }
                     }
+                    Compound.Warps.Add(war);
                 }
-                Compound.Warps.Add(war);
-            }
             // Parse conditionals
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Conditionals` section...");
             if (config.Conditionals != null)
                 foreach (Conditional con in config.Conditionals)
-                if (con.Item < -1)
-                    AdvancedLocationLoaderMod.Logger.Error("Unable to parse conditional, it references a null item: " + con.ToString());
-                else if (con.Amount < 1)
-                    AdvancedLocationLoaderMod.Logger.Error("Unable to validate conditional, the item amount is less then 1: " + con.ToString());
-                else if (Conditionals.Contains(con.Name))
-                    AdvancedLocationLoaderMod.Logger.Error("Unable to validate conditional, another condition with this name already exists: " + con.ToString());
-                else
-                {
-                    Configs.Compound.Conditionals.Add(con);
-                    Conditionals.Add(con.Name);
-                }
+                    if (con.Item < -1)
+                        AdvancedLocationLoaderMod.Logger.Error("Unable to parse conditional, it references a null item: " + con.ToString());
+                    else if (con.Amount < 1)
+                        AdvancedLocationLoaderMod.Logger.Error("Unable to validate conditional, the item amount is less then 1: " + con.ToString());
+                    else if (Conditionals.Contains(con.Name))
+                        AdvancedLocationLoaderMod.Logger.Error("Unable to validate conditional, another condition with this name already exists: " + con.ToString());
+                    else
+                    {
+                        Configs.Compound.Conditionals.Add(con);
+                        Conditionals.Add(con.Name);
+                    }
             // Parse minecarts
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Teleporters` section...");
             if (config.Teleporters != null)
                 foreach (TeleporterList min in config.Teleporters)
-            {
-                bool add = true;
-                foreach(TeleporterList tes in Compound.Teleporters)
-                    if(tes.ListName==min.ListName)
-                    {
-                        add = false;
-                        foreach (TeleporterDestination dest in min.Destinations)
-                            if (tes.Destinations.TrueForAll(a => { return !a.Equals(dest); }))
-                                tes.Destinations.Add(dest);
-                            else
-                                AdvancedLocationLoaderMod.Logger.Error("Unable to add teleporter destination for the `"+min.ListName+"` teleporter, the destination already exists: `"+dest.ToString());
+                {
+                    bool add = true;
+                    foreach (TeleporterList tes in Compound.Teleporters)
+                        if (tes.ListName == min.ListName)
+                        {
+                            add = false;
+                            foreach (TeleporterDestination dest in min.Destinations)
+                                if (tes.Destinations.TrueForAll(a => { return !a.Equals(dest); }))
+                                    tes.Destinations.Add(dest);
+                                else
+                                    AdvancedLocationLoaderMod.Logger.Error("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString());
 
-                    }
-                if (add)
-                    Compound.Teleporters.Add(min);
+                        }
+                    if (add)
+                        Compound.Teleporters.Add(min);
                     // Parse shops
                     if (config.Shops != null)
                         foreach (string shop in config.Shops)
-                {
-                    string path = Path.Combine(filepath, shop + ".json");
-                    if (!File.Exists(path))
-                        AdvancedLocationLoaderMod.Logger.Error("Unable to load shop, file does not exist: " + path);
-                    else
-                    {
-                        ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
-                        cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
-                        Configs.Compound.Shops.Add(shop,cfg);
-                    }
+                        {
+                            string path = Path.Combine(filepath, shop + ".json");
+                            if (!File.Exists(path))
+                                AdvancedLocationLoaderMod.Logger.Error("Unable to load shop, file does not exist: " + path);
+                            else
+                            {
+                                ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
+                                cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
+                                Configs.Compound.Shops.Add(shop, cfg);
+                            }
+                        }
                 }
-            }
         }
         internal static string CheckTileInfo(TileInfo info)
         {
             if (Game1.getLocationFromName(info.MapName) == null && !AffectedLocations.Contains(info.MapName))
-                if (info.Optional!=true)
+                if (info.Optional != true)
                     return "location does not exist";
                 else
                     return "OPTIONAL";
@@ -226,15 +243,15 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             int minY = 0;
             int maxX = size.X;
             int maxY = size.Y;
-                if (info is Warp)
-                {
-                    minX--;
-                    minY--;
-                    maxX++;
-                    maxY++;
-                }
-                if (info.TileX < minX || info.TileY < minY || info.TileX > maxX || info.TileY > maxY)
-                    return "placement is outside location bounds";
+            if (info is Warp)
+            {
+                minX--;
+                minY--;
+                maxX++;
+                maxY++;
+            }
+            if (info.TileX < minX || info.TileY < minY || info.TileX > maxX || info.TileY > maxY)
+                return "placement is outside location bounds";
             return null;
         }
         public static void ApplyPatches()
@@ -255,9 +272,9 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
                         trueCompound.Locations.Add(obj);
                     }
-                    catch(Exception err)
+                    catch (Exception err)
                     {
-                        AdvancedLocationLoaderMod.Logger.Error("Unable to add location, the map file caused a error when loaded: " + obj.ToString(),err);
+                        AdvancedLocationLoaderMod.Logger.Error("Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err);
                     }
                 }
             foreach (Override obj in Compound.Overrides)
@@ -279,9 +296,9 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     }
                 }
             foreach (Tilesheet obj in Compound.Tilesheets)
-                if(Game1.getLocationFromName(obj.MapName)==null && !AffectedLocations.Contains(obj.MapName))
+                if (Game1.getLocationFromName(obj.MapName) == null && !AffectedLocations.Contains(obj.MapName))
                 {
-                    AdvancedLocationLoaderMod.Logger.Error("Unable to patch tilesheet, location does not exist: "+obj.ToString());
+                    AdvancedLocationLoaderMod.Logger.Error("Unable to patch tilesheet, location does not exist: " + obj.ToString());
                 }
                 else
                     trueCompound.Tilesheets.Add(obj);
@@ -290,7 +307,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 string info = CheckTileInfo(obj);
                 if (info != null)
                 {
-                    if(info!="OPTIONAL")
+                    if (info != "OPTIONAL")
                         AdvancedLocationLoaderMod.Logger.Error("Unable to apply tile patch, " + info + ":" + obj.ToString());
                 }
                 else
@@ -318,7 +335,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 trueCompound.Warps.Add(obj);
             }
             // At this point any edits that showed problems have been removed, so now we can actually process everything
-            foreach(Location obj in trueCompound.Locations)
+            foreach (Location obj in trueCompound.Locations)
                 Processors.ApplyLocation(obj);
             foreach (Override obj in trueCompound.Overrides)
                 Processors.ApplyOverride(obj);
@@ -334,7 +351,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 if (!string.IsNullOrEmpty(obj.Conditions))
                     Configs.Compound.DynamicTiles.Add(obj);
             }
-            foreach(Property obj in trueCompound.Properties)
+            foreach (Property obj in trueCompound.Properties)
             {
                 Processors.ApplyProperty(obj);
                 if (!string.IsNullOrEmpty(obj.Conditions))

@@ -130,6 +130,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     newWarp.TargetName = warp[3];
                     newWarp.TargetX = Convert.ToInt32(warp[4]);
                     newWarp.TargetY = Convert.ToInt32(warp[5]);
+                    Updated.Warps.Add(newWarp);
                 }
             }
             AdvancedLocationLoaderMod.Logger.Trace("Converting the `conditions` section");

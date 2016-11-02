@@ -107,6 +107,21 @@ namespace Entoarox.AdvancedLocationLoader
                         loc = new StardewValley.Locations.Cellar(map, location.MapName);
                         loc.objects = new SerializableDictionary<Microsoft.Xna.Framework.Vector2, StardewValley.Object>();
                         break;
+                    case "BathHousePool":
+                        loc = new StardewValley.Locations.BathHousePool(map, location.MapName);
+                        break;
+                    case "Decoratable":
+                        loc = new Locations.DecoratableLocation(map, location.MapName);
+                        break;
+                    case "Desert":
+                        loc = new Locations.Desert(map, location.MapName);
+                        break;
+                    case "Greenhouse":
+                        loc = new Locations.Greenhouse(map, location.MapName);
+                        break;
+                    case "Sewer":
+                        loc = new Locations.Sewer(map, location.MapName);
+                        break;
                     default:
                         loc = new GameLocation(map, location.MapName);
                         break;

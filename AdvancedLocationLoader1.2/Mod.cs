@@ -28,18 +28,25 @@ namespace Entoarox.AdvancedLocationLoader
             Logger = new DataLogger("AdvancedLocationLoader", 4);
             Localizer = new LocalizationHelper(Path.Combine(PathOnDisk,"localization"));
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
+
             GameEvents.LoadContent += Events.GameEvents_LoadContent;
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
+
+            ITypeRegistry registry = EntoFramework.GetTypeRegistry();
+            registry.RegisterType<Locations.Greenhouse>();
+            registry.RegisterType<Locations.Sewer>();
+            registry.RegisterType<Locations.Desert>();
+            registry.RegisterType<Locations.DecoratableLocation>();
 #if DEBUG
             Logger.Warn("Warning, this is a BETA version, features may be buggy or not work as intended!");
             GameEvents.UpdateTick += DebugNotification;
-            GameEvents.UpdateTick += EntoFramework.CreditsTick;
         }
         internal static void DebugNotification(object s, EventArgs e)
         {
             if (Game1.activeClickableMenu is StardewValley.Menus.TitleMenu && Game1.activeClickableMenu != null)
             {
+                EntoFramework.CreditsTick(s, e);
                 Framework.Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "subMenu", new TitleMenuDialogue(Localizer.Localize("betaNotice","BETA")));
                 GameEvents.UpdateTick -= DebugNotification;
             }

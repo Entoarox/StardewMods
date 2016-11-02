@@ -20,7 +20,16 @@ namespace Entoarox.AdvancedLocationLoader
                 string file = Path.Combine(dir, "manifest.json");
                 if(File.Exists(file))
                 {
-                    JObject o = JObject.Parse(File.ReadAllText(file));
+                    JObject o;
+                    try
+                    {
+                        o = JObject.Parse(File.ReadAllText(file));
+                    }
+                    catch(Exception err)
+                    {
+                        AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, json is invalid:" + file,err);
+                        return;
+                    }
                     string loaderVersion = (string)o["LoaderVersion"];
                     if (loaderVersion == null)
                         loaderVersion = (string)o["loaderVersion"];
