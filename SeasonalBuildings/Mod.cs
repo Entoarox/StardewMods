@@ -27,9 +27,20 @@ namespace Entoarox.SeasonalBuildings
         {
             StardewModdingAPI.Events.GameEvents.LoadContent += GameEvents_LoadContent;
             FilePath = PathOnDisk;
-            string mode = "xna";
-            if(Type.GetType("Microsoft.Xna.Framework.Input.Joystick")!=null)
-                mode = "mono";
+            string mode = "unknown";
+            switch(Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    mode = "xna";
+                    break;
+                case PlatformID.MacOSX:
+                case PlatformID.Unix:
+                    mode = "mono";
+                    break;
+                default:
+                    mode = "other";
+                    break;
+            }
             StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] Version "+GetType().Assembly.GetName().Version+'/'+mode+" by Entoarox, do not redistribute", ConsoleColor.Cyan);
         }
         private static string FilePath;
@@ -40,7 +51,7 @@ namespace Entoarox.SeasonalBuildings
             string path = Path.Combine(FilePath, "ContentPack.zip");
             ZipArchive zip;
             if (File.Exists(path))
-                zip = new ZipArchive(new FileStream(path, FileMode.Open), ZipArchiveMode.Update);
+                zip = new ZipArchive(new FileStream(path, FileMode.Open), ZipArchiveMode.Read);
             else
             {
                 Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Entoarox.SeasonalBuildings.ContentPack.zip");
@@ -50,7 +61,7 @@ namespace Entoarox.SeasonalBuildings
                     return;
                 }
                 StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] No ContentPack.zip file found, using the embedded content pack", ConsoleColor.Yellow);
-                zip = new ZipArchive(stream,ZipArchiveMode.Update);
+                zip = new ZipArchive(stream,ZipArchiveMode.Read);
             }
             ZipArchiveEntry manifestData = zip.GetEntry("manifest.json");
             ContentPackManifest manifest = JsonConvert.DeserializeObject<ContentPackManifest>(new StreamReader(manifestData.Open()).ReadToEnd(), new VersionConverter());
@@ -76,25 +87,18 @@ namespace Entoarox.SeasonalBuildings
         {
             if (!Game1.hasLoadedGame || Game1.getFarm() == null)
                 return;
-            TimeEvents_SeasonOfYearChanged(s, e);
-            StardewModdingAPI.Events.TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
             StardewModdingAPI.Events.LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
             StardewModdingAPI.Events.GameEvents.UpdateTick -= GameEvents_UpdateTick;
-        }
-        internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
-        {
-            if (SeasonTextures.ContainsKey("houses"))
-                Game1.getFarm().houseTextures = SeasonTextures["houses"][Game1.currentSeason];
-            foreach (Building building in Game1.getFarm().buildings)
-                if (SeasonTextures.ContainsKey(building.buildingType))
-                    building.texture = SeasonTextures[building.buildingType][Game1.currentSeason];
         }
         internal static void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
         {
             if (Game1.currentLocation.name != "Farm")
                 return;
-            StardewModdingAPI.Events.LocationEvents.CurrentLocationChanged -= LocationEvents_CurrentLocationChanged;
-            TimeEvents_SeasonOfYearChanged(s, e);
+            if (SeasonTextures.ContainsKey("houses"))
+                Game1.getFarm().houseTextures = SeasonTextures["houses"][Game1.currentSeason];
+            foreach (Building building in Game1.getFarm().buildings)
+                if (SeasonTextures.ContainsKey(building.buildingType))
+                    building.texture = SeasonTextures[building.buildingType][Game1.currentSeason];
         }
     }
 }

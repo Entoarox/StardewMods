@@ -50,7 +50,8 @@ namespace Entoarox.Framework.Events
         // Internal methods
         internal static void FireActionTriggered(Farmer who, string action, string[] arguments, Vector2 position)
         {
-            ActionTriggered(null, new EventArgsActionTriggered(who, action, arguments, position));
+            if (ActionTriggered.GetInvocationList().Length > 0)
+                ActionTriggered(null, new EventArgsActionTriggered(who, action, arguments, position));
         }
         internal static bool ShouldFireActionTriggered()
         {
@@ -59,7 +60,8 @@ namespace Entoarox.Framework.Events
 
         internal static void FireWorldReady()
         {
-            WorldReady(null, new EventArgs());
+            if(WorldReady.GetInvocationList().Length>0)
+                WorldReady(null, new EventArgs());
         }
     }
 }

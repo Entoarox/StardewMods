@@ -100,6 +100,8 @@ namespace Entoarox.Framework
             if(LoaderType==LoaderTypes.Unknown)
                 Logger.Error("Was unable to hook into the `FarmHand` loader, has it updated since the last framework release?");
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/EntoaroxFramework.json");
+            Events.MoreEvents.ActionTriggered += MoreEvents_EventSink;
+            Events.MoreEvents.WorldReady += MoreEvents_EventSink;
         }
         internal static void GameEvents_FirstUpdateTick(object s, EventArgs e)
         {
@@ -143,6 +145,10 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick += PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged += PlayerHelper.LocationEvents_CurrentLocationChanged;
             Events.MoreEvents.FireWorldReady();
+        }
+        internal static void MoreEvents_EventSink(object s, EventArgs e)
+        {
+
         }
     }
 }

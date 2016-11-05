@@ -3,6 +3,7 @@
     "gold": "Gold",
     "no": "No",
     "cancel": "Cancel",
+    "sparkle": "Despite what you thought you saw, there does not seem to be anything here.",
     /* 0 = Amount of item; 1 = Name of item */
     "yesPrice": "Yes (Costs {$0} {$1})",
     /* 0 = Name of item */

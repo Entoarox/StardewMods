@@ -1,0 +1,238 @@
+﻿This file contains the basic layouts for both location-mod and shop manifests.
+
+
+**Location Manifest (Version 1.2)**
+```javascript
+{
+	/* What manifest loader ALL should use to load the file, for the 1.2 branch should always be `1.2` */
+	"LoaderVersion":"1.2",
+	/* The about section contains general information about the mod and its author */
+	"About":{
+		/* The name of your location mod, is printed to the log */
+		"ModName":"",
+		/* The name of the mod author, is printed to the log */
+		"Author":"",
+		/* People the author wishes to thank for having contributed to their mod in some fashion, is not printed to the log */
+		"ThanksTo":["","",...],
+		/* A website url linked to the mod, best used as the place where updates for the mod can be found and downloaded, not printed to the log */
+		"Website":"",
+		/* A short description of the mod, is printed to the log */
+		"Description":"",
+		/* The version of the mod this is, is printed to the log */
+		"Version":"1.0.0"
+	},
+	/* The locations section is where new locations are registered for addition to the game */
+	"Locations":[
+		{
+			/* The name to use for this new location in warps and such, if not unique then ALL will report a error */
+			"MapName":"",
+			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			"FileName":"",
+			/* If set to `true` then this new location is a outdoor location and exhibits all behaviour outdoor locations have */
+			"Outdoor":false,
+			/* If set to `true` then this new location is a farmable location and crops will be able to be planted here */
+			"Farmable":false,
+			/* What special Type of location this is, or `Default` if a generic location, special location types have unique behaviour that no other location type exhibits */
+			"Type":"Default"
+			/*
+				The following types are currently supported:
+				Default			- Generic location
+				Cellar			- Location where Cask objects are able to work
+				Greenhouse		- Location that is not affected by seasons similar to the greenhouse
+				Sewer			- Location that has the same green fog effect as the vanilla Sewer location
+				BathHousePool	- Location that has the same white fog effect as the vanilla BathHousePool location
+				Desert			- Location that exhibits the same 'always sunny' behaviour that the vanilla Desert exhibits
+				Decoratable		- Location that allows for Furniture objects to be placed within
+
+				More types may be added in the future, ALL will report if a type is unknown and fall back to the Default type in that case
+			*/
+		},
+		...
+	],
+	/* The overrides section is where location maps can be overridden by name */
+	"Overrides":[
+		{
+			/* The name that SDV uses for the location you wish to override */
+			"MapName":"",
+			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			"FileName":""
+		},
+		...
+	],
+	/* The redirects section is where you can redirect the loading of any xnb file relative to Content to a xnb file relative to the manifest instead */
+	"Redirects":[
+		{
+			/* The path (Without the c:/blabla/../Content/ prefix) to the xnb file that should be redirected, without the xnb extension */
+			"FromFile":"",
+			/* The path (Relative to the manifest) to the xnb file that should be loaded instead, without the xnb extension */
+			"ToFile":""
+		},
+		...
+	],
+	/* The tilesheets section is where you register all custom tilesheets so that ALL can properly handle them */
+	"Tilesheets":[
+		{
+			/* The name of the location that this tilesheet is attached to and needs to be edited on */
+			"MapName":"",
+			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			"FileName":"",
+			/* The name given to the tilesheet in tIDE */
+			"SheetId":"",
+			/* If `true` then ALL will treat this tilesheet as seasonal, in such a case, it appends `_<season>` to the filename given above before adding the xnb extension */
+			"Seasonal":false
+		},
+		...
+	],
+	/* The tiles section is where you can set or remove specific tiles on any location */
+	"":[
+		/* This first example is for setting a static tile */
+		{
+			/* The name of the location where you wish to set this tile */
+			"MapName":"",
+			/* The name given to the tilesheet in tIDE, if omitted, the first tilesheet assigned to the map is assumed */
+			"SheetId":"",
+			/* The X coordinate of the tile you wish to set */
+			"TileX":0,
+			/* The Y coordinate of the tile you wish to set */
+			"TileY":0,
+			/* The layer you wish to place this tile on, must be a valid SDV layer (Back, Buildings, Paths, Front, AlwaysFront) */
+			"LayerId":"",
+			/* What conditions must apply (if any) for this edit to be applied, omit or leave empty for no conditions */
+			"Conditions":"",
+			/* If set to `true` this edit is optional, and if the location it is meant to edit does not exist then ALL will not report an error as it usually would */
+			"Optional":false,
+			/* The tile index for the tile to set */
+			"TileIndex":0
+		},
+		/* This second example is for setting a animated tile */
+		{
+			/* The name of the location where you wish to set this tile */
+			"MapName":"",
+			/* The name given to the tilesheet in tIDE, if omitted, the first tilesheet assigned to the map is assumed */
+			"SheetId":"",
+			/* The X coordinate of the tile you wish to set */
+			"TileX":0,
+			/* The Y coordinate of the tile you wish to set */
+			"TileY":0,
+			/* The layer you wish to place this tile on, must be a valid SDV layer (Back, Buildings, Paths, Front, AlwaysFront) */
+			"LayerId":"",
+			/* What conditions must apply (if any) for this edit to be applied, omit or leave empty for no conditions */
+			"Conditions":"",
+			/* If set to `true` this edit is optional, and if the location it is meant to edit does not exist then ALL will not report an error as it usually would */
+			"Optional":false,
+			/* The list of tile indexes for the tile to animate through */
+			"TileIndexes":[0,1,1,2,2,0],
+			/* The interval between each frame in the animation */
+			"Interval":3
+		},
+		/* This third example is for removing a existing tile */
+		{
+			/* The name of the location where you wish to set this tile */
+			"MapName":"",
+			/* The X coordinate of the tile you wish to set */
+			"TileX":0,
+			/* The Y coordinate of the tile you wish to set */
+			"TileY":0,
+			/* The layer you wish to place this tile on, must be a valid SDV layer (Back, Buildings, Paths, Front, AlwaysFront) */
+			"LayerId":"",
+			/* What conditions must apply (if any) for this edit to be applied, omit or leave empty for no conditions */
+			"Conditions":"",
+			/* If set to `true` this edit is optional, and if the location it is meant to edit does not exist then ALL will not report an error as it usually would */
+			"Optional":false,
+			/* Setting the tile index to -1 tells ALL to remove any pre-existing tiles rather then setting a tile */
+			"TileIndex":-1
+		},
+		...
+	],
+	/* The properties section is where you can modify tile properties for any specific tile on any location */
+	"Properties":[
+		{
+			/* The name of the location where you wish to set this tile */
+			"MapName":"",
+			/* The X coordinate of the tile you wish to set */
+			"TileX":0,
+			/* The Y coordinate of the tile you wish to set */
+			"TileY":0,
+			/* The layer you wish to place this tile on, must be a valid SDV layer (Back, Buildings, Paths, Front, AlwaysFront) */
+			"LayerId":"",
+			/* What conditions must apply (if any) for this edit to be applied, omit or leave empty for no conditions */
+			"Conditions":"",
+			/* If set to `true` this edit is optional, and if the location it is meant to edit does not exist then ALL will not report an error as it usually would */
+			"Optional":false,
+			/* The key of the tile-property you wish to set */
+			"Key":"",
+			/* The value you wish to assign to the tile-property */
+			"Value":""
+		},
+		...
+	],
+	/* The warps section lets you add or override warps, warps are overridden if a pre-existing warp is in the same x,y position, otherwise a new warp is added */
+	"Warps":[
+		{
+			/* The name of the location where you wish to set this tile */
+			"MapName":"",
+			/* The X coordinate of the tile you wish to set */
+			"TileX":0,
+			/* The Y coordinate of the tile you wish to set */
+			"TileY":0,
+			/* The layer you wish to place this tile on, must be a valid SDV layer (Back, Buildings, Paths, Front, AlwaysFront) */
+			"LayerId":"",
+			/* What conditions must apply (if any) for this edit to be applied, omit or leave empty for no conditions */
+			"Conditions":"",
+			/* If set to `true` this edit is optional, and if the location it is meant to edit does not exist then ALL will not report an error as it usually would */
+			"Optional":false,
+			/* The name of the target location that this warp leads to */
+			"TargetName":"",
+			/* The X position on the target location this warp leads to */
+			"TargetX":0,
+			/* The Y position on the target location this warp leads to */
+			"TargetY":0
+		},
+		...
+	],
+	/* The conditionals section lets you add custom "pay X of Y" requirements to the game using the `ALLConditional` tile action */
+	"Conditionals":[
+		{
+			/* The unique name for this conditional */
+			"Name":"",
+			/* The Id of the item that is required to pay in order to complete this conditional, use `-1` for Gold */
+			"Item":-1,
+			/* The amount of the item is required to pay in order to complete this conditional */
+			"Amount":0,
+			/* The text that is displayed above the yes/no answers to complete this conditional */
+			"Question":""
+		},
+		...
+	],
+	/* The teleporters section lets you add custom teleportation networks similar to the vanilla Minecart system to the game */
+	"Teleporters":[
+		{
+			/* The name of this unique teleporter list */
+			"Name":"",
+			/* The list of destinations, if the previously given name has been used by another manifest, then both destination lists are merged */
+			"Destinations":[
+				{
+					/* The name of the map that this specific destination will teleport the player to */
+					"MapName":"",
+					/* The X position on the map this specific destination will teleport the player to */
+					"TileX":0,
+					/* The Y position on the map this specific destination will teleport the player to */
+					"TileY":0,
+					/* The text to display as the selectable option for this destination */
+					"ItemText":""
+				},
+				...
+			]
+		},
+		...
+	],
+	/* The shops section references the names of the individual <shopname>.json files relative to the manifest, without the json extension */
+	"Shops":["",""]
+}
+```
+
+Shops have their own format that can be found below:
+
+```javascript
+// TODO
+```

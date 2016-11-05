@@ -148,9 +148,20 @@ namespace Entoarox.Framework
         }
         public void LogModInfo(string author, Version version)
         {
-            string mode = "xna";
-            if (Type.GetType("Microsoft.Xna.Framework.Input.Joystick") != null)
-                mode = "mono";
+            string mode = "unknown";
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    mode = "xna";
+                    break;
+                case PlatformID.MacOSX:
+                case PlatformID.Unix:
+                    mode = "mono";
+                    break;
+                default:
+                    mode = "other";
+                    break;
+            }
             Log("INFO","Version " + version + '/' + mode + " by " + author + ", do not redistribute without permission",ConsoleColor.Cyan);
         }
     }

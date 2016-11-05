@@ -65,23 +65,35 @@ namespace Entoarox.Framework
         }
         internal static void ResetForNewGame()
         {
-            Game1.player.attackIncreaseModifier = 0;
-            Game1.player.knockbackModifier = 0;
-            Game1.player.critChanceModifier = 0;
-            Game1.player.critPowerModifier = 0;
-            Game1.player.weaponSpeedModifier = 0;
-            Game1.player.weaponPrecisionModifier = 0;
-            Game1.player.magneticRadius = Game1.tileSize * 2;
-            UpdateWatchers();
-            if (Game1.player.boots != null)
-                Game1.player.boots.onEquip();
-            if (Game1.player.leftRing != null)
-                Game1.player.leftRing.onEquip(Game1.player);
-            if (Game1.player.rightRing != null)
-                Game1.player.rightRing.onEquip(Game1.player);
-            foreach (Buff b in Game1.player.buffs)
-                b.addBuff();
-            UpdateCompound();
+            try
+            {
+                Game1.player.attackIncreaseModifier = 0;
+                Game1.player.knockbackModifier = 0;
+                Game1.player.critChanceModifier = 0;
+                Game1.player.critPowerModifier = 0;
+                Game1.player.weaponSpeedModifier = 0;
+                Game1.player.weaponPrecisionModifier = 0;
+                Game1.player.magneticRadius = Game1.tileSize * 2;
+                UpdateWatchers();
+                try
+                {
+                    if (Game1.player.leftRing != null)
+                        Game1.player.leftRing.onEquip(Game1.player);
+                    if (Game1.player.rightRing != null)
+                        Game1.player.rightRing.onEquip(Game1.player);
+                    foreach (Buff b in Game1.player.buffs)
+                        b.addBuff();
+                }
+                catch (Exception err)
+                {
+                    EntoFramework.Logger.Warn("Unable to apply vanilla buffs, a unexpected error occured", err);
+                }
+                UpdateCompound();
+            }
+            catch(Exception err)
+            {
+                EntoFramework.Logger.Error("Unable to initialize the PlayerHelper class, a unexpected error occured", err);
+            }
         }
         private static void UpdateSpeed()
         {
