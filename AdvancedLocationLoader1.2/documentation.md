@@ -1,5 +1,5 @@
-﻿This file contains the basic layouts for both location-mod and shop manifests.
-
+This file contains the basic layouts for both location-mod and shop manifests.
+For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](https://github.com/Entoarox/StardewMods/blob/master/Framework/ConditionDocumentation.md).
 
 **Location Manifest (Version 1.2)**
 ```javascript
