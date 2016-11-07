@@ -227,12 +227,41 @@
 		...
 	],
 	/* The shops section references the names of the individual <shopname>.json files relative to the manifest, without the json extension */
-	"Shops":["",""]
+	"Shops":["","",...]
 }
 ```
 
 Shops have their own format that can be found below:
 
+**Shop Manifest (Version 1)**
 ```javascript
-// TODO
+{
+	/* What version of the shop manifest parser ALL should use to read this file */
+	"ParserVersion":1,
+	/* Path relative to the shop manifest to a png to be used as a owner portrait for the shop */
+	"Portrait":"",
+	/* Name of the NPC who owns this shop, if no NPC exists then a placeholder NPC is created */
+	"Owner":"",
+	/* A list of messages, each time the shop is opened one is selected at random to be displayed */
+	"Messages":["","",...],
+	/* The list of items sold by this shop */
+	"Items":[
+		/* Each entry in the shop has its own item definition */
+		{
+			/* The numeric ID of the item */
+			"Id":0,
+			/* Optional, defaults to `false`, if true then this is a BigCraftable rather then a normal Object */
+			"BigCraftable":false,
+			/* Optional, defaults to the default sale price assigned to the item */
+			"Price":0,
+			/* Optional, defaults to `1`, how much of the item is bought per purchase */
+			"Stack":1,
+			/* Optional, defaults to unlimited stock, when set this limits how much of the item the shop sells at once */
+			"Stock":1,
+			/* What conditions must apply (if any) for this item to be in the shop, omit or leave empty for no conditions */
+			"Conditions":""
+		}
+	]
+	
+}
 ```
