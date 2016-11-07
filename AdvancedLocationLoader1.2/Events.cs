@@ -14,8 +14,10 @@ namespace Entoarox.AdvancedLocationLoader
         internal static void GameEvents_LoadContent(object s, EventArgs e)
         {
             AdvancedLocationLoaderMod.Logger.Info("Loading location mods into memory...");
+            string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
             int count = 0;
-            foreach(string dir in Directory.EnumerateDirectories(Path.Combine(AdvancedLocationLoaderMod.ModPath,"locations")))
+            Directory.CreateDirectory(baseDir);
+            foreach(string dir in Directory.EnumerateDirectories(baseDir))
             {
                 string file = Path.Combine(dir, "manifest.json");
                 if(File.Exists(file))

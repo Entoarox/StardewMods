@@ -1,6 +1,9 @@
-﻿namespace Entoarox.AdvancedLocationLoader.Locations
+﻿using System.Xml.Serialization;
+
+namespace Entoarox.AdvancedLocationLoader.Locations
 {
-    class Greenhouse : StardewValley.GameLocation
+    [XmlType("ALLGreenhouse")]
+    public class Greenhouse : StardewValley.GameLocation
     {
         public Greenhouse()
         {

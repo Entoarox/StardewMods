@@ -1,15 +1,10 @@
 ﻿using System;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 using StardewModdingAPI.Events;
 
 using StardewValley;
-
-using xTile.ObjectModel;
-using xTile.Tiles;
-using xTile.Dimensions;
 
 namespace Entoarox.Framework
 {

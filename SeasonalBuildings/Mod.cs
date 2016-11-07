@@ -16,10 +16,12 @@ namespace Entoarox.SeasonalBuildings
 {
     internal class ContentPackManifest
     {
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
         public string Name;
         public string Author;
         public Version Version;
         public string Description;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
     }
     internal class SeasonalBuildingsMod : StardewModdingAPI.Mod
     {
@@ -75,7 +77,10 @@ namespace Entoarox.SeasonalBuildings
                     ZipArchiveEntry zipFile = zip.GetEntry(season + '/' + name + ".png");
                     if (zipFile == null)
                         goto skipFile;
-                    textures.Add(season, Texture2D.FromStream(Game1.graphics.GraphicsDevice, zipFile.Open()));
+                    MemoryStream mst = new MemoryStream();
+                    zipFile.Open().CopyTo(mst);
+                    mst.Position = 0;
+                    textures.Add(season, Texture2D.FromStream(Game1.graphics.GraphicsDevice, mst));
                 }
                 SeasonTextures.Add(name, textures);
             skipFile:

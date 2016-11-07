@@ -74,7 +74,7 @@
     <Compile Include="VersionChecker.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\VersionChecker\EntoaroxFramework.json">
+    <None Include="..\VersionChecker\EntoaroxFramework.json">
       <Link>EntoaroxFramework.json</Link>
     </None>
     <None Include="packages.config" />

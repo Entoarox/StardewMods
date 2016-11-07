@@ -1,6 +1,10 @@
-﻿namespace Entoarox.AdvancedLocationLoader.Locations
+﻿using System.Xml;
+using System.Xml.Serialization;
+
+namespace Entoarox.AdvancedLocationLoader.Locations
 {
-    class Sewer : StardewValley.Locations.Sewer
+    [XmlType("ALLSewer")]
+    public class Sewer : StardewValley.Locations.Sewer
     {
         public Sewer()
         {

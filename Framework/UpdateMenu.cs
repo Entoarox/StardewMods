@@ -1,10 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: StardewValley.Menus.DialogueBox
-// Assembly: Stardew Valley, Version=1.0.6117.32354, Culture=neutral, PublicKeyToken=null
-// MVID: A228046D-FF51-468B-B935-E371C5FE297A
-// Assembly location: D:\Applications\Steam\steamapps\common\Stardew Valley\Stardew Valley.exe
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 

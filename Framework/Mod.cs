@@ -74,7 +74,7 @@ namespace Entoarox.Framework
             Logger = new DataLogger("EntoaroxFramework",4);
             Logger.LogModInfo("Entoarox", GetType().Assembly.GetName().Version);
             Logger.Debug("Attempting to resolve loader...");
-            if(Constants.Version.MajorVersion>0)
+            if (Constants.Version.Build == "Farmhand-Smapi")
             {
                 LoaderType = LoaderTypes.FarmHand;
                 Logger.Trace("The loader has been detected as being the `FarmHand` loader");
@@ -99,9 +99,7 @@ namespace Entoarox.Framework
             Logger.Debug("Preparation complete!");
             if(LoaderType==LoaderTypes.Unknown)
                 Logger.Error("Was unable to hook into the `FarmHand` loader, has it updated since the last framework release?");
-            VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/EntoaroxFramework.json");
-            Events.MoreEvents.ActionTriggered += MoreEvents_EventSink;
-            Events.MoreEvents.WorldReady += MoreEvents_EventSink;
+            VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
         internal static void GameEvents_FirstUpdateTick(object s, EventArgs e)
         {
@@ -140,15 +138,9 @@ namespace Entoarox.Framework
                 TimeEvents.DayOfMonthChanged += GamePatcher.TimeEvents_DayOfMonthChanged;
                 Events.MoreEvents.ActionTriggered += GamePatcher.MoreEvents_ActionTriggered;
             }
-            ControlEvents.ControllerButtonPressed += Events.MoreEventsManager.ControlEvents_ControllerButtonPressed;
-            ControlEvents.MouseChanged += Events.MoreEventsManager.ControlEvents_MouseChanged;
             GameEvents.UpdateTick += PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged += PlayerHelper.LocationEvents_CurrentLocationChanged;
             Events.MoreEvents.FireWorldReady();
-        }
-        internal static void MoreEvents_EventSink(object s, EventArgs e)
-        {
-
         }
     }
 }

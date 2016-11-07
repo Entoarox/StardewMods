@@ -163,20 +163,24 @@ namespace Entoarox.Framework
         }
         public override T Load<T>(string assetName)
         {
-            if (XnbMatches.ContainsKey(assetName))
+            assetName = assetName.Replace(Path.DirectorySeparatorChar=='/'?'\\':'/',Path.DirectorySeparatorChar);
+            if (HandledFiles.Contains(assetName))
             {
-                EntoFramework.Logger.TraceOnce("SCM.LoadFromXnb<" + typeof(T).ToString() + ">(" + assetName + ")");
-                return Registry[Path.GetDirectoryName(XnbMatches[assetName])].Load<T>(Path.GetFileName(XnbMatches[assetName]));
-            }
-            if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
-            {
-                EntoFramework.Logger.TraceOnce("SCM.LoadFromTexture<" + typeof(T).ToString() + ">(" + assetName + ")");
-                return (T)(object)Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open));
-            }
-            if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
-            {
-                EntoFramework.Logger.TraceOnce("SCM.LoadFromHandler<" + typeof(T).ToString() + ">(" + assetName + ")");
-                return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
+                if (XnbMatches.ContainsKey(assetName))
+                {
+                    EntoFramework.Logger.TraceOnce("SCM.LoadFromXnb<" + typeof(T).ToString() + ">(" + assetName + ")");
+                    return Registry[Path.GetDirectoryName(XnbMatches[assetName])].Load<T>(Path.GetFileName(XnbMatches[assetName]));
+                }
+                if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
+                {
+                    EntoFramework.Logger.TraceOnce("SCM.LoadFromTexture<" + typeof(T).ToString() + ">(" + assetName + ")");
+                    return (T)(object)Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open));
+                }
+                if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
+                {
+                    EntoFramework.Logger.TraceOnce("SCM.LoadFromHandler<" + typeof(T).ToString() + ">(" + assetName + ")");
+                    return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
+                }
             }
             return base.Load<T>(assetName);
         }
@@ -192,6 +196,7 @@ namespace Entoarox.Framework
         }
         internal void RegisterTexture(string assetName, string fileName)
         {
+            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             if (CanRegister(assetName) && File.Exists(fileName))
             {
                 TextureMatches.Add(assetName, fileName);
@@ -200,6 +205,7 @@ namespace Entoarox.Framework
         }
         internal void RegisterXnb(string assetName, string fileName)
         {
+            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             if (!CanRegister(assetName))
                 return;
             string manager = Path.GetDirectoryName(fileName);
@@ -211,6 +217,7 @@ namespace Entoarox.Framework
         }
         internal void RegisterHandler<T>(string assetName, FileLoadMethod<T> handler)
         {
+            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             if (CanRegister(assetName))
             {
                 DelegateMatches.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));

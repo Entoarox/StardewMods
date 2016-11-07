@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Xml.Serialization;
 
 using Microsoft.Xna.Framework;
 
@@ -7,7 +8,8 @@ using StardewValley.Objects;
 
 namespace Entoarox.AdvancedLocationLoader.Locations
 {
-    class DecoratableLocation : StardewValley.Locations.DecoratableLocation
+    [XmlType("ALLDecoratableLocation")]
+    public class DecoratableLocation : StardewValley.Locations.DecoratableLocation
     {
         private class FakeWallpaper : Wallpaper
         {

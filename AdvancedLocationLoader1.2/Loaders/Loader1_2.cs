@@ -98,7 +98,10 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             if (config.Redirects != null)
                 foreach (Redirect red in config.Redirects)
                     if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
-                        EntoFramework.GetContentRegistry().RegisterXnb(red.FromFile, Path.Combine(filepath, red.ToFile));
+                    {
+                        red.ToFile = Path.Combine(filepath, red.ToFile);
+                        Compound.Redirects.Add(red);
+                    }
             // Parse tilesheets
             AdvancedLocationLoaderMod.Logger.Trace("Parsing the `Tilesheets` section...");
             if (config.Tilesheets != null)
@@ -295,6 +298,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         AdvancedLocationLoaderMod.Logger.Error("Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err);
                     }
                 }
+            trueCompound.Redirects = Compound.Redirects;
             foreach (Tilesheet obj in Compound.Tilesheets)
                 if (Game1.getLocationFromName(obj.MapName) == null && !AffectedLocations.Contains(obj.MapName))
                 {
@@ -339,6 +343,8 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 Processors.ApplyLocation(obj);
             foreach (Override obj in trueCompound.Overrides)
                 Processors.ApplyOverride(obj);
+            foreach(Redirect obj in trueCompound.Redirects)
+                EntoFramework.GetContentRegistry().RegisterXnb(obj.FromFile, obj.ToFile);
             foreach (Tilesheet obj in trueCompound.Tilesheets)
             {
                 Processors.ApplyTilesheet(obj);

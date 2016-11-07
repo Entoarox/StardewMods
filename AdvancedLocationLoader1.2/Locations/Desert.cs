@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Xml.Serialization;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,7 +7,8 @@ using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader.Locations
 {
-    class Desert : StardewValley.Locations.Desert
+    [XmlType("ALLDesert")]
+    public class Desert : StardewValley.Locations.Desert
     {
         private static bool rememberRain;
         private static bool rememberDebris;
