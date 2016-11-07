@@ -99,7 +99,7 @@ namespace Entoarox.Framework
                         if (condition.StartsWith("married"))
                             return (Game1.player.spouse != null && Game1.player.spouse == condition.Substring(7));
                         // Handle engagement for any NPC instead of just the default bachelors *new*
-                        if (condition.StartsWith("married"))
+                        if (condition.StartsWith("engaged"))
                             return (Game1.player.spouse != null && Game1.player.spouse.Contains(condition.Substring(7)) && Game1.player.spouse.Contains("engaged"));
                         // Allow year-based conditions for during any specific year
                         if (condition.StartsWith("year="))
