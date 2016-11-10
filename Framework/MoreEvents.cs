@@ -1,5 +1,7 @@
 ﻿using System;
 
+using StardewValley;
+
 namespace Entoarox.Framework.Events
 {
     public static partial class MoreEvents
@@ -20,6 +22,10 @@ namespace Entoarox.Framework.Events
         /// This event is fired after the game is saved, so you can restore custom objects
         /// </summary>
         public static event EventHandler AfterSaving;
+        /// <summary>
+        /// This event is fired whenever the item currently held by the player is changed
+        /// </summary>
+        public static event EventHandler<EventArgsActiveItemChanged> ActiveItemChanged;
     }
     public class EventArgsActionTriggered : EventArgs
     {
@@ -34,7 +40,7 @@ namespace Entoarox.Framework.Events
         /// <summary>
         /// The player that triggered the action tile in question
         /// </summary>
-        public StardewValley.Farmer Who;
+        public Farmer Who;
         /// <summary>
         /// The position of the tile that the action was triggered on
         /// </summary>
@@ -46,12 +52,22 @@ namespace Entoarox.Framework.Events
         /// <param name="action">The action they triggered</param>
         /// <param name="arguments">Any arguments that are attached to the action</param>
         /// <param name="position">The tile position of the action triggered</param>
-        internal EventArgsActionTriggered(StardewValley.Farmer who, string action, string[] arguments, Microsoft.Xna.Framework.Vector2 position)
+        internal EventArgsActionTriggered(Farmer who, string action, string[] arguments, Microsoft.Xna.Framework.Vector2 position)
         {
             Action = action;
             Arguments = arguments;
             Who = who;
             Position = position;
+        }
+    }
+    public class EventArgsActiveItemChanged : EventArgs
+    {
+        public readonly Item OldItem;
+        public readonly Item NewItem;
+        public EventArgsActiveItemChanged(Item oldItem, Item newItem)
+        {
+            OldItem = oldItem;
+            NewItem = newItem;
         }
     }
 }

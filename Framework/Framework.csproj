@@ -60,6 +60,7 @@
     <Compile Include="LocalizationHelper.cs" />
     <Compile Include="Internal\LocationHelper.cs" />
     <Compile Include="DataLogger.cs" />
+    <Compile Include="Menus\FrameworkMenu.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Internal\MessageBox.cs" />
     <Compile Include="MoreEvents.cs" />
@@ -77,6 +78,7 @@
     <None Include="..\VersionChecker\EntoaroxFramework.json">
       <Link>EntoaroxFramework.json</Link>
     </None>
+    <None Include="ConditionDocumentation.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>

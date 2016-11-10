@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace Entoarox.Framework
@@ -24,6 +25,7 @@ namespace Entoarox.Framework
         private string Module;
         private static StreamWriter _writer;
         private static StreamWriter writer;
+        private static MethodInfo _logToFile;
         public DataLogger(string module, int logLevel=5)
         {
             Module = module;
@@ -37,11 +39,20 @@ namespace Entoarox.Framework
                 writer.WriteLine(LogFile);
                 try
                 {
-                    _writer = Reflection.FieldHelper.GetField<StreamWriter>(typeof(StardewModdingAPI.LogWriter), "_stream", false);
+                    if (StardewModdingAPI.Constants.Version.MajorVersion > 0)
+                    {
+                        _logToFile = typeof(StardewModdingAPI.Log).GetMethod("LogToFile", BindingFlags.Static | BindingFlags.NonPublic);
+                        if (_logToFile == null)
+                            throw new NullReferenceException("Attempt to hook logging method resulted in a null value.");
+                    }
+                    else
+                    {
+                        _writer = Reflection.FieldHelper.GetField<StreamWriter>(typeof(StardewModdingAPI.LogWriter), "_stream", false);
+                    }
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
-                    StardewModdingAPI.Log.SyncColour("[EntoaroxFramework/FATAL] EntoaroxFramework failed to hook into loader for logging" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace,ConsoleColor.Red);
+                    StardewModdingAPI.Log.SyncColour("[EntoaroxFramework/FATAL] EntoaroxFramework failed to hook into loader for logging" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, ConsoleColor.Red);
                 }
             }
         }
@@ -61,13 +72,16 @@ namespace Entoarox.Framework
                 writer.WriteLine(format);
                 writer.Flush();
             }
-            if (_writer == null)
+            if (_writer != null)
+                lock (_writer)
+                {
+                    _writer.WriteLine(format);
+                    _writer.Flush();
+                    return;
+                }
+            if (_logToFile == null)
                 return;
-            lock (_writer)
-            {
-                _writer.WriteLine(format);
-                _writer.Flush();
-            }
+            _logToFile.Invoke(null, new object[] { format });
         }
         public void LogOnce(string prefix, string message, ConsoleColor color,int level=0)
         {

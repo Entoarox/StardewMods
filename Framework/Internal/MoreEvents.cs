@@ -15,6 +15,7 @@ namespace Entoarox.Framework.Events
 {
     public static partial class MoreEvents
     {
+        internal static Item prevItem=null;
         internal static void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
@@ -27,8 +28,6 @@ namespace Entoarox.Framework.Events
         }
         private static void CheckForAction()
         {
-            if (ActionTriggered.GetInvocationList().Length > 1)
-                return;
             if (!Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
                 Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
@@ -65,15 +64,28 @@ namespace Entoarox.Framework.Events
             AfterSaving(null, EventArgs.Empty);
             MenuEvents.MenuClosed -= MenuEvents_MenuClosed;
         }
+        internal static void GameEvents_UpdateTick(object s, EventArgs e)
+        {
+            if((Game1.player.CurrentItem==null && prevItem!=null) || (Game1.player.CurrentItem!=null && !Game1.player.CurrentItem.Equals(prevItem)))
+            {
+                ActiveItemChanged(null, new EventArgsActiveItemChanged(prevItem, Game1.player.CurrentItem));
+                prevItem = Game1.player.CurrentItem;
+            }
+        }
         internal static void Setup()
         {
+            WorldReady += (s, e) =>
+             {
+                 MenuEvents.MenuChanged += MenuEvents_MenuChanged;
+                 ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
+                 ControlEvents.MouseChanged += ControlEvents_MouseChanged;
+                 GameEvents.UpdateTick += GameEvents_UpdateTick;
+             };
             ActionTriggered += EventSink;
             WorldReady += EventSink;
             BeforeSaving += EventSink;
             AfterSaving += EventSink;
-            MenuEvents.MenuChanged += MenuEvents_MenuChanged;
-            ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
-            ControlEvents.MouseChanged += ControlEvents_MouseChanged;
+            ActiveItemChanged += EventSink;
         }
         internal static void EventSink(object s, EventArgs e)
         {

@@ -88,6 +88,7 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
+            Events.MoreEvents.Setup();
             if (LoaderType == LoaderTypes.SMAPI)
             {
                 GameEvents.FirstUpdateTick += GameEvents_FirstUpdateTick;

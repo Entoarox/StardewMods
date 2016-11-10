@@ -69,15 +69,23 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
+        internal static Farmer who;
+        internal static string[] arguments;
+        internal static Vector2 tile;
         internal static void Shop(Farmer who, string[] arguments, Vector2 tile)
         {
-            ControlEvents.MouseChanged += (s, e) =>
-            {
-                if (e.NewState.RightButton != ButtonState.Pressed && e.PriorState.RightButton == ButtonState.Pressed)
-                    RealShop(who, arguments, tile);
-            };
+            ControlEvents.MouseChanged += RealShopEvent;
         }
-        internal static void RealShop(Farmer who, string[] arguments, Vector2 tile)
+        internal static void RealShopEvent(object s, EventArgsMouseStateChanged e)
+        {
+
+            if (e.NewState.RightButton != ButtonState.Pressed && e.PriorState.RightButton == ButtonState.Pressed)
+            {
+                RealShop();
+                ControlEvents.MouseChanged -= RealShopEvent;
+            }
+        }
+        internal static void RealShop()
         {
             if (!Configs.Compound.Shops.ContainsKey(arguments[0]))
             {
