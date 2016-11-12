@@ -36,19 +36,19 @@ namespace Entoarox.Framework.Menus
         protected List<T> Values;
         protected int OptionKey;
         protected ValueChanged<T> Handler;
-        public SliderFormComponent(Point position, List<T> values, int optionKey, ValueChanged<T> handler) : this(position, 100, values, optionKey, handler)
+        public SliderFormComponent(Point position, List<T> values, ValueChanged<T> handler=null) : this(position, 100, values, handler)
         {
         }
-        public SliderFormComponent(Point position, int width, List<T> values, int optionKey, ValueChanged<T> handler)
+        public SliderFormComponent(Point position, int width, List<T> values, ValueChanged<T> handler=null)
         {
             Offset = (int)Math.Round((width - 10) / (values.Count - 1D));
             SetScaledArea(new Rectangle(position.X, position.Y, width, 6));
             Values = values;
-            OptionKey = optionKey;
-            Handler = handler;
             Value = values[0];
             Index = 0;
             OldIndex = 0;
+            if(handler!=null)
+                Handler += handler;
         }
         public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
@@ -62,7 +62,7 @@ namespace Entoarox.Framework.Menus
             if (OldIndex == Index)
                 return;
             OldIndex = Index;
-            Handler(OptionKey, Value);
+            Handler?.Invoke(this, c, m, Value);
         }
         public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
@@ -76,10 +76,10 @@ namespace Entoarox.Framework.Menus
     }
     public class SliderFormComponent : SliderFormComponent<int>
     {
-        public SliderFormComponent(Point position, int steps, int optionKey, ValueChanged<int> handler) : this(position, 100, steps, optionKey, handler)
+        public SliderFormComponent(Point position, int steps, ValueChanged<int> handler=null) : this(position, 100, steps, handler)
         {
         }
-        public SliderFormComponent(Point position, int width, int steps, int optionKey, ValueChanged<int> handler) : base(position, width, Enumerable.Range(0, steps).ToList(), optionKey, handler)
+        public SliderFormComponent(Point position, int width, int steps, ValueChanged<int> handler=null) : base(position, width, Enumerable.Range(0, steps).ToList(), handler)
         {
         }
     }

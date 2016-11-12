@@ -26,24 +26,40 @@ namespace Entoarox.FrameworkMenuTest
         internal static void MoreEvents_WorldReady(object s, EventArgs e)
         {
             FrameworkMenu menu = new FrameworkMenu(new Point(256, 128));
-            menu.AddComponent(new CheckboxFormComponent(new Point(0, 0), "Example Checkbox", 0, CheckboxChanged));
-            menu.AddComponent(new PlusMinusFormComponent(new Point(0, 10), 0, 100, 0, PlusMinusChanged));
-            menu.AddComponent(new SliderFormComponent(new Point(0, 20), 3, 0, IntSliderChanged));
-            menu.AddComponent(new SliderFormComponent(new Point(0, 30), 12, 1, IntSliderChanged));
-            menu.AddComponent(new SliderFormComponent(new Point(0, 40), 20, 2, IntSliderChanged));
+            menu.AddComponent(new CheckboxFormComponent(new Point(0, 0), "Example Checkbox", CheckboxChanged));
+            menu.AddComponent(new PlusMinusFormComponent(new Point(0, 10), 0, 100, PlusMinusChanged));
+            menu.AddComponent(new SliderFormComponent(new Point(0, 20), 3, IntSliderChanged));
+            menu.AddComponent(new SliderFormComponent(new Point(0, 30), 12, IntSliderChanged));
+            menu.AddComponent(new SliderFormComponent(new Point(0, 40), 20, IntSliderChanged));
+            menu.AddComponent(new DropdownFormComponent(new Point(0, 50), new List<string>() {"First","Second","Third","Fourth"}, DropdownChanged));
+            menu.AddComponent(new DropdownFormComponent(new Point(0, 65), new List<string>() { "#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10","#11","#12" }, DropdownChanged));
+            menu.AddComponent(new ButtonFormComponent(new Point(0, 78), "Test Button", ButtonClicked));
+            menu.AddComponent(new TextboxFormComponent(new Point(0, 90), TextboxChanged));
             Game1.activeClickableMenu = menu;
         }
-        internal static void CheckboxChanged(int key, bool value)
+        internal static void CheckboxChanged(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu, bool value)
         {
-            Console.WriteLine("CheckBoxChanged: " + key.ToString() + " = " + (value ? "true" : "false"));
+            Console.WriteLine("CheckBoxChanged: " + (value ? "true" : "false"));
         }
-        internal static void PlusMinusChanged(int key, int value)
+        internal static void PlusMinusChanged(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu, int value)
         {
-            Console.WriteLine("PlusMinusChanged: " + key.ToString() + " = " + value.ToString());
+            Console.WriteLine("PlusMinusChanged: " + value.ToString());
         }
-        internal static void IntSliderChanged(int key, int value)
+        internal static void IntSliderChanged(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu, int value)
         {
-            Console.WriteLine("IntSliderChanged: " + key.ToString() + " = " + value.ToString());
+            Console.WriteLine("IntSliderChanged: " + value.ToString());
+        }
+        internal static void DropdownChanged(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu, string value)
+        {
+            Console.WriteLine("DropdownChanged: " + value);
+        }
+        internal static void TextboxChanged(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu, string value)
+        {
+            Console.WriteLine("TextboxChanged: " + value);
+        }
+        internal static void ButtonClicked(BaseFormComponent component, IComponentCollection collection, FrameworkMenu menu)
+        {
+            Console.WriteLine("ButtonClicked");
         }
     }
 }

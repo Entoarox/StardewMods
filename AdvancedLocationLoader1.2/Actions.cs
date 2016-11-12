@@ -69,16 +69,18 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
-        internal static Farmer who;
-        internal static string[] arguments;
-        internal static Vector2 tile;
+        internal static Farmer _who;
+        internal static string[] _arguments;
+        internal static Vector2 _tile;
         internal static void Shop(Farmer who, string[] arguments, Vector2 tile)
         {
+            _who = who;
+            _arguments = arguments;
+            _tile = tile;
             ControlEvents.MouseChanged += RealShopEvent;
         }
         internal static void RealShopEvent(object s, EventArgsMouseStateChanged e)
         {
-
             if (e.NewState.RightButton != ButtonState.Pressed && e.PriorState.RightButton == ButtonState.Pressed)
             {
                 RealShop();
@@ -87,14 +89,14 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void RealShop()
         {
-            if (!Configs.Compound.Shops.ContainsKey(arguments[0]))
+            if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
             {
                 Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                AdvancedLocationLoaderMod.Logger.Error("Unable to open shop, shop not found: "+arguments[0]);
+                AdvancedLocationLoaderMod.Logger.Error("Unable to open shop, shop not found: "+_arguments[0]);
             }
             else
             {
-                Configs.ShopConfig shop = Configs.Compound.Shops[arguments[0]];
+                Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
                 List<Item> stock = new List<Item>();
                 NPC portrait = new NPC();
                 EntoFramework.GetContentRegistry().RegisterXnb(shop.Portrait, shop.Portrait);

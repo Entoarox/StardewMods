@@ -54,6 +54,10 @@ namespace Entoarox.Framework.Menus
         {
 
         }
+        public virtual void FocusLost(IComponentCollection c, FrameworkMenu m)
+        {
+
+        }
         public virtual void Scroll(int d, Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
 

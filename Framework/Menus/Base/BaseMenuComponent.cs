@@ -33,14 +33,18 @@ namespace Entoarox.Framework.Menus
             Crop = (Rectangle)crop;
             SetScaledArea(area);
         }
+        public virtual Point GetPosition()
+        {
+            return new Point(Area.X, Area.Y);
+        }
         public virtual void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
         {
 
         }
-        public virtual void Draw(SpriteBatch b, Point offset)
+        public virtual void Draw(SpriteBatch b, Point o)
         {
             if (Visible)
-                b.Draw(Texture, new Vector2(Area.X + offset.X, Area.Y + offset.Y), Crop, Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
+                b.Draw(Texture, new Rectangle(Area.X + o.X, Area.Y + o.Y,Area.Width,Area.Height), Crop, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
         }
     }
 }

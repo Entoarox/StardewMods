@@ -12,6 +12,7 @@ namespace Entoarox.Framework.Menus
         void HoverIn(Point position, Point offset, IComponentCollection collection, FrameworkMenu menu);
         void HoverOut(Point position, Point offset, IComponentCollection collection, FrameworkMenu menu);
         void HoverOver(Point position, Point offset, IComponentCollection collection, FrameworkMenu menu);
+        void FocusLost(IComponentCollection collection, FrameworkMenu menu);
         void Scroll(int direction, Point position, Point offset, IComponentCollection collection, FrameworkMenu menu);
     }
 }
