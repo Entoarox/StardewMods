@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -30,20 +31,25 @@ namespace Entoarox.Framework.Menus
         public bool TextboxActive = false;
         public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
         public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
-        protected static Rectangle tl = new Rectangle(0, 0, 64, 64);
-        protected static Rectangle tc = new Rectangle(128, 0, 64, 64);
-        protected static Rectangle tr = new Rectangle(192, 0, 64, 64);
-        protected static Rectangle ml = new Rectangle(0, 128, 64, 64);
-        protected static Rectangle mr = new Rectangle(192, 128, 64, 64);
-        protected static Rectangle br = new Rectangle(192, 192, 64, 64);
-        protected static Rectangle bl = new Rectangle(0, 192, 64, 64);
-        protected static Rectangle bc = new Rectangle(128, 192, 64, 64);
-        protected static Rectangle bg = new Rectangle(64, 128, 64, 64);
+        protected readonly static Rectangle tl = new Rectangle(0, 0, 64, 64);
+        protected readonly static Rectangle tc = new Rectangle(128, 0, 64, 64);
+        protected readonly static Rectangle tr = new Rectangle(192, 0, 64, 64);
+        protected readonly static Rectangle ml = new Rectangle(0, 128, 64, 64);
+        protected readonly static Rectangle mr = new Rectangle(192, 128, 64, 64);
+        protected readonly static Rectangle br = new Rectangle(192, 192, 64, 64);
+        protected readonly static Rectangle bl = new Rectangle(0, 192, 64, 64);
+        protected readonly static Rectangle bc = new Rectangle(128, 192, 64, 64);
+        protected readonly static Rectangle bg = new Rectangle(64, 128, 64, 64);
+        protected readonly static int zoom2 = Game1.pixelZoom * 2;
+        protected readonly static int zoom3 = Game1.pixelZoom * 3;
+        protected readonly static int zoom4 = Game1.pixelZoom * 4;
+        protected readonly static int zoom6 = Game1.pixelZoom * 6;
+        protected readonly static int zoom10 = Game1.pixelZoom * 10;
         public static void DrawMenuRect(SpriteBatch b, int x, int y, int width, int height)
         {
-            Rectangle o = new Rectangle(x + Game1.pixelZoom * 2, y + Game1.pixelZoom * 2, width - Game1.pixelZoom * 4, height - Game1.pixelZoom * 4);
+            Rectangle o = new Rectangle(x + zoom2, y + zoom2, width - zoom4, height - zoom4);
             b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y, o.Width, o.Height), bg, Color.White);
-            o = new Rectangle(x - Game1.pixelZoom * 3, y - Game1.pixelZoom * 3, width + Game1.pixelZoom * 6, height + Game1.pixelZoom * 6);
+            o = new Rectangle(x - zoom3, y - zoom3, width + zoom6, height + zoom6);
             b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y, 64, 64), tl, Color.White);
             b.Draw(Game1.menuTexture, new Rectangle(o.X + o.Width - 64, o.Y, 64, 64), tr, Color.White);
             b.Draw(Game1.menuTexture, new Rectangle(o.X + 64, o.Y, o.Width - 128, 64), tc, Color.White);
@@ -163,7 +169,7 @@ namespace Entoarox.Framework.Menus
             if (HoverInElement == null)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             HoverInElement.LeftUp(p, o, this, this);
             Hold = false;
             if (HoverInElement.InBounds(p, o))
@@ -176,13 +182,13 @@ namespace Entoarox.Framework.Menus
             if (HoverInElement == null)
                 return;
             Hold = true;
-            HoverInElement.LeftHeld(new Point(x, y), new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom), this, this);
+            HoverInElement.LeftHeld(new Point(x, y), new Point(Area.X + zoom10, Area.Y + zoom10), this, this);
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             base.receiveLeftClick(x, y, playSound);
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             foreach (string pos in InteractiveDrawIndex)
             {
                 IInteractiveMenuComponent el = _InteractiveComponents[InteractiveDrawMap[pos]];
@@ -198,7 +204,7 @@ namespace Entoarox.Framework.Menus
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             foreach (string pos in InteractiveDrawIndex)
             {
                 IInteractiveMenuComponent el = _InteractiveComponents[InteractiveDrawMap[pos]];
@@ -217,7 +223,7 @@ namespace Entoarox.Framework.Menus
             if (!Area.Contains(x, y) || Hold)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             if (HoverInElement != null && !HoverInElement.InBounds(p, o))
             {
                 HoverInElement.HoverOut(p, o, this, this);
@@ -242,7 +248,7 @@ namespace Entoarox.Framework.Menus
         {
             base.receiveScrollWheelAction(direction);
             Point p = Game1.getMousePosition();
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             foreach (string pos in InteractiveDrawIndex)
                 _InteractiveComponents[InteractiveDrawMap[pos]].Scroll(direction, p, o, this, this);
         }
@@ -257,19 +263,31 @@ namespace Entoarox.Framework.Menus
             foreach (string pos in InteractiveDrawIndex)
                 _InteractiveComponents[InteractiveDrawMap[pos]].Update(time, this, this);
         }
+        //protected Stopwatch Watch=new Stopwatch();
+        //protected int count = 0;
         public override void draw(SpriteBatch b)
         {
+            //Watch.Start();
             if (DrawChrome)
                 DrawMenuRect(b, Area.X, Area.Y, Area.Width, Area.Height);
-                //Game1.drawDialogueBox(Area.X, Area.Y, Area.Width, Area.Height, false, true);
-                //drawTextureBox(b, Area.X, Area.Y, Area.Width, Area.Height, Color.White);
-            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
             foreach (string pos in StaticDrawIndexInverted)
                 _StaticComponents[StaticDrawMap[pos]].Draw(b, o);
             foreach (string pos in InteractiveDrawIndexInverted)
                 _InteractiveComponents[InteractiveDrawMap[pos]].Draw(b, o);
             base.draw(b);
             drawMouse(b);
+            /*
+            Watch.Stop();
+            if (count == 60)
+            {
+                Console.WriteLine("Total draw time over last 60 frames: " + Watch.ElapsedMilliseconds.ToString() + "ms");
+                Watch.Reset();
+                count=0;
+            }
+            else
+                count++;
+            */
         }
     }
 }

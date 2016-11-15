@@ -17,10 +17,7 @@ namespace Entoarox.Framework.Menus
         }
         public virtual bool InBounds(Point p, Point o)
         {
-            if (!Visible)
-                return false;
-            Rectangle Offset = new Rectangle(Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height);
-            return Offset.Contains(p);
+            return Visible ? new Rectangle(Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height).Contains(p) : false;
         }
         public virtual void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {

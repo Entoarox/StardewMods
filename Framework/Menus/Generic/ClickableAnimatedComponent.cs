@@ -47,7 +47,7 @@ namespace Entoarox.Framework.Menus
         public override void Draw(SpriteBatch b, Point offset)
         {
             if (Visible)
-                Sprite.draw(b, false, offset.X, offset.Y);
+                Sprite.draw(b, false, offset.X+Area.X, offset.Y+Area.Y);
         }
     }
 }

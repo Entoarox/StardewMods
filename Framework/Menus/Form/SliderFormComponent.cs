@@ -12,8 +12,8 @@ namespace Entoarox.Framework.Menus
 {
     public class SliderFormComponent<T> : BaseFormComponent
     {
-        protected static Rectangle Background = new Rectangle(403, 383, 6, 6);
-        protected static Rectangle Button = new Rectangle(420, 441, 10, 6);
+        protected readonly static Rectangle Background = new Rectangle(403, 383, 6, 6);
+        protected readonly static Rectangle Button = new Rectangle(420, 441, 10, 6);
         public T Value
         {
             get
@@ -54,7 +54,7 @@ namespace Entoarox.Framework.Menus
         {
             if (Disabled)
                 return;
-            Index = Math.Max(Math.Min((int)Math.Floor((p.X - o.X) / Offset / Game1.pixelZoom * 1D), Values.Count - 1), 0);
+            Index = Math.Max(Math.Min((int)Math.Floor((double)(p.X - o.X) / Offset / Game1.pixelZoom), Values.Count - 1), 0);
             Value = Values[Index];
         }
         public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
@@ -73,7 +73,7 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X, o.Y + Area.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
-            b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + (Index == Values.Count - 1 ? Area.Width - 10 * Game1.pixelZoom : (Index * Offset * Game1.pixelZoom)), o.Y + Area.Y), new Rectangle?(Button), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.9f);
+            b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + (Index == Values.Count - 1 ? Area.Width - zoom10 : Index * Offset * Game1.pixelZoom), o.Y + Area.Y), Button, Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.9f);
         }
     }
     public class SliderFormComponent : SliderFormComponent<int>

@@ -13,8 +13,8 @@ namespace Entoarox.Framework.Menus
 {
     public class HeartsComponent : BaseMenuComponent
     {
-        protected static Rectangle HeartFull = new Rectangle(211, 428, 7, 6);
-        protected static Rectangle HeartEmpty = new Rectangle(218, 428, 7, 6);
+        protected readonly static Rectangle HeartFull = new Rectangle(211, 428, 7, 6);
+        protected readonly static Rectangle HeartEmpty = new Rectangle(218, 428, 7, 6);
         public int Value
         {
             get
@@ -41,9 +41,9 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             for (int c = 0; c < MaxValue / 2; c++)
-                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * 8 * Game1.pixelZoom, o.Y + Area.Y), new Rectangle(HeartEmpty.X, HeartEmpty.Y, 7, 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
+                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * zoom8, o.Y + Area.Y), new Rectangle(HeartEmpty.X, HeartEmpty.Y, 7, 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
             for (int c = 0; c < Value; c++)
-                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * 4 * Game1.pixelZoom, o.Y + Area.Y), new Rectangle(HeartFull.X + (c % 2 == 0 ? 0 : 4), HeartFull.Y, (c % 2 == 0 ? 4 : 3), 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
+                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * zoom4, o.Y + Area.Y), new Rectangle(HeartFull.X + (c % 2 == 0 ? 0 : 4), HeartFull.Y, (c % 2 == 0 ? 4 : 3), 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
         }
     }
 }

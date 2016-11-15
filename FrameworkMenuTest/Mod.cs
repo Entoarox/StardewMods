@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 
@@ -11,7 +8,6 @@ using StardewModdingAPI.Events;
 
 using StardewValley;
 
-using Entoarox.Framework;
 using Entoarox.Framework.Events;
 using Entoarox.Framework.Menus;
 
@@ -26,7 +22,7 @@ namespace Entoarox.FrameworkMenuTest
         }
         internal static void MoreEvents_WorldReady(object s, EventArgs e)
         {
-            GameEvents.OneSecondTick += GameEvents_OneSecondTick;
+            GameEvents.HalfSecondTick += GameEvents_HalfSecondTick;
             FrameworkMenu menu = new FrameworkMenu(new Point(256, 128+32));
             menu.AddComponent(new LabelComponent(new Point(0, -16), "Component Examples"));
             menu.AddComponent(new CheckboxFormComponent(new Point(0, 2), "Example Checkbox", CheckboxChanged));
@@ -41,24 +37,26 @@ namespace Entoarox.FrameworkMenuTest
             menu.AddComponent(new TextboxFormComponent(new Point(0, 105), TextboxChanged));
             menu.AddComponent(new HeartsComponent(new Point(105, 0), 3, 10));
             menu.AddComponent(new ClickableHeartsComponent(new Point(105, 10), 8, 10, HeartsChanged));
-menu.AddComponent(prog);
+            menu.AddComponent(prog);
             Game1.activeClickableMenu = menu;
         }
-        private static bool Skipped = false;
-        internal static void GameEvents_OneSecondTick(object s, EventArgs e)
+        private static int Skipped = 0;
+        internal static void GameEvents_HalfSecondTick(object s, EventArgs e)
         {
             if (prog.Value == 40)
             {
-                if (Skipped)
+                if (Skipped>5)
                     prog.Value = 0;
-                Skipped = true;
+                Skipped++;
             }
-            else if(Skipped)
+            else if(Skipped>10)
             {
-                Skipped = false;
+                Skipped = 0;
             }
             else
                 prog.Value += 4;
+            if (Skipped > 0)
+                Skipped++;
         }
         internal static void CheckboxChanged(IInteractiveMenuComponent component, IComponentCollection collection, FrameworkMenu menu, bool value)
         {

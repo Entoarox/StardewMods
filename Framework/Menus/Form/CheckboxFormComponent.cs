@@ -7,8 +7,8 @@ namespace Entoarox.Framework.Menus
 {
     public class CheckboxFormComponent : BaseFormComponent
     {
-        protected static Rectangle sourceRectUnchecked = new Rectangle(227, 425, 9, 9);
-        protected static Rectangle sourceRectChecked = new Rectangle(236, 425, 9, 9);
+        protected readonly static Rectangle sourceRectUnchecked = new Rectangle(227, 425, 9, 9);
+        protected readonly static Rectangle sourceRectChecked = new Rectangle(236, 425, 9, 9);
         public event ValueChanged<bool> Handler;
         public bool Value
         {
@@ -44,7 +44,7 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X, o.Y + Area.Y), Value ? sourceRectChecked : sourceRectUnchecked, Color.White * (Disabled ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.4f);
-            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + 10 * Game1.pixelZoom, o.Y + Area.Y+Game1.pixelZoom*2), Game1.textColor * (Disabled ? 0.33f : 1f), 1f, 0.1f, -1, -1, 1f, 3);
+            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + zoom10, o.Y + Area.Y+zoom2), Game1.textColor * (Disabled ? 0.33f : 1f), 1f, 0.1f, -1, -1, 1f, 3);
         }
     }
 }

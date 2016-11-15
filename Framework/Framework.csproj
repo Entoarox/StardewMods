@@ -60,6 +60,7 @@
     <Compile Include="LocalizationHelper.cs" />
     <Compile Include="Internal\LocationHelper.cs" />
     <Compile Include="DataLogger.cs" />
+    <Compile Include="Menus\Base\BaseKeyboardFormComponent.cs" />
     <Compile Include="Menus\Generic\ClickableHeartsComponent.cs" />
     <Compile Include="Menus\Generic\AnimatedComponent.cs" />
     <Compile Include="Menus\Base\BaseFormComponent.cs" />
@@ -81,7 +82,7 @@
     <Compile Include="Menus\Form\TextboxFormComponent.cs" />
     <Compile Include="Menus\Generic\TextureComponent.cs" />
     <Compile Include="Menus\Generic\TextComponent.cs" />
-    <Compile Include="Menus\LabelComponent.cs" />
+    <Compile Include="Menus\Generic\LabelComponent.cs" />
     <Compile Include="Menus\Generic\ProgressbarComponent.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Internal\MessageBox.cs" />

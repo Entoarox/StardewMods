@@ -10,8 +10,8 @@ namespace Entoarox.Framework.Menus
 {
     public class ProgressbarComponent : BaseMenuComponent
     {
-        protected static Rectangle Background = new Rectangle(403, 383, 6, 6);
-        protected static Rectangle Filler = new Rectangle(306,320,16,16);
+        protected readonly static Rectangle Background = new Rectangle(403, 383, 6, 6);
+        protected readonly static Rectangle Filler = new Rectangle(306,320,16,16);
         public int Value
         {
             get
@@ -47,7 +47,7 @@ namespace Entoarox.Framework.Menus
             if (DateTime.Now.Millisecond % 5 == 0)
                 OffsetValue += GetDiff();
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Game1.pixelZoom, Area.Y + o.Y + Game1.pixelZoom, OffsetValue, 4 * Game1.pixelZoom), Filler, Color.White);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Game1.pixelZoom, Area.Y + o.Y + Game1.pixelZoom, OffsetValue, zoom4), Filler, Color.White);
         }
     }
 }

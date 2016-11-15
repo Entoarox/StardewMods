@@ -9,6 +9,21 @@ namespace Entoarox.Framework.Menus
 {
     abstract public class BaseMenuComponent : IMenuComponent
     {
+        protected readonly static int zoom05 = Game1.pixelZoom / 2;
+        protected readonly static int zoom2 = 2 * Game1.pixelZoom;
+        protected readonly static int zoom3 = 3 * Game1.pixelZoom;
+        protected readonly static int zoom4 = 4 * Game1.pixelZoom;
+        protected readonly static int zoom5 = 5 * Game1.pixelZoom;
+        protected readonly static int zoom6 = 6 * Game1.pixelZoom;
+        protected readonly static int zoom7 = 7 * Game1.pixelZoom;
+        protected readonly static int zoom8 = 8 * Game1.pixelZoom;
+        protected readonly static int zoom10 = 10 * Game1.pixelZoom;
+        protected readonly static int zoom11 = 11 * Game1.pixelZoom;
+        protected readonly static int zoom12 = 12 * Game1.pixelZoom;
+        protected readonly static int zoom14 = 14 * Game1.pixelZoom;
+        protected readonly static int zoom16 = 16 * Game1.pixelZoom;
+        protected readonly static int zoom17 = 17 * Game1.pixelZoom;
+        protected readonly static int zoom20 = 20 * Game1.pixelZoom;
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;

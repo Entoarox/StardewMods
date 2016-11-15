@@ -8,9 +8,9 @@ namespace Entoarox.Framework.Menus
     public class AnimatedComponent : BaseMenuComponent
     {
         protected TemporaryAnimatedSprite Sprite;
-        public AnimatedComponent(Rectangle area, TemporaryAnimatedSprite sprite)
+        public AnimatedComponent(Point position, TemporaryAnimatedSprite sprite)
         {
-            SetScaledArea(area);
+            SetScaledArea(new Rectangle(position.X,position.Y,sprite.sourceRect.Width,sprite.sourceRect.Height));
             Sprite = sprite;
         }
         public override void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
@@ -20,7 +20,7 @@ namespace Entoarox.Framework.Menus
         public override void Draw(SpriteBatch b, Point o)
         {
             if (Visible)
-                Sprite.draw(b, false, o.X, o.Y);
+                Sprite.draw(b, false, o.X+Area.X, o.Y+Area.Y);
         }
     }
 }

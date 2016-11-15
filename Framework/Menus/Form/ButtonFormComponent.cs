@@ -9,8 +9,8 @@ namespace Entoarox.Framework.Menus
 {
     public class ButtonFormComponent : BaseFormComponent
     {
-        protected static Rectangle ButtonNormal = new Rectangle(256, 256, 10, 10);
-        protected static Rectangle ButtonHover = new Rectangle(267, 256, 10, 10);
+        protected readonly static Rectangle ButtonNormal = new Rectangle(256, 256, 10, 10);
+        protected readonly static Rectangle ButtonHover = new Rectangle(267, 256, 10, 10);
         public event ClickHandler Handler;
         protected string Label;
         protected int LabelOffset;
@@ -64,13 +64,13 @@ namespace Entoarox.Framework.Menus
                 o.Y += Game1.pixelZoom / 2;
             Rectangle r = Hovered && !Pressed ? ButtonHover : ButtonNormal;
             // Begin
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, 2 * Game1.pixelZoom, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // End
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-2*Game1.pixelZoom, Area.Y + o.Y, 2 * Game1.pixelZoom, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-zoom2, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Center
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + 2 * Game1.pixelZoom, Area.Y + o.Y, Area.Width - 4 * Game1.pixelZoom, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - 4 * zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Text
-            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + Game1.pixelZoom*2), Game1.textColor * (Disabled?0.7f:1));
+            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + zoom2), Game1.textColor * (Disabled?0.7f:1));
         }
     }
 }

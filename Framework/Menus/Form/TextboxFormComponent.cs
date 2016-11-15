@@ -71,21 +71,22 @@ namespace Entoarox.Framework.Menus
             Menu = m;
             Game1.keyboardDispatcher.Subscriber = this;
         }
+        protected int CaretSize = (int)Game1.smallFont.MeasureString("|").Y;
         public override void Draw(SpriteBatch b, Point o)
         {
             if (!Visible)
                 return;
             bool flag = DateTime.Now.Millisecond % 1000 >= 500;
             string text = Value;
-            b.Draw(Box, new Rectangle(Area.X + o.X, Area.Y + o.Y, Game1.pixelZoom * 4, Area.Height), new Rectangle(Game1.pixelZoom, 0, Game1.pixelZoom * 4, Area.Height), Color.White);
-            b.Draw(Box, new Rectangle(Area.X+o.X + Game1.pixelZoom * 4, Area.Y+o.Y, Area.Width - Game1.pixelZoom * 8, Area.Height), new Rectangle(Game1.pixelZoom * 4, 0, 4, Area.Height), Color.White);
-            b.Draw(Box, new Rectangle(Area.X+o.X + Area.Width - Game1.pixelZoom * 4, Area.Y+o.Y, Game1.pixelZoom * 4, Area.Height), new Rectangle(Box.Bounds.Width - Game1.pixelZoom * 4, 0, Game1.pixelZoom * 4, Area.Height), Color.White);
+            b.Draw(Box, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom4, Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, Area.Height), Color.White);
+            b.Draw(Box, new Rectangle(Area.X+o.X + zoom4, Area.Y+o.Y, Area.Width - zoom8, Area.Height), new Rectangle(zoom4, 0, 4, Area.Height), Color.White);
+            b.Draw(Box, new Rectangle(Area.X+o.X + Area.Width - zoom4, Area.Y+o.Y, zoom4, Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, Area.Height), Color.White);
             Vector2 v;
             for (v = Game1.smallFont.MeasureString(text); v.X > Area.Width - Game1.pixelZoom*5; v = Game1.smallFont.MeasureString(text))
                 text = text.Substring(1);
             if (flag && Selected)
-                b.Draw(Game1.staminaRect, new Rectangle(Area.X+o.X + (int)(Game1.pixelZoom*3.5) + (int)v.X, Area.Y+o.Y + 8, Game1.pixelZoom/2, (int)Game1.smallFont.MeasureString("|").Y), Game1.textColor);
-            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(Area.X+o.X + Game1.pixelZoom*4, Area.Y+o.Y+Game1.pixelZoom*3), Game1.textColor);
+                b.Draw(Game1.staminaRect, new Rectangle(Area.X+o.X + zoom3 + zoom05 + (int)v.X, Area.Y+o.Y + 8, zoom05, CaretSize), Game1.textColor);
+            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(Area.X+o.X + zoom4, Area.Y+o.Y+zoom3), Game1.textColor);
         }
         public void RecieveTextInput(char inputChar)
         {
