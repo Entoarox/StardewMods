@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Entoarox.Framework.Menus
 {
@@ -10,5 +11,9 @@ namespace Entoarox.Framework.Menus
         void RemoveComponents<T>() where T : IMenuComponent;
         void RemoveComponents(Predicate<IMenuComponent> filter);
         void ClearComponents();
+        void ResetFocus();
+        void GiveFocus(IInteractiveMenuComponent component);
+        List<IInteractiveMenuComponent> InteractiveComponents { get; }
+        List<IMenuComponent> StaticComponents { get; }
     }
 }

@@ -25,7 +25,7 @@ namespace Entoarox.Framework.Menus
         protected string Label;
         public CheckboxFormComponent(Point offset, string label, ValueChanged<bool> handler=null)
         {
-            SetScaledArea(new Rectangle(offset.X, offset.Y, 9 + GetStringWidth(label, Game1.dialogueFont), 9));
+            SetScaledArea(new Rectangle(offset.X, offset.Y, 9 + GetStringWidth(label, Game1.smallFont), 9));
             Value = false;
             Label = label;
             if(handler!=null)
@@ -41,8 +41,10 @@ namespace Entoarox.Framework.Menus
         }
         public override void Draw(SpriteBatch b, Point o)
         {
+            if (!Visible)
+                return;
             b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X, o.Y + Area.Y), Value ? sourceRectChecked : sourceRectUnchecked, Color.White * (Disabled ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.4f);
-            Utility.drawTextWithShadow(b, Label, Game1.dialogueFont, new Vector2(o.X + Area.X + 9 * Game1.pixelZoom, o.Y + Area.Y), Game1.textColor * (Disabled ? 0.33f : 1f), 1f, 0.1f, -1, -1, 1f, 3);
+            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + 10 * Game1.pixelZoom, o.Y + Area.Y+Game1.pixelZoom*2), Game1.textColor * (Disabled ? 0.33f : 1f), 1f, 0.1f, -1, -1, 1f, 3);
         }
     }
 }

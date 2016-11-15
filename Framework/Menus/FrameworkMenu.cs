@@ -13,8 +13,8 @@ namespace Entoarox.Framework.Menus
 {
     public class FrameworkMenu : IClickableMenu, IComponentCollection
     {
-        protected List<IMenuComponent> StaticComponents = new List<IMenuComponent>();
-        protected List<IInteractiveMenuComponent> InteractiveComponents = new List<IInteractiveMenuComponent>();
+        protected List<IMenuComponent> _StaticComponents = new List<IMenuComponent>();
+        protected List<IInteractiveMenuComponent> _InteractiveComponents = new List<IInteractiveMenuComponent>();
         protected Rectangle Area;
         protected IInteractiveMenuComponent HoverInElement=null;
         protected IInteractiveMenuComponent FocusElement=null;
@@ -28,6 +28,31 @@ namespace Entoarox.Framework.Menus
         protected List<string> StaticDrawIndexInverted = new List<string>();
         protected List<string> InteractiveDrawIndexInverted = new List<string>();
         public bool TextboxActive = false;
+        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
+        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
+        protected static Rectangle tl = new Rectangle(0, 0, 64, 64);
+        protected static Rectangle tc = new Rectangle(128, 0, 64, 64);
+        protected static Rectangle tr = new Rectangle(192, 0, 64, 64);
+        protected static Rectangle ml = new Rectangle(0, 128, 64, 64);
+        protected static Rectangle mr = new Rectangle(192, 128, 64, 64);
+        protected static Rectangle br = new Rectangle(192, 192, 64, 64);
+        protected static Rectangle bl = new Rectangle(0, 192, 64, 64);
+        protected static Rectangle bc = new Rectangle(128, 192, 64, 64);
+        protected static Rectangle bg = new Rectangle(64, 128, 64, 64);
+        public static void DrawMenuRect(SpriteBatch b, int x, int y, int width, int height)
+        {
+            Rectangle o = new Rectangle(x + Game1.pixelZoom * 2, y + Game1.pixelZoom * 2, width - Game1.pixelZoom * 4, height - Game1.pixelZoom * 4);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y, o.Width, o.Height), bg, Color.White);
+            o = new Rectangle(x - Game1.pixelZoom * 3, y - Game1.pixelZoom * 3, width + Game1.pixelZoom * 6, height + Game1.pixelZoom * 6);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y, 64, 64), tl, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X + o.Width - 64, o.Y, 64, 64), tr, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X + 64, o.Y, o.Width - 128, 64), tc, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y + o.Height - 64, 64, 64), bl, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X + o.Width - 64, o.Y + o.Height - 64, 64, 64), br, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X + 64, o.Y + o.Height - 64, o.Width - 128, 64), bc, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X, o.Y + 64, 64, o.Height - 128), ml, Color.White);
+            b.Draw(Game1.menuTexture, new Rectangle(o.X + o.Width - 64, o.Y + 64, 64, o.Height - 128), mr, Color.White);
+        }
         protected string PointConverter(Point p)
         {
             return p.X.ToString() + ',' + p.Y.ToString();
@@ -42,9 +67,9 @@ namespace Entoarox.Framework.Menus
             InteractiveDrawIndexInverted.Clear();
             List<Point> Points = new List<Point>();
             List<string> SPoints = new List<string>();
-            for(int c=0;c<StaticComponents.Count;c++)
+            for(int c=0;c<_StaticComponents.Count;c++)
             {
-                IMenuComponent imc = StaticComponents[c];
+                IMenuComponent imc = _StaticComponents[c];
                 Point p = imc.GetPosition();
                 Points.Add(p);
                 StaticDrawMap.Add(PointConverter(p), c);
@@ -55,9 +80,9 @@ namespace Entoarox.Framework.Menus
             StaticDrawIndexInverted.AddRange(SPoints);
             Points.Clear();
             SPoints.Clear();
-            for (int c = 0; c < InteractiveComponents.Count; c++)
+            for (int c = 0; c < _InteractiveComponents.Count; c++)
             {
-                IInteractiveMenuComponent imc = InteractiveComponents[c];
+                IInteractiveMenuComponent imc = _InteractiveComponents[c];
                 Point p = imc.GetPosition();
                 Points.Add(p);
                 InteractiveDrawMap.Add(p.X.ToString() + ',' + p.Y.ToString(), c);
@@ -87,38 +112,46 @@ namespace Entoarox.Framework.Menus
             FocusElement.FocusLost(this, this);
             FocusElement = null;
         }
+        public void GiveFocus(IInteractiveMenuComponent component)
+        {
+            if (!_InteractiveComponents.Contains(component) || component == FocusElement)
+                return;
+            ResetFocus();
+            FocusElement = component;
+            component.FocusGained(this, this);
+        }
         public void AddComponent(IMenuComponent component)
         {
             if (component is IInteractiveMenuComponent)
-                InteractiveComponents.Add(component as IInteractiveMenuComponent);
+                _InteractiveComponents.Add(component as IInteractiveMenuComponent);
             else
-                StaticComponents.Add(component);
+                _StaticComponents.Add(component);
             UpdateDrawOrder();
         }
         public void RemoveComponent(IMenuComponent component)
         {
             if (component is IInteractiveMenuComponent)
-                InteractiveComponents.Remove(component as IInteractiveMenuComponent);
+                _InteractiveComponents.Remove(component as IInteractiveMenuComponent);
             else
-                StaticComponents.Remove(component);
+                _StaticComponents.Remove(component);
             UpdateDrawOrder();
         }
         public void RemoveComponents<T>() where T : IMenuComponent
         {
-            InteractiveComponents.RemoveAll((a)=> a.GetType()==typeof(T));
-            StaticComponents.RemoveAll((a) => a.GetType() == typeof(T));
+            _InteractiveComponents.RemoveAll((a)=> a.GetType()==typeof(T));
+            _StaticComponents.RemoveAll((a) => a.GetType() == typeof(T));
             UpdateDrawOrder();
         }
         public void RemoveComponents(Predicate<IMenuComponent> filter)
         {
-            InteractiveComponents.RemoveAll(filter);
-            StaticComponents.RemoveAll(filter);
+            _InteractiveComponents.RemoveAll(filter);
+            _StaticComponents.RemoveAll(filter);
             UpdateDrawOrder();
         }
         public void ClearComponents()
         {
-            InteractiveComponents.Clear();
-            StaticComponents.Clear();
+            _InteractiveComponents.Clear();
+            _StaticComponents.Clear();
             UpdateDrawOrder();
         }
         public bool AcceptsComponent(IMenuComponent component)
@@ -130,7 +163,7 @@ namespace Entoarox.Framework.Menus
             if (HoverInElement == null)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
             HoverInElement.LeftUp(p, o, this, this);
             Hold = false;
             if (HoverInElement.InBounds(p, o))
@@ -149,44 +182,34 @@ namespace Entoarox.Framework.Menus
         {
             base.receiveLeftClick(x, y, playSound);
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
-            foreach(string pos in InteractiveDrawIndex)
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
+            foreach (string pos in InteractiveDrawIndex)
             {
-                IInteractiveMenuComponent el = InteractiveComponents[InteractiveDrawMap[pos]];
+                IInteractiveMenuComponent el = _InteractiveComponents[InteractiveDrawMap[pos]];
                 if (el.InBounds(p, o))
                 {
-                    if (FocusElement != null && FocusElement != el)
-                        FocusElement.FocusLost(this,this);
-                    FocusElement = el;
+                    GiveFocus(el);
                     el.LeftClick(p, o, this, this);
                     return;
                 }
             }
-            if (FocusElement == null)
-                return;
-            FocusElement.FocusLost(this,this);
-            FocusElement = null;
+            ResetFocus();
         }
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
             foreach (string pos in InteractiveDrawIndex)
             {
-                IInteractiveMenuComponent el = InteractiveComponents[InteractiveDrawMap[pos]];
+                IInteractiveMenuComponent el = _InteractiveComponents[InteractiveDrawMap[pos]];
                 if (el.InBounds(p, o))
                 {
-                    if (FocusElement != null && FocusElement!=el)
-                        FocusElement.FocusLost(this,this);
+                    GiveFocus(el);
                     FocusElement = el;
-                    el.RightClick(p, o, this, this);
                     return;
                 }
             }
-            if (FocusElement == null)
-                return;
-            FocusElement.FocusLost(this,this);
-            FocusElement = null;
+            ResetFocus();
         }
         public override void performHoverAction(int x, int y)
         {
@@ -194,7 +217,7 @@ namespace Entoarox.Framework.Menus
             if (!Area.Contains(x, y) || Hold)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
             if (HoverInElement != null && !HoverInElement.InBounds(p, o))
             {
                 HoverInElement.HoverOut(p, o, this, this);
@@ -202,7 +225,7 @@ namespace Entoarox.Framework.Menus
             }
             foreach (string pos in InteractiveDrawIndex)
             {
-                IInteractiveMenuComponent el = InteractiveComponents[InteractiveDrawMap[pos]];
+                IInteractiveMenuComponent el = _InteractiveComponents[InteractiveDrawMap[pos]];
                 if (el.InBounds(p, o))
                 {
                     if (HoverInElement == null)
@@ -219,9 +242,9 @@ namespace Entoarox.Framework.Menus
         {
             base.receiveScrollWheelAction(direction);
             Point p = Game1.getMousePosition();
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
             foreach (string pos in InteractiveDrawIndex)
-                InteractiveComponents[InteractiveDrawMap[pos]].Scroll(direction, p, o, this, this);
+                _InteractiveComponents[InteractiveDrawMap[pos]].Scroll(direction, p, o, this, this);
         }
         public override void receiveKeyPress(Keys key)
         {
@@ -232,18 +255,19 @@ namespace Entoarox.Framework.Menus
         {
             base.update(time);
             foreach (string pos in InteractiveDrawIndex)
-                InteractiveComponents[InteractiveDrawMap[pos]].Update(time, this, this);
+                _InteractiveComponents[InteractiveDrawMap[pos]].Update(time, this, this);
         }
         public override void draw(SpriteBatch b)
         {
             if (DrawChrome)
-                //Game1.drawDialogueBox(Area.X,Area.Y,Area.Width,Area.Height, false, true);
-                drawTextureBox(b, Area.X, Area.Y, Area.Width, Area.Height, Color.White);
-            Point o = new Point(Area.X + 5 * Game1.pixelZoom, Area.Y + 5 * Game1.pixelZoom);
+                DrawMenuRect(b, Area.X, Area.Y, Area.Width, Area.Height);
+                //Game1.drawDialogueBox(Area.X, Area.Y, Area.Width, Area.Height, false, true);
+                //drawTextureBox(b, Area.X, Area.Y, Area.Width, Area.Height, Color.White);
+            Point o = new Point(Area.X + 10 * Game1.pixelZoom, Area.Y + 10 * Game1.pixelZoom);
             foreach (string pos in StaticDrawIndexInverted)
-                StaticComponents[StaticDrawMap[pos]].Draw(b, o);
+                _StaticComponents[StaticDrawMap[pos]].Draw(b, o);
             foreach (string pos in InteractiveDrawIndexInverted)
-                InteractiveComponents[InteractiveDrawMap[pos]].Draw(b, o);
+                _InteractiveComponents[InteractiveDrawMap[pos]].Draw(b, o);
             base.draw(b);
             drawMouse(b);
         }

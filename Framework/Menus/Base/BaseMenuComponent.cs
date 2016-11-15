@@ -12,7 +12,7 @@ namespace Entoarox.Framework.Menus
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;
-        public bool Visible;
+        public bool Visible { get; set; } = true;
         protected void SetScaledArea(Rectangle area)
         {
             Area = new Rectangle(area.X * Game1.pixelZoom, area.Y * Game1.pixelZoom, area.Width * Game1.pixelZoom, area.Height * Game1.pixelZoom);

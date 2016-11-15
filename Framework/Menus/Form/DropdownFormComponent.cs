@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,29 +7,10 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
 
-// WIP
 namespace Entoarox.Framework.Menus
 {
     public class DropdownFormComponent : BaseFormComponent
     {
-        class ClickHandler : IClickHandler
-        {
-            protected string Value;
-            protected DropdownFormComponent Parent;
-            public ClickHandler(DropdownFormComponent parent, string value)
-            {
-                Parent = parent;
-                Value = value;
-            }
-            public void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
-            {
-                Parent.Value = Value;
-            }
-            public void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
-            {
-
-            }
-        }
         protected static Rectangle Background = new Rectangle(433, 451, 3, 3);
         protected static Rectangle Button = new Rectangle(437, 450, 10, 11);
         protected static Rectangle UpScroll = new Rectangle(421, 459, 11, 12);
@@ -118,7 +96,7 @@ namespace Entoarox.Framework.Menus
         }
         public override void Scroll(int d, Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            if (Disabled || !Expanded)
+            if (Disabled || !Expanded || !Visible)
                 return;
             int change =d / 120;
             Offset = Math.Max(0, Math.Min(Offset - change, MaxScroll));
@@ -134,10 +112,12 @@ namespace Entoarox.Framework.Menus
         }
         public override void Draw(SpriteBatch b, Point o)
         {
+            if (!Visible)
+                return;
             // Selected background
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X+Area.X, o.Y+Area.Y, Area.Width-Game1.pixelZoom*(Button.Width-1), Game1.pixelZoom*11, Color.White * (Disabled ? 0.33f : 1f), Game1.pixelZoom, false);
             // Selected label
-            Utility.drawTextWithShadow(b, Value, Game1.dialogueFont, new Vector2(o.X + Area.X + Game1.pixelZoom*2, o.Y + Area.Y + Game1.pixelZoom), Game1.textColor * (Disabled ? 0.33f : 1f));
+            Utility.drawTextWithShadow(b, Value, Game1.smallFont, new Vector2(o.X + Area.X + Game1.pixelZoom*2, o.Y + Area.Y + Game1.pixelZoom*3), Game1.textColor * (Disabled ? 0.33f : 1f));
             // Selector button
             b.Draw(Game1.mouseCursors, new Vector2(o.X+Area.X + Area.Width - Game1.pixelZoom * Button.Width, o.Y + Area.Y), Button, Color.White * (Disabled ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.88f);
             if (!Expanded)

@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Collections.Generic;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewValley;
@@ -27,7 +28,7 @@ namespace Entoarox.SeasonalBuildings
     {
         public override void Entry(params object[] objects)
         {
-            StardewModdingAPI.Events.GameEvents.LoadContent += GameEvents_LoadContent;
+            StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
             FilePath = PathOnDisk;
             string mode = "unknown";
             switch(Environment.OSVersion.Platform)
@@ -48,8 +49,50 @@ namespace Entoarox.SeasonalBuildings
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
         private static string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        private static SpriteBatch spriteBatch;
+        private static BlendState blendColor = new BlendState
         {
+            ColorWriteChannels = ColorWriteChannels.Red | ColorWriteChannels.Green | ColorWriteChannels.Blue,
+            AlphaDestinationBlend = Blend.Zero,
+            ColorDestinationBlend = Blend.Zero,
+            AlphaSourceBlend = Blend.SourceAlpha,
+            ColorSourceBlend = Blend.SourceAlpha
+        };
+        private static BlendState blendAlpha = new BlendState
+        {
+            ColorWriteChannels = ColorWriteChannels.Alpha,
+            AlphaDestinationBlend = Blend.Zero,
+            ColorDestinationBlend = Blend.Zero,
+            AlphaSourceBlend = Blend.One,
+            ColorSourceBlend = Blend.One
+        };
+        private static Texture2D PreMultiply(Texture2D texture)
+        {
+            try
+            {
+                RenderTarget2D result = new RenderTarget2D(Game1.graphics.GraphicsDevice, texture.Width, texture.Height);
+                Game1.graphics.GraphicsDevice.SetRenderTarget(result);
+                Game1.graphics.GraphicsDevice.Clear(Color.Black);
+                spriteBatch.Begin(SpriteSortMode.Immediate, blendColor);
+                spriteBatch.Draw(texture, texture.Bounds, Color.White);
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate, blendAlpha);
+                spriteBatch.Draw(texture, texture.Bounds, Color.White);
+                spriteBatch.End();
+                Game1.graphics.GraphicsDevice.SetRenderTarget(null);
+                return result as Texture2D;
+            }
+            catch(Exception err)
+            {
+                StardewModdingAPI.Log.SyncColour("Failed to PreMultiply texture, alpha will not work properly" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, ConsoleColor.Red);
+                return texture;
+            }
+        }
+        internal static void LoadContent()
+        {
+            StardewModdingAPI.Log.SyncColour("[SeasonalBuildings] Attempting to load content pack...", ConsoleColor.Cyan);
+            if (spriteBatch == null)
+                spriteBatch = new SpriteBatch(Game1.graphics.GraphicsDevice);
             string path = Path.Combine(FilePath, "ContentPack.zip");
             ZipArchive zip;
             if (File.Exists(path))
@@ -80,18 +123,18 @@ namespace Entoarox.SeasonalBuildings
                     MemoryStream mst = new MemoryStream();
                     zipFile.Open().CopyTo(mst);
                     mst.Position = 0;
-                    textures.Add(season, Texture2D.FromStream(Game1.graphics.GraphicsDevice, mst));
+                    textures.Add(season, PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, mst)));
                 }
                 SeasonTextures.Add(name, textures);
             skipFile:
                 continue;
             }
-            StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
         }
         internal static void GameEvents_UpdateTick(object s, EventArgs e)
         {
             if (!Game1.hasLoadedGame || Game1.getFarm() == null)
                 return;
+            LoadContent();
             StardewModdingAPI.Events.LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
             StardewModdingAPI.Events.GameEvents.UpdateTick -= GameEvents_UpdateTick;
         }

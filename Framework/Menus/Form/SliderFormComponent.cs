@@ -70,6 +70,8 @@ namespace Entoarox.Framework.Menus
         }
         public override void Draw(SpriteBatch b, Point o)
         {
+            if (!Visible)
+                return;
             IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X, o.Y + Area.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
             b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + (Index == Values.Count - 1 ? Area.Width - 10 * Game1.pixelZoom : (Index * Offset * Game1.pixelZoom)), o.Y + Area.Y), new Rectangle?(Button), Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.9f);
         }

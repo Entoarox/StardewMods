@@ -1,51 +1,64 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewValley;
-using StardewValley.Menus;
 
 namespace Entoarox.Framework.Menus
 {
     public class ClickableTextComponent : BaseInteractiveMenuComponent
     {
-        protected SpriteFont Font;
         protected string Text;
-        protected IClickHandler Handler;
         protected float Scale;
+        protected Color Color;
+        protected SpriteFont Font;
         protected bool Shadow;
-        protected Color @Color;
-        protected bool Hovered;
-        public ClickableTextComponent(Point position, SpriteFont font, string text, IClickHandler handler, Color? color=null, float scale=1, bool shadow=true)
+        protected bool HoverEffect;
+        protected bool Hovered = false;
+        public event ClickHandler Handler;
+        public ClickableTextComponent(Point position, string text, ClickHandler handler = null, bool hoverEffect = true, bool shadow = true, float scale = 1, Color? color = null, SpriteFont font = null)
         {
             if (color == null)
                 color = Game1.textColor;
-            Vector2 s = (font.MeasureString(text) * scale) / Game1.pixelZoom;
-            SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(s.X), (int)Math.Ceiling(s.Y)));
+            if (font == null)
+                font = Game1.smallFont;
+            if (handler != null)
+                Handler += handler;
+            HoverEffect = hoverEffect;
             Font = font;
-            Text = text;
-            Handler = handler;
-            Scale = scale;
+            Color = (Color)color;
             Shadow = shadow;
-            @Color = (Color)color;
+            Scale = scale;
+            Text = text;
+            Vector2 size = Font.MeasureString(Text) / Game1.pixelZoom * Scale;
+            SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
+        }
+        public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        {
+            Hovered = true;
+        }
+        public override void HoverOut(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        {
+            Hovered = false;
         }
         public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.LeftClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, true);
         }
         public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.RightClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, false);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
+            if (!Visible)
+                return;
+            Vector2 p = new Vector2(Area.X + o.X, Area.Y + o.Y);
             if (Shadow)
-                Utility.drawTextWithShadow(b, Text, Font, new Vector2(Area.X + o.X, Area.Y + o.Y), Color * (Hovered ? 1 : 0.8f), Scale);
+                Utility.drawTextWithShadow(b, Text, Font, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), Scale);
             else
-                b.DrawString(Font, Text, new Vector2(Area.X + o.X, Area.Y + o.Y), Color * (Hovered ? 1 : 0.8f), 0, Vector2.Zero, Scale, SpriteEffects.None, 1);
+                b.DrawString(Font, Text, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), 0, Vector2.Zero, Game1.pixelZoom * Scale, SpriteEffects.None, 1);
         }
     }
 }

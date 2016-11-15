@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
 using StardewValley;
-using StardewValley.Menus;
 
 namespace Entoarox.Framework.Menus
 {
@@ -15,15 +11,16 @@ namespace Entoarox.Framework.Menus
     {
         protected static Rectangle ButtonNormal = new Rectangle(256, 256, 10, 10);
         protected static Rectangle ButtonHover = new Rectangle(267, 256, 10, 10);
-        public event ButtonPressed Handler;
+        public event ClickHandler Handler;
         protected string Label;
         protected int LabelOffset;
         protected bool Hovered = false;
-        public ButtonFormComponent(Point position, string label, ButtonPressed handler=null) : this(position,50,label,handler)
+        protected bool Pressed = false;
+        public ButtonFormComponent(Point position, string label, ClickHandler handler=null) : this(position,50,label,handler)
         {
 
         }
-        public ButtonFormComponent(Point position, int width, string label, ButtonPressed handler=null)
+        public ButtonFormComponent(Point position, int width, string label, ClickHandler handler =null)
         {
             int labelWidth = GetStringWidth(label, Game1.smallFont);
             width = Math.Max(width,labelWidth+4);
@@ -33,11 +30,19 @@ namespace Entoarox.Framework.Menus
             if (handler!=null)
                 Handler += handler;
         }
+        public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        {
+            Pressed = true;
+        }
+        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        {
+            Pressed = false;
+        }
         public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
-            Handler?.Invoke(this, c, m);
+            Handler?.Invoke(this, c, m, true);
         }
         public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
@@ -53,7 +58,11 @@ namespace Entoarox.Framework.Menus
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            Rectangle r = Hovered ? ButtonHover : ButtonNormal;
+            if (!Visible)
+                return;
+            if (Pressed)
+                o.Y += Game1.pixelZoom / 2;
+            Rectangle r = Hovered && !Pressed ? ButtonHover : ButtonNormal;
             // Begin
             b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, 2 * Game1.pixelZoom, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // End

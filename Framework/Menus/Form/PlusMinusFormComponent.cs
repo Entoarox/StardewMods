@@ -117,6 +117,8 @@ namespace Entoarox.Framework.Menus
         }
         public override void Draw(SpriteBatch b, Point o)
         {
+            if (!Visible)
+                return;
             // Minus button on the left
             b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X, o.Y + Area.Y), MinusButton, Color.White * (Disabled || Value <= MinValue ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.4f);
             // Plus button on the right

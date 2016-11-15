@@ -8,11 +8,12 @@ namespace Entoarox.Framework.Menus
     public class ClickableAnimatedComponent : BaseInteractiveMenuComponent
     {
         protected TemporaryAnimatedSprite Sprite;
-        protected IClickHandler Handler;
         protected bool ScaleOnHover;
-        public ClickableAnimatedComponent(Rectangle area, TemporaryAnimatedSprite sprite, IClickHandler handler, bool scaleOnHover = true)
+        public event ClickHandler Handler;
+        public ClickableAnimatedComponent(Rectangle area, TemporaryAnimatedSprite sprite, ClickHandler handler = null, bool scaleOnHover = true)
         {
-            Handler = handler;
+            if (handler != null)
+                Handler += handler;
             ScaleOnHover = scaleOnHover;
             Sprite = sprite;
             SetScaledArea(area);
@@ -33,11 +34,11 @@ namespace Entoarox.Framework.Menus
         }
         public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.LeftClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, true);
         }
         public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.RightClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, false);
         }
         public override void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
         {

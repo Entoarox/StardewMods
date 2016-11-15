@@ -5,11 +5,12 @@ namespace Entoarox.Framework.Menus
 {
     public class ClickableTextureComponent : BaseInteractiveMenuComponent
     {
-        protected IClickHandler Handler;
         protected bool ScaleOnHover;
-        public ClickableTextureComponent(Rectangle area, Texture2D texture, IClickHandler handler, Rectangle? crop = null, bool scaleOnHover = true) : base(area, texture, crop)
+        public event ClickHandler Handler;
+        public ClickableTextureComponent(Rectangle area, Texture2D texture, ClickHandler handler = null, Rectangle? crop = null, bool scaleOnHover = true) : base(area, texture, crop)
         {
-            Handler = handler;
+            if (handler != null)
+                Handler += handler;
             ScaleOnHover = scaleOnHover;
         }
         public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
@@ -28,11 +29,11 @@ namespace Entoarox.Framework.Menus
         }
         public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.LeftClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, true);
         }
         public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
         {
-            Handler.RightClick(p, o, c, m);
+            Handler?.Invoke(this, c, m, false);
         }
     }
 }

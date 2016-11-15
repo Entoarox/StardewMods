@@ -13,52 +13,59 @@ namespace Entoarox.AdvancedLocationLoader
     {
         internal static void GameEvents_LoadContent(object s, EventArgs e)
         {
-            AdvancedLocationLoaderMod.Logger.Info("Loading location mods into memory...");
-            string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
-            int count = 0;
-            Directory.CreateDirectory(baseDir);
-            foreach(string dir in Directory.EnumerateDirectories(baseDir))
+            try
             {
-                string file = Path.Combine(dir, "manifest.json");
-                if(File.Exists(file))
+                AdvancedLocationLoaderMod.Logger.Info("Loading location mods into memory...");
+                string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
+                int count = 0;
+                Directory.CreateDirectory(baseDir);
+                foreach (string dir in Directory.EnumerateDirectories(baseDir))
                 {
-                    JObject o;
-                    try
+                    string file = Path.Combine(dir, "manifest.json");
+                    if (File.Exists(file))
                     {
-                        o = JObject.Parse(File.ReadAllText(file));
-                    }
-                    catch(Exception err)
-                    {
-                        AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, json is invalid:" + file,err);
-                        return;
-                    }
-                    string loaderVersion = (string)o["LoaderVersion"];
-                    if (loaderVersion == null)
-                        loaderVersion = (string)o["loaderVersion"];
-                    if (loaderVersion == null)
-                        loaderVersion = "1.0";
-                    AdvancedLocationLoaderMod.Logger.Trace("Attempting to load manifest version `" + loaderVersion + "` at: " + file);
-                    string parserVersion = loaderVersion.Substring(0, 3);
-                    switch (parserVersion)
-                    {
-                        case "1.0":
-                            AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `1.0` is no longer supported: " + file);
-                            break;
-                        case "1.1":
-                            Loaders.Loader1_1.Load(file);
-                            count++;
-                            break;
-                        case "1.2":
-                            Loaders.Loader1_2.Load(file);
-                            count++;
-                            break;
-                        default:
-                            AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file);
-                            break;
+                        JObject o;
+                        try
+                        {
+                            o = JObject.Parse(File.ReadAllText(file));
+                        }
+                        catch (Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, json is invalid:" + file, err);
+                            return;
+                        }
+                        string loaderVersion = (string)o["LoaderVersion"];
+                        if (loaderVersion == null)
+                            loaderVersion = (string)o["loaderVersion"];
+                        if (loaderVersion == null)
+                            loaderVersion = "1.0";
+                        AdvancedLocationLoaderMod.Logger.Trace("Attempting to load manifest version `" + loaderVersion + "` at: " + file);
+                        string parserVersion = loaderVersion.Substring(0, 3);
+                        switch (parserVersion)
+                        {
+                            case "1.0":
+                                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `1.0` is no longer supported: " + file);
+                                break;
+                            case "1.1":
+                                Loaders.Loader1_1.Load(file);
+                                count++;
+                                break;
+                            case "1.2":
+                                Loaders.Loader1_2.Load(file);
+                                count++;
+                                break;
+                            default:
+                                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file);
+                                break;
+                        }
                     }
                 }
+                AdvancedLocationLoaderMod.Logger.Info("Found and loaded [" + count + "] location mods into memory");
             }
-            AdvancedLocationLoaderMod.Logger.Info("Found and loaded ["+count+"] location mods into memory");
+            catch(Exception err)
+            {
+                AdvancedLocationLoaderMod.Logger.Fatal("A unexpected error occured while loading location mod manifests", err);
+            }
         }
         internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
         {
@@ -107,7 +114,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Error("Could not fire appropriate action response, a unexpected error happened",err);
+                AdvancedLocationLoaderMod.Logger.Fatal("Could not fire appropriate action response, a unexpected error happened",err);
             }
         }
     }
