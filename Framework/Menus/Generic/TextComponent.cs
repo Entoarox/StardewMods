@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace Entoarox.Framework.Menus
 {
-    class TextComponent : BaseMenuComponent
+    public class TextComponent : BaseMenuComponent
     {
         protected string Text;
         protected float Scale;

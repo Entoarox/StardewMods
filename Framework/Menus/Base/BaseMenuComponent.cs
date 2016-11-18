@@ -69,15 +69,15 @@ namespace Entoarox.Framework.Menus
         }
         public void Attach(IComponentContainer collection)
         {
-            if (Parent!=null)
+            if (_Parent!=null)
                 throw new Exception("Component is already attached and must be detached first before it can be attached again");
-            Parent = collection;
+            _Parent = collection;
         }
         public void Detach(IComponentContainer collection)
         {
-            if (Parent==null)
+            if (_Parent==null)
                 throw new Exception("Component is not attached and must be attached first before it can be detached");
-            Parent = null;
+            _Parent = null;
         }
         public virtual Point GetPosition()
         {

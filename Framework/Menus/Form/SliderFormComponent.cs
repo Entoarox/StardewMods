@@ -72,8 +72,8 @@ namespace Entoarox.Framework.Menus
         {
             if (!Visible)
                 return;
-            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X, o.Y + Area.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
-            b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + (Index == Values.Count - 1 ? Area.Width - zoom10 : Index * Offset), o.Y + Area.Y), Button, Color.White, 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.9f);
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X, o.Y + Area.Y, Area.Width, Area.Height, Color.White * (Disabled ? 0.33f : 1), Game1.pixelZoom, false);
+            b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + (Index == Values.Count - 1 ? Area.Width - zoom10 : Index * Offset), o.Y + Area.Y), Button, Color.White * (Disabled ? 0.33f : 1), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.9f);
         }
     }
     public class SliderFormComponent : SliderFormComponent<int>

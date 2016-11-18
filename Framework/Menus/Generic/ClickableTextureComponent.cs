@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using StardewValley;
+
 namespace Entoarox.Framework.Menus
 {
     public class ClickableTextureComponent : BaseInteractiveMenuComponent
@@ -15,6 +17,9 @@ namespace Entoarox.Framework.Menus
         }
         public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("Cowboy_Footstep");
+            if (!ScaleOnHover)
+                return;
             Area.X -= 2;
             Area.Y -= 2;
             Area.Width += 4;
@@ -22,6 +27,8 @@ namespace Entoarox.Framework.Menus
         }
         public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            if (!ScaleOnHover)
+                return;
             Area.X += 2;
             Area.Y += 2;
             Area.Width -= 4;
@@ -29,10 +36,12 @@ namespace Entoarox.Framework.Menus
         }
         public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("bigDeSelect");
             Handler?.Invoke(this, c, m, true);
         }
         public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("bigDeSelect");
             Handler?.Invoke(this, c, m, false);
         }
     }

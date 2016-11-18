@@ -36,6 +36,7 @@ namespace Entoarox.Framework.Menus
         }
         public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("Cowboy_Footstep");
             Hovered = true;
         }
         public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
@@ -44,10 +45,12 @@ namespace Entoarox.Framework.Menus
         }
         public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("bigDeSelect");
             Handler?.Invoke(this, c, m, true);
         }
         public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
+            Game1.playSound("bigDeSelect");
             Handler?.Invoke(this, c, m, false);
         }
         public override void Draw(SpriteBatch b, Point o)

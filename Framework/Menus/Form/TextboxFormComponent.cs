@@ -55,6 +55,8 @@ namespace Entoarox.Framework.Menus
         }
         public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
+            if (Disabled)
+                return;
             Selected = false;
             m.TextboxActive = false;
             Game1.keyboardDispatcher.Subscriber = null;
@@ -65,6 +67,8 @@ namespace Entoarox.Framework.Menus
         }
         public override void FocusGained(IComponentContainer c, FrameworkMenu m)
         {
+            if (Disabled)
+                return;
             Selected = true;
             m.TextboxActive = true;
             Game1.keyboardDispatcher.Subscriber = this;
@@ -76,15 +80,15 @@ namespace Entoarox.Framework.Menus
                 return;
             bool flag = DateTime.Now.Millisecond % 1000 >= 500;
             string text = Value;
-            b.Draw(Box, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom4, Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, Area.Height), Color.White);
-            b.Draw(Box, new Rectangle(Area.X+o.X + zoom4, Area.Y+o.Y, Area.Width - zoom8, Area.Height), new Rectangle(zoom4, 0, 4, Area.Height), Color.White);
-            b.Draw(Box, new Rectangle(Area.X+o.X + Area.Width - zoom4, Area.Y+o.Y, zoom4, Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, Area.Height), Color.White);
+            b.Draw(Box, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom4, Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
+            b.Draw(Box, new Rectangle(Area.X+o.X + zoom4, Area.Y+o.Y, Area.Width - zoom8, Area.Height), new Rectangle(zoom4, 0, 4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
+            b.Draw(Box, new Rectangle(Area.X+o.X + Area.Width - zoom4, Area.Y+o.Y, zoom4, Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
             Vector2 v;
             for (v = Game1.smallFont.MeasureString(text); v.X > Area.Width - Game1.pixelZoom*5; v = Game1.smallFont.MeasureString(text))
                 text = text.Substring(1);
             if (flag && Selected)
                 b.Draw(Game1.staminaRect, new Rectangle(Area.X+o.X + zoom3 + zoom05 + (int)v.X, Area.Y+o.Y + 8, zoom05, CaretSize), Game1.textColor);
-            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(Area.X+o.X + zoom4, Area.Y+o.Y+zoom3), Game1.textColor);
+            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(Area.X+o.X + zoom4, Area.Y+o.Y+zoom3), Game1.textColor * (Disabled ? 0.33f : 1));
         }
         public void RecieveTextInput(char inputChar)
         {

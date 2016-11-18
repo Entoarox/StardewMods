@@ -121,7 +121,7 @@ namespace Entoarox.Framework.Menus
             // Plus button on the right
             b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Area.Width - zoom6, o.Y + Area.Y), PlusButton, Color.White * (Disabled || Value >= MaxValue ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.4f);
             // Box in the center
-            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X + zoom6, o.Y + Area.Y, Area.Width - zoom12, Area.Height, Color.White, Game1.pixelZoom, false);
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X + zoom6, o.Y + Area.Y, Area.Width - zoom12, Area.Height, Color.White * (Disabled?0.33f:1), Game1.pixelZoom, false);
             if (!Selected)
             {
                 // Text label in the center (Non-selected)

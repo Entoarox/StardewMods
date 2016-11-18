@@ -34,7 +34,6 @@ namespace Entoarox.Framework.Menus
             {
                 return base.Disabled;
             }
-
             set
             {
                 base.Disabled = value;

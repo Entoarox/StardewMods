@@ -32,22 +32,26 @@ namespace Entoarox.Framework.Menus
         }
         public override void LeftHeld(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
-            Pressed = true;
+            if(!Disabled)
+                Pressed = true;
         }
         public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
-            Pressed = false;
+            if(!Disabled)
+                Pressed = false;
         }
         public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
+            Game1.playSound("bigDeSelect");
             Handler?.Invoke(this, c, m, true);
         }
         public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
+            Game1.playSound("Cowboy_Footstep");
             Hovered = true;
         }
         public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
@@ -64,13 +68,13 @@ namespace Entoarox.Framework.Menus
                 o.Y += Game1.pixelZoom / 2;
             Rectangle r = Hovered && !Pressed ? ButtonHover : ButtonNormal;
             // Begin
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White * (Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // End
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-zoom2, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-zoom2, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White * (Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Center
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White *(Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Text
-            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + zoom2), Game1.textColor * (Disabled?0.7f:1));
+            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + zoom2), Game1.textColor * (Disabled?0.33f:1));
         }
     }
 }

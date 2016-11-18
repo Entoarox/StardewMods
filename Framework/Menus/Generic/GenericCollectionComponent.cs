@@ -202,20 +202,23 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            EventOrder.ForEach(el => el.Scroll(d, p, o2, this, m));
+            foreach (IInteractiveMenuComponent el in EventOrder)
+                el.Scroll(d, p, o2, this, m);
         }
         public override void Update(GameTime t, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
-            DrawOrder.ForEach(el => el.Update(t,c,m));
+            foreach(IMenuComponent el in DrawOrder)
+                el.Update(t,c,m);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
             if (!Visible)
                 return;
             Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            DrawOrder.ForEach(el => el.Draw(b, o2));
+            foreach(IMenuComponent el in DrawOrder)
+                el.Draw(b, o2);
         }
     }
 }

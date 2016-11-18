@@ -168,7 +168,7 @@ namespace Entoarox.Framework.Menus
             }
         }
         protected readonly static Rectangle Background = new Rectangle(433, 451, 3, 3);
-        protected readonly static Rectangle Button = new Rectangle(437, 450, 10, 11);
+        protected readonly static Rectangle Button = new Rectangle(438, 450, 9, 11);
         protected readonly static Rectangle UpScroll = new Rectangle(421, 459, 11, 12);
         protected readonly static Rectangle DownScroll = new Rectangle(421, 472, 11, 12);
         public event ValueChanged<string> Handler;
@@ -209,7 +209,7 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             // Selected background
-            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X+Area.X, o.Y+Area.Y, Area.Width-Game1.pixelZoom*(Button.Width-1), zoom11, Color.White * (Disabled ? 0.33f : 1f), Game1.pixelZoom, false);
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X+Area.X, o.Y+Area.Y, Area.Width-Game1.pixelZoom*(Button.Width), zoom11, Color.White * (Disabled ? 0.33f : 1f), Game1.pixelZoom, false);
             // Selected label
             Utility.drawTextWithShadow(b, Value, Game1.smallFont, new Vector2(o.X + Area.X + zoom2, o.Y + Area.Y + zoom3), Game1.textColor * (Disabled ? 0.33f : 1f));
             // Selector button
