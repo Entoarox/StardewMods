@@ -2,6 +2,6 @@
 {
     abstract public class BaseFormComponent : BaseInteractiveMenuComponent
     {
-        public bool Disabled = false;
+        public virtual bool Disabled { get; set;} = false;
     }
 }

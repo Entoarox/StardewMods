@@ -17,6 +17,7 @@ namespace Entoarox.Framework.Menus
         protected readonly static int zoom6 = 6 * Game1.pixelZoom;
         protected readonly static int zoom7 = 7 * Game1.pixelZoom;
         protected readonly static int zoom8 = 8 * Game1.pixelZoom;
+        protected readonly static int zoom9 = 9 * Game1.pixelZoom;
         protected readonly static int zoom10 = 10 * Game1.pixelZoom;
         protected readonly static int zoom11 = 11 * Game1.pixelZoom;
         protected readonly static int zoom12 = 12 * Game1.pixelZoom;
@@ -27,6 +28,7 @@ namespace Entoarox.Framework.Menus
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;
+        protected bool Attached = false;
         public bool Visible { get; set; } = true;
         protected void SetScaledArea(Rectangle area)
         {
@@ -48,9 +50,25 @@ namespace Entoarox.Framework.Menus
             Crop = (Rectangle)crop;
             SetScaledArea(area);
         }
+        public virtual void Attach(IComponentCollection collection)
+        {
+            if (Attached)
+                throw new Exception("Component is already attached and must be detached first before it can be attached again");
+            Attached = true;
+        }
+        public virtual void Detach(IComponentCollection collection)
+        {
+            if (!Attached)
+                throw new Exception("Component is not attached and must be attached first before it can be detached");
+            Attached = false;
+        }
         public virtual Point GetPosition()
         {
             return new Point(Area.X, Area.Y);
+        }
+        public virtual Rectangle GetRegion()
+        {
+            return Area;
         }
         public virtual void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
         {

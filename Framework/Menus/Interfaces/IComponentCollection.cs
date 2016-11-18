@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Microsoft.Xna.Framework;
+
 namespace Entoarox.Framework.Menus
 {
     public interface IComponentCollection
@@ -13,6 +15,8 @@ namespace Entoarox.Framework.Menus
         void ClearComponents();
         void ResetFocus();
         void GiveFocus(IInteractiveMenuComponent component);
+        Rectangle EventRegion { get; }
+        FrameworkMenu GetAttachedMenu();
         List<IInteractiveMenuComponent> InteractiveComponents { get; }
         List<IMenuComponent> StaticComponents { get; }
     }

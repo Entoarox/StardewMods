@@ -68,7 +68,7 @@ namespace Entoarox.Framework.Menus
             // End
             b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-zoom2, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Center
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - 4 * zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Text
             Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + zoom2), Game1.textColor * (Disabled?0.7f:1));
         }
