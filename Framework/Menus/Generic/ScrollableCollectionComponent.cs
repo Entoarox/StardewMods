@@ -17,11 +17,16 @@ namespace Entoarox.Framework.Menus
     {
         protected static Rectangle UpButton = new Rectangle(421, 459, 11, 12);
         protected static Rectangle DownButton = new Rectangle(421, 472, 11, 12);
+
         protected int ScrollOffset=0;
         protected int InnerHeight;
         protected int BarOffset;
+
         protected bool UpActive=false;
         protected bool DownActive=false;
+
+        protected int Counter = 0;
+        protected int Limiter = 20;
         public ScrollableCollectionComponent(Rectangle area, List<IMenuComponent> components = null):base(area,components)
         {
             
@@ -66,8 +71,6 @@ namespace Entoarox.Framework.Menus
             DownActive = ScrollOffset < InnerHeight && down.Contains(p);
             base.HoverOver(p, o, c, m);
         }
-        protected int Counter = 0;
-        protected int Limiter = 20;
         protected void ArrowClick(Point p, Point o)
         {
             if (UpActive && ScrollOffset > 0)
@@ -110,26 +113,14 @@ namespace Entoarox.Framework.Menus
             if (!Visible)
                 return;
             b.End();
-            int[] buffer=new int[b.GraphicsDevice.Viewport.Width*b.GraphicsDevice.Viewport.Height];
-            b.GraphicsDevice.GetBackBufferData(buffer);
-            Texture2D texture = new Texture2D(b.GraphicsDevice, b.GraphicsDevice.Viewport.Width, b.GraphicsDevice.Viewport.Height);
-            texture.SetData(buffer);
-            SpriteBatch Batch = new SpriteBatch(b.GraphicsDevice);
-            RenderTarget2D Target = new RenderTarget2D(b.GraphicsDevice, Area.Width - BarOffset, Area.Height);
-            b.GraphicsDevice.SetRenderTarget(Target);
-            b.GraphicsDevice.Clear(Color.Transparent);
-
-            Batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-            Point o2=new Point(0, -(ScrollOffset * zoom10));
-            DrawOrder.ForEach(el => el.Draw(Batch, o2));
-            Batch.End();
-
-            b.GraphicsDevice.SetRenderTarget((Game1.game1 as StardewModdingAPI.Inheritance.SGame).ZoomLevelIsOne ? null : (Game1.game1 as StardewModdingAPI.Inheritance.SGame).Screen);
+            Rectangle reg = EventRegion;
+            b.GraphicsDevice.ScissorRectangle = new Rectangle(reg.X+o.X,reg.Y+o.Y,reg.Width,reg.Height);
+            b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, new RasterizerState() { ScissorTestEnable = true });
+            Point o2=new Point(o.X+reg.X, o.Y+reg.Y-(ScrollOffset * zoom10));
+            foreach(IMenuComponent el in DrawOrder)
+                el.Draw(b,o2);
+            b.End();
             b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-            // Restore
-            b.Draw(texture, new Rectangle(0, 0, b.GraphicsDevice.Viewport.Width, b.GraphicsDevice.Viewport.Height), Color.White);
-            // Self
-            b.Draw(Target, new Rectangle(Area.X + o.X, Area.Y + o.Y, Area.Width - BarOffset, Area.Height), Color.White);
 
             // Scrollbar
             if (BarOffset == 0)

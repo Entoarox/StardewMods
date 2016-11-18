@@ -143,20 +143,27 @@ namespace Entoarox.Framework.Menus
             }
             public override void SpecialReceived(Keys k, IComponentContainer c, FrameworkMenu m)
             {
-                switch (k)
+                try
                 {
-                    case Keys.Down:
-                        if (KeyboardOffset < Owner.Values.Count - 1)
-                            KeyboardOffset++;
-                        if (KeyboardOffset - ScrollOffset > 9 && ScrollOffset < MaxScroll)
-                            ScrollOffset++;
-                        break;
-                    case Keys.Up:
-                        if (KeyboardOffset > 0)
-                            KeyboardOffset--;
-                        if (KeyboardOffset - ScrollOffset < 0 && ScrollOffset > 0)
-                            ScrollOffset--;
-                        break;
+                    switch (k)
+                    {
+                        case Keys.Down:
+                            if (KeyboardOffset < Owner.Values.Count - 1)
+                                KeyboardOffset++;
+                            if (KeyboardOffset - ScrollOffset > 9 && ScrollOffset < MaxScroll)
+                                ScrollOffset++;
+                            break;
+                        case Keys.Up:
+                            if (KeyboardOffset > 0)
+                                KeyboardOffset--;
+                            if (KeyboardOffset - ScrollOffset < 0 && ScrollOffset > 0)
+                                ScrollOffset--;
+                            break;
+                    }
+                }
+                catch(Exception err)
+                {
+                    StardewModdingAPI.Log.SyncColour("Key press error:"+Environment.NewLine+err.Message + Environment.NewLine + err.StackTrace, ConsoleColor.Red);
                 }
             }
         }

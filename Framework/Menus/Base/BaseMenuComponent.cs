@@ -32,7 +32,20 @@ namespace Entoarox.Framework.Menus
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;
-        public IComponentContainer Parent { get; private set; } = null;
+        public IComponentContainer Parent
+        {
+            get
+            {
+                if (_Parent == null)
+                    throw new NullReferenceException("Component attempted to reference its parent while not attached");
+                return _Parent;
+            }
+            private set
+            {
+                _Parent = value;
+            }
+        }
+        private IComponentContainer _Parent=null;
         public bool Visible { get; set; } = true;
         protected void SetScaledArea(Rectangle area)
         {

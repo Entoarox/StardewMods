@@ -76,7 +76,7 @@
     <Compile Include="Menus\Form\DropdownFormComponent.cs" />
     <Compile Include="Menus\FrameworkMenu.cs" />
     <Compile Include="Menus\Generic\HeartsComponent.cs" />
-    <Compile Include="Menus\IComponentContainer.cs" />
+    <Compile Include="Menus\Interfaces\IComponentContainer.cs" />
     <Compile Include="Menus\Interfaces\IComponentCollection.cs" />
     <Compile Include="Menus\Interfaces\IIinteractiveMenuComponent.cs" />
     <Compile Include="Menus\Interfaces\IMenuComponent.cs" />
@@ -87,8 +87,8 @@
     <Compile Include="Menus\Generic\TextComponent.cs" />
     <Compile Include="Menus\Generic\LabelComponent.cs" />
     <Compile Include="Menus\Generic\ProgressbarComponent.cs" />
-    <Compile Include="Menus\ScrollableCollectionComponent.cs" />
-    <Compile Include="Menus\TablistComponent.cs" />
+    <Compile Include="Menus\Generic\ScrollableCollectionComponent.cs" />
+    <Compile Include="Menus\Generic\TablistComponent.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Internal\MessageBox.cs" />
     <Compile Include="MoreEvents.cs" />

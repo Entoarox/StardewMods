@@ -6,7 +6,7 @@ namespace Entoarox.Framework.Menus
 {
     abstract public class BaseKeyboardFormComponent : BaseFormComponent, IKeyboardSubscriber
     {
-        public bool Selected {get;set; }
+        public bool Selected {get; set; }
         public override void FocusGained(IComponentContainer c, FrameworkMenu m)
         {
             Game1.keyboardDispatcher.Subscriber = this;

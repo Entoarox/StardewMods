@@ -96,7 +96,10 @@ namespace Entoarox.Framework.Menus
             FocusElement.FocusLost(this, this);
             FocusElement = null;
             if (FloatingComponent != null)
+            {
+                FloatingComponent.Detach(this);
                 FloatingComponent = null;
+            }
         }
         public void GiveFocus(IInteractiveMenuComponent component)
         {
@@ -105,7 +108,10 @@ namespace Entoarox.Framework.Menus
             ResetFocus();
             FocusElement = component;
             if (!_InteractiveComponents.Contains(component))
+            {
                 FloatingComponent = component;
+                component.Attach(this);
+            }
             component.FocusGained(this, this);
         }
         public void AddComponent(IMenuComponent component)
@@ -268,8 +274,11 @@ namespace Entoarox.Framework.Menus
             foreach (IMenuComponent el in DrawOrder)
                 el.Update(time, this, this);
         }
+        protected int Counter = 0;
+        protected Stopwatch Watch = new Stopwatch();
         public override void draw(SpriteBatch b)
         {
+            Watch.Start();
             if (DrawChrome)
                 DrawMenuRect(b, Area.X, Area.Y, Area.Width, Area.Height);
             Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
@@ -279,6 +288,15 @@ namespace Entoarox.Framework.Menus
                 FloatingComponent.Draw(b, o);
             base.draw(b);
             drawMouse(b);
+            Watch.Stop();
+            if (Counter == 60)
+            {
+                StardewModdingAPI.Log.SyncColour("Total time to draw last 60 frames: " + Watch.ElapsedMilliseconds.ToString()+"ms", ConsoleColor.Magenta);
+                Counter = 0;
+                Watch.Reset();
+            }
+            else
+                Counter++;
         }
     }
 }

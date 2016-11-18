@@ -52,6 +52,10 @@ namespace Entoarox.Framework.Menus
             }
         }
 
+        public TablistComponent(Rectangle area)
+        {
+            SetScaledArea(area);
+        }
         public void AddTab<T>(int icon, T collection) where T : IComponentCollection, IInteractiveMenuComponent
         {
             Tabs.Add(new TabInfo(collection, icon));
@@ -62,10 +66,7 @@ namespace Entoarox.Framework.Menus
                 CurrentTab = collection;
             }
         }
-        public TablistComponent(Rectangle area)
-        {
-            SetScaledArea(area);
-        }
+        // IInteractiveMenuComponent
         public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
             ResetFocus();

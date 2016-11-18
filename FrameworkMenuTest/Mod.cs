@@ -36,19 +36,6 @@ namespace Entoarox.FrameworkMenuTest
             tablist.AddTab(4, page2);
             tablist.AddTab(6, page3);
 
-            /*
-            menu.AddComponent(new ButtonFormComponent(new Point(0, 2), 20, "#1", buttonPage1));
-            menu.AddComponent(new ButtonFormComponent(new Point(25, 2), 20, "#2", buttonPage2));
-            menu.AddComponent(new ButtonFormComponent(new Point(50, 2), 20, "#3", buttonPage3));
-
-            page2.Visible = false;
-            page3.Visible = false;
-
-            menu.AddComponent(page1);
-            menu.AddComponent(page2);
-            menu.AddComponent(page3);
-            */
-
             page1.AddComponent(new LabelComponent(new Point(0, -38), "Form Components"));
             page1.AddComponent(new CheckboxFormComponent(new Point(0, 2), "Example Checkbox", CheckboxChanged));
             page1.AddComponent(new PlusMinusFormComponent(new Point(0, 12), 0, 100, PlusMinusChanged));
@@ -71,26 +58,6 @@ namespace Entoarox.FrameworkMenuTest
 
             Game1.activeClickableMenu = menu;
         }
-        /*
-        internal static void buttonPage1(IMenuComponent s, IComponentCollection c, FrameworkMenu m, bool l)
-        {
-            page1.Visible = true;
-            page2.Visible = false;
-            page3.Visible = false;
-        }
-        internal static void buttonPage2(IMenuComponent s, IComponentCollection c, FrameworkMenu m, bool l)
-        {
-            page1.Visible = false;
-            page2.Visible = true;
-            page3.Visible = false;
-        }
-        internal static void buttonPage3(IMenuComponent s, IComponentCollection c, FrameworkMenu m, bool l)
-        {
-            page1.Visible = false;
-            page2.Visible = false;
-            page3.Visible = true;
-        }
-        */
         private static int Skipped = 0;
         internal static void GameEvents_HalfSecondTick(object s, EventArgs e)
         {
