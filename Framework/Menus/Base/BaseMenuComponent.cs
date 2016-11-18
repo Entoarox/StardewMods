@@ -21,14 +21,18 @@ namespace Entoarox.Framework.Menus
         protected readonly static int zoom10 = 10 * Game1.pixelZoom;
         protected readonly static int zoom11 = 11 * Game1.pixelZoom;
         protected readonly static int zoom12 = 12 * Game1.pixelZoom;
+        protected readonly static int zoom13 = 13 * Game1.pixelZoom;
         protected readonly static int zoom14 = 14 * Game1.pixelZoom;
+        protected readonly static int zoom15 = 15 * Game1.pixelZoom;
         protected readonly static int zoom16 = 16 * Game1.pixelZoom;
         protected readonly static int zoom17 = 17 * Game1.pixelZoom;
         protected readonly static int zoom20 = 20 * Game1.pixelZoom;
+        protected readonly static int zoom22 = 22 * Game1.pixelZoom;
+        protected readonly static int zoom28 = 28 * Game1.pixelZoom;
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;
-        protected bool Attached = false;
+        public IComponentContainer Parent { get; private set; } = null;
         public bool Visible { get; set; } = true;
         protected void SetScaledArea(Rectangle area)
         {
@@ -50,17 +54,17 @@ namespace Entoarox.Framework.Menus
             Crop = (Rectangle)crop;
             SetScaledArea(area);
         }
-        public virtual void Attach(IComponentCollection collection)
+        public void Attach(IComponentContainer collection)
         {
-            if (Attached)
+            if (Parent!=null)
                 throw new Exception("Component is already attached and must be detached first before it can be attached again");
-            Attached = true;
+            Parent = collection;
         }
-        public virtual void Detach(IComponentCollection collection)
+        public void Detach(IComponentContainer collection)
         {
-            if (!Attached)
+            if (Parent==null)
                 throw new Exception("Component is not attached and must be attached first before it can be detached");
-            Attached = false;
+            Parent = null;
         }
         public virtual Point GetPosition()
         {
@@ -70,7 +74,7 @@ namespace Entoarox.Framework.Menus
         {
             return Area;
         }
-        public virtual void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
+        public virtual void Update(GameTime t, IComponentContainer c, FrameworkMenu m)
         {
 
         }

@@ -34,19 +34,19 @@ namespace Entoarox.Framework.Menus
             Vector2 size = Font.MeasureString(Text) / Game1.pixelZoom * Scale;
             SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
         }
-        public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Hovered = true;
         }
-        public override void HoverOut(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Hovered = false;
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Handler?.Invoke(this, c, m, true);
         }
-        public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Handler?.Invoke(this, c, m, false);
         }

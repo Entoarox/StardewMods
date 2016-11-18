@@ -42,15 +42,15 @@ namespace Entoarox.Framework.Menus
             if (handler != null)
                 Handler += handler;
         }
-        public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Hovered = true;
         }
-        public override void HoverOut(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Hovered = false;
         }
-        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Value = (int)Math.Round((p.X - (Area.X + o.X)) / 4D / Game1.pixelZoom);
             if (OldValue == Value)

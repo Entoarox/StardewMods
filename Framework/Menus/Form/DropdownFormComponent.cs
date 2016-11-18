@@ -22,7 +22,7 @@ namespace Entoarox.Framework.Menus
             protected bool ShowHover = false;
             protected string Value;
             protected DropdownFormComponent Owner;
-            protected IComponentCollection Collection;
+            protected IComponentContainer Collection;
             protected Rectangle Self;
             protected int GetCursorIndex(Point p, Point o)
             {
@@ -33,7 +33,7 @@ namespace Entoarox.Framework.Menus
                     index = Owner.Values.Count - 1;
                 return index;
             }
-            public DropdownSelect(Point position, int width, Rectangle self, DropdownFormComponent owner, IComponentCollection collection)
+            public DropdownSelect(Point position, int width, Rectangle self, DropdownFormComponent owner, IComponentContainer collection)
             {
                 MaxScroll = Math.Max(0, owner.Values.Count - 10);
                 Size = Math.Min(10, owner.Values.Count);
@@ -53,14 +53,14 @@ namespace Entoarox.Framework.Menus
             {
                 return true;
             }
-            public override void FocusLost(IComponentCollection c, FrameworkMenu m)
+            public override void FocusLost(IComponentContainer c, FrameworkMenu m)
             {
                 if (Value == Owner.Value)
                     return;
                 Owner.Value = Value;
                 Owner.Handler?.Invoke(Owner, Collection, m, Owner.Value);
             }
-            public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+            public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
             {
                 if (base.InBounds(p, new Point(0, 0)))
                 {
@@ -75,7 +75,7 @@ namespace Entoarox.Framework.Menus
                     m.receiveLeftClick(p.X, p.Y, false);
                 }
             }
-            public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+            public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
             {
                 if (!base.InBounds(p, new Point(0, 0)))
                 {
@@ -83,12 +83,15 @@ namespace Entoarox.Framework.Menus
                     m.receiveRightClick(p.X, p.Y, false);
                 }
             }
-            public override void Scroll(int d, Point p, Point o, IComponentCollection c, FrameworkMenu m)
+            public override void Scroll(int d, Point p, Point o, IComponentContainer c, FrameworkMenu m)
             {
                 int change = d / 120;
+                int oldOffset = ScrollOffset;
                 ScrollOffset = Math.Max(0, Math.Min(ScrollOffset - change, MaxScroll));
+                if (oldOffset != ScrollOffset)
+                    Game1.playSound("drumkit6");
             }
-            public override void HoverOver(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+            public override void HoverOver(Point p, Point o, IComponentContainer c, FrameworkMenu m)
             {
                 ShowHover = base.InBounds(p, new Point(0, 0));
                 HoverOffset = GetCursorIndex(p, o);
@@ -128,7 +131,7 @@ namespace Entoarox.Framework.Menus
                 if (ScrollOffset < MaxScroll)
                     b.Draw(Game1.mouseCursors, new Rectangle(o.X + Area.X + Area.Width - zoom2, o.Y + Area.Y + Area.Height - zoom9, zoom7, zoom7), DownScroll, Color.White);
             }
-            public override void CommandReceived(char k, IComponentCollection c, FrameworkMenu m)
+            public override void CommandReceived(char k, IComponentContainer c, FrameworkMenu m)
             {
                 switch ((int)k)
                 {
@@ -138,7 +141,7 @@ namespace Entoarox.Framework.Menus
                         break;
                 }
             }
-            public override void SpecialReceived(Keys k, IComponentCollection c, FrameworkMenu m)
+            public override void SpecialReceived(Keys k, IComponentContainer c, FrameworkMenu m)
             {
                 switch (k)
                 {
@@ -188,7 +191,7 @@ namespace Entoarox.Framework.Menus
             if(handler!=null)
                 Handler += handler;
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;

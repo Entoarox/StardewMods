@@ -18,29 +18,29 @@ namespace Entoarox.Framework.Menus
             Sprite = sprite;
             SetScaledArea(area);
         }
-        public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Area.X -= 2;
             Area.Y -= 2;
             Area.Width += 4;
             Area.Height += 4;
         }
-        public override void HoverOut(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Area.X += 2;
             Area.Y += 2;
             Area.Width -= 4;
             Area.Height -= 4;
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Handler?.Invoke(this, c, m, true);
         }
-        public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Handler?.Invoke(this, c, m, false);
         }
-        public override void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
+        public override void Update(GameTime t, IComponentContainer c, FrameworkMenu m)
         {
             Sprite.update(t);
         }

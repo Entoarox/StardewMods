@@ -25,8 +25,6 @@ namespace Entoarox.Framework.Menus
         protected IInteractiveMenuComponent FocusElement;
         protected bool Hold = false;
 
-        protected FrameworkMenu AttachedMenu;
-
         public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
         public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
 
@@ -68,23 +66,23 @@ namespace Entoarox.Framework.Menus
         }
         public FrameworkMenu GetAttachedMenu()
         {
-            return AttachedMenu;
+            return Parent.GetAttachedMenu();
         }
         public void ResetFocus()
         {
             if (FocusElement == null)
                 return;
-            FocusElement.FocusLost(this, AttachedMenu);
+            FocusElement.FocusLost(this, Parent.GetAttachedMenu());
             FocusElement = null;
         }
         public void GiveFocus(IInteractiveMenuComponent component)
         {
             if (!_InteractiveComponents.Contains(component) || component == FocusElement)
                 return;
-            AttachedMenu.GiveFocus(this);
+            Parent.GiveFocus(this);
             ResetFocus();
             FocusElement = component;
-            component.FocusGained(this, AttachedMenu);
+            component.FocusGained(this, Parent.GetAttachedMenu());
         }
         public void AddComponent(IMenuComponent component)
         {
@@ -126,22 +124,16 @@ namespace Entoarox.Framework.Menus
         {
             get { return Area; }
         }
+        public Rectangle ZoomEventRegion
+        {
+            get { return new Rectangle(Area.X / Game1.pixelZoom, Area.Y / Game1.pixelZoom, Area.Width / Game1.pixelZoom, Area.Height / Game1.pixelZoom); }
+        }
         // IInteractiveMenuComponent
-        public override void Attach(IComponentCollection collection)
-        {
-            base.Attach(collection);
-            AttachedMenu = collection.GetAttachedMenu();
-        }
-        public override void Detach(IComponentCollection collection)
-        {
-            base.Detach(collection);
-            AttachedMenu = null;
-        }
-        public override void FocusLost(IComponentCollection c, FrameworkMenu m)
+        public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
             ResetFocus();
         }
-        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
@@ -155,7 +147,7 @@ namespace Entoarox.Framework.Menus
             HoverElement.HoverOut(p, o2, this, m);
             HoverElement = null;
         }
-        public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftHeld(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
@@ -164,7 +156,7 @@ namespace Entoarox.Framework.Menus
             Hold = true;
             HoverElement.LeftHeld(p, new Point(Area.X + o.X, Area.Y + o.Y), this, m);
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
@@ -180,7 +172,7 @@ namespace Entoarox.Framework.Menus
             }
             ResetFocus();
         }
-        public override void RightClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void RightClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
@@ -197,11 +189,9 @@ namespace Entoarox.Framework.Menus
             }
             ResetFocus();
         }
-        public override void HoverOver(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverOver(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
-            if (!Visible)
-                return;
-            if (!Area.Contains(p) || Hold)
+            if (!Visible || Hold)
                 return;
             Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
             if (HoverElement != null && !HoverElement.InBounds(p, o2))
@@ -223,7 +213,7 @@ namespace Entoarox.Framework.Menus
                 }
             }
         }
-        public override void Scroll(int d, Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void Scroll(int d, Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;
@@ -231,7 +221,7 @@ namespace Entoarox.Framework.Menus
             foreach (IInteractiveMenuComponent el in EventOrder)
                 el.Scroll(d, p, o2, this, m);
         }
-        public override void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
+        public override void Update(GameTime t, IComponentContainer c, FrameworkMenu m)
         {
             if (!Visible)
                 return;

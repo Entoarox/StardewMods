@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.Menus
 {
-    public interface IComponentCollection
+    public interface IComponentCollection : IComponentContainer
     {
         bool AcceptsComponent(IMenuComponent component);
         void AddComponent(IMenuComponent component);
@@ -13,10 +13,6 @@ namespace Entoarox.Framework.Menus
         void RemoveComponents<T>() where T : IMenuComponent;
         void RemoveComponents(Predicate<IMenuComponent> filter);
         void ClearComponents();
-        void ResetFocus();
-        void GiveFocus(IInteractiveMenuComponent component);
-        Rectangle EventRegion { get; }
-        FrameworkMenu GetAttachedMenu();
         List<IInteractiveMenuComponent> InteractiveComponents { get; }
         List<IMenuComponent> StaticComponents { get; }
     }

@@ -50,21 +50,21 @@ namespace Entoarox.Framework.Menus
             if(handler!=null)
                 Handler += handler;
         }
-        public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftHeld(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
             Index = Math.Max(Math.Min((int)Math.Floor((double)(p.X - (o.X+Area.X)) / Offset), Values.Count - 1), 0);
             Value = Values[Index];
         }
-        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (OldIndex == Index)
                 return;
             OldIndex = Index;
             Handler?.Invoke(this, c, m, Value);
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             LeftHeld(p, o, c, m);
         }

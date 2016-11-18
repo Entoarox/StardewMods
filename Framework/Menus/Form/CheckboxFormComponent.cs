@@ -31,7 +31,7 @@ namespace Entoarox.Framework.Menus
             if(handler!=null)
                 Handler += handler;
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;

@@ -30,27 +30,27 @@ namespace Entoarox.Framework.Menus
             if (handler!=null)
                 Handler += handler;
         }
-        public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftHeld(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Pressed = true;
         }
-        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Pressed = false;
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
             Handler?.Invoke(this, c, m, true);
         }
-        public override void HoverIn(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverIn(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
             Hovered = true;
         }
-        public override void HoverOut(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void HoverOut(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;

@@ -65,7 +65,7 @@ namespace Entoarox.Framework.Menus
                 return;
             }
         }
-        public override void LeftClick(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftClick(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             if (Disabled)
                 return;
@@ -82,7 +82,7 @@ namespace Entoarox.Framework.Menus
                 FocusLost(c, m);
             Resolve(p, o);
         }
-        public override void LeftHeld(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftHeld(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Counter++;
             if (Disabled || Counter % Limiter !=0)
@@ -91,7 +91,7 @@ namespace Entoarox.Framework.Menus
             Limiter = Math.Max(1, Limiter - 1);
             Resolve(p, o);
         }
-        public override void LeftUp(Point p, Point o, IComponentCollection c, FrameworkMenu m)
+        public override void LeftUp(Point p, Point o, IComponentContainer c, FrameworkMenu m)
         {
             Counter = 0;
             Limiter = 15;
@@ -100,11 +100,11 @@ namespace Entoarox.Framework.Menus
             OldValue = Value;
             Handler?.Invoke(this, c, m, Value);
         }
-        public override void FocusGained(IComponentCollection c, FrameworkMenu m)
+        public override void FocusGained(IComponentContainer c, FrameworkMenu m)
         {
             
         }
-        public override void FocusLost(IComponentCollection c, FrameworkMenu m)
+        public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
             base.FocusLost(c, m);
             if (OldValue == Value)
@@ -140,12 +140,12 @@ namespace Entoarox.Framework.Menus
             // Draw the actual text
             Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(o.X + Area.X + zoom8, o.Y + Area.Y + Game1.pixelZoom), Game1.textColor);
         }
-        public override void KeyReceived(char k, IComponentCollection c, FrameworkMenu m)
+        public override void KeyReceived(char k, IComponentContainer c, FrameworkMenu m)
         {
             Game1.playSound("cowboy_monsterhit");
             TextReceived(k.ToString(), c, m);
         }
-        public override void TextReceived(string k, IComponentCollection c, FrameworkMenu m)
+        public override void TextReceived(string k, IComponentContainer c, FrameworkMenu m)
         {
             int t = -1;
             if (Disabled || !int.TryParse(k, out t))
@@ -154,7 +154,7 @@ namespace Entoarox.Framework.Menus
             Value = Math.Max(MinValue, Math.Min(MaxValue, Value));
             SelectedValue = Value.ToString();
         }
-        public override void CommandReceived(char r, IComponentCollection c, FrameworkMenu m)
+        public override void CommandReceived(char r, IComponentContainer c, FrameworkMenu m)
         {
             switch ((int)r)
             {

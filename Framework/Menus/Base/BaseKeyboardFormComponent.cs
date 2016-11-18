@@ -6,36 +6,32 @@ namespace Entoarox.Framework.Menus
 {
     abstract public class BaseKeyboardFormComponent : BaseFormComponent, IKeyboardSubscriber
     {
-        private FrameworkMenu Menu;
-        private IComponentCollection Collection;
         public bool Selected {get;set; }
-        public override void FocusGained(IComponentCollection c, FrameworkMenu m)
+        public override void FocusGained(IComponentContainer c, FrameworkMenu m)
         {
             Game1.keyboardDispatcher.Subscriber = this;
             Selected = true;
-            Menu = m;
-            Collection = c;
             m.TextboxActive = true;
         }
-        public override void FocusLost(IComponentCollection c, FrameworkMenu m)
+        public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
             Game1.keyboardDispatcher.Subscriber = null;
             Selected = false;
             m.TextboxActive = false;
         }
-        public virtual void KeyReceived(char r, IComponentCollection c, FrameworkMenu m)
+        public virtual void KeyReceived(char r, IComponentContainer c, FrameworkMenu m)
         {
 
         }
-        public virtual void TextReceived(string r, IComponentCollection c, FrameworkMenu m)
+        public virtual void TextReceived(string r, IComponentContainer c, FrameworkMenu m)
         {
 
         }
-        public virtual void CommandReceived(char r, IComponentCollection c, FrameworkMenu m)
+        public virtual void CommandReceived(char r, IComponentContainer c, FrameworkMenu m)
         {
 
         }
-        public virtual void SpecialReceived(Keys r, IComponentCollection c, FrameworkMenu m)
+        public virtual void SpecialReceived(Keys r, IComponentContainer c, FrameworkMenu m)
         {
 
         }
@@ -43,25 +39,25 @@ namespace Entoarox.Framework.Menus
         {
             if (Disabled || !Selected)
                 return;
-            KeyReceived(inputChar, Collection, Menu);
+            KeyReceived(inputChar, Parent, Parent.GetAttachedMenu());
         }
         void IKeyboardSubscriber.RecieveTextInput(string text)
         {
             if (Disabled || !Selected)
                 return;
-            TextReceived(text, Collection, Menu);
+            TextReceived(text, Parent, Parent.GetAttachedMenu());
         }
         void IKeyboardSubscriber.RecieveCommandInput(char c)
         {
             if (Disabled || !Selected)
                 return;
-            CommandReceived(c, Collection, Menu);
+            CommandReceived(c, Parent, Parent.GetAttachedMenu());
         }
         void IKeyboardSubscriber.RecieveSpecialInput(Keys k)
         {
             if (Disabled || !Selected)
                 return;
-            SpecialReceived(k, Collection, Menu);
+            SpecialReceived(k, Parent, Parent.GetAttachedMenu());
         }
     }
 }

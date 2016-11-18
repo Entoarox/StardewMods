@@ -14,8 +14,8 @@ namespace Entoarox.Framework.Menus
 {
     public class FrameworkMenu : IClickableMenu, IComponentCollection
     {
-        protected List<IMenuComponent> DrawOrder;
-        protected List<IInteractiveMenuComponent> EventOrder;
+        protected List<IMenuComponent> DrawOrder=new List<IMenuComponent>();
+        protected List<IInteractiveMenuComponent> EventOrder=new List<IInteractiveMenuComponent>();
 
         protected List<IMenuComponent> _StaticComponents = new List<IMenuComponent>();
         protected List<IInteractiveMenuComponent> _InteractiveComponents = new List<IInteractiveMenuComponent>();
@@ -65,9 +65,10 @@ namespace Entoarox.Framework.Menus
         }
         protected void UpdateDrawOrder()
         {
-            DrawOrder = new List<IMenuComponent>(_StaticComponents).OrderBy(x => x.GetPosition().Y).ThenBy(x => x.GetPosition().X).ToList();
+            List<IMenuComponent> drawOrder = new List<IMenuComponent>(_StaticComponents).OrderBy(x => x.GetPosition().Y).ThenBy(x => x.GetPosition().X).ToList();
             List<IInteractiveMenuComponent> InteractiveDrawOrder = new List<IInteractiveMenuComponent>(_InteractiveComponents).OrderBy(x => x.GetPosition().Y).ThenBy(x => x.GetPosition().X).ToList();
             EventOrder = new List<IInteractiveMenuComponent>(InteractiveDrawOrder);
+            DrawOrder = new List<IMenuComponent>(drawOrder);
             DrawOrder.AddRange(InteractiveDrawOrder);
             DrawOrder.Reverse();
         }
@@ -146,6 +147,10 @@ namespace Entoarox.Framework.Menus
         public Rectangle EventRegion
         {
             get { return new Rectangle(Area.X + zoom10, Area.Y + zoom10, Area.Width - zoom20, Area.Height - zoom20); }
+        }
+        public Rectangle ZoomEventRegion
+        {
+            get { return new Rectangle((Area.X + zoom10)/Game1.pixelZoom,(Area.Y + zoom10)/Game1.pixelZoom,(Area.Width - zoom20)/Game1.pixelZoom,(Area.Height - zoom20)/Game1.pixelZoom); }
         }
         public override void releaseLeftClick(int x, int y)
         {

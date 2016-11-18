@@ -29,7 +29,6 @@ namespace Entoarox.Framework.Menus
         protected string _Value;
         protected Predicate<string> Validator = (e) => true;
         protected string OldValue;
-        protected IComponentCollection Collection;
         public TextboxFormComponent(Point position, ValueChanged<string> handler = null) : this(position, 75, null, handler)
         {
 
@@ -54,7 +53,7 @@ namespace Entoarox.Framework.Menus
             Value = "";
             OldValue = Value;
         }
-        public override void FocusLost(IComponentCollection c, FrameworkMenu m)
+        public override void FocusLost(IComponentContainer c, FrameworkMenu m)
         {
             Selected = false;
             m.TextboxActive = false;
@@ -64,21 +63,11 @@ namespace Entoarox.Framework.Menus
             OldValue = Value;
             Handler?.Invoke(this, c, m, Value);
         }
-        public override void FocusGained(IComponentCollection c, FrameworkMenu m)
+        public override void FocusGained(IComponentContainer c, FrameworkMenu m)
         {
             Selected = true;
             m.TextboxActive = true;
             Game1.keyboardDispatcher.Subscriber = this;
-        }
-        public override void Attach(IComponentCollection collection)
-        {
-            base.Attach(collection);
-            Collection = collection;
-        }
-        public override void Detach(IComponentCollection collection)
-        {
-            base.Detach(collection);
-            Collection = null;
         }
         protected int CaretSize = (int)Game1.smallFont.MeasureString("|").Y;
         public override void Draw(SpriteBatch b, Point o)
@@ -129,12 +118,12 @@ namespace Entoarox.Framework.Menus
                 case 9:
                     if (TabPressed != null)
                     {
-                        Value = TabPressed(this, Collection.GetAttachedMenu(), Value);
+                        Value = TabPressed(this, Parent.GetAttachedMenu(), Value);
                         return;
                     }
                     bool Next = false;
                     IInteractiveMenuComponent first=null;
-                    foreach(IInteractiveMenuComponent imc in Collection.InteractiveComponents)
+                    foreach(IInteractiveMenuComponent imc in (Parent as IComponentCollection).InteractiveComponents)
                     {
                         if (first == null && imc is TextboxFormComponent)
                             first = imc;
@@ -145,17 +134,17 @@ namespace Entoarox.Framework.Menus
                         }
                         if (Next && imc is TextboxFormComponent)
                         {
-                            Collection.GiveFocus(imc);
+                            (Parent as IComponentCollection).GiveFocus(imc);
                             return;
                         }
                     }
-                    Collection.GiveFocus(first);
+                    (Parent as IComponentCollection).GiveFocus(first);
                     return;
                 case 13:
                     if (EnterPressed != null)
-                        Value = EnterPressed(this, Collection.GetAttachedMenu(), Value);
+                        Value = EnterPressed(this, Parent.GetAttachedMenu(), Value);
                     else
-                        Collection.ResetFocus();
+                        (Parent as IComponentCollection).ResetFocus();
                     return;
             }
         }

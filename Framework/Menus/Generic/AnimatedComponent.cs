@@ -13,7 +13,7 @@ namespace Entoarox.Framework.Menus
             SetScaledArea(new Rectangle(position.X,position.Y,sprite.sourceRect.Width,sprite.sourceRect.Height));
             Sprite = sprite;
         }
-        public override void Update(GameTime t, IComponentCollection c, FrameworkMenu m)
+        public override void Update(GameTime t, IComponentContainer c, FrameworkMenu m)
         {
             Sprite.update(t);
         }
