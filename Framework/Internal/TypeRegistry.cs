@@ -23,10 +23,10 @@ namespace Entoarox.Framework
         void ITypeRegistry.RegisterType<T>()
         {
             if (_injected)
-                EntoFramework.Logger.Error("RegisterType<T> called too late, must be called prior to Game1.Initialize or it will likely not be added to the serialiser");
+                EntoFramework.Logger.Log("RegisterType<T> called too late, must be called prior to Game1.Initialize or it will likely not be added to the serialiser",StardewModdingAPI.LogLevel.Error);
             if (!typeof(T).IsPublic)
             {
-                EntoFramework.Logger.Error("Types added to RegisterType<T> must be set as public");
+                EntoFramework.Logger.Log("Types added to RegisterType<T> must be set as public",StardewModdingAPI.LogLevel.Error);
             }
             else
             {
@@ -111,7 +111,6 @@ namespace Entoarox.Framework
         {
             if (_injected)
                 return;
-            EntoFramework.Logger.Debug("Initializing TypeRegistry functionality...");
             var typeArray = InjectedTypes.ToArray();
             injectedSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(InjectedTypes).ToArray());
             injectedFarmerSerializer = new XmlSerializer(typeof(Farmer), _farmerTypes.Concat(InjectedTypes).ToArray());

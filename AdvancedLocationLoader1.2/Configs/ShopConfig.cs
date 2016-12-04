@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using StardewModdingAPI;
+﻿using System.Collections.Generic;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class ShopConfig : Config
+    public class ShopConfig
     {
-        public override T GenerateDefaultConfig<T>()
-        {
-            return this as T;
-        }
         public int ParserVersion;
         public string Portrait;
         public string Owner;

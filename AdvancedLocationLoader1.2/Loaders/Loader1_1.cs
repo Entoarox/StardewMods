@@ -17,12 +17,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
     {
         public static void Load(string filepath)
         {
-            AdvancedLocationLoaderMod.Logger.Trace("Converting legacy 1.1 manifest to new 1.2 format...");
+            AdvancedLocationLoaderMod.Logger.Log("Converting legacy 1.1 manifest to new 1.2 format...",LogLevel.Trace);
+#pragma warning disable CS0618 // Type or member is obsolete
             LocationConfig1_1 Config = new LocationConfig1_1().InitializeConfig(filepath);
+#pragma warning restore CS0618 // Type or member is obsolete
             LocationConfig1_2 Updated = new LocationConfig1_2();
             // Prepare the 1.2 properties
             Updated.LoaderVersion = "1.2.0";
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `about` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `about` section", LogLevel.Trace);
             // Convert the `about` section
             Updated.About = new About();
             if (Config.about.ContainsKey("author"))
@@ -31,7 +33,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 Updated.About.Description = Config.about["description"];
             if (Config.about.ContainsKey("version"))
                 Updated.About.Version = Config.about["version"];
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `locations` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `locations` section", LogLevel.Trace);
             // Convert the `locations` section
             if (Config.locations != null)
             {
@@ -47,7 +49,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Locations.Add(newLoc);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `overrides` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `overrides` section", LogLevel.Trace);
             // Convert the `overrides` section
             if (Config.overrides != null)
             {
@@ -60,7 +62,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Overrides.Add(newOvr);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `tilesheets` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `tilesheets` section", LogLevel.Trace);
             // Convert the `tilesheets` section
             if (Config.tilesheets != null)
             {
@@ -75,7 +77,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Tilesheets.Add(newSheet);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `tiles` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `tiles` section", LogLevel.Trace);
             // Convert the `tiles` section
             if (Config.tiles != null)
             {
@@ -99,7 +101,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Tiles.Add(newTile);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `properties` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `properties` section", LogLevel.Trace);
             // Convert the `properties` section
             if (Config.properties != null)
             {
@@ -116,7 +118,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Properties.Add(newProp);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `warps` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `warps` section", LogLevel.Trace);
             // Convert the `warps` section
             if (Config.warps != null)
             {
@@ -133,7 +135,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Warps.Add(newWarp);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `conditions` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `conditions` section", LogLevel.Trace);
             // Convert the `conditions` into the new `Conditionals` section
             if (Config.conditions != null)
             {
@@ -148,7 +150,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Conditionals.Add(newCond);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `minecarts` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `minecarts` section", LogLevel.Trace);
             // Convert the `minecarts` section
             if (Config.minecarts != null)
             {
@@ -170,13 +172,13 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Updated.Teleporters.Add(newSet);
                 }
             }
-            AdvancedLocationLoaderMod.Logger.Trace("Converting the `shops` section");
+            AdvancedLocationLoaderMod.Logger.Log("Converting the `shops` section", LogLevel.Trace);
             // Convert the `shops` section
             Updated.Shops = Config.shops;
-            AdvancedLocationLoaderMod.Logger.Trace("Saving converted manifest to file...");
+            AdvancedLocationLoaderMod.Logger.Log("Saving converted manifest to file...", LogLevel.Trace);
             // Save and then parse the updated config
             File.WriteAllText(filepath, JsonConvert.SerializeObject(Updated,new JsonSerializerSettings() { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore }));
-            AdvancedLocationLoaderMod.Logger.Trace("Loading the converted manifest");
+            AdvancedLocationLoaderMod.Logger.Log("Loading the converted manifest", LogLevel.Trace);
             Loader1_2.Load(filepath);
         }
     }

@@ -2,6 +2,9 @@
 using System.IO;
 using System.Net;
 using System.Collections.Generic;
+using Version = System.Version;
+
+using StardewModdingAPI;
 
 using Newtonsoft.Json;
 
@@ -58,35 +61,18 @@ namespace Entoarox.Framework
         internal static List<VersionCheck> cache = new List<VersionCheck>();
         internal static void DoChecks()
         {
-            DataLogger Logger = new DataLogger("VersionChecker",4);
-            Logger.Log("INFO","Performing version checks for registered mods...",ConsoleColor.Green);
             foreach(VersionCheck check in cache)
             {
                 VersionInfo info = Get(check.Url);
-                if (info == null)
-                {
-                    Logger.Warn("Was unable to retrieve the update information for the `" + check.Mod + "` mod");
-                    EntoFramework.GetMessageBox().receiveMessage("[ Couldnt check for " + check.Mod + " updates", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
-                }
+                if (info == null && EntoFramework.Config.DebugMode)
+                    EntoFramework.GetMessageBox().receiveMessage("Couldnt check for " + check.Mod + " updates", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
                 else if (info.Minimum > check.Version)
-                {
-                    Logger.Error("The `" + check.Mod + "` mod is heavily outdated, you should update immediately!");
-                    EntoFramework.GetMessageBox().receiveMessage("[ Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
-                }
+                    EntoFramework.GetMessageBox().receiveMessage("Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
                 else if (info.Recommended > check.Version)
-                {
-                    Logger.Warn("The `" + check.Mod + "` mod is outdated, it is recommended for you to update it");
-                    EntoFramework.GetMessageBox().receiveMessage("[ Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
-                }
+                    EntoFramework.GetMessageBox().receiveMessage("Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
                 else if (info.Latest > check.Version)
-                {
-                    Logger.Info("There is a new version for the `" + check.Mod + "` mod available");
-                    EntoFramework.GetMessageBox().receiveMessage("[ Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
-                }
-                else
-                    Logger.Debug("You are using the latest version of the `" + check.Mod + "` mod available");
+                    EntoFramework.GetMessageBox().receiveMessage("Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
             }
-            Logger.Log("INFO", "Finished checking for updates", ConsoleColor.Green);
         }
         public static void AddCheck(string mod, Version version, string url)
         {

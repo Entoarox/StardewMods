@@ -39,7 +39,7 @@ namespace Entoarox.Framework
             }
             catch(Exception err)
             {
-                EntoFramework.Logger.Error("Was unable to populate localization from file: "+_File,err);
+                EntoFramework.Logger.Log("Was unable to populate localization from file: "+_File+err,StardewModdingAPI.LogLevel.Error);
             }
             if (Strings == null)
                 Strings = new Dictionary<string, string>();

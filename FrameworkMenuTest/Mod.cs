@@ -8,23 +8,40 @@ using StardewModdingAPI.Events;
 
 using StardewValley;
 
-using Entoarox.Framework.Events;
-using Entoarox.Framework.Menus;
+using Farmhand.UI;
 
 namespace Entoarox.FrameworkMenuTest
 {
     public class FrameworkMenuTestMod : Mod
     {
         internal static ProgressbarComponent prog=new ProgressbarComponent(new Point(0, 20), 0, 40);
-        public override void Entry(params object[] objects)
+        public override void Entry(IModHelper helper)
         {
-            MoreEvents.WorldReady += MoreEvents_WorldReady;
+            GameEvents.UpdateTick += GameEvents_UpdateTick;
+            Command.RegisterCommand("fmt_main", "Show the main Framework Menu Test interface").CommandFired += MainInterface;
+            Command.RegisterCommand("fmt_example", "Show the mod menu example Framework Menu Test interface").CommandFired += ExampleInterface;
         }
         internal static FormCollectionComponent page1b;
-        internal static void MoreEvents_WorldReady(object s, EventArgs e)
+        internal static FrameworkMenu menu;
+        internal static FrameworkMenu example;
+        internal static GenericCollectionComponent exampleList;
+        internal static TablistComponent examplePopup;
+        internal static ClickableTextureComponent examplePopupClose;
+        internal static void MainInterface(object s, EventArgs e)
         {
+            Game1.activeClickableMenu = menu;
+        }
+        internal static void ExampleInterface(object s, EventArgs e)
+        {
+            Game1.activeClickableMenu = example;
+        }
+        internal static void GameEvents_UpdateTick(object s, EventArgs e)
+        {
+            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
+                return;
+            GameEvents.UpdateTick -= GameEvents_UpdateTick;
             GameEvents.HalfSecondTick += GameEvents_HalfSecondTick;
-            FrameworkMenu menu = new FrameworkMenu(new Point(256, 168));
+            menu = new FrameworkMenu(new Point(256, 168)); ;
             TablistComponent tablist = new TablistComponent(new Rectangle(0, 0, menu.ZoomEventRegion.Width, menu.ZoomEventRegion.Height));
             Rectangle size = tablist.ZoomEventRegion;
             GenericCollectionComponent page1a = new GenericCollectionComponent(new Rectangle(0, 0, size.Width, size.Height));
@@ -39,7 +56,7 @@ namespace Entoarox.FrameworkMenuTest
             tablist.AddTab(6, page3);
 
             page1a.AddComponent(page1b);
-            page1a.AddComponent(new ButtonFormComponent(new Point(size.Width/2, 0), "Toggle Enabled", (t, c, m, l) =>
+            page1a.AddComponent(new ButtonFormComponent(new Point(size.Width/2, 0), "Toggle Enabled", (t, c, m) =>
             {
                 page1b.Disabled = !page1b.Disabled;
                 Console.WriteLine("Form state changed: " + (page1b.Disabled?"Disabled":"Enabled"));
@@ -70,10 +87,48 @@ namespace Entoarox.FrameworkMenuTest
 
             for (var c=0;c<41;c++)
                 page3.AddComponent(new HeartsComponent(new Point(0, 10*c), c, 40));
+            MainInterface(null, null);
 
-            Game1.activeClickableMenu = menu;
+            example = new FrameworkMenu(new Point(256, 128), false);
+
+            exampleList = new GenericCollectionComponent(new Rectangle(0, 0, example.ZoomEventRegion.Width, example.ZoomEventRegion.Height));
+            example.AddComponent(exampleList);
+
+            Rectangle r = new Rectangle(0, 0, example.ZoomEventRegion.Width, 32);
+            exampleList.AddComponent(new FrameComponent(r, Game1.mouseCursors, new Rectangle(384, 396, 15, 15)));
+            exampleList.AddComponent(new ClickableTextureComponent(r, Game1.mouseCursors, ExampleClicked, new Rectangle(383, 395, 1, 1), false));
+
+            examplePopup = new TablistComponent(new Rectangle(0,-10,example.ZoomEventRegion.Width,example.ZoomEventRegion.Height+10));
+            example.AddComponent(examplePopup);
+            examplePopup.Visible = false;
+
+            examplePopupClose = new ClickableTextureComponent(new Rectangle(examplePopup.ZoomEventRegion.Width, -11, 12, 12), Game1.mouseCursors, Example2Clicked, new Rectangle(337, 494, 12, 12));
+            example.AddComponent(examplePopupClose);
+            examplePopupClose.Visible = false;
+
+            GenericCollectionComponent tab1 = new GenericCollectionComponent(examplePopup.ZoomEventRegion);
+            GenericCollectionComponent tab2 = new GenericCollectionComponent(examplePopup.ZoomEventRegion);
+            examplePopup.AddTab(102, tab1);
+            examplePopup.AddTab(112, tab2);
+
+            tab1.AddComponent(new TextComponent(new Point(0, 0), "Example Mod, by Example User", true, 1.5f, Color.Black));
+            tab1.AddComponent(new TextComponent(new Point(0, 20), "Example Description for the Example Mod by Example User"));
+
+            tab2.AddComponent(new TextComponent(new Point(0, 0), "Normally the mod-specific config elements would show here"));
         }
         private static int Skipped = 0;
+        internal static void ExampleClicked(IMenuComponent component, IComponentContainer container, FrameworkMenu menu)
+        {
+            exampleList.Visible = false;
+            examplePopup.Visible = true;
+            examplePopupClose.Visible = true;
+        }
+        internal static void Example2Clicked(IMenuComponent component, IComponentContainer container, FrameworkMenu menu)
+        {
+            exampleList.Visible = true;
+            examplePopup.Visible = false;
+            examplePopupClose.Visible = false;
+        }
         internal static void GameEvents_HalfSecondTick(object s, EventArgs e)
         {
             if (prog.Value == 40)
@@ -115,7 +170,7 @@ namespace Entoarox.FrameworkMenuTest
         {
             Console.WriteLine("TextboxChanged: " + value);
         }
-        internal static void ButtonClicked(IInteractiveMenuComponent component, IComponentContainer collection, FrameworkMenu menu, bool left)
+        internal static void ButtonClicked(IInteractiveMenuComponent component, IComponentContainer collection, FrameworkMenu menu)
         {
             Console.WriteLine("ButtonClicked");
         }

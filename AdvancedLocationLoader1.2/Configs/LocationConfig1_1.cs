@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using StardewModdingAPI;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
+#pragma warning disable CS0618
     public class LocationConfig1_1 : Config
+#pragma warning restore CS0618
     {
+        [Obsolete]
         public override T GenerateDefaultConfig<T>()
         {
             return this as T;

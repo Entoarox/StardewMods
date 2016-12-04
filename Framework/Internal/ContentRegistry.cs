@@ -14,7 +14,6 @@ namespace Entoarox.Framework
         internal static IContentRegistry Singleton { get; } = new ContentRegistry();
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {
-            EntoFramework.Logger.TraceOnce("API.RegisterHandler<"+typeof(T).ToString()+">(" + key + ")");
             try
             {
                 switch (EntoFramework.LoaderType)
@@ -29,12 +28,11 @@ namespace Entoarox.Framework
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.Fatal("Was unable to register custom handler in loader", err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register custom handler in loader"+ err);
             }
         }
         void IContentRegistry.RegisterTexture(string key, string path)
         {
-            EntoFramework.Logger.TraceOnce("API.RegisterTexture('" + key + "','" + path + "')");
             try
             {
                 switch (EntoFramework.LoaderType)
@@ -57,12 +55,11 @@ namespace Entoarox.Framework
             }
             catch(Exception err)
             {
-                EntoFramework.Logger.Fatal("Was unable to register texture file in loader",err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader"+err);
             }
         }
         void IContentRegistry.RegisterXnb(string key, string path)
         {
-            EntoFramework.Logger.TraceOnce("API.RegisterXnb('" + key + "','" + path + "')");
             try
             {
                 switch (EntoFramework.LoaderType)
@@ -82,7 +79,7 @@ namespace Entoarox.Framework
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.Fatal("Was unable to register xnb file in loader", err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader"+ err);
             }
         }
         private static Type modXnb;
@@ -127,14 +124,13 @@ namespace Entoarox.Framework
                 }
                 catch (Exception err)
                 {
-                    EntoFramework.Logger.Fatal("Was unable to hook into FarmHand content loading", err);
+                    EntoFramework.Logger.ExitGameImmediately("Was unable to hook into FarmHand content loading"+ err);
                     EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
                 }
             }
         }
         internal static void Init()
         {
-            EntoFramework.Logger.Debug("Initializing ContentRegistry functionality...");
             SmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
             SmartDevice = new SmartDisplayDevice(SmartManager, Game1.game1.GraphicsDevice);
         }
@@ -167,30 +163,18 @@ namespace Entoarox.Framework
             if (HandledFiles.Contains(assetName))
             {
                 if (XnbMatches.ContainsKey(assetName))
-                {
-                    EntoFramework.Logger.TraceOnce("SCM.LoadFromXnb<" + typeof(T).ToString() + ">(" + assetName + ")");
                     return Registry[Path.GetDirectoryName(XnbMatches[assetName])].Load<T>(Path.GetFileName(XnbMatches[assetName]));
-                }
                 if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
-                {
-                    EntoFramework.Logger.TraceOnce("SCM.LoadFromTexture<" + typeof(T).ToString() + ">(" + assetName + ")");
                     return (T)(object)Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open));
-                }
                 if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
-                {
-                    EntoFramework.Logger.TraceOnce("SCM.LoadFromHandler<" + typeof(T).ToString() + ">(" + assetName + ")");
                     return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
-                }
             }
             return base.Load<T>(assetName);
         }
         private bool CanRegister(string assetName)
         {
             if (HandledFiles.Contains(assetName))
-            {
-                EntoFramework.Logger.DebugOnce("File already being handled: "+assetName);
                 return false;
-            }
             HandledFiles.Add(assetName);
             return true;
         }
@@ -198,10 +182,7 @@ namespace Entoarox.Framework
         {
             assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             if (CanRegister(assetName) && File.Exists(fileName))
-            {
                 TextureMatches.Add(assetName, fileName);
-                EntoFramework.Logger.TraceOnce("SCM.RegisterTexture('" + assetName + "','" + fileName + "')");
-            }
         }
         internal void RegisterXnb(string assetName, string fileName)
         {
@@ -213,16 +194,12 @@ namespace Entoarox.Framework
                 Registry.Add(manager, new SmartContentManager(ServiceProvider, manager));
             if (File.Exists(fileName + ".xnb"))
                 XnbMatches.Add(assetName, fileName);
-            EntoFramework.Logger.TraceOnce("SCM.RegisterXnb('" + assetName + "','" + fileName + "')");
         }
         internal void RegisterHandler<T>(string assetName, FileLoadMethod<T> handler)
         {
             assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             if (CanRegister(assetName))
-            {
                 DelegateMatches.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));
-                EntoFramework.Logger.TraceOnce("SCM.RegisterHandler<" + typeof(T).ToString() + ">(" + assetName + ")");
-            }
         }
     }
 }

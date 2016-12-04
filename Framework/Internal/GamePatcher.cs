@@ -15,21 +15,18 @@ namespace Entoarox.Framework
         private static Point Greenhouse;
         internal static void Patch()
         {
-            EntoFramework.Logger.Debug("Overriding greenhouse teleportation...");
             EntoFramework.GetLocationHelper().SetTileProperty(Game1.getLocationFromName("Farm"), "Buildings", 28, 15, "Action", "NewGreenhouse");
             if (EntoFramework.GetLocationHelper().GetTileProperty(Game1.getLocationFromName("Farm"), "Buildings", 28, 15, "Action") != "NewGreenhouse")
-                EntoFramework.Logger.Error("Setting the greenhouse tile action failed!");
-            EntoFramework.Logger.Trace("Attempting to find the greenhouse exit...");
+                EntoFramework.Logger.Log("Setting the greenhouse tile action failed!",StardewModdingAPI.LogLevel.Error);
             foreach (Warp warp in Game1.getLocationFromName("Greenhouse").warps)
             {
                 if (warp.TargetName != "Farm")
                     continue;
                 Greenhouse = new Point(warp.X, warp.Y - 1);
-                EntoFramework.Logger.Trace("Greenhouse exit found and hooked into");
                 break;
             }
             if (Greenhouse == null)
-                EntoFramework.Logger.Error("Unable to find the greenhouse exit warp to use as a reference for entering the greenhouse!");
+                EntoFramework.Logger.Log("Unable to find the greenhouse exit warp to use as a reference for entering the greenhouse!",StardewModdingAPI.LogLevel.Error);
         }
         internal static void Update(object s, EventArgs e)
         {
@@ -55,7 +52,6 @@ namespace Entoarox.Framework
             {
                 case "NewGreenhouse":
                 case "ALLGreenhouse":
-                    EntoFramework.Logger.Trace("Greenhouse clicked, performing logic");
                     if (Game1.player.mailReceived.Contains("ccPantry"))
                     {
                         Game1.warpFarmer("Greenhouse", Greenhouse.X, Greenhouse.Y, false);
@@ -77,7 +73,6 @@ namespace Entoarox.Framework
                             case 1:
                             case 3:
                                 Game1.weatherForTomorrow = Game1.weather_sunny;
-                                EntoFramework.Logger.Trace("Fixed weatherForTomorrow");
                                 break;
                         }
                     break;
@@ -87,7 +82,6 @@ namespace Entoarox.Framework
                         case 12:
                         case 25:
                             Game1.weatherForTomorrow = Game1.weather_lightning;
-                            EntoFramework.Logger.Trace("Fixed weatherForTomorrow");
                             break;
                     }
                     break;

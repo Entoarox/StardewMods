@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace Entoarox.Framework
 {
+    [Obsolete("Use the SMAPI 1.x logging mechanic instead")]
     public class DataLogger
     {
         /**

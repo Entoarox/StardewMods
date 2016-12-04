@@ -62,7 +62,7 @@ namespace Entoarox.FurnitureAnywhere
             MoreEvents_ActiveItemChanged(null, new EventArgsActiveItemChanged(Game1.player.CurrentItem, Game1.player.CurrentItem));
         }
     }
-    internal class AnywhereFurniture : Furniture
+    public class AnywhereFurniture : Furniture
     {
         public AnywhereFurniture()
         {
@@ -166,10 +166,10 @@ namespace Entoarox.FurnitureAnywhere
                 if (i.Value is Furniture)
                 {
                     Furniture furniture = (Furniture)i.Value;
-                    if (furniture.furniture_type == 11 && furniture.heldObject == null && furniture.getBoundingBox(furniture.tileLocation).Intersects(boundingBox))
+                    if (furniture.getBoundingBox(furniture.tileLocation).Intersects(boundingBox))
                     {
-                        furniture.performObjectDropInAction(Revert(), false, who == null ? Game1.player : who);
-                        return true;
+                        Game1.showRedMessage("Furniture can't be placed here");
+                        return false;
                     }
                 }
             }

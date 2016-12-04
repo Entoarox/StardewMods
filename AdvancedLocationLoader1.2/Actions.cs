@@ -52,7 +52,7 @@ namespace Entoarox.AdvancedLocationLoader
                 TeleportationResolver.Request(arguments[0]).Init();
             else
             {
-                AdvancedLocationLoaderMod.Logger.Error("Teleporter does not exist: "+arguments[0]);
+                AdvancedLocationLoaderMod.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
@@ -63,9 +63,9 @@ namespace Entoarox.AdvancedLocationLoader
             else
             {
                 if(who.mailReceived.Contains("ALLCondition_"+arguments[0]))
-                    AdvancedLocationLoaderMod.Logger.Error("Conditional has already been completed: " + arguments[0]);
+                    AdvancedLocationLoaderMod.Logger.Log("Conditional has already been completed: " + arguments[0], StardewModdingAPI.LogLevel.Error);
                 else
-                    AdvancedLocationLoaderMod.Logger.Error("Conditional does not exist: " + arguments[0]);
+                    AdvancedLocationLoaderMod.Logger.Log("Conditional does not exist: " + arguments[0], StardewModdingAPI.LogLevel.Error);
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
@@ -92,7 +92,7 @@ namespace Entoarox.AdvancedLocationLoader
             if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
             {
                 Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                AdvancedLocationLoaderMod.Logger.Error("Unable to open shop, shop not found: "+_arguments[0]);
+                AdvancedLocationLoaderMod.Logger.Log("Unable to open shop, shop not found: "+_arguments[0], StardewModdingAPI.LogLevel.Error);
             }
             else
             {

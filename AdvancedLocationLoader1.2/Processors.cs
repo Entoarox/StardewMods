@@ -3,6 +3,8 @@ using System.IO;
 
 using Microsoft.Xna.Framework.Graphics;
 
+using StardewModdingAPI;
+
 using StardewValley;
 using Warp = StardewValley.Warp;
 
@@ -18,7 +20,7 @@ namespace Entoarox.AdvancedLocationLoader
         internal static IContentRegistry ContentRegistry = EntoFramework.GetContentRegistry();
         internal static void ApplyTile(Tile tile)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(tile.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(tile.ToString(),LogLevel.Trace);
             try
             {
                 if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions))
@@ -33,12 +35,12 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to patch tile, a unexpected error occured: "+tile.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to patch tile, a unexpected error occured: " + tile.ToString(),err);
             }
         }
         internal static void ApplyProperty(Property property)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(property.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(property.ToString(),LogLevel.Trace);
             try
             {
                 if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions))
@@ -46,12 +48,12 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
             }
         }
         internal static void ApplyWarp(Configs.Warp warp)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(warp.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(warp.ToString(),LogLevel.Trace);
             try
             {
                 if (!string.IsNullOrEmpty(warp.Conditions) && !Conditions.CheckConditionList(warp.Conditions))
@@ -64,12 +66,12 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to patch warp, a unexpected error occured: " + warp.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
             }
         }
         internal static void ApplyTilesheet(Tilesheet tilesheet)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(tilesheet.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(tilesheet.ToString(),LogLevel.Trace);
             try
             {
                 GameLocation location = Game1.getLocationFromName(tilesheet.MapName);
@@ -79,23 +81,23 @@ namespace Entoarox.AdvancedLocationLoader
                 ContentRegistry.RegisterXnb(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
                 if (location.map.GetTileSheet(tilesheet.SheetId) != null)
                 {
-                    AdvancedLocationLoaderMod.Logger.Trace("Detected pre-existing tilesheet, patching to refer to correct file location");
+                    AdvancedLocationLoaderMod.Logger.Log("Detected pre-existing tilesheet, patching to refer to correct file location",LogLevel.Trace);
                     location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
                 }
                 else
                 {
                     Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
-                    location.map.AddTileSheet(new xTile.Tiles.TileSheet(location.map, fakepath, new xTile.Dimensions.Size(sheet.Width, sheet.Height), new xTile.Dimensions.Size(16, 16)));
+                    location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId,location.map, fakepath, new xTile.Dimensions.Size(sheet.Width, sheet.Height), new xTile.Dimensions.Size(16, 16)));
                 }
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to patch tilesheet, a unexpected error occured: " + tilesheet.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to patch tilesheet, a unexpected error occured: " + tilesheet.ToString(), err);
             }
         }
         internal static void ApplyLocation(Location location)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(location.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(location.ToString(),LogLevel.Trace);
             try
             {
                 GameLocation loc;
@@ -132,12 +134,12 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to add custom location, a unexpected error occured: " + location.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
             }
         }
         internal static void ApplyOverride(Override obj)
         {
-            AdvancedLocationLoaderMod.Logger.Trace(obj.ToString());
+            AdvancedLocationLoaderMod.Logger.Log(obj.ToString(),LogLevel.Trace);
             try
             {
                 ContentRegistry.RegisterXnb(obj.FileName, obj.FileName);
@@ -145,7 +147,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Unable to override location, a unexpected error occured: "+obj.ToString(), err);
+                AdvancedLocationLoaderMod.Fatal("Unable to override location, a unexpected error occured: " +obj.ToString(),err);
             }
         }
     }

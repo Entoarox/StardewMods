@@ -86,13 +86,13 @@ namespace Entoarox.Framework
                 }
                 catch (Exception err)
                 {
-                    EntoFramework.Logger.Warn("Unable to apply vanilla buffs, a unexpected error occured", err);
+                    EntoFramework.Logger.Log("Unable to apply vanilla buffs, a unexpected error occured"+ err,StardewModdingAPI.LogLevel.Warn);
                 }
                 UpdateCompound();
             }
             catch(Exception err)
             {
-                EntoFramework.Logger.Error("Unable to initialize the PlayerHelper class, a unexpected error occured", err);
+                EntoFramework.Logger.Log("Unable to initialize the PlayerHelper class, a unexpected error occured"+ err,StardewModdingAPI.LogLevel.Error);
             }
         }
         private static void UpdateSpeed()
@@ -285,7 +285,7 @@ namespace Entoarox.Framework
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.Fatal("Fatal error attempting to update player tick properties", err);
+                EntoFramework.Logger.ExitGameImmediately("Fatal error attempting to update player tick properties"+ err);
                 Freeze = true;
             }
         }
@@ -298,7 +298,7 @@ namespace Entoarox.Framework
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.Fatal("Fatal error attempting to handle player illumination", err);
+                EntoFramework.Logger.ExitGameImmediately("Fatal error attempting to handle player illumination"+ err);
                 LocationEvents.CurrentLocationChanged -= LocationEvents_CurrentLocationChanged;
             }
         }

@@ -17,16 +17,16 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal class AdvancedLocationLoaderMod : Mod
     {
-        internal static DataLogger Logger;
+        internal static IMonitor Logger;
         internal static LocalizationHelper Localizer;
         internal static string ModPath;
-        public override void Entry(params object[] objects)
+        public override void Entry(IModHelper helper)
         {
-            ModPath = PathOnDisk;
+            ModPath = helper.DirectoryPath;
             if (EntoFramework.Version < new Version(1, 3, 0))
                 throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
-            Logger = new DataLogger("AdvancedLocationLoader", 4);
-            Localizer = new LocalizationHelper(Path.Combine(PathOnDisk,"localization"));
+            Logger = Monitor;
+            Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
 
             GameEvents.LoadContent += Events.GameEvents_LoadContent;
@@ -39,7 +39,7 @@ namespace Entoarox.AdvancedLocationLoader
             registry.RegisterType<Locations.Desert>();
             registry.RegisterType<Locations.DecoratableLocation>();
 #if DEBUG
-            Logger.Warn("Warning, this is a BETA version, features may be buggy or not work as intended!");
+            Logger.Log("Warning, this is a BETA version, features may be buggy or not work as intended!",LogLevel.Alert);
             GameEvents.UpdateTick += DebugNotification;
         }
         internal static void DebugNotification(object s, EventArgs e)
@@ -76,6 +76,14 @@ namespace Entoarox.AdvancedLocationLoader
                 location.DisposeTileSheets(Game1.mapDisplayDevice);
                 location.LoadTileSheets(Game1.mapDisplayDevice);
             }
+        }
+        internal static string Format(string msg, Exception err)
+        {
+            return msg + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace;
+        }
+        internal static void Fatal(string msg, Exception err)
+        {
+            Logger.ExitGameImmediately(Format(msg, err));
         }
     }
 }

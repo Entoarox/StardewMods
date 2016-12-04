@@ -3,6 +3,7 @@ using System.IO;
 
 using Newtonsoft.Json.Linq;
 
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
 using Entoarox.Framework.Events;
@@ -15,7 +16,7 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                AdvancedLocationLoaderMod.Logger.Info("Loading location mods into memory...");
+                AdvancedLocationLoaderMod.Logger.Log("Loading location mods into memory...",LogLevel.Info);
                 string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
                 int count = 0;
                 Directory.CreateDirectory(baseDir);
@@ -31,7 +32,7 @@ namespace Entoarox.AdvancedLocationLoader
                         }
                         catch (Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, json is invalid:" + file, err);
+                            AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to load manifest, json is invalid:" + file, err),LogLevel.Error);
                             return;
                         }
                         string loaderVersion = (string)o["LoaderVersion"];
@@ -39,12 +40,12 @@ namespace Entoarox.AdvancedLocationLoader
                             loaderVersion = (string)o["loaderVersion"];
                         if (loaderVersion == null)
                             loaderVersion = "1.0";
-                        AdvancedLocationLoaderMod.Logger.Trace("Attempting to load manifest version `" + loaderVersion + "` at: " + file);
+                        AdvancedLocationLoaderMod.Logger.Log("Attempting to load manifest version `" + loaderVersion + "` at: " + file,LogLevel.Trace);
                         string parserVersion = loaderVersion.Substring(0, 3);
                         switch (parserVersion)
                         {
                             case "1.0":
-                                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `1.0` is no longer supported: " + file);
+                                AdvancedLocationLoaderMod.Logger.Log("Unable to load manifest, version `1.0` is no longer supported: " + file,LogLevel.Error);
                                 break;
                             case "1.1":
                                 Loaders.Loader1_1.Load(file);
@@ -55,16 +56,16 @@ namespace Entoarox.AdvancedLocationLoader
                                 count++;
                                 break;
                             default:
-                                AdvancedLocationLoaderMod.Logger.Error("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file);
+                                AdvancedLocationLoaderMod.Logger.Log("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file,LogLevel.Error);
                                 break;
                         }
                     }
                 }
-                AdvancedLocationLoaderMod.Logger.Info("Found and loaded [" + count + "] location mods into memory");
+                AdvancedLocationLoaderMod.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("A unexpected error occured while loading location mod manifests", err);
+                AdvancedLocationLoaderMod.Fatal("A unexpected error occured while loading location mod manifests", err);
             }
         }
         internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
@@ -85,7 +86,7 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {
-            AdvancedLocationLoaderMod.Logger.Trace("EventFired.MoreEvents_ActionTriggered("+e.Action+")");
+            AdvancedLocationLoaderMod.Logger.Log("EventFired.MoreEvents_ActionTriggered("+e.Action+")",LogLevel.Trace);
             try
             {
                 switch (e.Action)
@@ -114,7 +115,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Fatal("Could not fire appropriate action response, a unexpected error happened",err);
+                AdvancedLocationLoaderMod.Fatal("Could not fire appropriate action response, a unexpected error happened",err);
             }
         }
     }

@@ -12,18 +12,21 @@ namespace Entoarox.Framework
 {
     internal class FrameworkConfig : Config
     {
+#pragma warning disable CS0672 // Member overrides obsolete member
         public override T GenerateDefaultConfig<T>()
+#pragma warning restore CS0672 // Member overrides obsolete member
         {
             GamePatcher = true;
             SkipCredits = false;
+            DebugMode = false;
             return this as T;
         }
         public bool GamePatcher;
         public bool SkipCredits;
+        public bool DebugMode;
     }
     public class EntoFramework : Mod
     {
-        internal static DataLogger Logger;
         internal static LoaderTypes LoaderType;
         internal static FrameworkConfig Config;
         public static Version Version { get { return typeof(EntoFramework).Assembly.GetName().Version; } }
@@ -68,23 +71,22 @@ namespace Entoarox.Framework
         {
             return MessageBox.Singleton;
         }
-        public override void Entry(params object[] objects)
+        internal static IMonitor Logger;
+        public override void Entry(IModHelper helper)
         {
+            Logger = Monitor;
             Config = new FrameworkConfig().InitializeConfig(BaseConfigPath);
-            Logger = new DataLogger("EntoaroxFramework",4);
-            Logger.LogModInfo("Entoarox", GetType().Assembly.GetName().Version);
-            Logger.Debug("Attempting to resolve loader...");
             if (Constants.Version.Build == "Farmhand-Smapi")
             {
                 LoaderType = LoaderTypes.FarmHand;
-                Logger.Trace("The loader has been detected as being the `FarmHand` loader");
+                Logger.Log("The loader has been detected as being the `FarmHand` loader",LogLevel.Trace);
             }
             else
             {
                 LoaderType = LoaderTypes.SMAPI;
-                Logger.Trace("The loader has been detected as being the `SMAPI` loader");
+                Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
             }
-            Logger.Trace("Registering framework events...");
+            Logger.Log("Registering framework events...",LogLevel.Trace);
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
@@ -97,9 +99,9 @@ namespace Entoarox.Framework
             }
             if(Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
-            Logger.Debug("Preparation complete!");
             if(LoaderType==LoaderTypes.Unknown)
-                Logger.Error("Was unable to hook into the `FarmHand` loader, has it updated since the last framework release?");
+                Logger.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
+            Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
         internal static void GameEvents_FirstUpdateTick(object s, EventArgs e)
