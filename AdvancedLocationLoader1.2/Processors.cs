@@ -23,7 +23,7 @@ namespace Entoarox.AdvancedLocationLoader
             AdvancedLocationLoaderMod.Logger.Log(tile.ToString(),LogLevel.Trace);
             try
             {
-                if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions))
+                if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions,AdvancedLocationLoaderMod.ConditionResolver))
                     return;
                 if (tile.TileIndex != null)
                     if (tile.TileIndex < 0)
@@ -35,7 +35,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to patch tile, a unexpected error occured: " + tile.ToString(),err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch tile, a unexpected error occured: " + tile.ToString(),err);
             }
         }
         internal static void ApplyProperty(Property property)
@@ -43,12 +43,12 @@ namespace Entoarox.AdvancedLocationLoader
             AdvancedLocationLoaderMod.Logger.Log(property.ToString(),LogLevel.Trace);
             try
             {
-                if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions))
+                if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
                     LocationHelper.SetTileProperty(property.MapName, property.LayerId, property.TileX, property.TileY, property.Key, property.Value);
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
             }
         }
         internal static void ApplyWarp(Configs.Warp warp)
@@ -56,7 +56,7 @@ namespace Entoarox.AdvancedLocationLoader
             AdvancedLocationLoaderMod.Logger.Log(warp.ToString(),LogLevel.Trace);
             try
             {
-                if (!string.IsNullOrEmpty(warp.Conditions) && !Conditions.CheckConditionList(warp.Conditions))
+                if (!string.IsNullOrEmpty(warp.Conditions) && !Conditions.CheckConditionList(warp.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
                     return;
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
@@ -66,7 +66,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
             }
         }
         internal static void ApplyTilesheet(Tilesheet tilesheet)
@@ -92,7 +92,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to patch tilesheet, a unexpected error occured: " + tilesheet.ToString(), err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch tilesheet, a unexpected error occured: " + tilesheet.ToString(), err);
             }
         }
         internal static void ApplyLocation(Location location)
@@ -134,7 +134,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
             }
         }
         internal static void ApplyOverride(Override obj)
@@ -147,7 +147,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Unable to override location, a unexpected error occured: " +obj.ToString(),err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to override location, a unexpected error occured: " +obj.ToString(),err);
             }
         }
     }

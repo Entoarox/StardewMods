@@ -33,7 +33,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to load manifest, json cannot be parsed: " + filepath, err),LogLevel.Error);
+                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load manifest, json cannot be parsed: " + filepath, err);
                 return;
             }
             try
@@ -42,7 +42,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to load manifest, a unexpected error occured: " + filepath, err),LogLevel.Error);
+                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load manifest, a unexpected error occured: " + filepath, err);
             }
         }
         private static bool FileCheck(string path, string file)
@@ -132,7 +132,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 {
                     if (til.Conditions != null)
                     {
-                        string err = Conditions.FindConflictingConditions(til.Conditions.Split(','), 5, true);
+                        string err = Conditions.FindConflictingConditions(til.Conditions);
                         if (err != null)
                         {
                             AdvancedLocationLoaderMod.Logger.Log("Tile `" + til.ToString() + "` Condition Error: " + err,LogLevel.Error);
@@ -151,7 +151,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 {
                     if (pro.Conditions != null)
                     {
-                        string err = Conditions.FindConflictingConditions(pro.Conditions.Split(','), 5, true);
+                        string err = Conditions.FindConflictingConditions(pro.Conditions);
                         if (err != null)
                         {
                             AdvancedLocationLoaderMod.Logger.Log("Property `" + pro.ToString() + "` Condition Error: " + err,LogLevel.Error);
@@ -170,7 +170,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 {
                     if (war.Conditions != null)
                     {
-                        string err = Conditions.FindConflictingConditions(war.Conditions.Split(','), 5, true);
+                        string err = Conditions.FindConflictingConditions(war.Conditions);
                         if (err != null)
                         {
                             AdvancedLocationLoaderMod.Logger.Log("Warp `" + war.ToString() + "` Condition Error: " + err,LogLevel.Error);
@@ -226,6 +226,16 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     {
                         ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
                         cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
+                        foreach(ShopItem item in cfg.Items)
+                            if (item.Conditions != null)
+                            {
+                                string err = Conditions.FindConflictingConditions(item.Conditions);
+                                if (err != null)
+                                {
+                                    AdvancedLocationLoaderMod.Logger.Log("Shop item `" + item.ToString() + "` Condition Error: " + err, LogLevel.Error);
+                                    continue;
+                                }
+                            }
                         Configs.Compound.Shops.Add(shop, cfg);
                     }
                 }
@@ -280,7 +290,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     }
                     catch (Exception err)
                     {
-                        AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err), LogLevel.Error);
+                        AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err);
                     }
                 }
             foreach (Override obj in Compound.Overrides)
@@ -298,7 +308,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     }
                     catch (Exception err)
                     {
-                        AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err), LogLevel.Error);
+                        AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err);
                     }
                 }
             trueCompound.Redirects = Compound.Redirects;

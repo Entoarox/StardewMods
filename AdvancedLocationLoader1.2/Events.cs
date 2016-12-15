@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
+using Entoarox.Framework;
 using Entoarox.Framework.Events;
 
 namespace Entoarox.AdvancedLocationLoader
@@ -32,7 +33,7 @@ namespace Entoarox.AdvancedLocationLoader
                         }
                         catch (Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(AdvancedLocationLoaderMod.Format("Unable to load manifest, json is invalid:" + file, err),LogLevel.Error);
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to load manifest, json is invalid:" + file, err);
                             return;
                         }
                         string loaderVersion = (string)o["LoaderVersion"];
@@ -65,7 +66,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("A unexpected error occured while loading location mod manifests", err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
             }
         }
         internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
@@ -115,7 +116,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Fatal("Could not fire appropriate action response, a unexpected error happened",err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened",err);
             }
         }
     }

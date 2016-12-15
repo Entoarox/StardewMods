@@ -17,7 +17,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
     {
         public static void Load(string filepath)
         {
-            AdvancedLocationLoaderMod.Logger.Log("Converting legacy 1.1 manifest to new 1.2 format...",LogLevel.Trace);
+            AdvancedLocationLoaderMod.Logger.Log("Converting legacy 1.1 manifest to new 1.2 format...",LogLevel.Debug);
 #pragma warning disable CS0618 // Type or member is obsolete
             LocationConfig1_1 Config = new LocationConfig1_1().InitializeConfig(filepath);
 #pragma warning restore CS0618 // Type or member is obsolete

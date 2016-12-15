@@ -104,7 +104,7 @@ namespace Entoarox.AdvancedLocationLoader
                 portrait.name = shop.Owner;
                 foreach (Configs.ShopItem item in shop.Items)
                 {
-                    if (!string.IsNullOrEmpty(item.Conditions) || !Conditions.CheckConditionList(item.Conditions))
+                    if (!string.IsNullOrEmpty(item.Conditions) || !Conditions.CheckConditionList(item.Conditions,AdvancedLocationLoaderMod.ConditionResolver))
                         continue;
                     StardewValley.Object result;
                     if (item.Price!=null)

@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace Farmhand.UI
+namespace Entoarox.Framework.UI
 {
     public class FrameworkMenu : IClickableMenu, IComponentCollection
     {

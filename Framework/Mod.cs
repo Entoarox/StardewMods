@@ -7,26 +7,17 @@ using StardewModdingAPI.Events;
 
 using StardewValley;
 
-#pragma warning disable CS0618 // Type or member is obsolete
 namespace Entoarox.Framework
 {
-    internal class FrameworkConfig : Config
+    internal class FrameworkConfig
     {
-#pragma warning disable CS0672 // Member overrides obsolete member
-        public override T GenerateDefaultConfig<T>()
-#pragma warning restore CS0672 // Member overrides obsolete member
-        {
-            GamePatcher = true;
-            SkipCredits = false;
-            DebugMode = false;
-            return this as T;
-        }
-        public bool GamePatcher;
-        public bool SkipCredits;
-        public bool DebugMode;
+        public bool GamePatcher=true;
+        public bool SkipCredits=false;
+        public bool DebugMode=false;
     }
     public class EntoFramework : Mod
     {
+        private static bool CreditsDone = true;
         internal static LoaderTypes LoaderType;
         internal static FrameworkConfig Config;
         public static Version Version { get { return typeof(EntoFramework).Assembly.GetName().Version; } }
@@ -65,7 +56,7 @@ namespace Entoarox.Framework
             return PlayerHelper.Singleton;
         }
         /**
-         * <summary>Retrieves a pointer to the <see cref="IPlayerHelper"/> interface</summary>
+         * <summary>Retrieves a pointer to the <see cref="IMessageBox"/> interface</summary>
          */
         public static IMessageBox GetMessageBox()
         {
@@ -75,7 +66,7 @@ namespace Entoarox.Framework
         public override void Entry(IModHelper helper)
         {
             Logger = Monitor;
-            Config = new FrameworkConfig().InitializeConfig(BaseConfigPath);
+            Config = helper.ReadConfig<FrameworkConfig>();
             if (Constants.Version.Build == "Farmhand-Smapi")
             {
                 LoaderType = LoaderTypes.FarmHand;
@@ -100,7 +91,7 @@ namespace Entoarox.Framework
             if(Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
             if(LoaderType==LoaderTypes.Unknown)
-                Logger.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
+                Monitor.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
@@ -113,18 +104,23 @@ namespace Entoarox.Framework
         {
             if (!(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
                 return;
+            if (CreditsDone)
+            {
+                GameEvents.UpdateTick -= CreditsTick;
+                return;
+            }
             Game1.playSound("bigDeSelect");
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "logoFadeTimer", 0);
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "fadeFromWhiteTimer", 0);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "logoFadeTimer", 0);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "fadeFromWhiteTimer", 0);
             Game1.delayedActions.Clear();
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer", 0);
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "viewportY", -999f);
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "viewportDY", -0.01f);
-            Reflection.FieldHelper.GetField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").Clear();
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "logoSwipeTimer", 1f);
-            Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "chuckleFishTimer", 0);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer", 0);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "viewportY", -999f);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "viewportDY", -0.01f);
+            Reflection.ReflectionUtility.GetField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").Clear();
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "logoSwipeTimer", 1f);
+            Reflection.ReflectionUtility.SetField(Game1.activeClickableMenu, "chuckleFishTimer", 0);
             Game1.changeMusicTrack("MainTheme");
-            GameEvents.UpdateTick -= CreditsTick;
+            CreditsDone = true;
         }
         internal static void GameEvents_LoadTick(object s, EventArgs e)
         {
@@ -147,4 +143,3 @@ namespace Entoarox.Framework
         }
     }
 }
-#pragma warning restore CS0618 // Type or member is obsolete

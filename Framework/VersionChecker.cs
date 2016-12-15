@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.IO;
 using System.Net;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Entoarox.Framework
 {
-    internal class VersionCheck
+    internal struct VersionCheck
     {
         public string Mod;
         public Version Version;
@@ -36,22 +37,14 @@ namespace Entoarox.Framework
     }
     public static class VersionChecker
     {
-        [Obsolete("Causes game loading issues, use AddCheck instead", true)]
-        public static VersionInfo RetrieveInfo(string uri)
-        {
-            VersionInfo info = Get(uri);
-            if (info == null)
-                return new VersionInfo();
-            return info;
-        }
+        internal static WebClient Client;
         internal static VersionInfo Get(string uri)
         {
             try
             {
-                WebClient client = new WebClient();
-                Stream stream = client.OpenRead(uri);
-                StreamReader reader = new StreamReader(stream);
-                return JsonConvert.DeserializeObject<VersionInfo>(reader.ReadToEnd(), new Newtonsoft.Json.Converters.VersionConverter());
+                if (Client == null)
+                    Client = new WebClient();
+                return JsonConvert.DeserializeObject<VersionInfo>(new StreamReader(Client.OpenRead(uri)).ReadToEnd(), new Newtonsoft.Json.Converters.VersionConverter());
             }
             catch
             {
@@ -61,37 +54,45 @@ namespace Entoarox.Framework
         internal static List<VersionCheck> cache = new List<VersionCheck>();
         internal static void DoChecks()
         {
-            foreach(VersionCheck check in cache)
+            new Thread(() =>
             {
-                VersionInfo info = Get(check.Url);
-                if (info == null && EntoFramework.Config.DebugMode)
-                    EntoFramework.GetMessageBox().receiveMessage("Couldnt check for " + check.Mod + " updates", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
-                else if (info.Minimum > check.Version)
-                    EntoFramework.GetMessageBox().receiveMessage("Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
-                else if (info.Recommended > check.Version)
-                    EntoFramework.GetMessageBox().receiveMessage("Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
-                else if (info.Latest > check.Version)
-                    EntoFramework.GetMessageBox().receiveMessage("Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
-            }
+                try
+                {
+                    EntoFramework.Logger.Log("Checking for updates...", LogLevel.Info);
+                    foreach (VersionCheck check in cache)
+                    {
+                        VersionInfo info = Get(check.Url);
+                        if (info == null)
+                            EntoFramework.Logger.Log("Could not check for updates to " + check.Mod + ", if you are not connected to the internet you can ignore this error.", LogLevel.Error);
+                        else if (info.Minimum > check.Version)
+                        {
+                            EntoFramework.GetMessageBox().receiveMessage("Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
+                            EntoFramework.Logger.Log("A critical update for " + check.Mod + " is available, you should update immediately!", LogLevel.Warn);
+                        }
+                        else if (info.Recommended > check.Version)
+                        {
+                            EntoFramework.GetMessageBox().receiveMessage("Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
+                            EntoFramework.Logger.Log("A recommended update for " + check.Mod + " is available, you should update as soon as possible.", LogLevel.Alert);
+                        }
+                        else if (info.Latest > check.Version)
+                        {
+                            EntoFramework.GetMessageBox().receiveMessage("Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
+                            EntoFramework.Logger.Log("A optional update for " + check.Mod + " is available.", LogLevel.Info);
+                        }
+                        else
+                            EntoFramework.Logger.Log("You have the latest available version of " + check.Mod + " installed.", LogLevel.Trace);
+                    }
+                    EntoFramework.Logger.Log("Update checks have been completed.", LogLevel.Info);
+                }
+                catch(Exception err)
+                {
+                    EntoFramework.Logger.Log("Ran into a unknown issue while performing the version check:" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                }
+            }).Start();
         }
         public static void AddCheck(string mod, Version version, string url)
         {
             cache.Add(new VersionCheck(mod, version, url));
-        }
-        [Obsolete("Causes game loading issues, use AddCheck instead",true)]
-        public static bool CheckVersion(DataLogger logger, Version version, string uri)
-        {
-            VersionInfo v = RetrieveInfo(uri);
-            if (v.Minimum > version)
-            {
-                logger.Error("A critical update is available, you should update immediately!");
-                return false;
-            }
-            if (v.Recommended > version)
-                logger.Warn("A recommended update is available, you should update as soon as possible.");
-            else if (v.Latest > version)
-                logger.Info("A optional update is available");
-            return true;
         }
     }
 }

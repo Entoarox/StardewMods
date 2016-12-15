@@ -23,7 +23,7 @@ namespace Entoarox.AdvancedLocationLoader
         public override void Entry(IModHelper helper)
         {
             ModPath = helper.DirectoryPath;
-            if (EntoFramework.Version < new Version(1, 3, 0))
+            if (EntoFramework.Version < new Version(1, 6, 0))
                 throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
             Logger = Monitor;
             Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
@@ -77,13 +77,11 @@ namespace Entoarox.AdvancedLocationLoader
                 location.LoadTileSheets(Game1.mapDisplayDevice);
             }
         }
-        internal static string Format(string msg, Exception err)
+        internal static bool? ConditionResolver(string condition)
         {
-            return msg + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace;
-        }
-        internal static void Fatal(string msg, Exception err)
-        {
-            Logger.ExitGameImmediately(Format(msg, err));
+            if (condition.Substring(0, 13) != "ALLCondition:")
+                return null;
+            return Game1.player.mailReceived.Contains("ALLCondition_" + condition.Substring(13));
         }
     }
 }

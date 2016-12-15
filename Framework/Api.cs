@@ -285,6 +285,8 @@ namespace Entoarox.Framework
         private GameLocation Value;
         private LocationReference(GameLocation value)
         {
+            if (value == null)
+                throw new ArgumentNullException("location");
             Value = value;
         }
         public static implicit operator LocationReference(GameLocation value)

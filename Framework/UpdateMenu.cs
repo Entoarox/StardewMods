@@ -51,15 +51,15 @@ namespace Entoarox.Framework
 
         public static void ShowTitleMenuDialogue(string msg)
         {
-            FieldHelper.SetField(Game1.activeClickableMenu, "subMenu", new TitleMenuDialogue(msg));
-            List<ClickableTextureComponent> buttons = FieldHelper.GetField<List<ClickableTextureComponent>>(Game1.activeClickableMenu, "buttons");
+            ReflectionUtility.SetField(Game1.activeClickableMenu, "subMenu", new TitleMenuDialogue(msg));
+            List<ClickableTextureComponent> buttons = ReflectionUtility.GetField<List<ClickableTextureComponent>>(Game1.activeClickableMenu, "buttons");
             foreach (ClickableTextureComponent button in buttons)
                 button.visible = false;
-            FieldHelper.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = false;
+            ReflectionUtility.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = false;
         }
         public TitleMenuDialogue(string msg) : this(msg, true)
         {
-            FieldHelper.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = false;
+            ReflectionUtility.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = false;
         }
         private TitleMenuDialogue(int x, int y, int width, int height)
         {
@@ -168,11 +168,11 @@ namespace Entoarox.Framework
 
         public void closeDialogue()
         {
-            FieldHelper.SetField(Game1.activeClickableMenu, "subMenu", null);
-            List<ClickableTextureComponent> buttons = FieldHelper.GetField<List<ClickableTextureComponent>>(Game1.activeClickableMenu, "buttons");
+            ReflectionUtility.SetField<IClickableMenu>(Game1.activeClickableMenu, "subMenu", null);
+            List<ClickableTextureComponent> buttons = ReflectionUtility.GetField<List<ClickableTextureComponent>>(Game1.activeClickableMenu, "buttons");
             foreach (ClickableTextureComponent button in buttons)
                 button.visible = true;
-            FieldHelper.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = true;
+            ReflectionUtility.GetField<ClickableTextureComponent>(Game1.activeClickableMenu, "backButton").visible = true;
         }
 
         public void finishTyping()

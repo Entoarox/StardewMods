@@ -31,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,6 +49,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FarmhandUI\FarmhandUI.csproj">
+      <Project>{7097ab0b-6590-4f5c-b26a-c672de5c3c31}</Project>
+      <Name>FarmhandUI</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>

@@ -36,6 +36,10 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public int Stock;
         public string Conditions;
+        public override string ToString()
+        {
+            return "ShopItem(" + Id + ":" + (BigCraftable ? "craftable" : "object") + "){Price=" + Price.ToString() + ",Stack=" + Stack.ToString() + ",Stock=" + Stock.ToString() + ",Conditions=" + Conditions + "}";
+        }
     }
     // LocationConfig1_2
     public class About

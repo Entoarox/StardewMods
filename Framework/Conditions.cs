@@ -10,6 +10,10 @@ namespace Entoarox.Framework
     {
         public static bool CheckCondition(string condition)
         {
+            return CheckCondition(condition, null);
+        }
+        public static bool CheckCondition(string condition, Func<string,bool?> customResolver=null)
+        {
             // Check if this is a negated condition
             if (condition.StartsWith("!"))
                 // Check if it is negated multiple times, as this risks a infinite loop situation
@@ -97,7 +101,7 @@ namespace Entoarox.Framework
                     default:
                         // Handle marriage for any NPC instead of just the default bachelors (Backwards compatible)
                         if (condition.StartsWith("married"))
-                            return (Game1.player.spouse != null && Game1.player.spouse == condition.Substring(7));
+                            return (Game1.player.spouse != null && Game1.player.spouse.Equals(condition.Substring(7)));
                         // Handle engagement for any NPC instead of just the default bachelors *new*
                         if (condition.StartsWith("engaged"))
                             return (Game1.player.spouse != null && Game1.player.spouse.Contains(condition.Substring(7)) && Game1.player.spouse.Contains("engaged"));
@@ -119,6 +123,12 @@ namespace Entoarox.Framework
                         // Check if the condition is a deprecated one, and if so, evaluate its replacement instead
                         if (DeprecatedConditions.ContainsKey(condition))
                             return CheckCondition(DeprecatedConditions[condition]);
+                        if(customResolver != null)
+                        {
+                            bool? x = customResolver(condition);
+                            if (x != null)
+                                return (bool)x;
+                        }
                         // Check for mail flags
                         return Game1.player.mailReceived.Contains(condition);
                 }
@@ -142,6 +152,10 @@ namespace Entoarox.Framework
          */
         public static bool CheckConditionList(string conditionlist, char seperator = ',', int limit = 5)
         {
+            return CheckConditionList(conditionlist, null, seperator, limit);
+        }
+        public static bool CheckConditionList(string conditionlist, Func<string,bool?> customResolver=null, char seperator = ',', int limit = 5)
+        {
             string conditions = SortedConditionList(conditionlist, seperator);
             if (!ConditionCache.Contains(conditions))
                 ConditionCache.Add(conditions);
@@ -149,7 +163,7 @@ namespace Entoarox.Framework
             if (conds.Length > limit)
                 return false;
             foreach (string condition in conds)
-                if (!CheckCondition(condition))
+                if (!CheckCondition(condition, customResolver))
                     return false;
             return true;
         }
@@ -222,6 +236,7 @@ namespace Entoarox.Framework
                 return Format(ConditionExclusive, new string[] { "weatherSnow", "fall" });
             return null;
         }
+        [Obsolete("Use the other overload instead")]
         public static string FindConflictingConditions(string[] conditions, int limit, bool strict)
         {
             return FindConflictingConditions(string.Join(",", conditions), ',', limit, strict);
@@ -231,11 +246,8 @@ namespace Entoarox.Framework
             string[] conditions = conds.Split(seperator);
             // Force the limit to be 4~16
             // Less then 4 would not allow enough freedom
-            // While more then 16 should not be possible with the current conditions
-            if (limit < 4)
-                limit = 4;
-            if (limit > 16)
-                limit = 16;
+            // While more then 16 would take a lot of time to process
+            limit = Math.Max(4, Math.Min(16, limit));
             if (conditions.Length > limit)
                 return "The conditions list contains more then the maximum `" + limit + "` conditions allowed";
             List<string> cache = new List<string>();

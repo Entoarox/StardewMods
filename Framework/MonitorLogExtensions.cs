@@ -11,10 +11,10 @@ namespace Entoarox.Framework
     public static class MonitorLogExtensions
     {
         private static HashSet<string> Cache = new HashSet<string>();
-        private static void ResolvedLogger(IMonitor self, LogLevel level, string message, Exception error=null, string[] replacements=null, bool once=false)
+        private static void ResolvedLogger(IMonitor self, LogLevel level, string message, Exception error, string[] replacements, bool once)
         {
-            if (replacements != null && replacements.Count() > 0)
-                message = string.Format(message, replacements);
+            if (new List<string>(replacements).Count>0)
+                message = string.Format(message, replacements.ToArray());
             if (error != null)
                 message = message + Environment.NewLine + error.Message + Environment.NewLine + error.StackTrace;
             if (once)
@@ -24,37 +24,21 @@ namespace Entoarox.Framework
                     Cache.Add(level.ToString() + ':' + message);
             self.Log(message, level);
         }
-        public static void LogTrace(this IMonitor self, string message)
+        public static void Log(this IMonitor self, LogLevel level, string message, Exception error=null, params string[] replacements)
         {
-            ResolvedLogger(self, LogLevel.Trace, message);
+            ResolvedLogger(self, level, message, error, replacements, false);
         }
-        public static void LogTrace(this IMonitor self, string message, Exception error)
+        public static void LogOnce(this IMonitor self, LogLevel level, string message, Exception error=null, params string[] replacements)
         {
-            ResolvedLogger(self, LogLevel.Trace, message, error);
+            ResolvedLogger(self, level, message, error, replacements, true);
         }
-        public static void LogTrace(this IMonitor self, string message, params string[] replacements)
+        public static void ExitGameImmediately(this IMonitor self, string message, Exception error = null, params string[] replacements)
         {
-            ResolvedLogger(self, LogLevel.Trace, message, null, replacements);
-        }
-        public static void LogTrace(this IMonitor self, string message, Exception error, params string[] replacements)
-        {
-            ResolvedLogger(self, LogLevel.Trace, message, error, replacements);
-        }
-        public static void LogTraceOnce(this IMonitor self, string message)
-        {
-            ResolvedLogger(self, LogLevel.Trace, message, null, null, true);
-        }
-        public static void LogTraceOnce(this IMonitor self, string message, Exception error)
-        {
-            ResolvedLogger(self, LogLevel.Trace, message, error, null, true);
-        }
-        public static void LogTraceOnce(this IMonitor self, string message, params string[] replacements)
-        {
-            ResolvedLogger(self, LogLevel.Trace, message, null, replacements, true);
-        }
-        public static void LogTraceOnce(this IMonitor self, string message, Exception error, params string[] replacements)
-        {
-            ResolvedLogger(self, LogLevel.Trace, message, error, replacements, true);
+            if (new List<string>(replacements).Count > 0)
+                message = string.Format(message, replacements.ToArray());
+            if (error != null)
+                message = message + Environment.NewLine + error.Message + Environment.NewLine + error.StackTrace;
+            self.ExitGameImmediately(message);
         }
     }
 }
