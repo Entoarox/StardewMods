@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmhandUI", "FarmhandUI\Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedMinecart", "ExtendedMinecart\ExtendedMinecart.csproj", "{CA467BEA-932F-4133-ACA0-D634670C2488}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MorePets", "MorePets\MorePets.csproj", "{3710E6E1-296C-481D-B577-4BA6CCAF2E94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{CA467BEA-932F-4133-ACA0-D634670C2488}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA467BEA-932F-4133-ACA0-D634670C2488}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA467BEA-932F-4133-ACA0-D634670C2488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3710E6E1-296C-481D-B577-4BA6CCAF2E94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3710E6E1-296C-481D-B577-4BA6CCAF2E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3710E6E1-296C-481D-B577-4BA6CCAF2E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3710E6E1-296C-481D-B577-4BA6CCAF2E94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

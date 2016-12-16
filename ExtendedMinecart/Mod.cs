@@ -10,6 +10,9 @@ using StardewValley.Menus;
 using Entoarox.Framework;
 using Entoarox.Framework.UI;
 
+/*
+ - Disable travel to a location that is subject of a Festival on the current day
+*/
 namespace Entoarox.ExtendedMinecart
 {
     internal class Config

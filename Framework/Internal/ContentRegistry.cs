@@ -154,6 +154,7 @@ namespace Entoarox.Framework
         private Dictionary<string, string> XnbMatches = new Dictionary<string, string>();
         private Dictionary<string, string> TextureMatches = new Dictionary<string, string>();
         private Dictionary<string, KeyValuePair<Type,Delegate>> DelegateMatches = new Dictionary<string, KeyValuePair<Type,Delegate>>();
+        private Dictionary<string, object> TextureCache = new Dictionary<string, object>();
         public SmartContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
         {
         }
@@ -165,7 +166,11 @@ namespace Entoarox.Framework
                 if (XnbMatches.ContainsKey(assetName))
                     return Registry[Path.GetDirectoryName(XnbMatches[assetName])].Load<T>(Path.GetFileName(XnbMatches[assetName]));
                 if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
-                    return (T)(object)Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open));
+                {
+                    if(!TextureCache.ContainsKey(assetName))
+                        TextureCache.Add(assetName,Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open)));
+                    return (T)TextureCache[assetName];
+                }
                 if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
                     return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
             }
