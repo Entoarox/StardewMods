@@ -76,6 +76,7 @@
     <Compile Include="Interfaces\IKeyboardComponent.cs" />
     <Compile Include="Interfaces\IMenuComponent.cs" />
     <Compile Include="KeyboardSubscriberProxy.cs" />
+    <Compile Include="OverlayManager.cs" />
     <Compile Include="Wrapper\ClickableCancelComponent.cs" />
     <Compile Include="Wrapper\ClickableConfirmComponent.cs" />
     <Compile Include="Wrapper\ClickableObjectComponent.cs" />

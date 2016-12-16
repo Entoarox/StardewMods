@@ -72,7 +72,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             // Print mod info into the log
             AdvancedLocationLoaderMod.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
             // Parse locations
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Locations` section...");
+            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Locations` section...",LogLevel.Trace);
             if (config.Locations != null)
                 foreach (Location loc in config.Locations)
                     if (LocationChecks(filepath, loc.FileName, loc.MapName))
@@ -273,7 +273,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         public static void ApplyPatches()
         {
             LocationConfig1_2 trueCompound = new LocationConfig1_2();
-            AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Info);
+            AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Trace);
             // First we need to check any things we couldnt before
             foreach (Location obj in Compound.Locations)
                 if (Game1.getLocationFromName(obj.MapName) != null)
@@ -392,7 +392,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AffectedLocations = null;
             MapSizes = null;
             VerifyPatchIntegrity();
-            AdvancedLocationLoaderMod.Logger.Log("Patches have been applied",LogLevel.Info);
+            AdvancedLocationLoaderMod.Logger.Log("Patches have been applied",LogLevel.Debug);
         }
         internal static void VerifyPatchIntegrity()
         {

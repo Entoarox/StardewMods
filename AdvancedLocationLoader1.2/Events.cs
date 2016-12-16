@@ -17,7 +17,7 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                AdvancedLocationLoaderMod.Logger.Log("Loading location mods into memory...",LogLevel.Info);
+                AdvancedLocationLoaderMod.Logger.Log("Loading location mods into memory...",LogLevel.Debug);
                 string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
                 int count = 0;
                 Directory.CreateDirectory(baseDir);
@@ -61,8 +61,13 @@ namespace Entoarox.AdvancedLocationLoader
                                 break;
                         }
                     }
+                    else
+                        AdvancedLocationLoaderMod.Logger.Log("Could not find a manifest.json in the "+dir+" directory, if this is intentional you can ignore this message", LogLevel.Warn);
                 }
-                AdvancedLocationLoaderMod.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
+                if(count>0)
+                    AdvancedLocationLoaderMod.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
+                else
+                    AdvancedLocationLoaderMod.Logger.Log("Was unable to load any location mods, if you do not have any installed yet you can ignore this message", LogLevel.Warn);
             }
             catch(Exception err)
             {

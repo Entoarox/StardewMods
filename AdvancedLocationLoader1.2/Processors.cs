@@ -60,8 +60,7 @@ namespace Entoarox.AdvancedLocationLoader
                     return;
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
-                if (loc.warps.Contains(_warp))
-                    loc.warps.Remove(_warp);
+                loc.warps.RemoveAll((a) => a.X == _warp.X && a.Y == _warp.Y);
                 loc.warps.Add(_warp);
             }
             catch (Exception err)
