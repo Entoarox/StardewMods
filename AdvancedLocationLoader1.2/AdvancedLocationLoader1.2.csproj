@@ -67,6 +67,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\VersionChecker\AdvancedLocationLoader.json">
+      <Link>AdvancedLocationLoader.json</Link>
+    </None>
     <None Include="localization.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

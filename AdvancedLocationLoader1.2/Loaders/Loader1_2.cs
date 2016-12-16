@@ -408,7 +408,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs");
                             foreach (string season in seasons)
                             {
-                                string file = Path.Combine(Game1.content.RootDirectory, "Maps\\" + season + "_" + path[1] + ".xnb");
+                                string file = Path.Combine(Game1.content.RootDirectory, Path.Combine("Maps",season + "_" + path[1] + ".xnb"));
                                 if (!File.Exists(file))
                                 {
                                     AdvancedLocationLoaderMod.Logger.Log("File not found: " + file);

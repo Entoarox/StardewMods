@@ -28,13 +28,13 @@ namespace Entoarox.ExtendedMinecart
     }
     internal static class GLExtension
     {
-        public static void SetTile(this GameLocation self, int x, int y, int index ,string layer, int sheet=0)
+        public static void SetTile(this GameLocation self, int x, int y, int index ,string layer, string sheet)
         {
-            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, self.map.TileSheets[sheet].Id);
+            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, sheet);
         }
-        public static void SetTile(this GameLocation self, int x, int y, int index, string layer, string value, int sheet = 0)
+        public static void SetTile(this GameLocation self, int x, int y, int index, string layer, string value, string sheet)
         {
-            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, self.map.TileSheets[sheet].Id);
+            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, sheet);
             EntoFramework.GetLocationHelper().SetTileProperty(self, layer, x, y, "Action", value);
         }
     }
@@ -108,49 +108,49 @@ namespace Entoarox.ExtendedMinecart
                     GameLocation farm = Game1.getFarm();
                     if (Config.AlternateFarmMinecart)
                     {
-                        farm.SetTile(18, 5, 483, "Front", 1);
-                        farm.SetTile(19, 5, 484, "Front", 1);
-                        farm.SetTile(19, 5, 217, "Buildings", 1);
-                        farm.SetTile(20, 5, 485, "Front", 1);
+                        farm.SetTile(18, 5, 483, "Front", "untitled tile sheet");
+                        farm.SetTile(19, 5, 484, "Front", "untitled tile sheet");
+                        farm.SetTile(19, 5, 217, "Buildings", "untitled tile sheet");
+                        farm.SetTile(20, 5, 485, "Front", "untitled tile sheet");
 
-                        farm.SetTile(18, 6, 508, "Buildings", 1);
-                        farm.SetTile(19, 6, 509, "Back", 1);
-                        farm.SetTile(20, 6, 510, "Buildings", 1);
+                        farm.SetTile(18, 6, 508, "Buildings", "untitled tile sheet");
+                        farm.SetTile(19, 6, 509, "Back", "untitled tile sheet");
+                        farm.SetTile(20, 6, 510, "Buildings", "untitled tile sheet");
 
-                        farm.SetTile(18, 7, 533, "Buildings", 1);
-                        farm.SetTile(19, 7, 534, "Back", 1);
-                        farm.SetTile(20, 7, 535, "Buildings", 1);
+                        farm.SetTile(18, 7, 533, "Buildings", "untitled tile sheet");
+                        farm.SetTile(19, 7, 534, "Back", "untitled tile sheet");
+                        farm.SetTile(20, 7, 535, "Buildings", "untitled tile sheet");
 
-                        farm.SetTile(19, 6, 933, "Buildings", 1);
-                        farm.SetTile(19, 7, 958, "Buildings", "MinecartTransport", 1);
+                        farm.SetTile(19, 6, 933, "Buildings", "untitled tile sheet");
+                        farm.SetTile(19, 7, 958, "Buildings", "MinecartTransport", "untitled tile sheet");
                     }
                     else
                     {
                         // Clear annoying flower
                         farm.removeTile(79, 12, "Buildings");
                         // Cut dark short
-                        farm.SetTile(77, 11, 375, "Back", 1);
-                        farm.SetTile(78, 11, 376, "Back", 1);
-                        farm.SetTile(79, 11, 376, "Back", 1);
+                        farm.SetTile(77, 11, 375, "Back", "untitled tile sheet");
+                        farm.SetTile(78, 11, 376, "Back", "untitled tile sheet");
+                        farm.SetTile(79, 11, 376, "Back", "untitled tile sheet");
                         // Lay tracks
-                        farm.SetTile(78, 12, 729, "Back", 1);
-                        farm.SetTile(78, 13, 754, "Back", 1);
-                        farm.SetTile(78, 14, 755, "Back", 1);
-                        farm.SetTile(79, 12, 730, "Back", 1);
+                        farm.SetTile(78, 12, 729, "Back", "untitled tile sheet");
+                        farm.SetTile(78, 13, 754, "Back", "untitled tile sheet");
+                        farm.SetTile(78, 14, 755, "Back", "untitled tile sheet");
+                        farm.SetTile(79, 12, 730, "Back", "untitled tile sheet");
                         // Trim grass
-                        farm.SetTile(77, 13, 175, "Back", 1);
-                        farm.SetTile(77, 14, 175, "Back", 1);
-                        farm.SetTile(77, 15, 175, "Back", 1);
-                        farm.SetTile(78, 15, 175, "Back", 1);
-                        farm.SetTile(79, 13, 175, "Back", 1);
-                        farm.SetTile(79, 14, 175, "Back", 1);
-                        farm.SetTile(79, 15, 175, "Back", 1);
+                        farm.SetTile(77, 13, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(77, 14, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(77, 15, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(78, 15, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(79, 13, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(79, 14, 175, "Back", "untitled tile sheet");
+                        farm.SetTile(79, 15, 175, "Back", "untitled tile sheet");
                         // Clean up fence
-                        farm.SetTile(78, 11, 436, "Buildings", 1);
+                        farm.SetTile(78, 11, 436, "Buildings", "untitled tile sheet");
                         farm.removeTile(78, 14, "Buildings");
                         // Plop down minecart
-                        farm.SetTile(78, 12, 933, "Buildings", 1);
-                        farm.SetTile(78, 13, 958, "Buildings", "MinecartTransport", 1);
+                        farm.SetTile(78, 12, 933, "Buildings", "untitled tile sheet");
+                        farm.SetTile(78, 13, 958, "Buildings", "MinecartTransport", "untitled tile sheet");
                         // Keep exit clear
                         farm.setTileProperty(78, 14, "Back", "NoFurniture", "T");
                     }
@@ -173,48 +173,48 @@ namespace Entoarox.ExtendedMinecart
                     if (Config.AlternateDesertMinecart)
                     {
                         // Backdrop
-                        desert.SetTile(33, 1, 221, "Front");
-                        desert.SetTile(34, 1, 222, "Front");
-                        desert.SetTile(35, 1, 223, "Front");
+                        desert.SetTile(33, 1, 221, "Front", "desert-new");
+                        desert.SetTile(34, 1, 222, "Front", "desert-new");
+                        desert.SetTile(35, 1, 223, "Front", "desert-new");
 
-                        desert.SetTile(33, 2, 237, "Front");
-                        desert.SetTile(34, 2, 254, "Buildings");
-                        desert.SetTile(34, 2, 238, "Front");
-                        desert.SetTile(35, 2, 239, "Front");
+                        desert.SetTile(33, 2, 237, "Front", "desert-new");
+                        desert.SetTile(34, 2, 254, "Buildings", "desert-new");
+                        desert.SetTile(34, 2, 238, "Front", "desert-new");
+                        desert.SetTile(35, 2, 239, "Front", "desert-new");
 
-                        desert.SetTile(33, 3, 253, "Buildings");
-                        desert.SetTile(34, 3, 254, "Buildings");
-                        desert.SetTile(35, 3, 255, "Buildings");
+                        desert.SetTile(33, 3, 253, "Buildings", "desert-new");
+                        desert.SetTile(34, 3, 254, "Buildings", "desert-new");
+                        desert.SetTile(35, 3, 255, "Buildings", "desert-new");
 
-                        desert.SetTile(33, 4, 269, "Buildings");
-                        desert.SetTile(34, 4, 270, "Back");
-                        desert.SetTile(35, 4, 271, "Buildings");
+                        desert.SetTile(33, 4, 269, "Buildings", "desert-new");
+                        desert.SetTile(34, 4, 270, "Back", "desert-new");
+                        desert.SetTile(35, 4, 271, "Buildings", "desert-new");
                         // Cart
-                        desert.SetTile(34, 3, 933, "Front", 2);
-                        desert.SetTile(34, 4, 958, "Buildings", "MinecartTransport", 2);
+                        desert.SetTile(34, 3, 933, "Front", "z_path_objects_custom_sheet");
+                        desert.SetTile(34, 4, 958, "Buildings", "MinecartTransport", "z_path_objects_custom_sheet");
                     }
                     else
                     {
                         // Backdrop
-                        desert.SetTile(33, 39, 221, "Front");
-                        desert.SetTile(34, 39, 222, "Front");
-                        desert.SetTile(35, 39, 223, "Front");
+                        desert.SetTile(33, 39, 221, "Front", "desert-new");
+                        desert.SetTile(34, 39, 222, "Front", "desert-new");
+                        desert.SetTile(35, 39, 223, "Front", "desert-new");
 
-                        desert.SetTile(33, 40, 237, "Front");
-                        desert.SetTile(34, 40, 254, "Buildings");
-                        desert.SetTile(34, 40, 238, "Front");
-                        desert.SetTile(35, 40, 239, "Front");
+                        desert.SetTile(33, 40, 237, "Front", "desert-new");
+                        desert.SetTile(34, 40, 254, "Buildings", "desert-new");
+                        desert.SetTile(34, 40, 238, "Front", "desert-new");
+                        desert.SetTile(35, 40, 239, "Front", "desert-new");
 
-                        desert.SetTile(33, 41, 253, "Buildings");
-                        desert.SetTile(34, 41, 254, "Buildings");
-                        desert.SetTile(35, 41, 255, "Buildings");
+                        desert.SetTile(33, 41, 253, "Buildings", "desert-new");
+                        desert.SetTile(34, 41, 254, "Buildings", "desert-new");
+                        desert.SetTile(35, 41, 255, "Buildings", "desert-new");
 
-                        desert.SetTile(33, 42, 269, "Buildings");
-                        desert.SetTile(34, 42, 270, "Back");
-                        desert.SetTile(35, 42, 271, "Buildings");
+                        desert.SetTile(33, 42, 269, "Buildings", "desert-new");
+                        desert.SetTile(34, 42, 270, "Back", "desert-new");
+                        desert.SetTile(35, 42, 271, "Buildings", "desert-new");
                         // Cart
-                        desert.SetTile(34, 41, 933, "Front", 2);
-                        desert.SetTile(34, 42, 958, "Buildings", "MinecartTransport", 2);
+                        desert.SetTile(34, 41, 933, "Front", "z_path_objects_custom_sheet");
+                        desert.SetTile(34, 42, 958, "Buildings", "MinecartTransport", "z_path_objects_custom_sheet");
                     }
                 }
                 catch (Exception err)
@@ -228,8 +228,8 @@ namespace Entoarox.ExtendedMinecart
                 {
                     // # Woods
                     GameLocation woods = Game1.getLocationFromName("Woods");
-                    woods.SetTile(46, 3, 933, "Front", 1);
-                    woods.SetTile(46, 4, 958, "Buildings", "MinecartTransport", 1);
+                    woods.SetTile(46, 3, 933, "Front", "untitled tile sheet");
+                    woods.SetTile(46, 4, 958, "Buildings", "MinecartTransport", "untitled tile sheet");
                 }
                 catch (Exception err)
                 {
@@ -242,20 +242,20 @@ namespace Entoarox.ExtendedMinecart
                 {
                     // # Wizard
                     GameLocation forest = Game1.getLocationFromName("Forest");
-                    forest.SetTile(13, 37, 483, "Front");
-                    forest.SetTile(14, 37, 484, "Front");
-                    forest.SetTile(14, 37, 217, "Buildings");
-                    forest.SetTile(15, 37, 485, "Front");
+                    forest.SetTile(13, 37, 483, "Front", "outdoors");
+                    forest.SetTile(14, 37, 484, "Front", "outdoors");
+                    forest.SetTile(14, 37, 217, "Buildings", "outdoors");
+                    forest.SetTile(15, 37, 485, "Front", "outdoors");
 
-                    forest.SetTile(13, 38, 508, "Buildings");
-                    forest.SetTile(14, 38, 509, "Back");
-                    forest.SetTile(15, 38, 510, "Buildings");
+                    forest.SetTile(13, 38, 508, "Buildings", "outdoors");
+                    forest.SetTile(14, 38, 509, "Back", "outdoors");
+                    forest.SetTile(15, 38, 510, "Buildings", "outdoors");
 
-                    forest.SetTile(13, 39, 533, "Buildings");
-                    forest.SetTile(15, 39, 535, "Buildings");
+                    forest.SetTile(13, 39, 533, "Buildings", "outdoors");
+                    forest.SetTile(15, 39, 535, "Buildings", "outdoors");
 
-                    forest.SetTile(14, 38, 933, "Buildings");
-                    forest.SetTile(14, 39, 958, "Buildings", "MinecartTransport");
+                    forest.SetTile(14, 38, 933, "Buildings", "outdoors");
+                    forest.SetTile(14, 39, 958, "Buildings", "MinecartTransport", "outdoors");
                 }
                 catch (Exception err)
                 {
@@ -275,8 +275,8 @@ namespace Entoarox.ExtendedMinecart
                     beach.removeTile(67, 2, "Buildings");
                     beach.removeTile(67, 5, "Buildings");
                     beach.removeTile(67, 4, "Buildings");
-                    beach.SetTile(67, 2, 933, "Buildings", 2);
-                    beach.SetTile(67, 3, 958, "Buildings", "MinecartTransport", 2);
+                    beach.SetTile(67, 2, 933, "Buildings", "z_path_objects_custom_sheet");
+                    beach.SetTile(67, 3, 958, "Buildings", "MinecartTransport", "z_path_objects_custom_sheet");
                 }
                 catch (Exception err)
                 {
