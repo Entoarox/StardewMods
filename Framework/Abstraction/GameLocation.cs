@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using xTile;
 using xTile.Layers;
 using xTile.Tiles;
 
 namespace Entoarox.Framework.Abstraction
 {
-    public class GameLocation
+    public class GameLocation : Interfaces.IGameLocation
     {
         protected StardewValley.GameLocation Location;
         internal GameLocation(StardewValley.GameLocation location)
@@ -20,6 +21,10 @@ namespace Entoarox.Framework.Abstraction
         {
             return new GameLocation(location);
         }
+
+        public WarpList Warps => new WarpList(Location);
+        public Map Map => Location.map;
+
         public bool HasTile(int x, int y, string layer)
         {
             Layer _layer = Location.map.GetLayer(layer);
@@ -181,6 +186,112 @@ namespace Entoarox.Framework.Abstraction
                     _frames.Add(new StaticTile(_layer, _sheet, BlendMode.Alpha, indexes[c]));
             _layer.Tiles[x, y] = new AnimatedTile(_layer, _frames.ToArray(), interval);
             return true;
+        }
+        public void SetTileProperty(int x, int y, string layer, string key, string value)
+        {
+            Layer _layer = Location.map.GetLayer(layer);
+            if (_layer == null)
+                throw new ArgumentNullException(nameof(layer));
+            if (x < 0 || x >= _layer.LayerWidth)
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (y < 0 || y >= _layer.LayerHeight)
+                throw new ArgumentOutOfRangeException(nameof(y));
+            if (_layer.Tiles[x, y] == null)
+                throw new ArgumentException("Tile does not exist");
+            _layer.Tiles[x, y].Properties[key] = value;
+        }
+        public bool TrySetTileProperty(int x, int y, string layer, string key, string value)
+        {
+            Layer _layer = Location.map.GetLayer(layer);
+            if (_layer == null)
+                return false;
+            if (x < 0 || x >= _layer.LayerWidth)
+                return false;
+            if (y < 0 || y >= _layer.LayerHeight)
+                return false;
+            if (_layer.Tiles[x, y] == null)
+                return false;
+            _layer.Tiles[x, y].Properties[key] = value;
+            return true;
+        }
+        public string GetTileProperty(int x, int y, string layer, string key)
+        {
+            Layer _layer = Location.map.GetLayer(layer);
+            if (_layer == null)
+                throw new ArgumentNullException(nameof(layer));
+            if (x < 0 || x >= _layer.LayerWidth)
+                throw new ArgumentOutOfRangeException(nameof(x));
+            if (y < 0 || y >= _layer.LayerHeight)
+                throw new ArgumentOutOfRangeException(nameof(y));
+            if (_layer.Tiles[x, y] == null)
+                throw new ArgumentException("Tile does not exist");
+            return _layer.Tiles[x, y].Properties[key];
+        }
+        public bool TryGetTileProperty(int x, int y, string layer, string key, out string value)
+        {
+            value = default(string);
+            Layer _layer = Location.map.GetLayer(layer);
+            if (_layer == null)
+                return false;
+            if (x < 0 || x >= _layer.LayerWidth)
+                return false;
+            if (y < 0 || y >= _layer.LayerHeight)
+                return false;
+            if (_layer.Tiles[x, y] == null)
+                return false;
+            value= _layer.Tiles[x, y].Properties[key];
+            return true;
+        }
+        public void SetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace=false)
+        {
+            SetWarp(x, y, new Warp(destination, destinationX, destinationY), replace);
+        }
+        public bool TrySetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace = false)
+        {
+            return TrySetWarp(x, y, new Warp(destination, destinationX, destinationY), replace);
+        }
+        public void SetWarp(int x, int y, Warp warp, bool replace = false)
+        {
+            for (int c = 0; c < Location.warps.Count; c++)
+                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                {
+                    if (!replace)
+                        throw new InvalidOperationException();
+                    Location.warps[c] = new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false);
+                    return;
+                }
+            Location.warps.Add(new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false));
+        }
+        public bool TrySetWarp(int x, int y, Warp warp, bool replace = false)
+        {
+            for (int c = 0; c < Location.warps.Count; c++)
+                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                {
+                    if (!replace)
+                        return false;
+                    Location.warps[c] = new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false);
+                    break;
+                }
+            Location.warps.Add(new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false));
+            return true;
+        }
+        public Warp GetWarp(int x, int y)
+        {
+            for (int c = 0; c < Location.warps.Count; c++)
+                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                    return new Warp(Location.warps[c].TargetName, Location.warps[c].TargetX, Location.warps[c].TargetY);
+            throw new NullReferenceException();
+        }
+        public bool TryGetWarp(int x, int y, out Warp warp)
+        {
+            warp = default(Warp);
+            for (int c = 0; c < Location.warps.Count; c++)
+                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                {
+                    warp = new Warp(Location.warps[c].TargetName, Location.warps[c].TargetX, Location.warps[c].TargetY);
+                    return true;
+                }
+            return false;
         }
     }
 }

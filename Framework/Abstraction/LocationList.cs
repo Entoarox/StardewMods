@@ -49,6 +49,16 @@ namespace Entoarox.Framework.Abstraction
                 throw new IndexOutOfRangeException();
             }
         }
+        public GameLocation this[string name]
+        {
+            get
+            {
+                StardewValley.GameLocation loc = StardewValley.Game1.getLocationFromName(name);
+                if (loc == null)
+                    throw new KeyNotFoundException();
+                return GameLocation.Wrap(loc);
+            }
+        }
         private LocationEnumerator Enumerator()
         {
             return new LocationEnumerator();

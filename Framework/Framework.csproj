@@ -54,7 +54,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstraction\Farmer.cs" />
+    <Compile Include="Abstraction\GameLocation.cs" />
+    <Compile Include="Abstraction\Interfaces\IGameLocation.cs" />
+    <Compile Include="Abstraction\Warp.cs" />
+    <Compile Include="Abstraction\LocationList.cs" />
     <Compile Include="Abstraction\Stardew.cs" />
+    <Compile Include="Abstraction\WarpList.cs" />
+    <Compile Include="Abstraction\WrappedContentManager.cs" />
     <Compile Include="Conditions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
