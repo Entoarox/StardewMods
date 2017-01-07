@@ -30,7 +30,9 @@ namespace Entoarox.Framework
         /**
          * <summary>Retrieves a pointer to the <see cref="ILocationHelper"/> interface</summary>
          */
+#pragma warning disable CS0618 // Type or member is obsolete
         public static ILocationHelper GetLocationHelper()
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             return LocationHelper.Singleton;
         }

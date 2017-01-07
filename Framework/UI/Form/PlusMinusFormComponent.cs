@@ -22,6 +22,7 @@ namespace Entoarox.Framework.UI
             set
             {
                 _Value = value;
+                SelectedValue = _Value.ToString();
             }
         }
         protected int _Value;
@@ -101,6 +102,7 @@ namespace Entoarox.Framework.UI
         }
         public override void FocusLost()
         {
+            Selected = false;
             if (OldValue == Value)
                 return;
             OldValue = Value;

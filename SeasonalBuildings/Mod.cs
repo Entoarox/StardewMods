@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Collections.Generic;
-using Version = System.Version;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,13 +23,6 @@ namespace Entoarox.SeasonalImmersion
         public override void Entry(IModHelper helper)
         {
             FilePath = helper.DirectoryPath;
-            string mode = "unknown";
-#if GAME_PLATFORM_MAC
-            mode="mono";
-#else
-            mode = "xna";
-#endif
-            Monitor.Log("Version "+GetType().Assembly.GetName().Version+'/'+mode+" by Entoarox, do not redistribute",LogLevel.Info);
             GameEvents.LoadContent += GameEvents_LoadContent;
         }
         private static bool ContentReady = false;
@@ -58,7 +50,6 @@ namespace Entoarox.SeasonalImmersion
         {
             try
             {
-                int[] data = new int[texture.Width * texture.Height];
                 RenderTarget2D result = new RenderTarget2D(Game1.graphics.GraphicsDevice, texture.Width, texture.Height);
                 Game1.graphics.GraphicsDevice.SetRenderTarget(result);
                 Game1.graphics.GraphicsDevice.Clear(Color.Black);
@@ -81,7 +72,7 @@ namespace Entoarox.SeasonalImmersion
         }
         internal void LoadContent()
         {
-            Monitor.Log("Attempting to resolve content pack...", LogLevel.Debug);
+            Monitor.Log("Attempting to resolve content pack...", LogLevel.Trace);
             string path = Path.Combine(FilePath, "ContentPack.zip");
             ZipArchive zip;
             if (File.Exists(path))
@@ -100,7 +91,12 @@ namespace Entoarox.SeasonalImmersion
             ZipArchiveEntry manifestData = zip.GetEntry("manifest.json");
             ContentPackManifest manifest = JsonConvert.DeserializeObject<ContentPackManifest>(new StreamReader(manifestData.Open()).ReadToEnd(), new VersionConverter());
             Monitor.Log("Using the `" + manifest.Name + "` content pack, version " + manifest.Version + " by " + manifest.Author, LogLevel.Info);
-            List<string> Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")));
+            // Resolve content dir cause CA messes all stuffs up...
+            List<string> Files;
+            if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")))
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")));
+            else
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")));
             Files.Add("Flooring.xnb");
             Files.Add("Craftables_outdoor.xnb");
             Files.Add("Craftables_indoor.xnb");
@@ -185,7 +181,7 @@ namespace Entoarox.SeasonalImmersion
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value null
         public string Name;
         public string Author;
-        public Version Version;
+        public System.Version Version;
         public string Description;
 #pragma warning restore CS0649 // Field is never assigned to, and will always have its default value null
     }

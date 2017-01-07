@@ -14,6 +14,6 @@ namespace Entoarox.Framework.UI
         void HoverOver(Point position, Point offset);
         void FocusLost();
         void FocusGained();
-        void Scroll(int direction, Point position, Point offset);
+        bool Scroll(int direction, Point position, Point offset);
     }
 }

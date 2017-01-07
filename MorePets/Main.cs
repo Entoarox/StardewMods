@@ -17,22 +17,13 @@ using xTile.Tiles;
 using xTile.ObjectModel;
 
 using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 
 namespace MorePets
 {
-    public class MorePetsConfig : Config
+    public class MorePetsConfig
     {
-        public override T GenerateDefaultConfig<T>()
-        {
-            AdoptionPrice = 500;
-            RepeatedAdoptionPenality = 0.1;
-            UseMaxAdoptionLimit = false;
-            MaxAdoptionLimit = 10;
-            DebugMode = false;
-            return this as T;
-        }
-        public bool DebugMode;
-        private int _AdoptionPrice;
+        private int _AdoptionPrice=500;
         public int AdoptionPrice
         {
             get
@@ -44,7 +35,7 @@ namespace MorePets
                 _AdoptionPrice = Math.Max(100, value);
             }
         }
-        private double _RepeatedAdoptionPenality;
+        private double _RepeatedAdoptionPenality=0.1;
         public double RepeatedAdoptionPenality
         {
             get
@@ -56,8 +47,9 @@ namespace MorePets
                 _RepeatedAdoptionPenality = Math.Max(0.0, Math.Min(0.9, value));
             }
         }
-        public bool UseMaxAdoptionLimit;
-        public int MaxAdoptionLimit;
+        public bool UseMaxAdoptionLimit=false;
+        public int MaxAdoptionLimit=10;
+        public bool DebugMode = false;
     }
     public class MorePetsMod : Mod
     {
@@ -68,15 +60,14 @@ namespace MorePets
         internal static Random random;
         private static bool replaceBus = false;
         internal static MorePetsConfig Config;
-        internal static DataLogger Logger = new DataLogger("MorePets");
         private static System.Version version = new System.Version(1,2,1);
         // DEV PROPERTIES
         internal static int offsetX = 0;
         internal static int offsetY = 0;
-        public override void Entry(params object[] objects)
+        public override void Entry(IModHelper helper)
         {
-            modPath = PathOnDisk;
-            Config = new MorePetsConfig().InitializeConfig(BaseConfigPath);
+            modPath = helper.DirectoryPath;
+            Config = helper.ReadConfig<MorePetsConfig>();
             GameEvents.UpdateTick += GameEvents_UpdateTick;
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
@@ -88,10 +79,9 @@ namespace MorePets
                 Command.RegisterCommand("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>",new string[] { "type","skin"}).CommandFired += CommandFired_SpawnPet;
                 Command.RegisterCommand("test_adoption", "Triggers the adoption dialogue").CommandFired += CommandFired_TestAdoption;
             }
-            Logger.Info("MorePets "+version.ToString()+" by Entoarox, do not redistribute without permission");
             VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/MorePets.json");
         }
-        private static void PopulatePetSkins()
+        private void PopulatePetSkins()
         {
             bool dogsDone = false;
             bool catsDone = false;
@@ -112,16 +102,16 @@ namespace MorePets
                 if (dogsDone && catsDone)
                     break;
             }
-            Logger.Info("Found [" + catLimit + "] Cat and [" + dogLimit + "] Dog skins");
+            Monitor.Log("Found [" + catLimit + "] Cat and [" + dogLimit + "] Dog skins", LogLevel.Info);
         }
-        private static List<NPC> GetAllPets()
+        private List<NPC> GetAllPets()
         {
             List<NPC> npcs = new List<NPC>();
             npcs.AddRange(Game1.getLocationFromName("FarmHouse").characters.FindAll(a => a is Pet));
             npcs.AddRange(Game1.getLocationFromName("Farm").characters.FindAll(a => a is Pet));
             return npcs;
         }
-        internal static void GameEvents_UpdateTick(object s, EventArgs e)
+        internal void GameEvents_UpdateTick(object s, EventArgs e)
         {
             if (!Game1.hasLoadedGame || Game1.CurrentEvent != null || Game1.fadeToBlack)
                 return;
@@ -140,7 +130,7 @@ namespace MorePets
                     }
                     catch
                     {
-                        Logger.Error("Pet with unknown skin number found, using default: "+npc.manners);
+                        Monitor.Log("Pet with unknown skin number found, using default: " + npc.manners, LogLevel.Error);
                     }
                     npc.updatedDialogueYet = true;
                 }
@@ -149,17 +139,16 @@ namespace MorePets
                 GameLocation bus = Game1.getLocationFromName("BusStop");
                 bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet",bus.map, "paths_objects_MorePetsTilesheet", new xTile.Dimensions.Size(2,2), new xTile.Dimensions.Size(16,16)));
                 EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
-                ILocationHelper helper = EntoFramework.GetLocationHelper();
-                helper.SetStaticTile(bus, "Front", 1, 2, 0, "MorePetsTilesheet");
-                helper.SetStaticTile(bus, "Front", 2, 2, 1, "MorePetsTilesheet");
-                helper.SetStaticTile(bus, "Buildings", 1, 3, 2, "MorePetsTilesheet");
-                helper.SetStaticTile(bus, "Buildings", 2, 3, 3, "MorePetsTilesheet");
-                bus.setTileProperty(1, 3, "Buildings", "Action", "MorePetsAdoption");
-                bus.setTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
+                bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
+                bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
+                bus.SetTile(1, 3, "Front", 2, "MorePetsTilesheet");
+                bus.SetTile(2, 3, "Front", 3, "MorePetsTilesheet");
+                bus.SetTileProperty(1, 3, "Buildings", "Action", "MorePetsAdoption");
+                bus.SetTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
                 replaceBus = false;
             }
         }
-        internal static void CommandFired_SpawnPet(object s, EventArgsCommand e)
+        internal void CommandFired_SpawnPet(object s, EventArgsCommand e)
         {
             if(e.Command.CalledArgs.Length==2)
             {
@@ -186,13 +175,13 @@ namespace MorePets
                     pet.age = 1100;
                     pet.position = Game1.player.position;
                     Game1.currentLocation.addCharacter(pet);
-                    Logger.Log("INFO","Pet spawned", ConsoleColor.Green);
+                    Monitor.Log("Pet spawned", LogLevel.Alert);
                 }
                 else
-                    Logger.Error("Was unable to spawn pet, did you make sure the <type> and <skin> are valid?");
+                    Monitor.Log("Was unable to spawn pet, did you make sure the <type> and <skin> are valid?",LogLevel.Error);
             }
         }
-        internal static void CommandFired_KillPets(object s, EventArgs e)
+        internal void CommandFired_KillPets(object s, EventArgs e)
         {
             GameLocation farm = Game1.getLocationFromName("Farm");
             GameLocation house = Game1.getLocationFromName("FarmHouse");
@@ -202,27 +191,27 @@ namespace MorePets
                         farm.characters.Remove(pet);
                     else
                         house.characters.Remove(pet);
-            Logger.Log("INFO","You actually killed them.. you FAT monster!", ConsoleColor.DarkRed);
+            Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
         }
-        internal static void CommandFired_TestAdoption(object s, EventArgs e)
+        internal void CommandFired_TestAdoption(object s, EventArgs e)
         {
             if (dogLimit == 0 && catLimit == 0)
                 return;
             random = new Random();
             AdoptQuestion.Show();
         }
-        internal static void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
+        internal void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
                 CheckForAction();
         }
-        internal static void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        internal void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
         }
         internal static List<string> seasons = new List<string>(){ "spring", "summer", "fall", "winter" };
-        private static void CheckForAction()
+        private void CheckForAction()
         {
             if (!Game1.hasLoadedGame)
                 return;

@@ -89,39 +89,48 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void RealShop()
         {
-            if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
+            try
             {
-                Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                AdvancedLocationLoaderMod.Logger.Log("Unable to open shop, shop not found: "+_arguments[0], StardewModdingAPI.LogLevel.Error);
-            }
-            else
-            {
-                Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
-                List<Item> stock = new List<Item>();
-                NPC portrait = new NPC();
-                EntoFramework.GetContentRegistry().RegisterXnb(shop.Portrait, shop.Portrait);
-                portrait.Portrait = Game1.content.Load<Texture2D>(shop.Portrait);
-                portrait.name = shop.Owner;
-                foreach (Configs.ShopItem item in shop.Items)
+                if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
                 {
-                    if (!string.IsNullOrEmpty(item.Conditions) || !Conditions.CheckConditionList(item.Conditions,AdvancedLocationLoaderMod.ConditionResolver))
-                        continue;
-                    StardewValley.Object result;
-                    if (item.Price!=null)
-                        result = new StardewValley.Object(item.Id, item.Stock, false, (int)item.Price);
-                    else
-                        result = new StardewValley.Object(item.Id, item.Stock, false, -1);
-                    if (item.Stack > 1)
-                    {
-                        stock.Add(new StackableShopObject(result, item.Stack));
-                    }
-                    else
-                        stock.Add(result);
+                    Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
+                    AdvancedLocationLoaderMod.Logger.Log("Unable to open shop, shop not found: " + _arguments[0], StardewModdingAPI.LogLevel.Error);
                 }
-                ShopMenu menu = new ShopMenu(stock);
-                menu.portraitPerson = portrait;
-                menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
-                Game1.activeClickableMenu = menu;
+                else
+                {
+                    Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
+                    List<Item> stock = new List<Item>();
+                    NPC portrait = new NPC();
+                    EntoFramework.GetContentRegistry().RegisterXnb(shop.Portrait, shop.Portrait);
+                    portrait.Portrait = Game1.content.Load<Texture2D>(shop.Portrait);
+                    portrait.name = shop.Owner;
+                    foreach (Configs.ShopItem item in shop.Items)
+                    {
+                        if (!string.IsNullOrEmpty(item.Conditions) || !Conditions.CheckConditionList(item.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                            continue;
+                        StardewValley.Object result;
+                        if (item.Price != null)
+                            result = new StardewValley.Object(item.Id, item.Stock, false, (int)item.Price);
+                        else
+                            result = new StardewValley.Object(item.Id, item.Stock, false, -1);
+                        if (item.Stack > 1)
+                        {
+                            stock.Add(new StackableShopObject(result, item.Stack));
+                        }
+                        else
+                            stock.Add(result);
+                    }
+                    if (stock.Count == 0)
+                        AdvancedLocationLoaderMod.Logger.Log("No stock: " + _arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
+                    ShopMenu menu = new ShopMenu(stock);
+                    menu.portraitPerson = portrait;
+                    menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
+                    Game1.activeClickableMenu = menu;
+                }
+            }
+            catch(Exception err)
+            {
+                AdvancedLocationLoaderMod.Logger.Log(StardewModdingAPI.LogLevel.Error, "Unable to open shop due to unexpected error: ", err);
             }
         }
     }

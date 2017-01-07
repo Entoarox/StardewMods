@@ -55,9 +55,9 @@ namespace Entoarox.Framework.UI
         {
 
         }
-        public virtual void Scroll(int d, Point p, Point o)
+        public virtual bool Scroll(int d, Point p, Point o)
         {
-
+            return false;
         }
     }
 }

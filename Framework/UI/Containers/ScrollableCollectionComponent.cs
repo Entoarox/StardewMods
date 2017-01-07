@@ -30,7 +30,7 @@ namespace Entoarox.Framework.UI
         {
             base.UpdateDrawOrder();
             int height = Area.Height;
-            foreach(IMenuComponent c in DrawOrder)
+            foreach (IMenuComponent c in DrawOrder)
             {
                 if (!c.Visible)
                     return;
@@ -44,19 +44,29 @@ namespace Entoarox.Framework.UI
             else
                 BarOffset = 0;
             InnerHeight = (int)Math.Ceiling((height - Area.Height) / (double)zoom10);
+            // Remove components that do not intersect the collection viewport from both the draw and event order
+            Rectangle self = new Rectangle(0, -(ScrollOffset * zoom10), Area.Width, Area.Height);
+            DrawOrder = DrawOrder.FindAll(c => c.GetRegion().Intersects(self));
+            EventOrder = EventOrder.FindAll(c => c.GetRegion().Intersects(self));
         }
-        public override void Scroll(int d, Point p, Point o)
+        public override bool Scroll(int d, Point p, Point o)
         {
             if (!Visible)
-                return;
-            base.Scroll(d, p, o);
+                return false;
+            if (base.Scroll(d, p, new Point(o.X, o.Y - ScrollOffset * zoom10)))
+                return true;
             if (HoverElement != null)
-                return;
+                return false;
             int change = d / 120;
             int oldOffset = ScrollOffset;
             ScrollOffset = Math.Max(0, Math.Min(ScrollOffset - change, InnerHeight));
-            if(oldOffset!=ScrollOffset)
+            if (oldOffset != ScrollOffset)
+            {
                 Game1.playSound("drumkit6");
+                UpdateDrawOrder();
+                return true;
+            }
+            return false;
         }
         public override void HoverOver(Point p, Point o)
         {
@@ -64,7 +74,7 @@ namespace Entoarox.Framework.UI
             Rectangle down = new Rectangle(Area.X + o.X + Area.Width - (DownActive ? zoom12 : zoom11 + zoom05), Area.Y + o.Y + Area.Height - zoom12 - (DownActive ? zoom05 : 0), DownActive ? zoom12 : zoom11, DownActive ? zoom13 : zoom12);
             UpActive = ScrollOffset > 0 && up.Contains(p);
             DownActive = ScrollOffset < InnerHeight && down.Contains(p);
-            base.HoverOver(p, o);
+            base.HoverOver(p, new Point(o.X, o.Y - ScrollOffset * zoom10));
         }
         protected void ArrowClick(Point p, Point o)
         {
@@ -81,7 +91,7 @@ namespace Entoarox.Framework.UI
         }
         public override void LeftHeld(Point p, Point o)
         {
-            base.LeftHeld(p, o);
+            base.LeftHeld(p, new Point(o.X,o.Y-ScrollOffset*zoom10));
             if (!UpActive && !DownActive)
                 return;
             Counter++;
@@ -95,11 +105,11 @@ namespace Entoarox.Framework.UI
         {
             Limiter = 10;
             Counter = 0;
-            base.LeftUp(p, o);
+            base.LeftUp(p, new Point(o.X, o.Y - ScrollOffset * zoom10));
         }
         public override void LeftClick(Point p, Point o)
         {
-            base.LeftClick(p, o);
+            base.LeftClick(p, new Point(o.X, o.Y - ScrollOffset * zoom10));
             Counter = 0;
             Limiter = 10;
             ArrowClick(p,o);

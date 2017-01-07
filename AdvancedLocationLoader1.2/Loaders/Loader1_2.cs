@@ -224,19 +224,27 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         AdvancedLocationLoaderMod.Logger.Log("Unable to load shop, file does not exist: " + path, LogLevel.Error);
                     else
                     {
-                        ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
-                        cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
-                        foreach(ShopItem item in cfg.Items)
-                            if (item.Conditions != null)
-                            {
-                                string err = Conditions.FindConflictingConditions(item.Conditions);
-                                if (err != null)
+                        try
+                        {
+                            ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
+                            cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
+                            foreach (ShopItem item in cfg.Items)
+                                if (item.Conditions != null)
                                 {
-                                    AdvancedLocationLoaderMod.Logger.Log("Shop item `" + item.ToString() + "` Condition Error: " + err, LogLevel.Error);
-                                    continue;
+                                    string err = Conditions.FindConflictingConditions(item.Conditions);
+                                    if (err != null)
+                                    {
+                                        AdvancedLocationLoaderMod.Logger.Log("Shop item `" + item.ToString() + "` in `"+path+"` caused a Condition Error: " + err, LogLevel.Error);
+                                        continue;
+                                    }
                                 }
-                            }
-                        Configs.Compound.Shops.Add(shop, cfg);
+                            Configs.Compound.Shops.Add(shop, cfg);
+                        }
+                        catch(Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Could not load shop due to unexpected error: " + path, err);
+                            continue;
+                        }
                     }
                 }
         }

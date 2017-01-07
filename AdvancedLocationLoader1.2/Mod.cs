@@ -7,6 +7,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
 using StardewValley;
+using StardewValley.Menus;
 
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
@@ -32,6 +33,7 @@ namespace Entoarox.AdvancedLocationLoader
             GameEvents.LoadContent += Events.GameEvents_LoadContent;
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
+            PlayerEvents.FarmerChanged += Events.PlayerEvents_FarmerChanged;
 
             ITypeRegistry registry = EntoFramework.GetTypeRegistry();
             registry.RegisterType<Locations.Greenhouse>();
@@ -44,10 +46,10 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void DebugNotification(object s, EventArgs e)
         {
-            if (Game1.activeClickableMenu is StardewValley.Menus.TitleMenu && Game1.activeClickableMenu != null)
+            if (Game1.activeClickableMenu is TitleMenu && Game1.activeClickableMenu != null)
             {
                 EntoFramework.CreditsTick(s, e);
-                Framework.Reflection.FieldHelper.SetField(Game1.activeClickableMenu, "subMenu", new TitleMenuDialogue(Localizer.Localize("betaNotice","BETA")));
+                typeof(TitleMenu).GetField("subMenu", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(new TitleMenuDialogue(Localizer.Localize("betaNotice", "BETA")));
                 GameEvents.UpdateTick -= DebugNotification;
             }
 #endif

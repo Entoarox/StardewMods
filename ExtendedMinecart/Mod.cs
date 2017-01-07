@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Microsoft.Xna.Framework;
+
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
@@ -25,6 +27,8 @@ namespace Entoarox.ExtendedMinecart
         public bool WoodsDestinationEnabled = true;
         public bool BeachDestinationEnabled = true;
         public bool WizardDestinationEnabled = true;
+        public bool UseCustomFarmDestination = false;
+        public Point CustomFarmDestinationPoint = new Point(0, 0);
     }
     internal static class GLExtension
     {
@@ -101,7 +105,7 @@ namespace Entoarox.ExtendedMinecart
             foreach (ButtonFormComponent c in Destinations.Values)
                 Menu.AddComponent(c);
             // # Farm
-            if (Config.FarmDestinationEnabled)
+            if (Config.FarmDestinationEnabled && !Config.UseCustomFarmDestination)
             {
                 try
                 {
@@ -346,7 +350,9 @@ namespace Entoarox.ExtendedMinecart
                     Game1.warpFarmer("Town", 105, 80, 1);
                     break;
                 case "Farm":
-                    if(Config.AlternateFarmMinecart)
+                    if (Config.UseCustomFarmDestination)
+                        Game1.warpFarmer("Farm", Config.CustomFarmDestinationPoint.X, Config.CustomFarmDestinationPoint.Y, 1);
+                    else if (Config.AlternateFarmMinecart)
                         Game1.warpFarmer("Farm", 19, 8, 1);
                     else
                         Game1.warpFarmer("Farm", 78, 14, 1);

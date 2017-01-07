@@ -154,7 +154,7 @@ namespace Entoarox.Framework
         {
             return CheckConditionList(conditionlist, null, seperator, limit);
         }
-        public static bool CheckConditionList(string conditionlist, Func<string,bool?> customResolver=null, char seperator = ',', int limit = 5)
+        public static bool CheckConditionList(string conditionlist, Func<string,bool?> customResolver, char seperator = ',', int limit = 5)
         {
             string conditions = SortedConditionList(conditionlist, seperator);
             if (!ConditionCache.Contains(conditions))
@@ -169,6 +169,8 @@ namespace Entoarox.Framework
         }
         private static string SortedConditionList(string list, char seperator)
         {
+            if (!list.Contains(seperator.ToString()))
+                return list;
             string[] indexes = list.Split(seperator);
             Array.Sort(indexes);
             return string.Join(seperator.ToString(), indexes);

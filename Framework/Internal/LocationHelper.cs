@@ -8,9 +8,11 @@ using xTile.Tiles;
 
 namespace Entoarox.Framework
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     internal class LocationHelper : ILocationHelper
     {
         internal static ILocationHelper Singleton { get; } = new LocationHelper();
+#pragma warning restore CS0618 // Type or member is obsolete
         void ILocationHelper.SetStaticTile(LocationReference location, string layer, int x, int y, int index, string sheet)
         {
             GameLocation loc = location;

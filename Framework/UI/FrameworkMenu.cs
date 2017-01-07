@@ -279,14 +279,16 @@ namespace Entoarox.Framework.UI
             base.receiveScrollWheelAction(direction);
             Point p = Game1.getMousePosition();
             Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            if (FloatingComponent!=null)
+            if (FloatingComponent != null)
                 FloatingComponent.Scroll(direction, p, o);
-            foreach (IInteractiveMenuComponent el in EventOrder)
-                el.Scroll(direction, p, o);
+            else
+                foreach (IInteractiveMenuComponent el in EventOrder)
+                    if (el.InBounds(p, o) && el.Scroll(direction, p, o))
+                        return;
         }
         public override void receiveKeyPress(Keys key)
         {
-            if (Game1.keyboardDispatcher.Subscriber == null)
+            if (Game1.keyboardDispatcher.Subscriber == null || !Game1.keyboardDispatcher.Subscriber.Selected)
                 base.receiveKeyPress(key);
         }
         public override void update(GameTime time)

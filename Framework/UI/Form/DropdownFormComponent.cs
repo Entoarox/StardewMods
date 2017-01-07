@@ -49,10 +49,6 @@ namespace Entoarox.Framework.UI
                 ScrollOffset = Math.Max(0,index - 9);
                 KeyboardOffset = index;
             }
-            public override bool InBounds(Point p, Point o)
-            {
-                return true;
-            }
             public override void FocusGained()
             {
                 Selected = true;
@@ -66,36 +62,32 @@ namespace Entoarox.Framework.UI
             }
             public override void LeftClick(Point p, Point o)
             {
+                Value = Owner.Values[GetCursorIndex(p, o)];
                 Parent.ResetFocus();
-                if (base.InBounds(p, new Point(0, 0)))
-                {
-                    Value = Owner.Values[GetCursorIndex(p, o)];
-                }
-                else if (!Self.Contains(p))
-                {
-                    Parent.GetAttachedMenu().receiveLeftClick(p.X, p.Y, false);
-                }
             }
-            public override void RightClick(Point p, Point o)
-            {
-                if (!base.InBounds(p, new Point(0, 0)))
-                {
-                    Parent.ResetFocus();
-                    Parent.GetAttachedMenu().receiveRightClick(p.X, p.Y, false);
-                }
-            }
-            public override void Scroll(int d, Point p, Point o)
+            public override bool Scroll(int d, Point p, Point o)
             {
                 int change = d / 120;
                 int oldOffset = ScrollOffset;
                 ScrollOffset = Math.Max(0, Math.Min(ScrollOffset - change, MaxScroll));
                 if (oldOffset != ScrollOffset)
+                {
                     Game1.playSound("drumkit6");
+                    return true;
+                }
+                return false;
+            }
+            public override void HoverIn(Point p, Point o)
+            {
+                ShowHover = true;
             }
             public override void HoverOver(Point p, Point o)
             {
-                ShowHover = base.InBounds(p, new Point(0, 0));
                 HoverOffset = GetCursorIndex(p, o);
+            }
+            public override void HoverOut(Point p, Point o)
+            {
+                ShowHover = false;
             }
             public override void Draw(SpriteBatch b, Point o)
             {

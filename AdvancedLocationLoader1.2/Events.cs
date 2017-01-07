@@ -92,7 +92,6 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {
-            AdvancedLocationLoaderMod.Logger.Log("EventFired.MoreEvents_ActionTriggered("+e.Action+")",LogLevel.Trace);
             try
             {
                 switch (e.Action)
@@ -117,12 +116,19 @@ namespace Entoarox.AdvancedLocationLoader
                     case "ALLShop":
                         Actions.Shop(e.Who, e.Arguments, e.Position);
                         break;
+                    default:
+                        return;
                 }
+                AdvancedLocationLoaderMod.Logger.Log("ActionTriggered(" + e.Action + ")", LogLevel.Trace);
             }
             catch(Exception err)
             {
                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened",err);
             }
+        }
+        internal static void PlayerEvents_FarmerChanged(object s, EventArgs e)
+        {
+            AdvancedLocationLoaderMod.UpdateConditionalEdits();
         }
     }
 }

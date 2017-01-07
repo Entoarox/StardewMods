@@ -15,7 +15,7 @@
             }
             set
             {
-                Component.Selected = value;
+                
             }
         }
         public void RecieveTextInput(char chr)

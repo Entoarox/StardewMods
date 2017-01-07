@@ -12,11 +12,13 @@ namespace Entoarox.Framework.UI
         protected class TabInfo
         {
             public IInteractiveMenuComponent Component;
-            public int Icon;
-            public TabInfo(IInteractiveMenuComponent component, int icon)
+            public Texture2D Texture;
+            public Rectangle Crop;
+            public TabInfo(IInteractiveMenuComponent component, Texture2D texture, Rectangle crop)
             {
                 Component = component;
-                Icon = icon;
+                Texture = texture;
+                Crop = crop;
             }
         }
         protected static Rectangle Tab = new Rectangle(16, 368, 16, 16);
@@ -53,9 +55,17 @@ namespace Entoarox.Framework.UI
         }
         public void AddTab<T>(int icon, T collection) where T : IComponentCollection, IInteractiveMenuComponent
         {
-            Tabs.Add(new TabInfo(collection, icon));
+            AddTab(Game1.objectSpriteSheet, icon, collection);
+        }
+        public void AddTab<T>(Texture2D texture, int icon, T collection) where T : IComponentCollection, IInteractiveMenuComponent
+        {
+            AddTab(texture, Game1.getSourceRectForStandardTileSheet(texture, icon, 16, 16), collection);
+        }
+        public void AddTab<T>(Texture2D texture, Rectangle crop, T collection) where T : IComponentCollection, IInteractiveMenuComponent
+        {
+            Tabs.Add(new TabInfo(collection, texture, crop));
             collection.Attach(this);
-            if(CurrentTab==null)
+            if (CurrentTab == null)
             {
                 Current = 0;
                 CurrentTab = collection;
@@ -96,9 +106,9 @@ namespace Entoarox.Framework.UI
         {
             CurrentTab?.HoverOver(p, new Point(o.X + Area.X + zoom5, o.Y + Area.Y + zoom22));
         }
-        public override void Scroll(int d, Point p, Point o)
+        public override bool Scroll(int d, Point p, Point o)
         {
-            CurrentTab?.Scroll(d, p, new Point(o.X + Area.X + zoom5, o.Y + Area.Y + zoom22));
+            return CurrentTab == null ? false : CurrentTab.Scroll(d, p, new Point(o.X + Area.X + zoom5, o.Y + Area.Y + zoom22));
         }
         public override void Update(GameTime t)
         {
@@ -114,7 +124,7 @@ namespace Entoarox.Framework.UI
             for(var c=0;c<Tabs.Count;c++)
             {
                 b.Draw(Game1.mouseCursors, new Rectangle(o.X + Area.X + zoom4 + c * zoom16, o.Y + Area.Y + (c == Current ? zoom2 : 0), zoom16, zoom16), Tab, Color.White);
-                b.Draw(Game1.objectSpriteSheet, new Rectangle(o.X + Area.X + zoom8 + c * zoom16, o.Y + Area.Y + zoom5 + (c == Current ? zoom2 : 0), zoom8, zoom8), Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, Tabs[c].Icon, 16, 16), Color.White);
+                b.Draw(Tabs[c].Texture, new Rectangle(o.X + Area.X + zoom8 + c * zoom16, o.Y + Area.Y + zoom5 + (c == Current ? zoom2 : 0), zoom8, zoom8), Tabs[c].Crop, Color.White);
             }
             // Draw body
             CurrentTab?.Draw(b, new Point(o.X + Area.X + zoom5, o.Y + Area.Y + zoom22));

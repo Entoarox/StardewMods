@@ -101,6 +101,7 @@ namespace Entoarox.Framework
     /**
      * <summary>Contains EntoFramework methods to simplify operations to game locations</summary>
      */
+    [Obsolete("Use the extension methods found in Entoarox.Framework.Extensions.GameLocationExtensions instead")]
     public interface ILocationHelper
     {
         /**

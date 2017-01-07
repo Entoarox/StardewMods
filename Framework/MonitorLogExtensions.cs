@@ -8,6 +8,7 @@ using StardewModdingAPI;
 
 namespace Entoarox.Framework
 {
+    [Obsolete]
     public static class MonitorLogExtensions
     {
         private static HashSet<string> Cache = new HashSet<string>();

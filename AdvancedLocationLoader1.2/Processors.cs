@@ -9,6 +9,7 @@ using StardewValley;
 using Warp = StardewValley.Warp;
 
 using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
@@ -16,22 +17,25 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Processors
     {
-        internal static ILocationHelper LocationHelper = EntoFramework.GetLocationHelper();
         internal static IContentRegistry ContentRegistry = EntoFramework.GetContentRegistry();
         internal static void ApplyTile(Tile tile)
         {
-            AdvancedLocationLoaderMod.Logger.Log(tile.ToString(),LogLevel.Trace);
             try
             {
-                if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions,AdvancedLocationLoaderMod.ConditionResolver))
+                if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                {
+                    AdvancedLocationLoaderMod.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
                     return;
+                }
+                GameLocation loc = Game1.getLocationFromName(tile.MapName);
                 if (tile.TileIndex != null)
                     if (tile.TileIndex < 0)
-                        LocationHelper.RemoveTile(tile.MapName, tile.LayerId, tile.TileX, tile.TileY);
+                        loc.RemoveTile(tile.TileX, tile.TileY, tile.LayerId);
                     else
-                        LocationHelper.SetStaticTile(tile.MapName, tile.LayerId, tile.TileX, tile.TileY, (int)tile.TileIndex, tile.SheetId);
+                        loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId);
                 else
-                    LocationHelper.SetAnimatedTile(tile.MapName, tile.LayerId, tile.TileX, tile.TileY, tile.TileIndexes, (int)tile.Interval, tile.SheetId);
+                    loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId);
+                AdvancedLocationLoaderMod.Logger.Log(tile.ToString() +" ~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
@@ -44,7 +48,7 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
-                    LocationHelper.SetTileProperty(property.MapName, property.LayerId, property.TileX, property.TileY, property.Key, property.Value);
+                    Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
             }
             catch (Exception err)
             {

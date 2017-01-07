@@ -175,6 +175,27 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AdvancedLocationLoaderMod.Logger.Log("Converting the `shops` section", LogLevel.Trace);
             // Convert the `shops` section
             Updated.Shops = Config.shops;
+            // Remove empty fields
+            if (Updated.Conditionals.Count == 0)
+                Updated.Conditionals = null;
+            if (Updated.Locations.Count == 0)
+                Updated.Locations = null;
+            if (Updated.Overrides.Count == 0)
+                Updated.Overrides = null;
+            if (Updated.Properties.Count == 0)
+                Updated.Properties = null;
+            if (Updated.Redirects.Count == 0)
+                Updated.Redirects = null;
+            if (Updated.Shops.Count == 0)
+                Updated.Shops = null;
+            if (Updated.Teleporters.Count == 0)
+                Updated.Teleporters = null;
+            if (Updated.Tiles.Count == 0)
+                Updated.Tiles = null;
+            if (Updated.Tilesheets.Count == 0)
+                Updated.Tilesheets = null;
+            if (Updated.Warps.Count == 0)
+                Updated.Warps = null;
             AdvancedLocationLoaderMod.Logger.Log("Saving converted manifest to file...", LogLevel.Trace);
             // Save and then parse the updated config
             File.WriteAllText(filepath, JsonConvert.SerializeObject(Updated,new JsonSerializerSettings() { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore }));

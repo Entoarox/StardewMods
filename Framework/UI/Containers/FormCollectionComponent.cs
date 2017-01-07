@@ -44,10 +44,10 @@ namespace Entoarox.Framework.UI
         }
         public FormCollectionComponent(Rectangle area, List<IMenuComponent> components = null)
         {
+            SetScaledArea(area);
             if (components != null)
                 foreach (IMenuComponent c in components)
                     AddComponent(c);
-            SetScaledArea(area);
         }
         // IComponentCollection
         protected void UpdateDrawOrder()
@@ -212,13 +212,15 @@ namespace Entoarox.Framework.UI
                 }
             }
         }
-        public override void Scroll(int d, Point p, Point o)
+        public override bool Scroll(int d, Point p, Point o)
         {
             if (!Visible)
-                return;
+                return false;
             Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
             foreach (IInteractiveMenuComponent el in EventOrder)
-                el.Scroll(d, p, o2);
+                if (el.InBounds(p, o) && el.Scroll(d, p, o))
+                    return true;
+            return false;
         }
         public override void Update(GameTime t)
         {
