@@ -7,8 +7,8 @@
     <ProjectGuid>{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Entoarox.SeasonalBuildings</RootNamespace>
-    <AssemblyName>SeasonalBuildings</AssemblyName>
+    <RootNamespace>Entoarox.SeasonalImmersion</RootNamespace>
+    <AssemblyName>SeasonalImmersion</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>

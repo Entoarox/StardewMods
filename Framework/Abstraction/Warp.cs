@@ -8,14 +8,26 @@ namespace Entoarox.Framework.Abstraction
 {
     public class Warp
     {
-        public readonly string Destination;
         public readonly int X;
         public readonly int Y;
-        public Warp(string destination, int x, int y)
+        public readonly string Target;
+        public readonly int TargetX;
+        public readonly int TargetY;
+        public Warp(int x, int y, string target, int targetX, int targetY)
         {
-            Destination = destination;
             X = x;
             Y = y;
+            Target = target;
+            TargetX = targetX;
+            TargetY = targetY;
+        }
+        internal static Warp Wrap(StardewValley.Warp obj)
+        {
+            return new Warp(obj.X, obj.Y, obj.TargetName, obj.TargetX, obj.TargetY);
+        }
+        internal static StardewValley.Warp Unwrap(Warp obj)
+        {
+            return new StardewValley.Warp(obj.X, obj.Y, obj.Target, obj.TargetX, obj.TargetY, false);
         }
     }
 }

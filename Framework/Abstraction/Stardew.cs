@@ -10,7 +10,7 @@ namespace Entoarox.Framework.Abstraction
     {
         public static WrappedContentManager ContentManager => new WrappedContentManager(StardewValley.Game1.content);
         public static Farmer Player => StardewValley.Game1.player == null ? null : new Farmer(StardewValley.Game1.player);
-        public static LocationList Locations => new LocationList();
+        public static WrappedList<GameLocation, StardewValley.GameLocation> Locations => new WrappedList<GameLocation, StardewValley.GameLocation>(StardewValley.Game1.locations, GameLocation.Wrap);
         public static GameLocation GetLocationFromName(string name)
         {
             StardewValley.GameLocation loc = StardewValley.Game1.getLocationFromName(name);
@@ -26,6 +26,10 @@ namespace Entoarox.Framework.Abstraction
                 return false;
             location = GameLocation.Wrap(loc);
             return true;
+        }
+        public static Character GetCharacterFromName(string name)
+        {
+            return null;
         }
     }
 }
