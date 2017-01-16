@@ -88,7 +88,7 @@ namespace Entoarox.Framework.Abstraction
             set
             {
                 if (Unwrapper == null)
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException();
                 if (index < 0 || List.Count <= index)
                     throw new IndexOutOfRangeException();
                 List[index] = Unwrapper(value);

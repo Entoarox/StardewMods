@@ -124,7 +124,7 @@ namespace Entoarox.ShopExpander
             if (!affectedShops.Contains(owner))
                 affectedShops.Add(owner);
             obj.requirements = requirements;
-            Monitor.Log("Object registered: " + obj.Name + ':' + replacement + '@' + owner + '[' + obj.maximumStackSize() + ',' + obj.stackAmount + "]#"+requirements,LogLevel.Trace);
+            Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.maximumStackSize()}*{obj.stackAmount},'{requirements}')",LogLevel.Trace);
             AddedObjects.Add(obj.Name, obj);
             ReplacementStacks.Add(obj.Name, stack);
         }
@@ -235,6 +235,9 @@ namespace Entoarox.ShopExpander
                             break;
                         case "Hospital":
                             shopOwner = "Hospital";
+                            break;
+                        case "Club":
+                            shopOwner = "MisterQi";
                             break;
                     }
                 }
