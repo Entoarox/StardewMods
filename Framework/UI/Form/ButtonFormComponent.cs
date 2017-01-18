@@ -12,7 +12,23 @@ namespace Entoarox.Framework.UI
         protected readonly static Rectangle ButtonNormal = new Rectangle(256, 256, 10, 10);
         protected readonly static Rectangle ButtonHover = new Rectangle(267, 256, 10, 10);
         public event ClickHandler Handler;
-        protected string Label;
+        protected string _Label;
+        protected int _Width;
+        public string Label
+        {
+            get
+            {
+                return _Label;
+            }
+            set
+            {
+                _Label = value;
+                int labelWidth = GetStringWidth(value, Game1.smallFont);
+                int width = Math.Max(_Width, labelWidth + 4);
+                LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
+                Area.Width = width * Game1.pixelZoom;
+            }
+        }
         protected int LabelOffset;
         protected bool Hovered = false;
         protected bool Pressed = false;
@@ -22,11 +38,12 @@ namespace Entoarox.Framework.UI
         }
         public ButtonFormComponent(Point position, int width, string label, ClickHandler handler =null)
         {
+            _Width = width;
             int labelWidth = GetStringWidth(label, Game1.smallFont);
             width = Math.Max(width,labelWidth+4);
             LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
             SetScaledArea(new Rectangle(position.X, position.Y, width, 10));
-            Label = label;
+            _Label = label;
             if (handler!=null)
                 Handler += handler;
         }

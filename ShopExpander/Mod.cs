@@ -124,7 +124,7 @@ namespace Entoarox.ShopExpander
             if (!affectedShops.Contains(owner))
                 affectedShops.Add(owner);
             obj.requirements = requirements;
-            Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.maximumStackSize()}*{obj.stackAmount},'{requirements}')",LogLevel.Trace);
+            Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.stackAmount}*{obj.maximumStackSize()},'{requirements}')",LogLevel.Trace);
             AddedObjects.Add(obj.Name, obj);
             ReplacementStacks.Add(obj.Name, stack);
         }
@@ -168,23 +168,27 @@ namespace Entoarox.ShopExpander
         // Add a modified "stack" item to the shop
         private void addItem(SObject item, string location)
         {
-            Monitor.Log("Item(" + item.Name + ':' + item.maximumStackSize()+')',LogLevel.Trace);
             // Check that makes sure only the items that the current shop is supposed to sell are added
             if (location != item.targetedShop)
+            {
+                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false}", LogLevel.Trace);
                 return;
-            Monitor.Log("Location: true", LogLevel.Trace);
-            if(!Conditions.CheckConditionList(item.requirements,','))
+            }
+            if (!Conditions.CheckConditionList(item.requirements, ','))
+            {
+                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false,Condition=false}", LogLevel.Trace);
                 return;
-            Monitor.Log("Condition: true",LogLevel.Trace);
+            }
             if(item.stackAmount==1)
             {
-                Monitor.Log("Stack: false", LogLevel.Trace);
-                forSale.Add(item.Revert());
-                itemPriceAndStock.Add(item.Revert(), new int[2] { item.Revert().salePrice(), int.MaxValue });
+                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=false}", LogLevel.Trace);
+                Item reverted = item.Revert();
+                forSale.Add(reverted);
+                itemPriceAndStock.Add(reverted, new int[2] { reverted.salePrice(), int.MaxValue });
             }
             else
             {
-                Monitor.Log("Stack: true", LogLevel.Trace);
+                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=true}", LogLevel.Trace);
                 forSale.Add(item);
                 itemPriceAndStock.Add(item, new int[2] { item.salePrice(), int.MaxValue });
             }
@@ -283,10 +287,6 @@ namespace Entoarox.ShopExpander
             price = salePrice() * stack;
             MaxStackSize = (int)Math.Floor(999d / stack);
         }
-        private SObject()
-        {
-
-        }
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
         {
             SpriteBatch spriteBatch1 = spriteBatch;
@@ -316,7 +316,7 @@ namespace Entoarox.ShopExpander
         }
         public override string Name
         {
-            get { return stackAmount+' '+Item.Name; }
+            get { return stackAmount.ToString()+' '+Item.Name; }
             set { }
         }
         public int getStackNumber()
@@ -329,7 +329,7 @@ namespace Entoarox.ShopExpander
         }
         public new bool canStackWith(Item obj)
         {
-            return obj.canStackWith(this) && obj is StackableShopObject && (Stack + obj.Stack) < maximumStackSize();
+            return obj.canStackWith(this) && obj is SObject && (Stack + obj.Stack) < maximumStackSize();
         }
         public override string getDescription()
         {
@@ -353,19 +353,7 @@ namespace Entoarox.ShopExpander
         }
         public SObject Clone()
         {
-            var obj = new SObject();
-
-            obj.Name = Name;
-            obj.quality = quality;
-            obj.scale = scale;
-            obj.isSpawnedObject = isSpawnedObject;
-            obj.isRecipe = isRecipe;
-            obj.questItem = questItem;
-            obj.stack = 1;
-            obj.parentSheetIndex = parentSheetIndex;
-            obj.MaxStackSize = maximumStackSize();
-
-            obj.stackAmount = stackAmount;
+            var obj = new SObject(Item, stackAmount);
             obj.targetedShop = targetedShop;
             obj.requirements = requirements;
 

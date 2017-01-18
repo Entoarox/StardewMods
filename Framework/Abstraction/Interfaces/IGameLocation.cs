@@ -17,7 +17,7 @@ namespace Entoarox.Framework.Abstraction.Interfaces
         void SetTileProperty(int x, int y, string layer, string key, string value);
         string GetTileProperty(int x, int y, string layer, string key);
         void SetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace = false);
-        void SetWarp(int x, int y, Warp warp, bool replace = false);
+        void SetWarp(Warp warp, bool replace = false);
         Warp GetWarp(int x, int y);
 
         bool TryRemoveTile(int x, int y, string layer);
@@ -26,7 +26,7 @@ namespace Entoarox.Framework.Abstraction.Interfaces
         bool TrySetTileProperty(int x, int y, string layer, string key, string value);
         bool TryGetTileProperty(int x, int y, string layer, string key, out string value);
         bool TrySetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace = false);
-        bool TrySetWarp(int x, int y, Warp warp, bool replace = false);
+        bool TrySetWarp(Warp warp, bool replace = false);
         bool TryGetWarp(int x, int y, out Warp warp);
 
         WarpList Warps { get;}

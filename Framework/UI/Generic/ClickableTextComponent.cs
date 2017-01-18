@@ -9,7 +9,21 @@ namespace Entoarox.Framework.UI
 {
     public class ClickableTextComponent : BaseInteractiveMenuComponent
     {
-        protected string Text;
+        protected string _Label;
+        public string Label
+        {
+            get
+            {
+                return _Label;
+            }
+            set
+            {
+                _Label = value;
+                Vector2 size = Font.MeasureString(value) * Scale;
+                Area.Width = (int)Math.Ceiling(size.X);
+                Area.Height = (int)Math.Ceiling(size.Y);
+            }
+        }
         protected float Scale;
         protected Color Color;
         protected SpriteFont Font;
@@ -17,7 +31,7 @@ namespace Entoarox.Framework.UI
         protected bool HoverEffect;
         protected bool Hovered = false;
         public event ClickHandler Handler;
-        public ClickableTextComponent(Point position, string text, ClickHandler handler = null, bool hoverEffect = true, bool shadow = true, float scale = 1, Color? color = null, SpriteFont font = null)
+        public ClickableTextComponent(Point position, string label, ClickHandler handler = null, bool hoverEffect = true, bool shadow = true, float scale = 1, Color? color = null, SpriteFont font = null)
         {
             if (color == null)
                 color = Game1.textColor;
@@ -30,8 +44,8 @@ namespace Entoarox.Framework.UI
             Color = (Color)color;
             Shadow = shadow;
             Scale = scale;
-            Text = text;
-            Vector2 size = Font.MeasureString(Text) / Game1.pixelZoom * Scale;
+            _Label = label;
+            Vector2 size = Font.MeasureString(label) / Game1.pixelZoom * Scale;
             SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
         }
         public override void HoverIn(Point p, Point o)
@@ -54,9 +68,9 @@ namespace Entoarox.Framework.UI
                 return;
             Vector2 p = new Vector2(Area.X + o.X, Area.Y + o.Y);
             if (Shadow)
-                Utility.drawTextWithShadow(b, Text, Font, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), Scale);
+                Utility.drawTextWithShadow(b, Label, Font, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), Scale);
             else
-                b.DrawString(Font, Text, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), 0, Vector2.Zero, Game1.pixelZoom * Scale, SpriteEffects.None, 1);
+                b.DrawString(Font, Label, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), 0, Vector2.Zero, Game1.pixelZoom * Scale, SpriteEffects.None, 1);
         }
     }
 }

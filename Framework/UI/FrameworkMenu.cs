@@ -99,7 +99,7 @@ namespace Entoarox.Framework.UI
             if (FocusElement == null)
                 return;
             FocusElement.FocusLost();
-            if(FocusElement is IKeyboardComponent)
+            if(FocusElement is IKeyboardComponent && Game1.keyboardDispatcher.Subscriber!=null)
             {
                 Game1.keyboardDispatcher.Subscriber.Selected = false;
                 Game1.keyboardDispatcher.Subscriber = null;

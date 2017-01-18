@@ -125,16 +125,12 @@ namespace Entoarox.Framework.UI
                 return;
             }
             // Drawing code used when the textbox is selected
-            string text = SelectedValue;
-            Vector2 v;
-            // Limit the draw length
-            for (v = Game1.smallFont.MeasureString(text); v.X > Area.Width - zoom5; v = Game1.smallFont.MeasureString(text))
-                text = text.Substring(1);
+
             // Draw the caret (Text cursor)
             if (DateTime.Now.Millisecond % 1000 >= 500)
-                b.Draw(Game1.staminaRect, new Rectangle(Area.X + o.X + zoom05 + zoom8 + (int)v.X, Area.Y + o.Y + (int)(Game1.pixelZoom*1.5), zoom05, Area.Height-zoom3), Game1.textColor);
+                b.Draw(Game1.staminaRect, new Rectangle(Area.X + o.X + zoom05 + zoom8 + (int)Game1.smallFont.MeasureString(SelectedValue).X, Area.Y + o.Y + (int)(Game1.pixelZoom*1.5), zoom05, Area.Height-zoom3), Game1.textColor);
             // Draw the actual text
-            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(o.X + Area.X + zoom8, o.Y + Area.Y + Game1.pixelZoom), Game1.textColor);
+            Utility.drawTextWithShadow(b, SelectedValue, Game1.smallFont, new Vector2(o.X + Area.X + zoom8, o.Y + Area.Y + Game1.pixelZoom), Game1.textColor);
         }
         public override void TextReceived(char chr)
         {

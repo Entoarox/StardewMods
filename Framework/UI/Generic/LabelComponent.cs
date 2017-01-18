@@ -10,11 +10,23 @@ namespace Entoarox.Framework.UI
         protected readonly static Rectangle Left = new Rectangle(256, 267, 6, 16);
         protected readonly static Rectangle Right = new Rectangle(263, 267, 6, 16);
         protected readonly static Rectangle Center = new Rectangle(262, 267, 1, 16);
-        protected string Label;
+        protected string _Label;
+        public string Label
+        {
+            get
+            {
+                return _Label;
+            }
+            set
+            {
+                _Label = value;
+                Area.Width = (GetStringWidth(value, Game1.smallFont) + 12) * Game1.pixelZoom;
+            }
+        }
         public LabelComponent(Point position, string label)
         {
             SetScaledArea(new Rectangle(position.X, position.Y, GetStringWidth(label, Game1.smallFont) + 12, 16));
-            Label = label;
+            _Label = label;
         }
         public override void Draw(SpriteBatch b, Point o)
         {

@@ -244,42 +244,42 @@ namespace Entoarox.Framework.Abstraction
         }
         public void SetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace=false)
         {
-            SetWarp(x, y, new Warp(destination, destinationX, destinationY), replace);
+            SetWarp(new Warp(x, y, destination, destinationX, destinationY), replace);
         }
         public bool TrySetWarp(int x, int y, string destination, int destinationX, int destinationY, bool replace = false)
         {
-            return TrySetWarp(x, y, new Warp(destination, destinationX, destinationY), replace);
+            return TrySetWarp(new Warp(x, y, destination, destinationX, destinationY), replace);
         }
-        public void SetWarp(int x, int y, Warp warp, bool replace = false)
+        public void SetWarp(Warp warp, bool replace = false)
         {
             for (int c = 0; c < Location.warps.Count; c++)
-                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                if (Location.warps[c].X == warp.X && Location.warps[c].Y == warp.Y)
                 {
                     if (!replace)
                         throw new InvalidOperationException();
-                    Location.warps[c] = new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false);
+                    Location.warps[c] = Warp.Unwrap(warp);
                     return;
                 }
-            Location.warps.Add(new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false));
+            Location.warps.Add(Warp.Unwrap(warp));
         }
-        public bool TrySetWarp(int x, int y, Warp warp, bool replace = false)
+        public bool TrySetWarp(Warp warp, bool replace = false)
         {
             for (int c = 0; c < Location.warps.Count; c++)
-                if (Location.warps[c].X == x && Location.warps[c].Y == y)
+                if (Location.warps[c].X == warp.X && Location.warps[c].Y == warp.Y)
                 {
                     if (!replace)
                         return false;
-                    Location.warps[c] = new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false);
+                    Location.warps[c] = Warp.Unwrap(warp);
                     break;
                 }
-            Location.warps.Add(new StardewValley.Warp(x, y, warp.Destination, warp.X, warp.Y, false));
+            Location.warps.Add(Warp.Unwrap(warp));
             return true;
         }
         public Warp GetWarp(int x, int y)
         {
             for (int c = 0; c < Location.warps.Count; c++)
                 if (Location.warps[c].X == x && Location.warps[c].Y == y)
-                    return new Warp(Location.warps[c].TargetName, Location.warps[c].TargetX, Location.warps[c].TargetY);
+                    return Warp.Wrap(Location.warps[c]);
             throw new NullReferenceException();
         }
         public bool TryGetWarp(int x, int y, out Warp warp)
@@ -288,7 +288,7 @@ namespace Entoarox.Framework.Abstraction
             for (int c = 0; c < Location.warps.Count; c++)
                 if (Location.warps[c].X == x && Location.warps[c].Y == y)
                 {
-                    warp = new Warp(Location.warps[c].TargetName, Location.warps[c].TargetX, Location.warps[c].TargetY);
+                    warp = Warp.Wrap(Location.warps[c]);
                     return true;
                 }
             return false;

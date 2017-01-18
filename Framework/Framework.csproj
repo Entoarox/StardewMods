@@ -54,18 +54,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstraction\Character.cs" />
-    <Compile Include="Abstraction\Enums.cs" />
-    <Compile Include="Abstraction\Farmer.cs" />
-    <Compile Include="Abstraction\GameLocation.cs" />
-    <Compile Include="Abstraction\Interfaces\IGameLocation.cs" />
-    <Compile Include="Abstraction\Warp.cs" />
-    <Compile Include="Abstraction\LocationList.cs" />
-    <Compile Include="Abstraction\Stardew.cs" />
-    <Compile Include="Abstraction\WarpList.cs" />
-    <Compile Include="Abstraction\WrappedContentManager.cs" />
-    <Compile Include="Abstraction\WrappedList.cs" />
+    <None Include="Abstraction\Character.cs" />
+    <None Include="Abstraction\Enums.cs" />
+    <None Include="Abstraction\Farmer.cs" />
+    <None Include="Abstraction\GameLocation.cs" />
+    <None Include="Abstraction\Interfaces\IGameLocation.cs" />
+    <None Include="Abstraction\Warp.cs" />
+    <None Include="Abstraction\LocationList.cs" />
+    <None Include="Abstraction\Stardew.cs" />
+    <None Include="Abstraction\WarpList.cs" />
+    <None Include="Abstraction\WrappedContentManager.cs" />
+    <None Include="Abstraction\WrappedList.cs" />
     <Compile Include="Conditions.cs" />
+    <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
     <Compile Include="Internal\ContentRegistry.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="LocalizationHelper.cs" />
     <Compile Include="Internal\LocationHelper.cs" />
     <Compile Include="DataLogger.cs" />
+    <Compile Include="MathUtility.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Internal\MessageBox.cs" />
     <Compile Include="MonitorLogExtensions.cs" />
@@ -144,12 +146,12 @@
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
+  <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.4.0\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.4.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pathoschild.Stardew.ModBuildConfig.1.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets'))" />
+    <Error Condition="!Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.4.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pathoschild.Stardew.ModBuildConfig.1.4.0\build\Pathoschild.Stardew.ModBuildConfig.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

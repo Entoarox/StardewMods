@@ -15,6 +15,7 @@ namespace Entoarox.Framework
         private static Point Greenhouse;
         internal static void Patch()
         {
+            EntoFramework.Logger.Log("GamePatcher: Patching greenhouse...", StardewModdingAPI.LogLevel.Trace);
             EntoFramework.GetLocationHelper().SetTileProperty(Game1.getLocationFromName("Farm"), "Buildings", 28, 15, "Action", "NewGreenhouse");
             if (EntoFramework.GetLocationHelper().GetTileProperty(Game1.getLocationFromName("Farm"), "Buildings", 28, 15, "Action") != "NewGreenhouse")
                 EntoFramework.Logger.Log("Setting the greenhouse tile action failed!",StardewModdingAPI.LogLevel.Error);
@@ -27,6 +28,8 @@ namespace Entoarox.Framework
             }
             if (Greenhouse == null)
                 EntoFramework.Logger.Log("Unable to find the greenhouse exit warp to use as a reference for entering the greenhouse!",StardewModdingAPI.LogLevel.Error);
+            else
+                EntoFramework.Logger.Log($"GamePatcher: Greenhouse exit warp found at [{Greenhouse.X},{Greenhouse.Y+1}], player will enter greenhouse at [{Greenhouse.X},{Greenhouse.Y}]", StardewModdingAPI.LogLevel.Trace);
         }
         internal static void Update(object s, EventArgs e)
         {
@@ -37,6 +40,7 @@ namespace Entoarox.Framework
             }
             if (Game1.fadeToBlack && !Game1.messagePause && WarpStage == 1 && !Game1.nonWarpFade && Game1.currentLocation != null && Game1.locationAfterWarp != null && !Game1.menuUp && !Game1.eventUp && Game1.locationAfterWarp.Name != "UndergroundMine" && Game1.locationAfterWarp.Name == ReportedLocation)
             {
+                EntoFramework.Logger.Log("GamePatcher: Fixing lighting...", StardewModdingAPI.LogLevel.Trace);
                 Game1.currentLocation.cleanupBeforePlayerExit();
                 Game1.currentLocation.resetForPlayerEntry();
                 WarpStage++;
@@ -52,6 +56,7 @@ namespace Entoarox.Framework
             {
                 case "NewGreenhouse":
                 case "ALLGreenhouse":
+                    EntoFramework.Logger.Log("GamePatcher: Detected `NewGreenhouse` being triggered", StardewModdingAPI.LogLevel.Trace);
                     if (Game1.player.mailReceived.Contains("ccPantry"))
                     {
                         Game1.warpFarmer("Greenhouse", Greenhouse.X, Greenhouse.Y, false);
@@ -72,6 +77,7 @@ namespace Entoarox.Framework
                         {
                             case 1:
                             case 3:
+                                EntoFramework.Logger.Log("GamePatcher: Fixing weather report...", StardewModdingAPI.LogLevel.Trace);
                                 Game1.weatherForTomorrow = Game1.weather_sunny;
                                 break;
                         }
@@ -81,6 +87,7 @@ namespace Entoarox.Framework
                     {
                         case 12:
                         case 25:
+                            EntoFramework.Logger.Log("GamePatcher: Fixing weather report...", StardewModdingAPI.LogLevel.Trace);
                             Game1.weatherForTomorrow = Game1.weather_lightning;
                             break;
                     }
