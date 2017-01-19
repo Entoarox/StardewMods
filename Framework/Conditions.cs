@@ -133,8 +133,6 @@ namespace Entoarox.Framework
                         return Game1.player.mailReceived.Contains(condition);
                 }
         }
-        // Keeps a cache of previously collision-checked conditions, as collision-checking does have some impact
-        private static List<string> ConditionCache = new List<string>();
         /**
          * Checks a character-separated list of conditions
          * A conflict check is performed the first time a condition string is asked to be checked
@@ -157,8 +155,6 @@ namespace Entoarox.Framework
         public static bool CheckConditionList(string conditionlist, Func<string,bool?> customResolver, char seperator = ',', int limit = 5)
         {
             string conditions = SortedConditionList(conditionlist, seperator);
-            if (!ConditionCache.Contains(conditions))
-                ConditionCache.Add(conditions);
             string[] conds = conditions.Split(seperator);
             if (conds.Length > limit)
                 return false;
