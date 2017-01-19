@@ -98,7 +98,7 @@ namespace Entoarox.AdvancedLocationLoader
                 else
                 {
                     Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
-                    location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId,location.map, fakepath, new xTile.Dimensions.Size(sheet.Width, sheet.Height), new xTile.Dimensions.Size(16, 16)));
+                    location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId,location.map, fakepath, new xTile.Dimensions.Size((int)Math.Ceiling(sheet.Width/16.0), (int)Math.Ceiling(sheet.Height/16.0)), new xTile.Dimensions.Size(16, 16)));
                 }
             }
             catch (Exception err)
