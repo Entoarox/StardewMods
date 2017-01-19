@@ -130,15 +130,6 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             if (config.Tiles != null)
                 foreach (Tile til in config.Tiles)
                 {
-                    if (til.Conditions != null)
-                    {
-                        string err = Conditions.FindConflictingConditions(til.Conditions);
-                        if (err != null)
-                        {
-                            AdvancedLocationLoaderMod.Logger.Log("Tile `" + til.ToString() + "` Condition Error: " + err,LogLevel.Error);
-                            continue;
-                        }
-                    }
                     if (!Layers.Contains(til.LayerId))
                         AdvancedLocationLoaderMod.Logger.Log("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId,LogLevel.Error);
                     else
@@ -149,15 +140,6 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             if (config.Properties != null)
                 foreach (Property pro in config.Properties)
                 {
-                    if (pro.Conditions != null)
-                    {
-                        string err = Conditions.FindConflictingConditions(pro.Conditions);
-                        if (err != null)
-                        {
-                            AdvancedLocationLoaderMod.Logger.Log("Property `" + pro.ToString() + "` Condition Error: " + err,LogLevel.Error);
-                            continue;
-                        }
-                    }
                     if (!Layers.Contains(pro.LayerId))
                         AdvancedLocationLoaderMod.Logger.Log("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId,LogLevel.Error);
                     else
@@ -167,18 +149,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AdvancedLocationLoaderMod.Logger.Log("Parsing the `Warps` section...", LogLevel.Trace);
             if (config.Warps != null)
                 foreach (Warp war in config.Warps)
-                {
-                    if (war.Conditions != null)
-                    {
-                        string err = Conditions.FindConflictingConditions(war.Conditions);
-                        if (err != null)
-                        {
-                            AdvancedLocationLoaderMod.Logger.Log("Warp `" + war.ToString() + "` Condition Error: " + err,LogLevel.Error);
-                            continue;
-                        }
-                    }
                     Compound.Warps.Add(war);
-                }
             // Parse conditionals
             AdvancedLocationLoaderMod.Logger.Log("Parsing the `Conditionals` section...", LogLevel.Trace);
             if (config.Conditionals != null)
@@ -228,16 +199,6 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         {
                             ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
                             cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
-                            foreach (ShopItem item in cfg.Items)
-                                if (item.Conditions != null)
-                                {
-                                    string err = Conditions.FindConflictingConditions(item.Conditions);
-                                    if (err != null)
-                                    {
-                                        AdvancedLocationLoaderMod.Logger.Log("Shop item `" + item.ToString() + "` in `"+path+"` caused a Condition Error: " + err, LogLevel.Error);
-                                        continue;
-                                    }
-                                }
                             Configs.Compound.Shops.Add(shop, cfg);
                         }
                         catch(Exception err)

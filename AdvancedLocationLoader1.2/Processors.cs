@@ -54,7 +54,7 @@ namespace Entoarox.AdvancedLocationLoader
                     else if (property.Optional)
                         return;
                     else
-                        AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch required property, tile does not exist: " + property.ToString());
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to patch required property, tile does not exist: " + property.ToString(), LogLevel.Error);
                 }
             }
             catch (Exception err)
