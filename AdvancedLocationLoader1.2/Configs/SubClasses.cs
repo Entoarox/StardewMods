@@ -160,7 +160,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string LayerId;
         public override string ToString()
         {
-            return "Property(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " > `" + Key + "` = " + Value + ')';
+            return "Property(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " => `" + Key + "` = " + Value + ')';
         }
     }
     public class Warp : TileInfo
@@ -168,6 +168,8 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string TargetName;
         public int TargetX;
         public int TargetY;
+        [JsonIgnore]
+        public new bool Optional;
         public override string ToString()
         {
             return "Warp(" + MapName + "@[" + TileX + ',' + TileY + "] => " + TargetName + "@[" + TargetX + ',' + TargetY + "])";

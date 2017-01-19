@@ -48,11 +48,19 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
-                    Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
+                {
+                    if (Game1.getLocationFromName(property.MapName).HasTile(property.TileX, property.TileY, property.LayerId))
+                        Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
+                    else if (property.Optional)
+                        return;
+                    else
+                        AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch required property, tile does not exist: " + property.ToString());
+                }
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
+                if(!property.Optional)
+                    AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
             }
         }
         internal static void ApplyWarp(Configs.Warp warp)

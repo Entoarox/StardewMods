@@ -13,6 +13,13 @@ namespace Entoarox.Framework.Extensions
 {
     public static class GameLocationExtensions
     {
+        public static bool HasTile(this GameLocation self, int x, int y, string layer)
+        {
+            Layer _layer = self.map.GetLayer(layer);
+            if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
+                return false;
+            return _layer.Tiles[x, y] != null;
+        }
         public static void SetTile(this GameLocation self, int x, int y, string layer, int index, string sheet = null)
         {
             TileSheet _sheet = sheet==null?self.map.TileSheets[0]:self.map.GetTileSheet(sheet);
