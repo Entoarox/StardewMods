@@ -29,9 +29,12 @@ namespace Entoarox.AdvancedLocationLoader
                 }
                 GameLocation loc = Game1.getLocationFromName(tile.MapName);
                 if (tile.TileIndex != null)
-                    if (tile.TileIndex < 0 && loc.HasTile(tile.TileX, tile.TileY, tile.LayerId))
-                        loc.RemoveTile(tile.TileX, tile.TileY, tile.LayerId);
-                    else
+                    if (tile.TileIndex < 0)
+                        if(loc.HasTile(tile.TileX, tile.TileY, tile.LayerId))
+                            loc.RemoveTile(tile.TileX, tile.TileY, tile.LayerId);
+                        else if(!tile.Optional)
+                            AdvancedLocationLoaderMod.Logger.Log("Unable to remove required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                        else
                         loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId);
                 else
                     loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId);

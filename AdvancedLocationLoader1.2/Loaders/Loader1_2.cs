@@ -296,6 +296,8 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     if (info != "OPTIONAL")
                         AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, " + info + ":" + obj.ToString(), LogLevel.Error);
                 }
+                else if(obj.SheetId!=null && Game1.getLocationFromName(obj.MapName).map.GetTileSheet(obj.SheetId)==null)
+                    AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
                 else
                     trueCompound.Tiles.Add(obj);
             }
