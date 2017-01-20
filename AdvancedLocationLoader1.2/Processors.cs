@@ -20,29 +20,50 @@ namespace Entoarox.AdvancedLocationLoader
         internal static IContentRegistry ContentRegistry = EntoFramework.GetContentRegistry();
         internal static void ApplyTile(Tile tile)
         {
+            int stage = 0;
+            int sub = 0;
             try
             {
+                stage++; // 1
                 if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
                 {
                     AdvancedLocationLoaderMod.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
                     return;
                 }
+                stage++; // 2
                 GameLocation loc = Game1.getLocationFromName(tile.MapName);
+                if(loc==null)
+                {
+                    AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, location does not exist: " + tile.ToString(), LogLevel.Error);
+                }
+                stage++; // 3
                 if (tile.TileIndex != null)
+                {
+                    sub = 1;
                     if (tile.TileIndex < 0)
-                        if(loc.HasTile(tile.TileX, tile.TileY, tile.LayerId))
-                            loc.RemoveTile(tile.TileX, tile.TileY, tile.LayerId);
-                        else if(!tile.Optional)
+                    {
+                        if (!loc.TryRemoveTile(tile.TileX, tile.TileY, tile.LayerId) && !tile.Optional)
                             AdvancedLocationLoaderMod.Logger.Log("Unable to remove required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
-                        else
-                        loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId);
+                    }
+                    else if (!loc.TrySetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId == null ? null : tile.SheetId) && !tile.Optional)
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                    return;
+                }
                 else
-                    loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId);
-                AdvancedLocationLoaderMod.Logger.Log(tile.ToString() +" ~> true", LogLevel.Trace);
+                {
+                    sub = 2;
+                    if (!loc.TrySetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId == null ? null : tile.SheetId) && !tile.Optional)
+                    {
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                        return;
+                    }
+                }
+                stage++; // 4
+                AdvancedLocationLoaderMod.Logger.Log(tile.ToString() + " ~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch tile, a unexpected error occured: " + tile.ToString(),err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately($"Unable to patch tile, a unexpected error occured at stage {stage}{(sub>0?("-"+sub):"")}: {tile}",err);
             }
         }
         internal static void ApplyProperty(Property property)
