@@ -49,7 +49,7 @@ namespace Entoarox.AdvancedLocationLoader
             if (Game1.activeClickableMenu is TitleMenu && Game1.activeClickableMenu != null)
             {
                 EntoFramework.CreditsTick(s, e);
-                typeof(TitleMenu).GetField("subMenu", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(new TitleMenuDialogue(Localizer.Localize("betaNotice", "BETA")));
+                typeof(TitleMenu).GetField("subMenu", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(Game1.activeClickableMenu, new TitleMenuDialogue(Localizer.Localize("betaNotice", "BETA")));
                 GameEvents.UpdateTick -= DebugNotification;
             }
 #endif

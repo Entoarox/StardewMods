@@ -24,6 +24,8 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         private static List<string> Conditionals = new List<string>();
         private static LocationConfig1_2 Compound = new LocationConfig1_2();
         private static Dictionary<string, Point> MapSizes = new Dictionary<string, Point>();
+        private static Dictionary<string, xTile.Map> MapCache = new Dictionary<string, xTile.Map>();
+        private static Dictionary<string, List<string>> TilesheetCache = new Dictionary<string, List<string>>();
         public static void Load(string filepath)
         {
             LocationConfig1_2 conf;
@@ -122,6 +124,9 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     }
                     else if (!FileCheck(filepath, sht.FileName))
                         continue;
+                    if(!TilesheetCache.ContainsKey(sht.MapName))
+                    TilesheetCache.Add(sht.MapName, new List<string>());
+                    TilesheetCache[sht.MapName].Add(sht.SheetId);
                     sht.FileName = Path.Combine(filepath, sht.FileName);
                     Compound.Tilesheets.Add(sht);
                 }
@@ -212,15 +217,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         internal static string CheckTileInfo(TileInfo info)
         {
             if (Game1.getLocationFromName(info.MapName) == null && !AffectedLocations.Contains(info.MapName))
-                if (info.Optional != true)
-                    return "location does not exist";
-                else
-                    return "OPTIONAL";
+                return info.Optional ? "OPTIONAL" : "location does not exist";
             Point size;
             if (!AffectedLocations.Contains(info.MapName))
             {
                 xTile.Map map = Game1.getLocationFromName(info.MapName).map;
                 size = new Point(map.DisplayWidth, map.DisplayHeight);
+                AffectedLocations.Add(info.MapName);
+                MapSizes.Add(info.MapName, size);
             }
             else
                 size = MapSizes[info.MapName];
@@ -241,129 +245,168 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         }
         public static void ApplyPatches()
         {
-            LocationConfig1_2 trueCompound = new LocationConfig1_2();
-            AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Trace);
-            // First we need to check any things we couldnt before
-            foreach (Location obj in Compound.Locations)
-                if (Game1.getLocationFromName(obj.MapName) != null)
-                {
-                    AdvancedLocationLoaderMod.Logger.Log("Unable to add location, it already exists: " + obj.ToString(), LogLevel.Error);
-                }
-                else
-                {
-                    try
-                    {
-                        xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
-                        MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
-                        trueCompound.Locations.Add(obj);
-                    }
-                    catch (Exception err)
-                    {
-                        AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err);
-                    }
-                }
-            foreach (Override obj in Compound.Overrides)
-                if (Game1.getLocationFromName(obj.MapName) == null)
-                {
-                    AdvancedLocationLoaderMod.Logger.Log("Unable to override location, it does not exist: " + obj.ToString(), LogLevel.Error);
-                }
-                else
-                {
-                    try
-                    {
-                        xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
-                        MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
-                        trueCompound.Overrides.Add(obj);
-                    }
-                    catch (Exception err)
-                    {
-                        AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err);
-                    }
-                }
-            trueCompound.Redirects = Compound.Redirects;
-            foreach (Tilesheet obj in Compound.Tilesheets)
-                if (Game1.getLocationFromName(obj.MapName) == null && !AffectedLocations.Contains(obj.MapName))
-                {
-                    AdvancedLocationLoaderMod.Logger.Log("Unable to patch tilesheet, location does not exist: " + obj.ToString(), LogLevel.Error);
-                }
-                else
-                    trueCompound.Tilesheets.Add(obj);
-            foreach (Tile obj in Compound.Tiles)
+            int stage = 0;
+            try
             {
-                string info = CheckTileInfo(obj);
-                if (info != null)
+                stage++; // 1
+                LocationConfig1_2 trueCompound = new LocationConfig1_2();
+                AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Trace);
+                // First we need to check any things we couldnt before
+                foreach (Location obj in Compound.Locations)
+                    if (Game1.getLocationFromName(obj.MapName) != null)
+                    {
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to add location, it already exists: " + obj.ToString(), LogLevel.Error);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
+                            MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
+                            MapCache.Add(obj.MapName, map);
+                            AffectedLocations.Add(obj.MapName);
+                            trueCompound.Locations.Add(obj);
+                        }
+                        catch (Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err);
+                        }
+                    }
+                stage++; // 2
+                foreach (Override obj in Compound.Overrides)
+                    if (Game1.getLocationFromName(obj.MapName) == null)
+                    {
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to override location, it does not exist: " + obj.ToString(), LogLevel.Error);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
+                            MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
+                            trueCompound.Overrides.Add(obj);
+                        }
+                        catch (Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err);
+                        }
+                    }
+                stage++; // 3
+                trueCompound.Redirects = Compound.Redirects;
+                stage++; // 4
+                foreach (Tilesheet obj in Compound.Tilesheets)
+                    if (Game1.getLocationFromName(obj.MapName) == null && !AffectedLocations.Contains(obj.MapName))
+                    {
+                        AdvancedLocationLoaderMod.Logger.Log("Unable to patch tilesheet, location does not exist: " + obj.ToString(), LogLevel.Error);
+                    }
+                    else
+                        trueCompound.Tilesheets.Add(obj);
+                stage++; // 5
+                foreach (Tile obj in Compound.Tiles)
                 {
-                    if (info != "OPTIONAL")
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, " + info + ":" + obj.ToString(), LogLevel.Error);
-                }
-                else if(obj.SheetId!=null && Game1.getLocationFromName(obj.MapName).map.GetTileSheet(obj.SheetId)==null)
-                    AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
-                else
+                    string info = CheckTileInfo(obj);
+                    if (info != null)
+                    {
+                        if (info != "OPTIONAL")
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                            continue;
+                        }
+                    }
+                    else if (obj.SheetId != null && (!TilesheetCache.ContainsKey(obj.MapName) || !TilesheetCache[obj.MapName].Contains(obj.SheetId)))
+                    {
+                        xTile.Map map = MapCache.ContainsKey(obj.MapName) ? MapCache[obj.MapName] : Game1.getLocationFromName(obj.MapName).map;
+                        if (map.GetTileSheet(obj.SheetId) == null)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
+                            continue;
+                        }
+                    }
                     trueCompound.Tiles.Add(obj);
-            }
-            foreach (Property obj in Compound.Properties)
-            {
-                string info = CheckTileInfo(obj);
-                if (info != null)
-                {
-                    if (info != "OPTIONAL")
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to apply property patch, " + info + ":" + obj.ToString(), LogLevel.Error);
                 }
-                else
-                    trueCompound.Properties.Add(obj);
-            }
-            foreach (Warp obj in Compound.Warps)
-            {
-                string info = CheckTileInfo(obj);
-                if (info != null)
+                stage++; // 6
+                foreach (Property obj in Compound.Properties)
                 {
-                    if (info != "OPTIONAL")
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to apply warp patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                    string info = CheckTileInfo(obj);
+                    if (info != null)
+                    {
+                        if (info != "OPTIONAL")
+                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply property patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                    }
+                    else
+                        trueCompound.Properties.Add(obj);
                 }
-                trueCompound.Warps.Add(obj);
+                stage++; // 7
+                foreach (Warp obj in Compound.Warps)
+                {
+                    string info = CheckTileInfo(obj);
+                    if (info != null)
+                    {
+                        if (info != "OPTIONAL")
+                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply warp patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                    }
+                    trueCompound.Warps.Add(obj);
+                }
+                stage++; // 8
+                // At this point any edits that showed problems have been removed, so now we can actually process everything
+                foreach (Location obj in trueCompound.Locations)
+                    Processors.ApplyLocation(obj);
+                stage++; // 9
+                foreach (Override obj in trueCompound.Overrides)
+                    Processors.ApplyOverride(obj);
+                stage++; // 10
+                foreach (Redirect obj in trueCompound.Redirects)
+                    EntoFramework.GetContentRegistry().RegisterXnb(obj.FromFile, obj.ToFile);
+                stage++; // 11
+                foreach (Tilesheet obj in trueCompound.Tilesheets)
+                {
+                    Processors.ApplyTilesheet(obj);
+                    if (obj.Seasonal)
+                        Configs.Compound.SeasonalTilesheets.Add(obj);
+                }
+                stage++; // 12
+                foreach (Tile obj in trueCompound.Tiles)
+                {
+                    Processors.ApplyTile(obj);
+                    if (!string.IsNullOrEmpty(obj.Conditions))
+                        Configs.Compound.DynamicTiles.Add(obj);
+                }
+                stage++; // 13
+                foreach (Property obj in trueCompound.Properties)
+                {
+                    Processors.ApplyProperty(obj);
+                    if (!string.IsNullOrEmpty(obj.Conditions))
+                        Configs.Compound.DynamicProperties.Add(obj);
+                }
+                stage++; // 14
+                foreach (Warp obj in trueCompound.Warps)
+                {
+                    Processors.ApplyWarp(obj);
+                    if (!string.IsNullOrEmpty(obj.Conditions))
+                        Configs.Compound.DynamicWarps.Add(obj);
+                }
+                stage++; // 15
+                foreach (Conditional obj in trueCompound.Conditionals)
+                    Configs.Compound.Conditionals.Add(obj);
+                stage++; // 16
+                foreach (TeleporterList obj in trueCompound.Teleporters)
+                    Configs.Compound.Teleporters.Add(obj);
+                stage++; // 17
+                NPC.populateRoutesFromLocationToLocationList();
+                stage++; // 18
+                Compound = null;
+                Conditionals = null;
+                AffectedLocations = null;
+                MapSizes = null;
+                stage++; // 19
+                VerifyPatchIntegrity();
+                stage++; // 20
+                AdvancedLocationLoaderMod.Logger.Log("Patches have been applied", LogLevel.Debug);
             }
-            // At this point any edits that showed problems have been removed, so now we can actually process everything
-            foreach (Location obj in trueCompound.Locations)
-                Processors.ApplyLocation(obj);
-            foreach (Override obj in trueCompound.Overrides)
-                Processors.ApplyOverride(obj);
-            foreach(Redirect obj in trueCompound.Redirects)
-                EntoFramework.GetContentRegistry().RegisterXnb(obj.FromFile, obj.ToFile);
-            foreach (Tilesheet obj in trueCompound.Tilesheets)
+            catch(Exception err)
             {
-                Processors.ApplyTilesheet(obj);
-                if (obj.Seasonal)
-                    Configs.Compound.SeasonalTilesheets.Add(obj);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch the game, a unexpected error occured at stage "+stage.ToString(), err);
             }
-            foreach (Tile obj in trueCompound.Tiles)
-            {
-                Processors.ApplyTile(obj);
-                if (!string.IsNullOrEmpty(obj.Conditions))
-                    Configs.Compound.DynamicTiles.Add(obj);
-            }
-            foreach (Property obj in trueCompound.Properties)
-            {
-                Processors.ApplyProperty(obj);
-                if (!string.IsNullOrEmpty(obj.Conditions))
-                    Configs.Compound.DynamicProperties.Add(obj);
-            }
-            foreach (Warp obj in trueCompound.Warps)
-            {
-                Processors.ApplyWarp(obj);
-                if (!string.IsNullOrEmpty(obj.Conditions))
-                    Configs.Compound.DynamicWarps.Add(obj);
-            }
-            foreach (Conditional obj in trueCompound.Conditionals)
-                Configs.Compound.Conditionals.Add(obj);
-            foreach (TeleporterList obj in trueCompound.Teleporters)
-                Configs.Compound.Teleporters.Add(obj);
-            NPC.populateRoutesFromLocationToLocationList();
-            Compound = null;
-            Conditionals = null;
-            AffectedLocations = null;
-            MapSizes = null;
-            VerifyPatchIntegrity();
-            AdvancedLocationLoaderMod.Logger.Log("Patches have been applied",LogLevel.Debug);
         }
         internal static void VerifyPatchIntegrity()
         {
