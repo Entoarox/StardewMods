@@ -64,24 +64,26 @@ namespace Entoarox.Framework.UI
 			Keys[] Down = New.GetPressedKeys().Where(a => !Old.IsKeyDown(a)).ToArray();
 			Keys[] Up = OldDown.Where(a => !New.IsKeyDown(a)).ToArray();
 			Keys[] Held = OldDown.Where(a => New.IsKeyDown(a)).ToArray();
-			foreach(Keys @key in Down)
+			foreach(Keys key in Down)
 			{
-				KeyDown?.Invoke(@key);
-				Counter.Add(@key,new int[2]{30,30});
+				KeyDown?.Invoke(key);
+                // int[]{ticks,tickRate}
+				Counter.Add(key,new int[2]{30,30});
 			}
-			foreach(Keys @key in Up)
+			foreach(Keys key in Up)
 			{
-				Counter.Remove(@key);
-				KeyUp?.Invoke(@key);
+				Counter.Remove(key);
+				KeyUp?.Invoke(key);
 			}
-			foreach(Keys @key in Held)
+			foreach(Keys key in Held)
 			{
-				Counter[@key][0]--;
-				if(Counter[@key][0]!=0)
+				Counter[key][0]--;
+				if(Counter[key][0]>0)
 					continue;
-				Counter[@key][0]=Counter[@key][1];
-				Counter[@key][1]=Math.Max(Counter[@key][1]-1,15);
-				KeyHeld?.Invoke(@key);
+				Counter[key][0]=Counter[key][1];
+                if (Counter[key][1] > 15)
+                    Counter[key][1]--;
+				KeyHeld?.Invoke(key);
 			}
             Old = New;
 		}
