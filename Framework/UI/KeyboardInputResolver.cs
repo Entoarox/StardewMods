@@ -15,23 +15,23 @@ namespace Entoarox.Framework.UI
         /// This event is triggered when a given key is first pressed
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// </summary>
-		static public event Action<Keys> KeyDown;
+        static public event Action<Keys> KeyDown;
         /// <summary>
         /// This event is triggered for a key that is held down long enough to require a repeat firing
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// This will not fire every update, as a internal counter is used to keep repeat firing at a acceptable rate
         /// </summary>
-		static public event Action<Keys> KeyHeld;
+        static public event Action<Keys> KeyHeld;
         /// <summary>
         /// This event is triggered when a given key is released
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// </summary>
-		static public event Action<Keys> KeyUp;
+        static public event Action<Keys> KeyUp;
         /// <summary>
         /// This event is trigger when a given key is first pressed or held
         /// It outputs the char for the intended value rather then the Keys enumeration for the actual key pressed
         /// </summary>
-		static public event Action<char> KeyPressed;
+        static public event Action<char> KeyPressed;
         // Private fields
         static private KeyboardState Old;
         static private Dictionary<Keys, int[]> Counter = new Dictionary<Keys, int[]>();
