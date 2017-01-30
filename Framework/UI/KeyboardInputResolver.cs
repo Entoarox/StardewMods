@@ -9,8 +9,8 @@ using StardewValley;
 
 namespace Entoarox.Framework.UI
 {
-	static class KeyboardInputResolver
-	{
+    static class KeyboardInputResolver
+    {
         /// <summary>
         /// This event is triggered when a given key is first pressed
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
@@ -58,102 +58,102 @@ namespace Entoarox.Framework.UI
         }
         // The method responsible for handling the update
         static private void Update(object s, EventArgs e)
-		{
-			KeyboardState New=Keyboard.GetState();
-			Keys[] OldDown = Old.GetPressedKeys();
-			Keys[] Down = New.GetPressedKeys().Where(a => !Old.IsKeyDown(a)).ToArray();
-			Keys[] Up = OldDown.Where(a => !New.IsKeyDown(a)).ToArray();
-			Keys[] Held = OldDown.Where(a => New.IsKeyDown(a)).ToArray();
-			foreach(Keys key in Down)
-			{
-				KeyDown?.Invoke(key);
+        {
+            KeyboardState New = Keyboard.GetState();
+            Keys[] OldDown = Old.GetPressedKeys();
+            Keys[] Down = New.GetPressedKeys().Where(a => !Old.IsKeyDown(a)).ToArray();
+            Keys[] Up = OldDown.Where(a => !New.IsKeyDown(a)).ToArray();
+            Keys[] Held = OldDown.Where(a => New.IsKeyDown(a)).ToArray();
+            foreach (Keys key in Down)
+            {
+                KeyDown?.Invoke(key);
                 // int[]{ticks,tickRate}
-				Counter.Add(key,new int[2]{30,30});
-			}
-			foreach(Keys key in Up)
-			{
-				Counter.Remove(key);
-				KeyUp?.Invoke(key);
-			}
-			foreach(Keys key in Held)
-			{
-				Counter[key][0]--;
-				if(Counter[key][0]>0)
-					continue;
-				Counter[key][0]=Counter[key][1];
+                Counter.Add(key, new int[2] { 30, 30 });
+            }
+            foreach (Keys key in Up)
+            {
+                Counter.Remove(key);
+                KeyUp?.Invoke(key);
+            }
+            foreach (Keys key in Held)
+            {
+                Counter[key][0]--;
+                if (Counter[key][0] > 0)
+                    continue;
+                Counter[key][0] = Counter[key][1];
                 if (Counter[key][1] > 15)
                     Counter[key][1]--;
-				KeyHeld?.Invoke(key);
-			}
+                KeyHeld?.Invoke(key);
+            }
             Old = New;
-		}
-		// if XNA is being used, we need to do quite a bit of logic to make sure that the correct characters are output
-		static private void KeyDownHandler(Keys key)
-		{
-			switch(key)
+        }
+        // if XNA is being used, we need to do quite a bit of logic to make sure that the correct characters are output
+        static private void KeyDownHandler(Keys key)
+        {
+            switch (key)
             {
                 case Keys.LeftShift:
                 case Keys.RightShift:
-                    Shift =true;
-					Alt=true;
-					break;
-				case Keys.CapsLock:
-					Caps=true;
-					Alt=true;
-					break;
-			}
-			KeyPressed?.Invoke(ResolveChar(@key));
-		}
-		static private void KeyUpHandler(Keys key)
-		{
-			switch(key)
-			{
-				case Keys.LeftShift:
+                    Shift = true;
+                    Alt = true;
+                    break;
+                case Keys.CapsLock:
+                    Caps = true;
+                    Alt = true;
+                    break;
+            }
+            KeyPressed?.Invoke(ResolveChar(@key));
+        }
+        static private void KeyUpHandler(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.LeftShift:
                 case Keys.RightShift:
-                    Shift =false;
-					Alt = Caps;
-					break;
-				case Keys.CapsLock:
-					Caps=false;
-					Alt = Shift;
-					break;
-			}
-		}
-		static private void KeyHeldHandler(Keys key)
-		{
-			KeyPressed?.Invoke(ResolveChar(key));
-		}
-		static private char ResolveChar(Keys key)
-		{
-			char Char=(char)key;
-			if(!Alt)
-				return Char;
+                    Shift = false;
+                    Alt = Caps;
+                    break;
+                case Keys.CapsLock:
+                    Caps = false;
+                    Alt = Shift;
+                    break;
+            }
+        }
+        static private void KeyHeldHandler(Keys key)
+        {
+            KeyPressed?.Invoke(ResolveChar(key));
+        }
+        static private char ResolveChar(Keys key)
+        {
+            char Char = (char)key;
+            if (!Alt)
+                return Char;
             short Pre = VkKeyScan(Char);
-			uint Post=(uint)Pre&0xFF;
-			byte[] Arr = new byte[256];
-            if(Shift)
-                Arr[0x10]=0x80;
-            if(Caps)
+            uint Post = (uint)Pre & 0xFF;
+            byte[] Arr = new byte[256];
+            if (Shift)
+                Arr[0x10] = 0x80;
+            if (Caps)
                 Arr[0x14] = 0x80;
             uint Out;
             ToAscii(Post, Post, Arr, out Out, 0);
-			return (char)Out;
-		}
-		[DllImport("user32.dll")]
-		static extern short VkKeyScan(char c);
+            return (char)Out;
+        }
+        [DllImport("user32.dll")]
+        static extern short VkKeyScan(char c);
 
-		[DllImport("user32.dll", SetLastError=true)]
-		static extern int ToAscii(
-			uint uVirtKey,
-			uint uScanCode,
-			byte[] lpKeyState,
-			out uint lpChar,
-			uint flags
-			);
-		// If MonoGame is in use, we can easily take advantage of its build-in input handler
-		static private void TextInputHandler(object s, EventArgs e)
-		{
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern int ToAscii(
+            uint uVirtKey,
+            uint uScanCode,
+            byte[] lpKeyState,
+            out uint lpChar,
+            uint flags
+            );
+        // If MonoGame is in use, we can easily take advantage of its build-in input handler
+        static private void TextInputHandler(object s, EventArgs e)
+        {
             KeyPressed?.Invoke((char)e.GetType().GetField("Character").GetValue(e));
-		}
-	}
+        }
+    }
 }
