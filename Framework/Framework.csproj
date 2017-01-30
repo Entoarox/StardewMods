@@ -127,6 +127,7 @@
     <Compile Include="UI\Interfaces\IIinteractiveMenuComponent.cs" />
     <Compile Include="UI\Interfaces\IKeyboardComponent.cs" />
     <Compile Include="UI\Interfaces\IMenuComponent.cs" />
+    <Compile Include="UI\KeyboardInputResolver.cs" />
     <Compile Include="UI\KeyboardSubscriberProxy.cs" />
     <Compile Include="UI\Wrapper\ClickableCancelComponent.cs" />
     <Compile Include="UI\Wrapper\ClickableConfirmComponent.cs" />

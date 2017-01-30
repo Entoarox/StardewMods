@@ -33,11 +33,11 @@ namespace Entoarox.Framework.UI
         /// </summary>
 		static public event Action<char> KeyPressed;
         // Private fields
-        static private KeyboardState @old;
+        static private KeyboardState Old;
         static private Dictionary<Keys, int[]> Counter = new Dictionary<Keys, int[]>();
-        static private bool @Shift = false;
-        static private bool @Caps = false;
-        static private bool @Alt = false;
+        static private bool Shift = false;
+        static private bool Caps = false;
+        static private bool Alt = false;
         // Initializer, as there is some init needed
         static KeyboardInputResolver()
         {
@@ -59,22 +59,22 @@ namespace Entoarox.Framework.UI
         // The method responsible for handling the update
         static private void Update(object s, EventArgs e)
 		{
-			KeyboardState @new=Keyboard.GetState();
-			Keys[] @oldDown = @old.GetPressedKeys();
-			Keys[] @down = @new.GetPressedKeys().Where(a => !@old.IsKeyDown(a)).ToArray();
-			Keys[] @up = @oldDown.Where(a => !@new.IsKeyDown(a)).ToArray();
-			Keys[] @held = @oldDown.Where(a => @new.IsKeyDown(a)).ToArray();
-			foreach(Keys @key in @down)
+			KeyboardState New=Keyboard.GetState();
+			Keys[] OldDown = Old.GetPressedKeys();
+			Keys[] Down = New.GetPressedKeys().Where(a => !Old.IsKeyDown(a)).ToArray();
+			Keys[] Up = OldDown.Where(a => !New.IsKeyDown(a)).ToArray();
+			Keys[] Held = OldDown.Where(a => New.IsKeyDown(a)).ToArray();
+			foreach(Keys @key in Down)
 			{
 				KeyDown?.Invoke(@key);
 				Counter.Add(@key,new int[2]{30,30});
 			}
-			foreach(Keys @key in @up)
+			foreach(Keys @key in Up)
 			{
 				Counter.Remove(@key);
 				KeyUp?.Invoke(@key);
 			}
-			foreach(Keys @key in @held)
+			foreach(Keys @key in Held)
 			{
 				Counter[@key][0]--;
 				if(Counter[@key][0]!=0)
@@ -83,56 +83,59 @@ namespace Entoarox.Framework.UI
 				Counter[@key][1]=Math.Max(Counter[@key][1]-1,15);
 				KeyHeld?.Invoke(@key);
 			}
-			@old=@new;
+            Old = New;
 		}
 		// if XNA is being used, we need to do quite a bit of logic to make sure that the correct characters are output
-		static private void KeyDownHandler(Keys @key)
+		static private void KeyDownHandler(Keys key)
 		{
-			switch(@key)
+			switch(key)
             {
                 case Keys.LeftShift:
                 case Keys.RightShift:
-                    @Shift =true;
-					@Alt=true;
+                    Shift =true;
+					Alt=true;
 					break;
 				case Keys.CapsLock:
-					@Caps=true;
-					@Alt=true;
+					Caps=true;
+					Alt=true;
 					break;
 			}
 			KeyPressed?.Invoke(ResolveChar(@key));
 		}
-		static private void KeyUpHandler(Keys @key)
+		static private void KeyUpHandler(Keys key)
 		{
-			switch(@key)
+			switch(key)
 			{
 				case Keys.LeftShift:
                 case Keys.RightShift:
-                    @Shift =false;
-					@Alt = @Caps;
+                    Shift =false;
+					Alt = Caps;
 					break;
 				case Keys.CapsLock:
-					@Caps=false;
-					@Alt = @Shift;
+					Caps=false;
+					Alt = Shift;
 					break;
 			}
 		}
-		static private void KeyHeldHandler(Keys @key)
+		static private void KeyHeldHandler(Keys key)
 		{
-			KeyPressed?.Invoke(ResolveChar(@key));
+			KeyPressed?.Invoke(ResolveChar(key));
 		}
-		static private char ResolveChar(Keys @key)
+		static private char ResolveChar(Keys key)
 		{
-			char @char=(char)@key;
-			if(!@Alt)
-				return @char;
-            short @pre = VkKeyScan(@char);
-			uint @post=(uint)@pre&0xFF;
-			byte[] @arr = new byte[256];
-			@arr[0x10]=0x80;
-			uint @out;
-            ToAscii(@post, @post, @arr, out @out, 0);
-			return (char)@out;
+			char Char=(char)key;
+			if(!Alt)
+				return Char;
+            short Pre = VkKeyScan(Char);
+			uint Post=(uint)Pre&0xFF;
+			byte[] Arr = new byte[256];
+            if(Shift)
+                Arr[0x10]=0x80;
+            if(Caps)
+                Arr[0x14] = 0x80;
+            uint Out;
+            ToAscii(Post, Post, Arr, out Out, 0);
+			return (char)Out;
 		}
 		[DllImport("user32.dll")]
 		static extern short VkKeyScan(char c);
