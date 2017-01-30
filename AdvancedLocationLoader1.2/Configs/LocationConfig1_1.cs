@@ -5,15 +5,8 @@ using StardewModdingAPI;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-#pragma warning disable CS0618
-    public class LocationConfig1_1 : Config
-#pragma warning restore CS0618
+    public class LocationConfig1_1
     {
-        [Obsolete]
-        public override T GenerateDefaultConfig<T>()
-        {
-            return this as T;
-        }
         public string loaderVersion;
         public Dictionary<string, string> about;
         public List<Dictionary<string, string>> locations;

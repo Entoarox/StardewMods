@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
 using System.Reflection;
 
-using Microsoft.Xna.Framework;
-
 using StardewValley;
-using StardewValley.Locations;
 using StardewValley.Characters;
 using StardewValley.Monsters;
 using StardewValley.Quests;
@@ -113,83 +109,19 @@ namespace Entoarox.Framework
         }
         internal static void Init(object s, EventArgs e)
         {
-            if (_injected)
-                return;
-            var typeArray = InjectedTypes.ToArray();
-            injectedSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(InjectedTypes).ToArray());
-            injectedFarmerSerializer = new XmlSerializer(typeof(Farmer), _farmerTypes.Concat(InjectedTypes).ToArray());
-            injectedLocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(InjectedTypes).ToArray());
-            PatchSerializer<long, FarmAnimal>();
-            PatchSerializer<string, int>();
-            PatchSerializer<int, int>();
-            PatchSerializer<string, int[]>();
-            PatchSerializer<int, int[]>();
-            PatchSerializer<int, MineInfo>();
-            PatchSerializer<Vector2, StardewValley.Object>();
-            PatchSerializer<Vector2, TerrainFeature>();
-            _injected = true;
-        }
-        private static unsafe void PatchSerializer<TKey,TValue>()
-        {
-            // Read
-            IntPtr site1 = typeof(SerializableDictionary<TKey, TValue>).GetMethod("ReadXml").MethodHandle.GetFunctionPointer();
-            IntPtr target1 = typeof(HookedDictionary<TKey, TValue>).GetMethod("HookedReadXml").MethodHandle.GetFunctionPointer();
-            byte* sitePtr1 = (byte*)site1.ToPointer();
-            *sitePtr1 = 0xBB;
-            *((uint*)(sitePtr1 + 1)) = (uint)target1.ToInt32();
-            *(sitePtr1 + 9) = 0xFF;
-            *(sitePtr1 + 10) = 0xE3;
-            // Write
-            IntPtr site2 = typeof(SerializableDictionary<TKey, TValue>).GetMethod("WriteXml").MethodHandle.GetFunctionPointer();
-            IntPtr target2 = typeof(HookedDictionary<TKey, TValue>).GetMethod("HookedWriteXml").MethodHandle.GetFunctionPointer();
-            byte* sitePtr2 = (byte*)site2.ToPointer();
-            *sitePtr2 = 0xBB;
-            *((uint*)(sitePtr2 + 1)) = (uint)target2.ToInt32();
-            *(sitePtr2 + 9) = 0xFF;
-            *(sitePtr2 + 10) = 0xE3;
-        }
-        class HookedDictionary<TKey,TValue> : SerializableDictionary<TKey,TValue>
-        {
-            public void HookedReadXml(XmlReader reader)
+            try
             {
-                XmlSerializer xmlSerializer1 = new XmlSerializer(typeof(TKey), _serialiserTypes.Concat(InjectedTypes).ToArray());
-                XmlSerializer xmlSerializer2 = new XmlSerializer(typeof(TValue), _serialiserTypes.Concat(InjectedTypes).ToArray());
-                int num1 = reader.IsEmptyElement ? 1 : 0;
-                reader.Read();
-                if (num1 != 0)
+                if (_injected)
                     return;
-                while (reader.NodeType != XmlNodeType.EndElement)
-                {
-                    reader.ReadStartElement("item");
-                    reader.ReadStartElement("key");
-                    TKey key = (TKey)xmlSerializer1.Deserialize(reader);
-                    reader.ReadEndElement();
-                    reader.ReadStartElement("value");
-                    TValue obj = (TValue)xmlSerializer2.Deserialize(reader);
-                    reader.ReadEndElement();
-                    Add(key, obj);
-                    reader.ReadEndElement();
-                    int num2 = (int)reader.MoveToContent();
-                }
-                reader.ReadEndElement();
+                var typeArray = InjectedTypes.ToArray();
+                injectedSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(InjectedTypes).ToArray());
+                injectedFarmerSerializer = new XmlSerializer(typeof(Farmer), _farmerTypes.Concat(InjectedTypes).ToArray());
+                injectedLocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(InjectedTypes).ToArray());
+                _injected = true;
             }
-
-            public void HookedWriteXml(XmlWriter writer)
+            catch(Exception err)
             {
-                XmlSerializer xmlSerializer1 = new XmlSerializer(typeof(TKey), _serialiserTypes.Concat(InjectedTypes).ToArray());
-                XmlSerializer xmlSerializer2 = new XmlSerializer(typeof(TValue), _serialiserTypes.Concat(InjectedTypes).ToArray());
-                foreach (TKey index in Keys)
-                {
-                    writer.WriteStartElement("item");
-                    writer.WriteStartElement("key");
-                    xmlSerializer1.Serialize(writer, index);
-                    writer.WriteEndElement();
-                    writer.WriteStartElement("value");
-                    TValue obj = this[index];
-                    xmlSerializer2.Serialize(writer, obj);
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
-                }
+                EntoFramework.Logger.ExitGameImmediately("A unexpected error occured trying to inject the custom serializer", err);
             }
         }
     }

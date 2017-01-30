@@ -341,6 +341,8 @@ namespace Entoarox.ExtendedMinecart
                     Game1.warpFarmer("Mountain", 124, 12, 2);
                     break;
                 case "BusStop":
+                    if(Game1.currentLocation.Name.Equals("Desert"))
+                        Game1.warpFarmer("Woods", 46, 5, 1);
                     Game1.warpFarmer("BusStop", 4, 4, 2);
                     break;
                 case "Mine":
@@ -358,6 +360,8 @@ namespace Entoarox.ExtendedMinecart
                         Game1.warpFarmer("Farm", 78, 14, 1);
                     break;
                 case "Desert":
+                    if(Game1.currentLocation.Name.Equals("BusStop"))
+                        Game1.warpFarmer("Woods", 46, 5, 1);
                     if (Config.AlternateDesertMinecart)
                         Game1.warpFarmer("Desert", 34, 5, 1);
                     else

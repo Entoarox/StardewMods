@@ -11,6 +11,8 @@ using StardewModdingAPI;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
+using Entoarox.Framework;
+
 namespace Entoarox.AdvancedLocationLoader.Loaders
 {
     static class Loader1_1
@@ -18,9 +20,16 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         public static void Load(string filepath)
         {
             AdvancedLocationLoaderMod.Logger.Log("Converting legacy 1.1 manifest to new 1.2 format...",LogLevel.Debug);
-#pragma warning disable CS0618 // Type or member is obsolete
-            LocationConfig1_1 Config = new LocationConfig1_1().InitializeConfig(filepath);
-#pragma warning restore CS0618 // Type or member is obsolete
+            LocationConfig1_1 Config;
+            try
+            {
+                Config = JsonConvert.DeserializeObject<LocationConfig1_1>(File.ReadAllText(filepath));
+            }
+            catch (Exception err)
+            {
+                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load legacy manifest, json cannot be parsed: " + filepath, err);
+                return;
+            }
             LocationConfig1_2 Updated = new LocationConfig1_2();
             // Prepare the 1.2 properties
             Updated.LoaderVersion = "1.2.0";
