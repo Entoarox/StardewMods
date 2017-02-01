@@ -22,16 +22,48 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         private static List<string> Layers = new List<string>() { "Back", "Buildings", "Paths", "Front", "AlwaysFront" };
         private static List<string> AffectedLocations = new List<string>();
         private static List<string> Conditionals = new List<string>();
-        private static LocationConfig1_2 Compound = new LocationConfig1_2();
+        private static SecondaryLocationManifest1_2 Compound = new SecondaryLocationManifest1_2();
         private static Dictionary<string, Point> MapSizes = new Dictionary<string, Point>();
         private static Dictionary<string, xTile.Map> MapCache = new Dictionary<string, xTile.Map>();
         private static Dictionary<string, List<string>> TilesheetCache = new Dictionary<string, List<string>>();
         public static void Load(string filepath)
         {
-            LocationConfig1_2 conf;
+            MainLocationManifest1_2 conf;
             try
             {
-                conf = JsonConvert.DeserializeObject<LocationConfig1_2>(File.ReadAllText(filepath));
+                conf = JsonConvert.DeserializeObject<MainLocationManifest1_2>(File.ReadAllText(filepath));
+                if (conf.Includes.Count > 0)
+                    foreach (string include in conf.Includes)
+                    {
+                        string childPath = Path.Combine(Path.GetDirectoryName(filepath), include + ".json");
+                        SecondaryLocationManifest1_2 secondary;
+                        try
+                        {
+                            secondary = JsonConvert.DeserializeObject<SecondaryLocationManifest1_2>(File.ReadAllText(childPath));
+                        }
+                        catch(Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to merge child manifest, json cannot be parsed: " + childPath, err);
+                            continue;
+                        }
+                        try
+                        {
+                            conf.Conditionals.AddRange(secondary.Conditionals);
+                            conf.Locations.AddRange(secondary.Locations);
+                            conf.Overrides.AddRange(secondary.Overrides);
+                            conf.Properties.AddRange(secondary.Properties);
+                            conf.Redirects.AddRange(secondary.Redirects);
+                            conf.Shops.AddRange(secondary.Shops);
+                            conf.Teleporters.AddRange(secondary.Teleporters);
+                            conf.Tiles.AddRange(secondary.Tiles);
+                            conf.Tilesheets.AddRange(secondary.Tilesheets);
+                            conf.Warps.AddRange(secondary.Warps);
+                        }
+                        catch(Exception err)
+                        {
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to merge child manifest, a unexpected error occured: " + childPath, err);
+                        }
+                    }
             }
             catch (Exception err)
             {
@@ -69,7 +101,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AffectedLocations.Add(name);
             return true;
         }
-        public static void Parse(string filepath, LocationConfig1_2 config)
+        public static void Parse(string filepath, MainLocationManifest1_2 config)
         {
             // Print mod info into the log
             AdvancedLocationLoaderMod.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
@@ -249,7 +281,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             try
             {
                 stage++; // 1
-                LocationConfig1_2 trueCompound = new LocationConfig1_2();
+                SecondaryLocationManifest1_2 trueCompound = new SecondaryLocationManifest1_2();
                 AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Trace);
                 // First we need to check any things we couldnt before
                 foreach (Location obj in Compound.Locations)

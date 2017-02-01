@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopExpander", "ShopExpande
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheatMenu", "CheatMenu\CheatMenu.csproj", "{B9214C81-871F-44FA-8763-CB0F3C98B56A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{90456A76-2C34-4028-A811-83B2BAD133EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{B9214C81-871F-44FA-8763-CB0F3C98B56A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9214C81-871F-44FA-8763-CB0F3C98B56A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9214C81-871F-44FA-8763-CB0F3C98B56A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90456A76-2C34-4028-A811-83B2BAD133EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90456A76-2C34-4028-A811-83B2BAD133EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90456A76-2C34-4028-A811-83B2BAD133EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90456A76-2C34-4028-A811-83B2BAD133EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

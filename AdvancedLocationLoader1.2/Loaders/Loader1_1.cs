@@ -30,7 +30,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load legacy manifest, json cannot be parsed: " + filepath, err);
                 return;
             }
-            LocationConfig1_2 Updated = new LocationConfig1_2();
+            MainLocationManifest1_2 Updated = new MainLocationManifest1_2();
             // Prepare the 1.2 properties
             Updated.LoaderVersion = "1.2.0";
             AdvancedLocationLoaderMod.Logger.Log("Converting the `about` section", LogLevel.Trace);

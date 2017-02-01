@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 using StardewValley;
@@ -31,7 +32,7 @@ namespace Entoarox.Framework.UI
         /// This event is trigger when a given key is first pressed or held
         /// It outputs the char for the intended value rather then the Keys enumeration for the actual key pressed
         /// </summary>
-        static public event Action<char> KeyPressed;
+        static public event Action<char> CharReceived;
         // Private fields
         static private KeyboardState Old;
         static private Dictionary<Keys, int[]> Counter = new Dictionary<Keys, int[]>();
@@ -48,7 +49,7 @@ namespace Entoarox.Framework.UI
             {
                 // Using reflection to hook the event so that monogame is not required to compile
                 // Also makes sure the reference sticks just in case mono rewrite goes heads up on it
-                Game1.game1.Window.GetType().GetEvent("TextInput").AddEventHandler(Game1.game1.Window, (Action<object, EventArgs>)TextInputHandler);
+                typeof(GameWindow).GetEvent("TextInput").AddEventHandler(Game1.game1.Window, (Action<object, EventArgs>)TextInputHandler);
                 return;
             }
             // XNA logic
@@ -102,7 +103,7 @@ namespace Entoarox.Framework.UI
                     Alt = true;
                     break;
             }
-            KeyPressed?.Invoke(ResolveChar(@key));
+            CharReceived?.Invoke(ResolveChar(@key));
         }
         static private void KeyUpHandler(Keys key)
         {
@@ -121,7 +122,7 @@ namespace Entoarox.Framework.UI
         }
         static private void KeyHeldHandler(Keys key)
         {
-            KeyPressed?.Invoke(ResolveChar(key));
+            CharReceived?.Invoke(ResolveChar(key));
         }
         static private char ResolveChar(Keys key)
         {
@@ -153,7 +154,7 @@ namespace Entoarox.Framework.UI
         // If MonoGame is in use, we can easily take advantage of its build-in input handler
         static private void TextInputHandler(object s, EventArgs e)
         {
-            KeyPressed?.Invoke((char)e.GetType().GetField("Character").GetValue(e));
+            CharReceived?.Invoke((char)e.GetType().GetField("Character").GetValue(e));
         }
     }
 }

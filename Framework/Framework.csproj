@@ -69,6 +69,7 @@
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
+    <Compile Include="Internal\BushReset.cs" />
     <Compile Include="Internal\ContentRegistry.cs" />
     <Compile Include="Internal\GamePatcher.cs" />
     <Compile Include="Api.cs" />
