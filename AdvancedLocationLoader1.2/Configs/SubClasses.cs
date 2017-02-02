@@ -127,9 +127,10 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         [DefaultValue(false)]
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool Seasonal;
+        public Dictionary<string, string> Properties = new Dictionary<string, string>();
         public override string ToString()
         {
-            return "Tilesheet(" + MapName + "," + SheetId + "," + FileName + "){Seasonal=" + Seasonal + "}";
+            return "Tilesheet(" + MapName + ":" + SheetId + "," + (FileName == null ? "null" : FileName) + "){Seasonal=" + Seasonal + "}";
         }
     }
     public class Tile : TileInfo

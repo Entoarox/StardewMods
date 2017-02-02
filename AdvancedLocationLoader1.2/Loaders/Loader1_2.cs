@@ -143,23 +143,27 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             if (config.Tilesheets != null)
                 foreach (Tilesheet sht in config.Tilesheets)
                 {
-                    if (sht.Seasonal)
+                    if (sht.FileName != null)
                     {
-                        if (!FileCheck(filepath, sht.FileName + "_spring"))
-                            continue;
-                        if (!FileCheck(filepath, sht.FileName + "_summer"))
-                            continue;
-                        if (!FileCheck(filepath, sht.FileName + "_fall"))
-                            continue;
-                        if (!FileCheck(filepath, sht.FileName + "_winter"))
+                        if (sht.Seasonal)
+                        {
+                            if (!FileCheck(filepath, sht.FileName + "_spring"))
+                                continue;
+                            if (!FileCheck(filepath, sht.FileName + "_summer"))
+                                continue;
+                            if (!FileCheck(filepath, sht.FileName + "_fall"))
+                                continue;
+                            if (!FileCheck(filepath, sht.FileName + "_winter"))
+                                continue;
+                        }
+                        else if (!FileCheck(filepath, sht.FileName))
                             continue;
                     }
-                    else if (!FileCheck(filepath, sht.FileName))
-                        continue;
                     if(!TilesheetCache.ContainsKey(sht.MapName))
                     TilesheetCache.Add(sht.MapName, new List<string>());
                     TilesheetCache[sht.MapName].Add(sht.SheetId);
-                    sht.FileName = Path.Combine(filepath, sht.FileName);
+                    if(sht.FileName!=null)
+                        sht.FileName = Path.Combine(filepath, sht.FileName);
                     Compound.Tilesheets.Add(sht);
                 }
             // Parse tiles

@@ -108,35 +108,49 @@ namespace Entoarox.AdvancedLocationLoader
         {
             int stage = 0;
             int branch = 0;
+            int skip = 0;
             try
             {
                 stage++; // 1
                 GameLocation location = Game1.getLocationFromName(tilesheet.MapName);
                 stage++; // 2
-                string fakepath = Path.Combine(Path.GetDirectoryName(tilesheet.FileName), "all_sheet_paths_objects", tilesheet.SheetId, Path.GetFileName(tilesheet.FileName));
-                if (tilesheet.Seasonal)
-                    fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
-                stage++; // 3
-                ContentRegistry.RegisterXnb(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
-                stage++; // 4
-                if (location.map.GetTileSheet(tilesheet.SheetId) != null)
-                {
-                    branch = 1;
-                    location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
-                    AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/override", LogLevel.Trace);
-                }
+                if (tilesheet.FileName == null)
+                    skip = 1;
                 else
                 {
-                    branch = 2;
-                    Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
-                    location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId,location.map, fakepath, new xTile.Dimensions.Size((int)Math.Ceiling(sheet.Width/16.0), (int)Math.Ceiling(sheet.Height/16.0)), new xTile.Dimensions.Size(16, 16)));
-                    AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/insert", LogLevel.Trace);
+                    skip = 2;
+                    string fakepath = Path.Combine(Path.GetDirectoryName(tilesheet.FileName), "all_sheet_paths_objects", tilesheet.SheetId, Path.GetFileName(tilesheet.FileName));
+                    if (tilesheet.Seasonal)
+                        fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
+                    stage++; // 3
+                    ContentRegistry.RegisterXnb(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                    stage++; // 4
+                    if (location.map.GetTileSheet(tilesheet.SheetId) != null)
+                    {
+                        branch = 1;
+                        location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
+                        AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/override", LogLevel.Trace);
+                    }
+                    else
+                    {
+                        branch = 2;
+                        Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
+                        location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId, location.map, fakepath, new xTile.Dimensions.Size((int)Math.Ceiling(sheet.Width / 16.0), (int)Math.Ceiling(sheet.Height / 16.0)), new xTile.Dimensions.Size(16, 16)));
+                        AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/insert", LogLevel.Trace);
+                    }
                 }
-                stage++; // 5
+                stage++; // 5 (skip 3)
+                if (tilesheet.Properties.Count > 0)
+                {
+                    xTile.Tiles.TileSheet sheet = location.map.GetTileSheet(tilesheet.SheetId);
+                    foreach (string prop in tilesheet.Properties.Keys)
+                        sheet.Properties[prop] = tilesheet.Properties[prop];
+                }
+
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately($"Unable to patch tilesheet, a unexpected error occured at stage {stage}{(branch > 0 ? ("-" + branch) : "")}: {tilesheet}", err);
+                AdvancedLocationLoaderMod.Logger.ExitGameImmediately($"Unable to patch tilesheet, a unexpected error occured at stage {stage}{(skip > 0 ? ("-" + skip) : "")}{(branch > 0 ? ("-" + branch) : "")}: {tilesheet}", err);
             }
         }
         internal static void ApplyLocation(Location location)

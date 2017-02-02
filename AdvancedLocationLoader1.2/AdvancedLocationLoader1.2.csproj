@@ -86,6 +86,9 @@
   <ItemGroup>
     <None Include="documentation.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="changelog.txt" />
+  </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
   </PropertyGroup>
