@@ -23,16 +23,33 @@ namespace Entoarox.Framework.UI
         public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
         public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
 
+        protected bool Center = false;
+
         protected GenericCollectionComponent()
         {
 
         }
-        public GenericCollectionComponent(Rectangle area, List<IMenuComponent> components=null)
+        protected GenericCollectionComponent(List<IMenuComponent> components = null)
         {
-            SetScaledArea(area);
             if (components != null)
                 foreach (IMenuComponent c in components)
                     AddComponent(c);
+        }
+        public GenericCollectionComponent(Point size, List<IMenuComponent> components = null) : this(components)
+        {
+            Center = true;
+            SetScaledArea(new Rectangle(0, 0, size.X, size.Y));
+        }
+        public GenericCollectionComponent(Rectangle area, List<IMenuComponent> components=null) : this(components)
+        {
+            SetScaledArea(area);
+        }
+        public override void OnAttach(IComponentContainer parent)
+        {
+            if (!Center)
+                return;
+            Area.X = (parent.EventRegion.Width - Area.Width) / 2;
+            Area.Y = (parent.EventRegion.Height - Area.Height) / 2;
         }
         // IComponentCollection
         protected virtual void UpdateDrawOrder()

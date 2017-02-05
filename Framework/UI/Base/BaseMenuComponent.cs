@@ -72,13 +72,23 @@ namespace Entoarox.Framework.UI
         {
             if (_Parent!=null)
                 throw new Exception("Component is already attached and must be detached first before it can be attached again");
+            OnAttach(collection);
             _Parent = collection;
         }
         public void Detach(IComponentContainer collection)
         {
             if (_Parent==null)
                 throw new Exception("Component is not attached and must be attached first before it can be detached");
+            OnDetach(Parent);
             _Parent = null;
+        }
+        public virtual void OnAttach(IComponentContainer parent)
+        {
+
+        }
+        public virtual void OnDetach(IComponentContainer parent)
+        {
+
         }
         public virtual Point GetPosition()
         {

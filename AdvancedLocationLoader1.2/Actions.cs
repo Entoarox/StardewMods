@@ -48,11 +48,15 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void Teleporter(Farmer who, string[] arguments, Vector2 tile)
         {
-            if(Configs.Compound.Teleporters.Exists(e => e.ListName==arguments[0]))
+            if(Configs.Compound.Teleporters.Exists(e => e.ListName.Equals(arguments[0].Trim())))
                 TeleportationResolver.Request(arguments[0]).Init();
             else
             {
                 AdvancedLocationLoaderMod.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
+                List<string> lists = new List<string>();
+                foreach (var list in Configs.Compound.Teleporters)
+                    lists.Add(list.ListName);
+                AdvancedLocationLoaderMod.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
@@ -77,10 +81,6 @@ namespace Entoarox.AdvancedLocationLoader
             _who = who;
             _arguments = arguments;
             _tile = tile;
-            Action<object, EventArgsMouseStateChanged> handler = (s, e) =>
-             {
-
-             };
             ControlEvents.MouseChanged += RealShop;
         }
         internal static void RealShop(object s, EventArgsMouseStateChanged e)
@@ -213,6 +213,7 @@ namespace Entoarox.AdvancedLocationLoader
                 else
                     who.removeItemsFromInventory(Conditional.Item, Conditional.Amount);
                 who.mailReceived.Add("ALLCondition_" + Conditional.Name);
+                AdvancedLocationLoaderMod.Logger.Log("Conditional completed: "+Conditional.Name, StardewModdingAPI.LogLevel.Trace);
                 AdvancedLocationLoaderMod.UpdateConditionalEdits();
             }
             else

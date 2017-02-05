@@ -126,8 +126,9 @@ namespace Entoarox.AdvancedLocationLoader
                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened",err);
             }
         }
-        internal static void PlayerEvents_FarmerChanged(object s, EventArgs e)
+        internal static void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
         {
+            LocationEvents.CurrentLocationChanged -= LocationEvents_CurrentLocationChanged;
             AdvancedLocationLoaderMod.UpdateConditionalEdits();
         }
     }

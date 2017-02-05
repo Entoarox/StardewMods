@@ -10,6 +10,23 @@ namespace Entoarox.Framework.UI
     public class TextComponent : BaseMenuComponent
     {
         protected string _Label;
+        protected SpriteFont Font;
+        protected float _Scale;
+        public float Scale
+        {
+            get
+            {
+                return _Scale;
+            }
+            set
+            {
+
+                _Scale = value;
+                Vector2 size = Font.MeasureString(Label) * value;
+                Area.Width = (int)Math.Ceiling(size.X);
+                Area.Height = (int)Math.Ceiling(size.Y);
+            }
+        }
         public string Label
         {
             get
@@ -24,10 +41,8 @@ namespace Entoarox.Framework.UI
                 Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
-        protected float Scale;
-        protected Color Color;
-        protected SpriteFont Font;
-        protected bool Shadow;
+        public Color Color;
+        public bool Shadow;
         public TextComponent(Point position, string label, bool shadow=true, float scale=1, Color? color=null, SpriteFont font=null)
         {
             if (color == null)

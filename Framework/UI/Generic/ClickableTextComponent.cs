@@ -10,6 +10,24 @@ namespace Entoarox.Framework.UI
     public class ClickableTextComponent : BaseInteractiveMenuComponent
     {
         protected string _Label;
+        protected float _Scale;
+        protected SpriteFont Font;
+        protected bool Hovered = false;
+        public float Scale
+        {
+            get
+            {
+                return _Scale;
+            }
+            set
+            {
+
+                _Scale = value;
+                Vector2 size = Font.MeasureString(Label) * value;
+                Area.Width = (int)Math.Ceiling(size.X);
+                Area.Height = (int)Math.Ceiling(size.Y);
+            }
+        }
         public string Label
         {
             get
@@ -24,12 +42,9 @@ namespace Entoarox.Framework.UI
                 Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
-        protected float Scale;
-        protected Color Color;
-        protected SpriteFont Font;
-        protected bool Shadow;
-        protected bool HoverEffect;
-        protected bool Hovered = false;
+        public Color Color;
+        public bool Shadow;
+        public bool HoverEffect;
         public event ClickHandler Handler;
         public ClickableTextComponent(Point position, string label, ClickHandler handler = null, bool hoverEffect = true, bool shadow = true, float scale = 1, Color? color = null, SpriteFont font = null)
         {

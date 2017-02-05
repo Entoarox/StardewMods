@@ -43,18 +43,34 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tile.TileIndex < 0)
                     {
                         if (!loc.TryRemoveTile(tile.TileX, tile.TileY, tile.LayerId) && !tile.Optional)
+                        {
                             AdvancedLocationLoaderMod.Logger.Log("Unable to remove required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                            return;
+                        }
                     }
-                    else if (!loc.TrySetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId == null ? null : tile.SheetId) && !tile.Optional)
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
-                    return;
+                    else
+                        try
+                        {
+                            loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, (int)tile.TileIndex, tile.SheetId);
+                        }
+                        catch (Exception err)
+                        {
+                            if (!tile.Optional)
+                                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to set required tile: " + tile.ToString(), err);
+                            return;
+                        }
                 }
                 else
                 {
                     branch = 2;
-                    if (!loc.TrySetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId == null ? null : tile.SheetId) && !tile.Optional)
+                    try
                     {
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                        loc.SetTile(tile.TileX, tile.TileY, tile.LayerId, tile.TileIndexes, (int)tile.Interval, tile.SheetId);
+                    }
+                    catch (Exception err)
+                    {
+                        if (!tile.Optional)
+                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to set required tile: " + tile.ToString(), err);
                         return;
                     }
                 }
@@ -68,11 +84,11 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void ApplyProperty(Property property)
         {
-            AdvancedLocationLoaderMod.Logger.Log(property.ToString(),LogLevel.Trace);
             try
             {
                 if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
                 {
+                    AdvancedLocationLoaderMod.Logger.Log(property.ToString()+" ~> true", LogLevel.Trace);
                     if (Game1.getLocationFromName(property.MapName).HasTile(property.TileX, property.TileY, property.LayerId))
                         Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
                     else if (property.Optional)
@@ -80,6 +96,8 @@ namespace Entoarox.AdvancedLocationLoader
                     else
                         AdvancedLocationLoaderMod.Logger.Log("Unable to patch required property, tile does not exist: " + property.ToString(), LogLevel.Error);
                 }
+                else
+                    AdvancedLocationLoaderMod.Logger.Log(property.ToString() + " ~> false", LogLevel.Trace);
             }
             catch (Exception err)
             {
@@ -89,15 +107,18 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void ApplyWarp(Configs.Warp warp)
         {
-            AdvancedLocationLoaderMod.Logger.Log(warp.ToString(),LogLevel.Trace);
             try
             {
                 if (!string.IsNullOrEmpty(warp.Conditions) && !Conditions.CheckConditionList(warp.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                {
+                    AdvancedLocationLoaderMod.Logger.Log(warp.ToString() +"~> false", LogLevel.Trace);
                     return;
+                }
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
                 loc.warps.RemoveAll((a) => a.X == _warp.X && a.Y == _warp.Y);
                 loc.warps.Add(_warp);
+                AdvancedLocationLoaderMod.Logger.Log(warp.ToString() + "~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {

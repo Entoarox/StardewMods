@@ -24,7 +24,7 @@ namespace Entoarox.AdvancedLocationLoader
         public override void Entry(IModHelper helper)
         {
             ModPath = helper.DirectoryPath;
-            if (EntoFramework.Version < new Version(1, 6, 0))
+            if (EntoFramework.Version < new Version(1, 6, 4))
                 throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
             Logger = Monitor;
             Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
@@ -33,7 +33,7 @@ namespace Entoarox.AdvancedLocationLoader
             GameEvents.LoadContent += Events.GameEvents_LoadContent;
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
-            PlayerEvents.FarmerChanged += Events.PlayerEvents_FarmerChanged;
+            LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
             ITypeRegistry registry = EntoFramework.GetTypeRegistry();
             registry.RegisterType<Locations.Greenhouse>();

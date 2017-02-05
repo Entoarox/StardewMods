@@ -66,8 +66,8 @@ namespace Entoarox.Framework.UI
         {
             List<IMenuComponent> drawOrder = new List<IMenuComponent>(statics);
             drawOrder.AddRange(interactives);
-            drawOrder = drawOrder.OrderByDescending(x => x.Layer).ThenByDescending(x => x.GetPosition().Y).ThenByDescending(x => x.GetPosition().X).ToList();
-            List<IInteractiveMenuComponent>  eventOrder = interactives.OrderBy(x => x.Layer).ThenBy(x => x.GetPosition().Y).ThenBy(x => x.GetPosition().X).ToList();
+            drawOrder = drawOrder.OrderBy(x => x.Layer).ThenByDescending(x => x.GetPosition().Y).ThenByDescending(x => x.GetPosition().X).ToList();
+            List<IInteractiveMenuComponent>  eventOrder = interactives.OrderByDescending(x => x.Layer).ThenBy(x => x.GetPosition().Y).ThenBy(x => x.GetPosition().X).ToList();
             return new KeyValuePair<List<IInteractiveMenuComponent>, List<IMenuComponent>>(eventOrder, drawOrder);
         }
         public FrameworkMenu(Rectangle area, bool showCloseButton = true, bool drawChrome = true)

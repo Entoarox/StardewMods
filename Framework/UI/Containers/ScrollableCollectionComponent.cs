@@ -22,6 +22,10 @@ namespace Entoarox.Framework.UI
 
         protected int Counter = 0;
         protected int Limiter = 20;
+        public ScrollableCollectionComponent(Point size, List<IMenuComponent> components = null) : base(size, components)
+        {
+
+        }
         public ScrollableCollectionComponent(Rectangle area, List<IMenuComponent> components = null):base(area,components)
         {
             

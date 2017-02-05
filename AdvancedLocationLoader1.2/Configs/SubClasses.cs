@@ -118,7 +118,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public List<TeleporterDestination> Destinations;
         public override string ToString()
         {
-            return "Minecart(" + ListName + ") => [" + string.Join(",", Destinations) + ']';
+            return "TeleporterList(" + ListName + ") => {" + string.Join(",", Destinations) + '}';
         }
     }
     public class Tilesheet : MapFileLink

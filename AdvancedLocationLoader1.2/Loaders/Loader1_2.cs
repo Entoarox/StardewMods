@@ -221,10 +221,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                     tes.Destinations.Add(dest);
                                 else
                                     AdvancedLocationLoaderMod.Logger.Log("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString(), LogLevel.Error);
-
+                            AdvancedLocationLoaderMod.Logger.Log("Teleporter updated: " + tes.ToString(), LogLevel.Trace);
+                            break;
                         }
                     if (add)
+                    {
                         Compound.Teleporters.Add(min);
+                        AdvancedLocationLoaderMod.Logger.Log("Teleporter created: " + min.ToString(), LogLevel.Trace);
+                    }
                 }
             // Parse shops
             AdvancedLocationLoaderMod.Logger.Log("Parsing the `Shops` section...", LogLevel.Trace);
@@ -384,49 +388,49 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     trueCompound.Warps.Add(obj);
                 }
                 stage++; // 8
+                foreach (Conditional obj in Compound.Conditionals)
+                    Configs.Compound.Conditionals.Add(obj);
+                stage++; // 9
+                foreach (TeleporterList obj in Compound.Teleporters)
+                    Configs.Compound.Teleporters.Add(obj);
+                stage++; // 10
                 // At this point any edits that showed problems have been removed, so now we can actually process everything
                 foreach (Location obj in trueCompound.Locations)
                     Processors.ApplyLocation(obj);
-                stage++; // 9
+                stage++; // 11
                 foreach (Override obj in trueCompound.Overrides)
                     Processors.ApplyOverride(obj);
-                stage++; // 10
+                stage++; // 12
                 foreach (Redirect obj in trueCompound.Redirects)
                     EntoFramework.GetContentRegistry().RegisterXnb(obj.FromFile, obj.ToFile);
-                stage++; // 11
+                stage++; // 13
                 foreach (Tilesheet obj in trueCompound.Tilesheets)
                 {
                     Processors.ApplyTilesheet(obj);
                     if (obj.Seasonal)
                         Configs.Compound.SeasonalTilesheets.Add(obj);
                 }
-                stage++; // 12
+                stage++; // 14
                 foreach (Tile obj in trueCompound.Tiles)
                 {
                     Processors.ApplyTile(obj);
                     if (!string.IsNullOrEmpty(obj.Conditions))
                         Configs.Compound.DynamicTiles.Add(obj);
                 }
-                stage++; // 13
+                stage++; // 15
                 foreach (Property obj in trueCompound.Properties)
                 {
                     Processors.ApplyProperty(obj);
                     if (!string.IsNullOrEmpty(obj.Conditions))
                         Configs.Compound.DynamicProperties.Add(obj);
                 }
-                stage++; // 14
+                stage++; // 16
                 foreach (Warp obj in trueCompound.Warps)
                 {
                     Processors.ApplyWarp(obj);
                     if (!string.IsNullOrEmpty(obj.Conditions))
                         Configs.Compound.DynamicWarps.Add(obj);
                 }
-                stage++; // 15
-                foreach (Conditional obj in trueCompound.Conditionals)
-                    Configs.Compound.Conditionals.Add(obj);
-                stage++; // 16
-                foreach (TeleporterList obj in trueCompound.Teleporters)
-                    Configs.Compound.Teleporters.Add(obj);
                 stage++; // 17
                 NPC.populateRoutesFromLocationToLocationList();
                 stage++; // 18

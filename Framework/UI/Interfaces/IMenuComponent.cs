@@ -9,6 +9,8 @@ namespace Entoarox.Framework.UI
         void Draw(SpriteBatch b, Point offset);
         void Attach(IComponentContainer collection);
         void Detach(IComponentContainer collection);
+        void OnAttach(IComponentContainer parent);
+        void OnDetach(IComponentContainer parent);
         Point GetPosition();
         Rectangle GetRegion();
         bool Visible { get; set; }

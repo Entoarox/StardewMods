@@ -117,6 +117,7 @@
     <Compile Include="UI\Generic\ClickableHeartsComponent.cs" />
     <Compile Include="UI\Generic\ClickableTextComponent.cs" />
     <Compile Include="UI\Generic\ClickableTextureComponent.cs" />
+    <Compile Include="UI\Generic\ColoredRectangleComponent.cs" />
     <Compile Include="UI\Generic\FrameComponent.cs" />
     <Compile Include="UI\Generic\HeartsComponent.cs" />
     <Compile Include="UI\Generic\LabelComponent.cs" />

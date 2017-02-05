@@ -23,6 +23,8 @@ namespace Entoarox.Framework.UI
         public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
         public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
 
+        protected bool Center = false;
+
         public override bool Disabled
         {
             get
@@ -42,12 +44,27 @@ namespace Entoarox.Framework.UI
         {
 
         }
-        public FormCollectionComponent(Rectangle area, List<IMenuComponent> components = null)
+        protected FormCollectionComponent(List<IMenuComponent> components = null)
         {
-            SetScaledArea(area);
             if (components != null)
                 foreach (IMenuComponent c in components)
                     AddComponent(c);
+        }
+        public FormCollectionComponent(Point size, List<IMenuComponent> components = null) : this(components)
+        {
+            Center = true;
+            SetScaledArea(new Rectangle(0, 0, size.X, size.Y));
+        }
+        public FormCollectionComponent(Rectangle area, List<IMenuComponent> components = null) : this(components)
+        {
+            SetScaledArea(area);
+        }
+        public override void OnAttach(IComponentContainer parent)
+        {
+            if (!Center)
+                return;
+            Area.X = (parent.EventRegion.Width - Area.Width) / 2;
+            Area.Y = (parent.EventRegion.Height - Area.Height) / 2;
         }
         // IComponentCollection
         protected void UpdateDrawOrder()

@@ -7,6 +7,11 @@ namespace Entoarox.Framework.UI
     class ClickableCollectionComponent : GenericCollectionComponent
     {
         public event ClickHandler Handler;
+        public ClickableCollectionComponent(Point size, ClickHandler handler = null, List<IMenuComponent> components = null) : base(size, components)
+        {
+            if (handler != null)
+                Handler += handler;
+        }
         public ClickableCollectionComponent(Rectangle area, ClickHandler handler = null, List<IMenuComponent> components = null) : base(area, components)
         {
             if (handler != null)

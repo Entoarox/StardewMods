@@ -22,11 +22,6 @@ namespace Entoarox.Framework.Extensions
         }
         public static void SetTile(this GameLocation self, int x, int y, string layer, int index, string sheet = null)
         {
-            TileSheet _sheet = sheet==null?self.map.TileSheets[0]:self.map.GetTileSheet(sheet);
-            if (_sheet == null)
-                throw new ArgumentNullException(nameof(sheet));
-            if (_sheet.TileCount < index || index < 0)
-                throw new ArgumentNullException(nameof(index));
             Layer _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
@@ -34,16 +29,21 @@ namespace Entoarox.Framework.Extensions
                 throw new ArgumentOutOfRangeException(nameof(x));
             if(_layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
+            TileSheet _sheet;
+            if (sheet != null)
+                _sheet = self.map.GetTileSheet(sheet);
+            else if (_layer.Tiles[x, y] != null)
+                _sheet = _layer.Tiles[x, y].TileSheet;
+            else
+                _sheet = self.map.TileSheets[0];
+            if (_sheet == null)
+                throw new ArgumentNullException(nameof(sheet));
+            if (_sheet.TileCount < index || index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), "Must be at least 0 and less then " + _sheet.TileCount + " for tilesheet with Id `" + _sheet.Id + '`');
             _layer.Tiles[x, y] = new StaticTile(_layer, _sheet, BlendMode.Alpha, index);
         }
         public static void SetTile(this GameLocation self, int x, int y, string layer, int[] indexes, int interval, string sheet=null)
         {
-            TileSheet _sheet = sheet == null ? self.map.TileSheets[0] : self.map.GetTileSheet(sheet);
-            if (_sheet == null)
-                throw new ArgumentNullException(nameof(sheet));
-            for(int c=0;c<indexes.Length;c++)
-                if (_sheet.TileCount < indexes[c] || indexes[c] < 0)
-                    throw new ArgumentNullException(nameof(indexes)+'['+c.ToString()+']');
             if (interval < 0)
                 throw new ArgumentOutOfRangeException(nameof(interval));
             Layer _layer = self.map.GetLayer(layer);
@@ -53,6 +53,18 @@ namespace Entoarox.Framework.Extensions
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (_layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
+            TileSheet _sheet;
+            if (sheet != null)
+                _sheet = self.map.GetTileSheet(sheet);
+            else if (_layer.Tiles[x, y] != null)
+                _sheet = _layer.Tiles[x, y].TileSheet;
+            else
+                _sheet = self.map.TileSheets[0];
+            if (_sheet == null)
+                throw new ArgumentNullException(nameof(sheet));
+            for (int c = 0; c < indexes.Length; c++)
+                if (_sheet.TileCount < indexes[c] || indexes[c] < 0)
+                    throw new ArgumentOutOfRangeException(nameof(indexes) + '[' + c.ToString() + ']', "Must be at least 0 and less then " + _sheet.TileCount + " for tilesheet with Id `" + _sheet.Id + '`');
             List<StaticTile> Frames = new List<StaticTile>();
             foreach(int index in indexes)
             Frames.Add(new StaticTile(_layer, _sheet, BlendMode.Alpha, index));
