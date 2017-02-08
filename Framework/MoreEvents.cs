@@ -40,7 +40,7 @@ namespace Entoarox.Framework.Events
         /// <summary>
         /// The player that triggered the action tile in question
         /// </summary>
-        public Farmer Who;
+        public StardewValley.Farmer Who;
         /// <summary>
         /// The position of the tile that the action was triggered on
         /// </summary>
@@ -52,7 +52,7 @@ namespace Entoarox.Framework.Events
         /// <param name="action">The action they triggered</param>
         /// <param name="arguments">Any arguments that are attached to the action</param>
         /// <param name="position">The tile position of the action triggered</param>
-        internal EventArgsActionTriggered(Farmer who, string action, string[] arguments, Microsoft.Xna.Framework.Vector2 position)
+        internal EventArgsActionTriggered(StardewValley.Farmer who, string action, string[] arguments, Microsoft.Xna.Framework.Vector2 position)
         {
             Action = action;
             Arguments = arguments;

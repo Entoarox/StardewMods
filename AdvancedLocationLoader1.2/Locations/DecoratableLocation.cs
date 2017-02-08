@@ -24,7 +24,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
             {
                 return false;
             }
-            public override bool placementAction(GameLocation location, int x, int y, Farmer who = null)
+            public override bool placementAction(GameLocation location, int x, int y, StardewValley.Farmer who = null)
             {
                 return false;
             }

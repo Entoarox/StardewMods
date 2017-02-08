@@ -37,30 +37,30 @@ namespace Entoarox.Framework
         private static List<Point> OldLevelups;
         private static void RestoreLevels()
         {
-            Game1.player.experiencePoints[Farmer.combatSkill] = ExpWatcher[Farmer.combatSkill];
-            Game1.player.experiencePoints[Farmer.farmingSkill] = ExpWatcher[Farmer.farmingSkill];
-            Game1.player.experiencePoints[Farmer.fishingSkill] = ExpWatcher[Farmer.fishingSkill];
-            Game1.player.experiencePoints[Farmer.foragingSkill] = ExpWatcher[Farmer.foragingSkill];
-            Game1.player.experiencePoints[Farmer.miningSkill] = ExpWatcher[Farmer.miningSkill];
-            Game1.player.CombatLevel = OldLevels[Farmer.combatSkill];
-            Game1.player.FarmingLevel = OldLevels[Farmer.farmingSkill];
-            Game1.player.FishingLevel = OldLevels[Farmer.fishingSkill];
-            Game1.player.ForagingLevel = OldLevels[Farmer.foragingSkill];
-            Game1.player.MiningLevel = OldLevels[Farmer.miningSkill];
+            Game1.player.experiencePoints[StardewValley.Farmer.combatSkill] = ExpWatcher[StardewValley.Farmer.combatSkill];
+            Game1.player.experiencePoints[StardewValley.Farmer.farmingSkill] = ExpWatcher[StardewValley.Farmer.farmingSkill];
+            Game1.player.experiencePoints[StardewValley.Farmer.fishingSkill] = ExpWatcher[StardewValley.Farmer.fishingSkill];
+            Game1.player.experiencePoints[StardewValley.Farmer.foragingSkill] = ExpWatcher[StardewValley.Farmer.foragingSkill];
+            Game1.player.experiencePoints[StardewValley.Farmer.miningSkill] = ExpWatcher[StardewValley.Farmer.miningSkill];
+            Game1.player.CombatLevel = OldLevels[StardewValley.Farmer.combatSkill];
+            Game1.player.FarmingLevel = OldLevels[StardewValley.Farmer.farmingSkill];
+            Game1.player.FishingLevel = OldLevels[StardewValley.Farmer.fishingSkill];
+            Game1.player.ForagingLevel = OldLevels[StardewValley.Farmer.foragingSkill];
+            Game1.player.MiningLevel = OldLevels[StardewValley.Farmer.miningSkill];
             Game1.player.newLevels = OldLevelups;
         }
         private static void UpdateWatchers()
         {
-            ExpWatcher[Farmer.combatSkill] = Game1.player.experiencePoints[Farmer.combatSkill];
-            ExpWatcher[Farmer.farmingSkill] = Game1.player.experiencePoints[Farmer.farmingSkill];
-            ExpWatcher[Farmer.fishingSkill] = Game1.player.experiencePoints[Farmer.fishingSkill];
-            ExpWatcher[Farmer.foragingSkill] = Game1.player.experiencePoints[Farmer.foragingSkill];
-            ExpWatcher[Farmer.miningSkill] = Game1.player.experiencePoints[Farmer.miningSkill];
-            OldLevels[Farmer.combatSkill] = Game1.player.CombatLevel;
-            OldLevels[Farmer.farmingSkill] = Game1.player.FarmingLevel;
-            OldLevels[Farmer.fishingSkill] = Game1.player.FishingLevel;
-            OldLevels[Farmer.foragingSkill] = Game1.player.ForagingLevel;
-            OldLevels[Farmer.miningSkill] = Game1.player.MiningLevel;
+            ExpWatcher[StardewValley.Farmer.combatSkill] = Game1.player.experiencePoints[StardewValley.Farmer.combatSkill];
+            ExpWatcher[StardewValley.Farmer.farmingSkill] = Game1.player.experiencePoints[StardewValley.Farmer.farmingSkill];
+            ExpWatcher[StardewValley.Farmer.fishingSkill] = Game1.player.experiencePoints[StardewValley.Farmer.fishingSkill];
+            ExpWatcher[StardewValley.Farmer.foragingSkill] = Game1.player.experiencePoints[StardewValley.Farmer.foragingSkill];
+            ExpWatcher[StardewValley.Farmer.miningSkill] = Game1.player.experiencePoints[StardewValley.Farmer.miningSkill];
+            OldLevels[StardewValley.Farmer.combatSkill] = Game1.player.CombatLevel;
+            OldLevels[StardewValley.Farmer.farmingSkill] = Game1.player.FarmingLevel;
+            OldLevels[StardewValley.Farmer.fishingSkill] = Game1.player.FishingLevel;
+            OldLevels[StardewValley.Farmer.foragingSkill] = Game1.player.ForagingLevel;
+            OldLevels[StardewValley.Farmer.miningSkill] = Game1.player.MiningLevel;
             OldLevelups = Game1.player.newLevels;
         }
         internal static void ResetForNewGame()

@@ -288,6 +288,7 @@ namespace Entoarox.ShopExpander
             parentSheetIndex = item.parentSheetIndex;
             price = salePrice() * stack;
             MaxStackSize = (int)Math.Floor(999d / stack);
+            name = stackAmount.ToString() + ' ' + Item.Name;
         }
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
         {
@@ -315,11 +316,6 @@ namespace Entoarox.ShopExpander
         public override int salePrice()
         {
             return Item.salePrice() * stackAmount;
-        }
-        public override string Name
-        {
-            get { return stackAmount.ToString()+' '+Item.Name; }
-            set { }
         }
         public int getStackNumber()
         {

@@ -11,39 +11,38 @@ using StardewValley;
 using StardewValley.Objects;
 
 using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 using Entoarox.Framework.Events;
+
+
 using Microsoft.Xna.Framework;
 
 namespace Entoarox.FurnitureAnywhere
 {
     public class FurnitureAnywhereMod : Mod
     {
-        private static DataLogger Logger;
-        public override void Entry(params object[] objects)
+        public override void Entry(IModHelper helper)
         {
-            Logger = new DataLogger("FurnitureAnywhere");
-            System.Version version = typeof(FurnitureAnywhereMod).Assembly.GetName().Version;
-            Logger.LogModInfo("Entoarox", version);
-            VersionChecker.AddCheck("FurnitureAnywhere", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/FurnitureAnywhere.json");
+            VersionChecker.AddCheck("FurnitureAnywhere", typeof(FurnitureAnywhereMod).Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/FurnitureAnywhere.json");
             MoreEvents.ActiveItemChanged += MoreEvents_ActiveItemChanged;
             LocationEvents.CurrentLocationChanged += TriggerItemChangedEvent;
             MenuEvents.MenuChanged += TriggerItemChangedEvent;
             MenuEvents.MenuClosed += TriggerItemChangedEvent;
             EntoFramework.GetTypeRegistry().RegisterType<AnywhereFurniture>();
         }
-        private static void RestoreVanillaObjects()
+        private void RestoreVanillaObjects()
         {
             for (int c = 0; c < Game1.player.items.Count; c++)
                 if (Game1.player.items[c] != null && Game1.player.items[c] is AnywhereFurniture)
                     Game1.player.items[c] = (Game1.player.items[c] as AnywhereFurniture).Revert();
         }
-        private static void InitSpecialObject(Item i)
+        private void InitSpecialObject(Item i)
         {
             for (int c = 0; c < Game1.player.items.Count; c++)
                 if (Game1.player.items[c] != null && Game1.player.items[c].Equals(i))
                     Game1.player.items[c] = new AnywhereFurniture(Game1.player.items[c] as Furniture);
         }
-        internal static void MoreEvents_ActiveItemChanged(object s, EventArgsActiveItemChanged e)
+        internal void MoreEvents_ActiveItemChanged(object s, EventArgsActiveItemChanged e)
         {
             try
             {
@@ -54,10 +53,10 @@ namespace Entoarox.FurnitureAnywhere
             }
             catch(Exception err)
             {
-                Logger.Error("Failed to run logic check due to unexpected error", err);
+                Monitor.Log(LogLevel.Error,"Failed to run logic check due to unexpected error", err);
             }
         }
-        internal static void TriggerItemChangedEvent(object s, EventArgs e)
+        internal void TriggerItemChangedEvent(object s, EventArgs e)
         {
             MoreEvents_ActiveItemChanged(null, new EventArgsActiveItemChanged(Game1.player.CurrentItem, Game1.player.CurrentItem));
         }
@@ -100,7 +99,7 @@ namespace Entoarox.FurnitureAnywhere
         {
             return "FurnitureAnywhere";
         }
-        public override bool performObjectDropInAction(StardewValley.Object dropIn, bool probe, Farmer who)
+        public override bool performObjectDropInAction(StardewValley.Object dropIn, bool probe, StardewValley.Farmer who)
         {
             return false;
         }
@@ -130,7 +129,7 @@ namespace Entoarox.FurnitureAnywhere
                 return true;
             return !l.isTileOccupiedForPlacement(tile, this);
         }
-        public override bool placementAction(GameLocation location, int x, int y, Farmer who = null)
+        public override bool placementAction(GameLocation location, int x, int y, StardewValley.Farmer who = null)
         {
             Point point = new Point(x / Game1.tileSize, y / Game1.tileSize);
             tileLocation = new Vector2(point.X, point.Y);
@@ -209,7 +208,7 @@ namespace Entoarox.FurnitureAnywhere
             furniture.rotate();
             return furniture;
         }
-        public override bool clicked(Farmer who)
+        public override bool clicked(StardewValley.Farmer who)
         {
             Game1.haltAfterCheck = false;
             if (furniture_type == 11 && who.ActiveObject != null && (who.ActiveObject != null && heldObject == null))

@@ -19,6 +19,7 @@ namespace Entoarox.Framework
             parentSheetIndex = item.parentSheetIndex;
             price = salePrice() * stack;
             MaxStackSize = (int)Math.Floor(999d / stack);
+            name = Item.Name;
         }
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
         {
@@ -29,11 +30,6 @@ namespace Entoarox.Framework
         public override int salePrice()
         {
             return Item.salePrice() * stackAmount;
-        }
-        public override string Name
-        {
-            get { return Item.name; }
-            set { Item.name = value; }
         }
         public int getStackNumber()
         {

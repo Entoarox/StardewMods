@@ -58,9 +58,9 @@ namespace Entoarox.Framework.UI
             Font = font;
             Color = (Color)color;
             Shadow = shadow;
-            Scale = scale;
+            _Scale = scale;
             _Label = label;
-            Vector2 size = Font.MeasureString(label) / Game1.pixelZoom * Scale;
+            Vector2 size = Font.MeasureString(label) / Game1.pixelZoom * scale;
             SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
         }
         public override void HoverIn(Point p, Point o)

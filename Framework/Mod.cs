@@ -14,6 +14,7 @@ namespace Entoarox.Framework
         public bool GamePatcher=true;
         public bool SkipCredits=false;
         public bool DebugMode=false;
+        public bool IngameUpdateNotices = true;
     }
     public class EntoFramework : Mod
     {

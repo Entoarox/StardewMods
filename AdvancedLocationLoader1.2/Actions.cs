@@ -19,16 +19,16 @@ namespace Entoarox.AdvancedLocationLoader
     internal static class Actions
     {
         internal static Random _Random = new Random();
-        internal static void Shift(Farmer who, string[] arguments, Vector2 tile)
+        internal static void Shift(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             Game1.warpFarmer(who.currentLocation, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]),who.facingDirection,who.currentLocation.isStructure);
         }
-        internal static void RandomMessage(Farmer who, string[] arguments, Vector2 tile)
+        internal static void RandomMessage(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             string[] opts = string.Join(" ", arguments).Split('|');
             Game1.drawObjectDialogue(opts[_Random.Next(opts.Length)]);
         }
-        internal static void React(Farmer who, string[] arguments, Vector2 tile)
+        internal static void React(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             int interval = Convert.ToInt32(arguments[0]);
             int[] indexes = arguments[1].Split(',').Select(e => Convert.ToInt32(e)).ToArray();
@@ -46,7 +46,7 @@ namespace Entoarox.AdvancedLocationLoader
             },
             null, delay, System.Threading.Timeout.Infinite);
         }
-        internal static void Teleporter(Farmer who, string[] arguments, Vector2 tile)
+        internal static void Teleporter(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             if(Configs.Compound.Teleporters.Exists(e => e.ListName.Equals(arguments[0].Trim())))
                 TeleportationResolver.Request(arguments[0]).Init();
@@ -60,7 +60,7 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
-        internal static void Conditional(Farmer who, string[] arguments, Vector2 tile)
+        internal static void Conditional(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             if(!who.mailReceived.Contains("ALLCondition_"+arguments[0]) && Configs.Compound.Conditionals.Exists(e => e.Name==arguments[0]))
                 ConditionalResolver.Request(arguments[0]).Init();
@@ -73,10 +73,10 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
             }
         }
-        internal static Farmer _who;
+        internal static StardewValley.Farmer _who;
         internal static string[] _arguments;
         internal static Vector2 _tile;
-        internal static void Shop(Farmer who, string[] arguments, Vector2 tile)
+        internal static void Shop(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             _who = who;
             _arguments = arguments;
@@ -164,7 +164,7 @@ namespace Entoarox.AdvancedLocationLoader
             Game1.currentLocation.lastQuestionKey = "SelectTeleportDestination";
             Game1.currentLocation.createQuestionDialogue(AdvancedLocationLoaderMod.Localizer.Localize("teleporter"), destinations.ToArray(), Resolver, null);
         }
-        internal void Resolver(Farmer who, string answer)
+        internal void Resolver(StardewValley.Farmer who, string answer)
         {
             if (answer == "cancel")
                 return;
@@ -202,7 +202,7 @@ namespace Entoarox.AdvancedLocationLoader
             Game1.currentLocation.lastQuestionKey = "CompleteConditionalQuestion";
             Game1.currentLocation.createQuestionDialogue(Conditional.Question, answers, Resolver, null);
         }
-        internal void Resolver(Farmer who, string answer)
+        internal void Resolver(StardewValley.Farmer who, string answer)
         {
             if (answer == "n")
                 return;

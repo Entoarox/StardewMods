@@ -66,17 +66,20 @@ namespace Entoarox.Framework
                             EntoFramework.Logger.Log("Could not check for updates to " + check.Mod + ", if you are not connected to the internet you can ignore this error.", LogLevel.Error);
                         else if (info.Minimum > check.Version)
                         {
-                            EntoFramework.GetMessageBox().receiveMessage("Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
+                            if(EntoFramework.Config.IngameUpdateNotices)
+                                EntoFramework.GetMessageBox().receiveMessage("Critical " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 0, 0));
                             EntoFramework.Logger.Log("A critical update for " + check.Mod + " is available, you should update immediately!", LogLevel.Warn);
                         }
                         else if (info.Recommended > check.Version)
                         {
-                            EntoFramework.GetMessageBox().receiveMessage("Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
+                            if (EntoFramework.Config.IngameUpdateNotices)
+                                EntoFramework.GetMessageBox().receiveMessage("Recommended " + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(255, 128, 0));
                             EntoFramework.Logger.Log("A recommended update for " + check.Mod + " is available, you should update as soon as possible.", LogLevel.Alert);
                         }
                         else if (info.Latest > check.Version)
                         {
-                            EntoFramework.GetMessageBox().receiveMessage("Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
+                            if (EntoFramework.Config.IngameUpdateNotices)
+                                EntoFramework.GetMessageBox().receiveMessage("Optional" + check.Mod + " update", "VersionChecker", new Microsoft.Xna.Framework.Color(0, 0, 255));
                             EntoFramework.Logger.Log("A optional update for " + check.Mod + " is available.", LogLevel.Info);
                         }
                         else

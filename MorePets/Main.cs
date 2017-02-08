@@ -241,7 +241,7 @@ namespace MorePets
     {
         private bool Cat;
         private int Skin;
-        private Farmer Who=null;
+        private StardewValley.Farmer Who=null;
         private AnimatedSprite Sprite;
         internal AdoptQuestion(bool cat, int skin)
         {
@@ -283,7 +283,7 @@ namespace MorePets
             else
                 GraphicsEvents.OnPostRenderHudEvent -= Display;
         }
-        internal void Resolver(Farmer who, string answer)
+        internal void Resolver(StardewValley.Farmer who, string answer)
         {
             GraphicsEvents.OnPostRenderHudEvent -= Display;
             if (answer == "n")

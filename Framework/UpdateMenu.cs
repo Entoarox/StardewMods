@@ -49,6 +49,7 @@ namespace Entoarox.Framework
         private bool isQuestion;
         private TemporaryAnimatedSprite dialogueIcon;
 
+        private static ReflectedField<int> timer = new ReflectedField<int>(typeof(DialogueBox), "questionFinishPauseTimer");
         public static void ShowTitleMenuDialogue(string msg)
         {
             ReflectionUtility.SetField(Game1.activeClickableMenu, "subMenu", new TitleMenuDialogue(msg));
@@ -243,7 +244,7 @@ namespace Entoarox.Framework
                 {
                     if (this.selectedResponse == -1)
                         return;
-                    DialogueBox.questionFinishPauseTimer = Game1.eventUp ? 600 : 200;
+                    timer.SetValue(Game1.eventUp ? 600 : 200);
                     this.transitioning = true;
                     this.transitionX = -1;
                     this.transitioningBigger = true;
@@ -514,9 +515,10 @@ namespace Entoarox.Framework
             }
             if (this.safetyTimer > 0)
                 this.safetyTimer -= time.ElapsedGameTime.Milliseconds;
-            if (DialogueBox.questionFinishPauseTimer > 0)
+            if (
+                    timer.GetValue() > 0)
             {
-                DialogueBox.questionFinishPauseTimer -= time.ElapsedGameTime.Milliseconds;
+                timer.SetValue(timer.GetValue() - time.ElapsedGameTime.Milliseconds);
             }
             else
             {

@@ -115,7 +115,7 @@ namespace Entoarox.Framework
                     return;
                 var typeArray = InjectedTypes.ToArray();
                 injectedSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(InjectedTypes).ToArray());
-                injectedFarmerSerializer = new XmlSerializer(typeof(Farmer), _farmerTypes.Concat(InjectedTypes).ToArray());
+                injectedFarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(InjectedTypes).ToArray());
                 injectedLocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(InjectedTypes).ToArray());
                 _injected = true;
             }

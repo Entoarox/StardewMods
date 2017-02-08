@@ -30,14 +30,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
@@ -76,7 +77,6 @@
     <Compile Include="Internal\MoreEvents.cs" />
     <Compile Include="LocalizationHelper.cs" />
     <Compile Include="Internal\LocationHelper.cs" />
-    <Compile Include="DataLogger.cs" />
     <Compile Include="MathUtility.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Internal\MessageBox.cs" />
