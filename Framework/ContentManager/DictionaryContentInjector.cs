@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Entoarox.Framework.ContentManager
 {
-    class DictionaryContentInjector : ContentInjector
+    class DictionaryContentInjector : ContentHandler
     {
         private static Dictionary<string, List<string>> Mapping=new Dictionary<string, List<string>>();
         private static Dictionary<string, object> Cache = new Dictionary<string, object>();

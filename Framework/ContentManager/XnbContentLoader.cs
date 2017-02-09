@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Entoarox.Framework.ContentManager
 {
-    public class XnbContentInjector : ContentInjector
+    public class XnbContentLoader : ContentHandler
     {
         private static Dictionary<string, string> Mapping = new Dictionary<string, string>();
         public static void Register(string assetName, string filePath)

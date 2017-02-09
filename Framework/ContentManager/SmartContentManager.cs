@@ -13,12 +13,13 @@ namespace Entoarox.Framework.ContentManager
         public SmartContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
         {
         }
-        public static List<ContentInjector> Injectors { get; } = new List<ContentInjector>()
+        public static List<ContentHandler> ContentHandlers { get; } = new List<ContentHandler>()
         {
-            new XnbContentInjector(),
+            new DictionaryContentInjector(),
             new TextureContentInjector(),
-            new DelegatedContentInjector(),
-            new DelegatedTypeContentInjector()
+            new XnbContentLoader(),
+            new DelegatedAssetContentHandler(),
+            new DelegatedTypeContentHandler()
         };
         public static List<string> ExpectedFailures { get; } = new List<string>
         {
@@ -43,15 +44,15 @@ namespace Entoarox.Framework.ContentManager
             try
             {
                 T asset = default(T);
-                var loaders = Injectors.Where(a => a.CanLoad<T>(assetName)).ToArray();
+                var loaders = ContentHandlers.Where(a => a.CanLoad<T>(assetName)).ToArray();
                 if (loaders.Length > 1)
                     EntoFramework.Logger.Log("ContentManager: multiple loaders for `" + assetName + "` found, using first", StardewModdingAPI.LogLevel.Warn);
                 if (loaders.Length > 0)
                     asset = loaders[0].Load(assetName, base.Load<T>);
                 else
                     asset = base.Load<T>(assetName);
-                var injectors = Injectors.Where(a => a.CanInject<T>(assetName)).ToArray();
-                foreach (ContentInjector injector in injectors)
+                var injectors = ContentHandlers.Where(a => a.CanInject<T>(assetName)).ToArray();
+                foreach (ContentHandler injector in injectors)
                     injector.Inject(assetName, ref asset);
                 return asset;
             }

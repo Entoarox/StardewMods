@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.Framework.ContentManager
 {
-    public class TextureContentInjector : ContentInjector
+    public class TextureContentInjector : ContentHandler
     {
         private static Texture2D Premultiply(string file)
         {

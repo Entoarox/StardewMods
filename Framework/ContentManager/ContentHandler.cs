@@ -1,6 +1,6 @@
 ﻿namespace Entoarox.Framework.ContentManager
 {
-    public abstract class ContentInjector
+    public abstract class ContentHandler
     {
         private static StardewValley.LocalizedContentManager _ModManager;
         protected static StardewValley.LocalizedContentManager ModManager
