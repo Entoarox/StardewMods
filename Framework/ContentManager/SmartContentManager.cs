@@ -15,8 +15,9 @@ namespace Entoarox.Framework.ContentManager
         }
         public static List<ContentHandler> ContentHandlers { get; } = new List<ContentHandler>()
         {
-            new DictionaryContentInjector(),
+            new MapContentInjector(),
             new TextureContentInjector(),
+            new DictionaryContentInjector(),
             new XnbContentLoader(),
             new DelegatedAssetContentHandler(),
             new DelegatedTypeContentHandler()
@@ -47,7 +48,7 @@ namespace Entoarox.Framework.ContentManager
                 T asset = default(T);
                 var loaders = ContentHandlers.Where(a => a.Loader && a.CanLoad<T>(assetName)).ToArray();
                 if (loaders.Length > 1)
-                    EntoFramework.Logger.Log("ContentManager: multiple loaders for `" + assetName + "` found, using first", StardewModdingAPI.LogLevel.Warn);
+                    EntoFramework.Logger.Log("ContentManager: multiple loaders for `" + assetName + "` found, using first.", StardewModdingAPI.LogLevel.Warn);
                 if (loaders.Length > 0)
                     asset = loaders[0].Load(assetName, base.Load<T>);
                 else
