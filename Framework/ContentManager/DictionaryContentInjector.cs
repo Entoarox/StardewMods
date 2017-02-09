@@ -5,6 +5,7 @@ namespace Entoarox.Framework.ContentManager
 {
     class DictionaryContentInjector : ContentHandler
     {
+        public override bool Injector { get; } = true;
         private static Dictionary<string, List<string>> Mapping=new Dictionary<string, List<string>>();
         private static Dictionary<string, object> Cache = new Dictionary<string, object>();
         private static void InjectPairs<TKey,TValue>(Dictionary<TKey,TValue> dictionary, string assetName)
