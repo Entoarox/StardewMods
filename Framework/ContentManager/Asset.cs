@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entoarox.Framework.ContentManager
 {
-    class Asset
+    struct Asset
     {
         private readonly Type Type;
         private readonly string AssetName;

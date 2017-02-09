@@ -15,7 +15,8 @@ namespace Entoarox.Framework.ContentManager
         }
         public static List<ContentInjector> Injectors { get; } = new List<ContentInjector>()
         {
-            new XnbContentInjector()
+            new XnbContentInjector(),
+            new DelegatedContentInjector()
         };
         public static List<string> ExpectedFailures { get; } = new List<string>
         {

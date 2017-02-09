@@ -12,6 +12,14 @@
                 return _ModManager;
             }
         }
+        protected static string GetModsRelativePath(string file)
+        {
+            return file.Replace(ModManager.RootDirectory + System.IO.Path.PathSeparator, "");
+        }
+        protected static string GetPlatformSafePath(string file)
+        {
+            return file.Replace(System.IO.Path.PathSeparator == '/' ? '\\' : '/', System.IO.Path.PathSeparator);
+        }
         public virtual bool CanLoad<T>(string assetName)
         {
             return false;
