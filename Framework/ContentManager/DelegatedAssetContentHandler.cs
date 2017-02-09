@@ -5,16 +5,18 @@ namespace Entoarox.Framework.ContentManager
 {
     public class DelegatedAssetContentHandler : ContentHandler
     {
-        public delegate void Injector<T>(string assetName, ref T asset);
-        public delegate T Loader<T>(string assetName, Func<string, T> loadBase);
+        public override bool Injector { get; } = true;
+        public override bool Loader { get; } = true;
+        public delegate void InjectHandler<T>(string assetName, ref T asset);
+        public delegate T Loadhandler<T>(string assetName, Func<string, T> loadBase);
         private static Dictionary<Asset, Delegate> Loaders = new Dictionary<Asset, Delegate>();
         private static Dictionary<Asset, List<Delegate>> Injectors = new Dictionary<Asset, List<Delegate>>();
 
-        public static void RegisterLoader<T>(string assetName, Loader<T> handler)
+        public static void RegisterLoader<T>(string assetName, Loadhandler<T> handler)
         {
             Loaders.Add(new Asset(typeof(T), GetPlatformSafePath(assetName)), handler);
         }
-        public static void RegisterInjector<T>(string assetName, Injector<T> handler)
+        public static void RegisterInjector<T>(string assetName, InjectHandler<T> handler)
         {
             Asset asset = new Asset(typeof(T), GetPlatformSafePath(assetName));
             if (!Injectors.ContainsKey(asset))
@@ -32,12 +34,12 @@ namespace Entoarox.Framework.ContentManager
         }
         public override void Inject<T>(string assetName, ref T asset)
         {
-            foreach (Injector<T> injector in Injectors[new Asset(typeof(T), assetName)])
+            foreach (InjectHandler<T> injector in Injectors[new Asset(typeof(T), assetName)])
                 injector(assetName, ref asset);
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
-            return ((Loader<T>)Loaders[new Asset(typeof(T), assetName)])(assetName, loadBase);
+            return ((Loadhandler<T>)Loaders[new Asset(typeof(T), assetName)])(assetName, loadBase);
         }
     }
 }

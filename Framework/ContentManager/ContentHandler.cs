@@ -26,6 +26,8 @@ namespace Entoarox.Framework.ContentManager
         {
             return file.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
         }
+        public virtual bool Loader { get; } = false;
+        public virtual bool Injector { get; } = false;
         public virtual bool CanLoad<T>(string assetName)
         {
             return false;

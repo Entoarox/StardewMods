@@ -9,6 +9,7 @@ namespace Entoarox.Framework.ContentManager
 {
     public class TextureContentInjector : ContentHandler
     {
+        public override bool Injector { get; } = true;
         private static Texture2D Premultiply(string file)
         {
             Texture2D texture = Texture2D.FromStream(StardewValley.Game1.graphics.GraphicsDevice, new System.IO.FileStream(file, System.IO.FileMode.Open));

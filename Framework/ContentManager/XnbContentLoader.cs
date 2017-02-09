@@ -5,6 +5,7 @@ namespace Entoarox.Framework.ContentManager
 {
     public class XnbContentLoader : ContentHandler
     {
+        public override bool Loader { get; } = true;
         private static Dictionary<string, string> Mapping = new Dictionary<string, string>();
         public static void Register(string assetName, string filePath)
         {

@@ -45,14 +45,14 @@ namespace Entoarox.Framework.ContentManager
             {
                 assetName = ContentHandler.GetPlatformSafePath(assetName);
                 T asset = default(T);
-                var loaders = ContentHandlers.Where(a => a.CanLoad<T>(assetName)).ToArray();
+                var loaders = ContentHandlers.Where(a => a.Loader && a.CanLoad<T>(assetName)).ToArray();
                 if (loaders.Length > 1)
                     EntoFramework.Logger.Log("ContentManager: multiple loaders for `" + assetName + "` found, using first", StardewModdingAPI.LogLevel.Warn);
                 if (loaders.Length > 0)
                     asset = loaders[0].Load(assetName, base.Load<T>);
                 else
                     asset = base.Load<T>(assetName);
-                var injectors = ContentHandlers.Where(a => a.CanInject<T>(assetName)).ToArray();
+                var injectors = ContentHandlers.Where(a => a.Injector && a.CanInject<T>(assetName)).ToArray();
                 foreach (ContentHandler injector in injectors)
                     injector.Inject(assetName, ref asset);
                 return asset;
