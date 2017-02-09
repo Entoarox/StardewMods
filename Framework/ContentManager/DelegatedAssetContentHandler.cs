@@ -24,20 +24,20 @@ namespace Entoarox.Framework.ContentManager
 
         public override bool CanInject<T>(string assetName)
         {
-            return Injectors.ContainsKey(new Asset(typeof(T), GetPlatformSafePath(assetName)));
+            return Injectors.ContainsKey(new Asset(typeof(T), assetName));
         }
         public override bool CanLoad<T>(string assetName)
         {
-            return Loaders.ContainsKey(new Asset(typeof(T), GetPlatformSafePath(assetName)));
+            return Loaders.ContainsKey(new Asset(typeof(T), assetName));
         }
         public override void Inject<T>(string assetName, ref T asset)
         {
-            foreach (Injector<T> injector in Injectors[new Asset(typeof(T), GetPlatformSafePath(assetName))])
-                injector(GetPlatformSafePath(assetName), ref asset);
+            foreach (Injector<T> injector in Injectors[new Asset(typeof(T), assetName)])
+                injector(assetName, ref asset);
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
-            return ((Loader<T>)Loaders[new Asset(typeof(T), GetPlatformSafePath(assetName))])(GetPlatformSafePath(assetName), loadBase);
+            return ((Loader<T>)Loaders[new Asset(typeof(T), assetName)])(assetName, loadBase);
         }
     }
 }

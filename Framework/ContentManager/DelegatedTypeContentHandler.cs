@@ -32,11 +32,11 @@ namespace Entoarox.Framework.ContentManager
         public override void Inject<T>(string assetName, ref T asset)
         {
             foreach (Injector<T> injector in Injectors[typeof(T)])
-                injector(GetPlatformSafePath(assetName), ref asset);
+                injector(assetName, ref asset);
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
-            return ((Loader<T>)Loaders[typeof(T)])(GetPlatformSafePath(assetName), loadBase);
+            return ((Loader<T>)Loaders[typeof(T)])(assetName, loadBase);
         }
     }
 }

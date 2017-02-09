@@ -12,7 +12,7 @@ namespace Entoarox.Framework.ContentManager
             foreach (string file in Mapping[assetName])
                 try
                 {
-                    foreach (KeyValuePair<TKey, TValue> pair in ModManager.Load<Dictionary<TKey, TValue>>(file))
+                    foreach (KeyValuePair<TKey, TValue> pair in ModManager.Load<Dictionary<TKey, TValue>>(GetModsRelativePath(file)))
                         if (dictionary.ContainsKey(pair.Key))
                             dictionary[pair.Key] = pair.Value;
                         else
@@ -27,7 +27,7 @@ namespace Entoarox.Framework.ContentManager
         {
             if (!Mapping.ContainsKey(assetName))
                 Mapping.Add(assetName, new List<string>());
-            Mapping[assetName].Add(GetModsRelativePath(GetPlatformSafePath(file)));
+            Mapping[assetName].Add(GetPlatformSafePath(file));
         }
         public override bool CanInject<T>(string assetName)
         {

@@ -4,11 +4,16 @@
     {
         public override void Entry(StardewModdingAPI.IModHelper helper)
         {
-            StardewModdingAPI.Events.GameEvents.LoadContent += GameEvents_LoadContent;
+            StardewModdingAPI.Events.GameEvents.FirstUpdateTick += GameEvents_FirstUpdateTick;
         }
         private string _Path;
-        private void GameEvents_LoadContent(object s, object e)
+        private void GameEvents_FirstUpdateTick(object s, object e)
         {
+            StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
+        }
+        private void GameEvents_UpdateTick(object s, object e)
+        {
+            StardewModdingAPI.Events.GameEvents.UpdateTick -= GameEvents_UpdateTick;
             _Path = System.IO.Path.Combine(Helper.DirectoryPath, "ModContent");
             System.IO.Directory.CreateDirectory(_Path);
             Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", StardewModdingAPI.LogLevel.Info);

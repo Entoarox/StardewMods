@@ -48,14 +48,14 @@ namespace Entoarox.Framework.ContentManager
         }
         public override bool CanInject<T>(string assetName)
         {
-            return typeof(T)==typeof(Texture2D) && Mapping.ContainsKey(GetPlatformSafePath(assetName));
+            return typeof(T)==typeof(Texture2D) && Mapping.ContainsKey(assetName);
         }
         public override void Inject<T>(string assetName, ref T asset)
         {
             if(!Cache.ContainsKey(assetName))
             {
                 Texture2D partial = asset as Texture2D;
-                foreach(KeyValuePair<string,Rectangle> patch in Mapping[GetPlatformSafePath(assetName)])
+                foreach(KeyValuePair<string,Rectangle> patch in Mapping[assetName])
                     partial = PatchTexture(partial, Premultiply(patch.Key),patch.Value);
                 Cache.Add(assetName, partial);
             }

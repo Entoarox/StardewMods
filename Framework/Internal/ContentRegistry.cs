@@ -65,7 +65,6 @@ namespace Entoarox.Framework
                 switch (EntoFramework.LoaderType)
                 {
                     case EntoFramework.LoaderTypes.SMAPI:
-                        ContentManager.XnbContentInjector.Register(key, path);
                         SmartManager.RegisterXnb(key, path);
                         break;
                     case EntoFramework.LoaderTypes.FarmHand:

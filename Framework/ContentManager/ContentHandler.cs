@@ -1,4 +1,7 @@
-﻿namespace Entoarox.Framework.ContentManager
+﻿using System;
+using System.IO;
+
+namespace Entoarox.Framework.ContentManager
 {
     public abstract class ContentHandler
     {
@@ -8,17 +11,20 @@
             get
             {
                 if (_ModManager == null)
-                    _ModManager = new StardewValley.LocalizedContentManager(StardewValley.Game1.content.ServiceProvider, System.IO.Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"));
+                    _ModManager = new StardewValley.LocalizedContentManager(StardewValley.Game1.content.ServiceProvider, Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"));
                 return _ModManager;
             }
         }
-        protected static string GetModsRelativePath(string file)
+        public static string GetModsRelativePath(string file)
         {
-            return file.Replace(ModManager.RootDirectory + System.IO.Path.PathSeparator, "");
+            Uri fromUri = new Uri(ModManager.RootDirectory + Path.PathSeparator);
+            Uri toUri = new Uri(file);
+            if (fromUri.Scheme != toUri.Scheme) { throw new InvalidOperationException("Unable to make path relative to the Mods directory: " + file); }
+            return GetPlatformSafePath(Uri.UnescapeDataString(fromUri.MakeRelativeUri(toUri).ToString()));
         }
-        protected static string GetPlatformSafePath(string file)
+        public static string GetPlatformSafePath(string file)
         {
-            return file.Replace(System.IO.Path.PathSeparator == '/' ? '\\' : '/', System.IO.Path.PathSeparator);
+            return file.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
         }
         public virtual bool CanLoad<T>(string assetName)
         {
@@ -28,7 +34,7 @@
         {
             return false;
         }
-        public abstract T Load<T>(string assetName, System.Func<string, T> loadBase);
+        public abstract T Load<T>(string assetName, Func<string, T> loadBase);
         public abstract void Inject<T>(string assetName, ref T asset);
     }
 }

@@ -43,6 +43,7 @@ namespace Entoarox.Framework.ContentManager
         {
             try
             {
+                assetName = ContentHandler.GetPlatformSafePath(assetName);
                 T asset = default(T);
                 var loaders = ContentHandlers.Where(a => a.CanLoad<T>(assetName)).ToArray();
                 if (loaders.Length > 1)
