@@ -38,8 +38,7 @@ namespace Entoarox.Framework.ContentManager
             if (!Cache.ContainsKey(assetName))
             {
                 T copy = asset;
-                var method = typeof(DictionaryContentInjector).GetMethod("InjectPairs").MakeGenericMethod(typeof(T).GetGenericArguments());
-                method.Invoke(null, new object[] { copy, assetName });
+                typeof(DictionaryContentInjector).GetMethod("InjectPairs").MakeGenericMethod(typeof(T).GetGenericArguments()).Invoke(null, new object[] { copy, assetName }); ();
                 Cache.Add(assetName, copy);
             }
             asset = (T)Cache[assetName];
