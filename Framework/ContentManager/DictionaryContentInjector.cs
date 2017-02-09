@@ -35,8 +35,14 @@ namespace Entoarox.Framework.ContentManager
         }
         public override void Inject<T>(string assetName, ref T asset)
         {
-            var method = typeof(DictionaryContentInjector).GetMethod("InjectPairs").MakeGenericMethod(typeof(T).GetGenericArguments());
-            method.Invoke(null, new object[] { asset, assetName });
+            if (!Cache.ContainsKey(assetName))
+            {
+                T copy = asset;
+                var method = typeof(DictionaryContentInjector).GetMethod("InjectPairs").MakeGenericMethod(typeof(T).GetGenericArguments());
+                method.Invoke(null, new object[] { copy, assetName });
+                Cache.Add(assetName, copy);
+            }
+            asset = (T)Cache[assetName];
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
