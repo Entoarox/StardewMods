@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.Framework.ContentManager
 {
-    class TextureContentInjector : ContentInjector
+    public class TextureContentInjector : ContentInjector
     {
         private static Texture2D Premultiply(string file)
         {
@@ -20,24 +20,8 @@ namespace Entoarox.Framework.ContentManager
         }
         private static Texture2D PatchTexture(Texture2D @base,Texture2D input,Rectangle destination)
         {
-            if (@base == null)
-            {
-                throw new ArgumentNullException(nameof(@base));
-            }
-
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             var newData = new Color[input.Width * input.Height];
             input.GetData(newData);
-
             if (destination.Bottom > @base.Height || destination.Right > @base.Width)
             {
                 var originalRect = new Rectangle(0, 0, @base.Width, @base.Height);
@@ -50,7 +34,6 @@ namespace Entoarox.Framework.ContentManager
                     Math.Max(destination.Bottom, @base.Height));
                 @base.SetData(0, originalRect, originalData, 0, originalSize);
             }
-
             @base.SetData(0, destination, newData, 0, destination.Width * destination.Height);
 
             return @base;
