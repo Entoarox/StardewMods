@@ -2,8 +2,8 @@
 {
     public abstract class ContentInjector
     {
-        private StardewValley.LocalizedContentManager _ModManager;
-        protected StardewValley.LocalizedContentManager ModManager
+        private static StardewValley.LocalizedContentManager _ModManager;
+        protected static StardewValley.LocalizedContentManager ModManager
         {
             get
             {

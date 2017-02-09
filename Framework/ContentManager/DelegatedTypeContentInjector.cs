@@ -36,7 +36,7 @@ namespace Entoarox.Framework.ContentManager
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
-            return ((Loader<T>)Loaders[typeof(T)])(assetName, loadBase);
+            return ((Loader<T>)Loaders[typeof(T)])(GetPlatformSafePath(assetName), loadBase);
         }
     }
 }

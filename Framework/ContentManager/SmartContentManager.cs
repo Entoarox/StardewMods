@@ -17,7 +17,8 @@ namespace Entoarox.Framework.ContentManager
         {
             new XnbContentInjector(),
             new TextureContentInjector(),
-            new DelegatedContentInjector()
+            new DelegatedContentInjector(),
+            new DelegatedTypeContentInjector()
         };
         public static List<string> ExpectedFailures { get; } = new List<string>
         {
