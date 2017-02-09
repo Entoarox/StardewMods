@@ -67,6 +67,11 @@
     <None Include="Abstraction\WrappedContentManager.cs" />
     <None Include="Abstraction\WrappedList.cs" />
     <Compile Include="Conditions.cs" />
+    <Compile Include="ContentManager\Asset.cs" />
+    <Compile Include="ContentManager\ContentInjector.cs" />
+    <Compile Include="ContentManager\DelegatedContentInjector.cs" />
+    <Compile Include="ContentManager\TextureContentInjector.cs" />
+    <Compile Include="ContentManager\XnbContentInjector.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
@@ -95,6 +100,7 @@
     <Compile Include="Reflection\ReflectedMethod.cs" />
     <Compile Include="Reflection\ReflectedProperty.cs" />
     <Compile Include="Reflection\ReflectionUtility.cs" />
+    <Compile Include="ContentManager\SmartContentManager.cs" />
     <Compile Include="StackableShopObject.cs" />
     <Compile Include="UI\Base\BaseFormComponent.cs" />
     <Compile Include="UI\Base\BaseInteractiveMenuComponent.cs" />

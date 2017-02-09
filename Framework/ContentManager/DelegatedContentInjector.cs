@@ -21,9 +21,10 @@ namespace Entoarox.Framework.ContentManager
                 Injectors.Add(asset, new List<Delegate>());
             Injectors[asset].Add(handler);
         }
+
         public override bool CanInject<T>(string assetName)
         {
-            return Injectors.ContainsKey(new Asset(typeof(T), assetName));
+            return Injectors.ContainsKey(new Asset(typeof(T), GetPlatformSafePath(assetName)));
         }
         public override bool CanLoad<T>(string assetName)
         {
@@ -31,12 +32,12 @@ namespace Entoarox.Framework.ContentManager
         }
         public override void Inject<T>(string assetName, ref T asset)
         {
-            foreach (Injector<T> injector in Injectors[new Asset(typeof(T), assetName)])
+            foreach (Injector<T> injector in Injectors[new Asset(typeof(T), GetPlatformSafePath(assetName))])
                 injector(GetPlatformSafePath(assetName), ref asset);
         }
         public override T Load<T>(string assetName, Func<string, T> loadBase)
         {
-            return ((Loader<T>)Loaders[new Asset(typeof(T), GetPlatformSafePath(assetName))])(assetName, loadBase);
+            return ((Loader<T>)Loaders[new Asset(typeof(T), GetPlatformSafePath(assetName))])(GetPlatformSafePath(assetName), loadBase);
         }
     }
 }
