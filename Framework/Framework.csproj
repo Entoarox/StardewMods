@@ -68,12 +68,12 @@
     <None Include="Abstraction\WrappedList.cs" />
     <Compile Include="Conditions.cs" />
     <Compile Include="ContentManager\Asset.cs" />
-    <Compile Include="ContentManager\ContentInjector.cs" />
-    <Compile Include="ContentManager\DelegatedContentInjector.cs" />
-    <Compile Include="ContentManager\DelegatedTypeContentInjector.cs" />
+    <Compile Include="ContentManager\ContentHandler.cs" />
+    <Compile Include="ContentManager\DelegatedAssetContentHandler.cs" />
+    <Compile Include="ContentManager\DelegatedTypeContentHandler.cs" />
     <Compile Include="ContentManager\DictionaryContentInjector.cs" />
     <Compile Include="ContentManager\TextureContentInjector.cs" />
-    <Compile Include="ContentManager\XnbContentInjector.cs" />
+    <Compile Include="ContentManager\XnbContentLoader.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />

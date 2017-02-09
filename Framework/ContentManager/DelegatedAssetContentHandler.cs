@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Entoarox.Framework.ContentManager
 {
-    public class DelegatedContentHandler : ContentHandler
+    public class DelegatedAssetContentHandler : ContentHandler
     {
         public delegate void Injector<T>(string assetName, ref T asset);
         public delegate T Loader<T>(string assetName, Func<string, T> loadBase);
