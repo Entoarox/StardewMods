@@ -127,9 +127,9 @@ namespace Entoarox.SeasonalImmersion
                 if (count != 4)
                 {
                     if (count > 0)
-                        Monitor.Log("Could not find the expected `" + name + ".png` file in all season directories, skipping file: " + file, LogLevel.Warn);
+                        Monitor.Log("Textures for `" + name + "` are incomplete, skipping file", LogLevel.Warn);
                     else
-                        Monitor.Log("Could not find the expected `" + name + ".png` file in any season directories, skipping file: " + file, LogLevel.Trace);
+                        Monitor.Log("Textures for `" + name + "` are omitted, skipping file", LogLevel.Trace);
                     continue;
                 }
                 SeasonTextures.Add(name, textures);
