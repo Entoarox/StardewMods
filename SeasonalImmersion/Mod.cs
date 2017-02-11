@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Reflection;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -70,26 +69,38 @@ namespace Entoarox.SeasonalImmersion
                 return texture;
             }
         }
+        internal int Mode = 0;
+        internal ZipArchive Zip;
         internal void LoadContent()
         {
             Monitor.Log("Attempting to resolve content pack...", LogLevel.Trace);
-            string path = Path.Combine(FilePath, "ContentPack.zip");
-            ZipArchive zip;
-            if (File.Exists(path))
-                zip = new ZipArchive(new FileStream(path, FileMode.Open), ZipArchiveMode.Read);
-            else
+            if (Directory.Exists(Path.Combine(FilePath, "ContentPack")))
+                Mode = 1;
+            else if (File.Exists(Path.Combine(FilePath, "ContentPack.zip")))
             {
-                Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack.zip");
-                if (stream == null)
-                {
-                    Monitor.Log("No ContentPack.zip file found, and did not find a embedded pack either", LogLevel.Error);
-                    return;
-                }
-                Monitor.Log("No ContentPack.zip file found, using the embedded content pack", LogLevel.Warn);
-                zip = new ZipArchive(stream,ZipArchiveMode.Read);
+                Zip = new ZipArchive(new FileStream(Path.Combine(FilePath, "ContentPack.zip"), FileMode.Open), ZipArchiveMode.Read);
+                Mode = 2;
             }
-            ZipArchiveEntry manifestData = zip.GetEntry("manifest.json");
-            ContentPackManifest manifest = JsonConvert.DeserializeObject<ContentPackManifest>(new StreamReader(manifestData.Open()).ReadToEnd(), new VersionConverter());
+            else
+                Mode = 3;
+            Stream stream = GetStream("manifest.json");
+            if (stream == null)
+            {
+                switch (Mode)
+                {
+                    case 1:
+                        Monitor.Log("Found `ContentPack` directory but the `manifest.json` file is missing!", LogLevel.Error);
+                        break;
+                    case 2:
+                        Monitor.Log("Found `ContentPack.zip` file but the `manifest.json` file is missing!", LogLevel.Error);
+                        break;
+                    case 3:
+                        Monitor.Log("Attempted to use internal ContentPack, but could not resolve manifest!", LogLevel.Error);
+                        break;
+                }
+                return;
+            }
+            ContentPackManifest manifest = JsonConvert.DeserializeObject<ContentPackManifest>(new StreamReader(stream).ReadToEnd(), new VersionConverter());
             Monitor.Log("Using the `" + manifest.Name + "` content pack, version " + manifest.Version + " by " + manifest.Author, LogLevel.Info);
             // Resolve content dir cause CA messes all stuffs up...
             List<string> Files;
@@ -104,19 +115,24 @@ namespace Entoarox.SeasonalImmersion
             {
                 Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
                 string name = Path.GetFileNameWithoutExtension(file);
+                int count = 0;
                 foreach (string season in seasons)
                 {
-                    ZipArchiveEntry zipFile = zip.GetEntry(season + '/' + name + ".png");
-                    if (zipFile == null)
-                        goto skipFile;
-                    MemoryStream mst = new MemoryStream();
-                    zipFile.Open().CopyTo(mst);
-                    mst.Position = 0;
-                    textures.Add(season, PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, mst)));
+                    Texture2D tex = GetTexture(Path.Combine(season, name + ".png"));
+                    if (tex == null)
+                        continue;
+                    count++;
+                    textures.Add(season, tex);
+                }
+                if (count != 4)
+                {
+                    if (count > 0)
+                        Monitor.Log("Could not find the expected `" + name + ".png` file in all season directories, skipping file: " + file, LogLevel.Warn);
+                    else
+                        Monitor.Log("Could not find the expected `" + name + ".png` file in any season directories, skipping file: " + file, LogLevel.Trace);
+                    continue;
                 }
                 SeasonTextures.Add(name, textures);
-            skipFile:
-                continue;
             }
         }
         internal void GameEvents_LoadContent(object s, EventArgs e)
@@ -135,6 +151,33 @@ namespace Entoarox.SeasonalImmersion
             {
                 Monitor.Log("Could not load ContentPack" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
             }
+        }
+        internal Stream GetStream(string file)
+        {
+            switch(Mode)
+            {
+                case 1:
+                    return new FileStream(Path.Combine(FilePath, "ContentPack", file), FileMode.Open);
+                case 2:
+                    ZipArchiveEntry zipFile = Zip.GetEntry(file.Replace(Path.DirectorySeparatorChar, '/'));
+                    if (zipFile == null)
+                        return null;
+                    MemoryStream mst = new MemoryStream();
+                    zipFile.Open().CopyTo(mst);
+                    mst.Position = 0;
+                    return mst;
+                case 3:
+                    return GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
+                default:
+                    throw new InvalidOperationException("Was unable to resolve content pack location!");
+            }
+        }
+        internal Texture2D GetTexture(string file)
+        {
+            Stream stream = GetStream(file);
+            if (stream == null)
+                return null;
+            return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
         }
         internal void UpdateTextures()
         {

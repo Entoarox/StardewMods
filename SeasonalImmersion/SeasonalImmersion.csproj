@@ -54,10 +54,75 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ContentPack.zip" />
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="ContentPack\manifest.json" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="ContentPack\fall\Barn.png" />
+    <EmbeddedResource Include="ContentPack\fall\Big Barn.png" />
+    <EmbeddedResource Include="ContentPack\fall\Big Coop.png" />
+    <EmbeddedResource Include="ContentPack\fall\Coop.png" />
+    <EmbeddedResource Include="ContentPack\fall\Deluxe Barn.png" />
+    <EmbeddedResource Include="ContentPack\fall\Deluxe Coop.png" />
+    <EmbeddedResource Include="ContentPack\fall\Earth Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\fall\Gold Clock.png" />
+    <EmbeddedResource Include="ContentPack\fall\houses.png" />
+    <EmbeddedResource Include="ContentPack\fall\Mill.png" />
+    <EmbeddedResource Include="ContentPack\fall\Shed.png" />
+    <EmbeddedResource Include="ContentPack\fall\Silo.png" />
+    <EmbeddedResource Include="ContentPack\fall\Slime Hutch.png" />
+    <EmbeddedResource Include="ContentPack\fall\Stable.png" />
+    <EmbeddedResource Include="ContentPack\fall\Water Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\fall\Well.png" />
+    <EmbeddedResource Include="ContentPack\spring\Barn.png" />
+    <EmbeddedResource Include="ContentPack\spring\Big Barn.png" />
+    <EmbeddedResource Include="ContentPack\spring\Big Coop.png" />
+    <EmbeddedResource Include="ContentPack\spring\Coop.png" />
+    <EmbeddedResource Include="ContentPack\spring\Deluxe Barn.png" />
+    <EmbeddedResource Include="ContentPack\spring\Deluxe Coop.png" />
+    <EmbeddedResource Include="ContentPack\spring\Earth Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\spring\Gold Clock.png" />
+    <EmbeddedResource Include="ContentPack\spring\houses.png" />
+    <EmbeddedResource Include="ContentPack\spring\Mill.png" />
+    <EmbeddedResource Include="ContentPack\spring\Shed.png" />
+    <EmbeddedResource Include="ContentPack\spring\Silo.png" />
+    <EmbeddedResource Include="ContentPack\spring\Slime Hutch.png" />
+    <EmbeddedResource Include="ContentPack\spring\Stable.png" />
+    <EmbeddedResource Include="ContentPack\spring\Water Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\spring\Well.png" />
+    <EmbeddedResource Include="ContentPack\summer\Barn.png" />
+    <EmbeddedResource Include="ContentPack\summer\Big Barn.png" />
+    <EmbeddedResource Include="ContentPack\summer\Big Coop.png" />
+    <EmbeddedResource Include="ContentPack\summer\Coop.png" />
+    <EmbeddedResource Include="ContentPack\summer\Deluxe Barn.png" />
+    <EmbeddedResource Include="ContentPack\summer\Deluxe Coop.png" />
+    <EmbeddedResource Include="ContentPack\summer\Earth Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\summer\Gold Clock.png" />
+    <EmbeddedResource Include="ContentPack\summer\houses.png" />
+    <EmbeddedResource Include="ContentPack\summer\Mill.png" />
+    <EmbeddedResource Include="ContentPack\summer\Shed.png" />
+    <EmbeddedResource Include="ContentPack\summer\Silo.png" />
+    <EmbeddedResource Include="ContentPack\summer\Slime Hutch.png" />
+    <EmbeddedResource Include="ContentPack\summer\Stable.png" />
+    <EmbeddedResource Include="ContentPack\summer\Water Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\summer\Well.png" />
+    <EmbeddedResource Include="ContentPack\winter\Barn.png" />
+    <EmbeddedResource Include="ContentPack\winter\Big Barn.png" />
+    <EmbeddedResource Include="ContentPack\winter\Big Coop.png" />
+    <EmbeddedResource Include="ContentPack\winter\Coop.png" />
+    <EmbeddedResource Include="ContentPack\winter\Deluxe Barn.png" />
+    <EmbeddedResource Include="ContentPack\winter\Deluxe Coop.png" />
+    <EmbeddedResource Include="ContentPack\winter\Earth Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\winter\Gold Clock.png" />
+    <EmbeddedResource Include="ContentPack\winter\houses.png" />
+    <EmbeddedResource Include="ContentPack\winter\Mill.png" />
+    <EmbeddedResource Include="ContentPack\winter\Shed.png" />
+    <EmbeddedResource Include="ContentPack\winter\Silo.png" />
+    <EmbeddedResource Include="ContentPack\winter\Slime Hutch.png" />
+    <EmbeddedResource Include="ContentPack\winter\Stable.png" />
+    <EmbeddedResource Include="ContentPack\winter\Water Obelisk.png" />
+    <EmbeddedResource Include="ContentPack\winter\Well.png" />
   </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>

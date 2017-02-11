@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using Version = System.Version;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -141,8 +142,8 @@ namespace MorePets
                 EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
-                bus.SetTile(1, 3, "Front", 2, "MorePetsTilesheet");
-                bus.SetTile(2, 3, "Front", 3, "MorePetsTilesheet");
+                bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");
+                bus.SetTile(2, 3, "Buildings", 3, "MorePetsTilesheet");
                 bus.SetTileProperty(1, 3, "Buildings", "Action", "MorePetsAdoption");
                 bus.SetTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
                 replaceBus = false;
