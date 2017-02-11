@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopExpander", "ShopExpande
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XnbLoader", "XnbLoader\XnbLoader.csproj", "{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterPaths", "FasterPaths\FasterPaths.csproj", "{B9CDF893-2243-46D1-8CB6-CE48B8973023}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

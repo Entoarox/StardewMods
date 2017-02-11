@@ -28,7 +28,7 @@
             foreach (string file in System.IO.Directory.EnumerateFiles(path))
             {
                 string filePath = System.IO.Path.Combine(path, System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file));
-                string from = filePath.Replace(_Path + System.IO.Path.PathSeparator, "");
+                string from = filePath.Replace(_Path + System.IO.Path.PathSeparator.ToString(), "");
                 Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", StardewModdingAPI.LogLevel.Trace);
                 Framework.EntoFramework.GetContentRegistry().RegisterXnb(from, filePath);
             }

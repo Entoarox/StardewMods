@@ -34,9 +34,9 @@ namespace Entoarox.Framework.ContentManager
                             warp = new string[5];
                         }
                     }
-                    else if (!edits.Properties.ContainsKey(prop.Value))
+                    else if (!edits.Properties.ContainsKey(prop.Key))
                         edits.Properties.Add(prop);
-                    else
+                    else if((!@base.Properties.ContainsKey(prop.Key) || !@base.Properties[prop.Key].Equals(prop.Value)))
                         EntoFramework.Logger.Log($"ContentManager: MapContentInjector encountered duplicate map property `{prop.Key}` in patch at index [{patches.IndexOf(patch)}], using first.", StardewModdingAPI.LogLevel.Warn);
                 foreach (TileSheet sheet in patch.TileSheets)
                 {
@@ -52,9 +52,9 @@ namespace Entoarox.Framework.ContentManager
                             EntoFramework.Logger.Log($"ContentManager: MapContentInjector encountered duplicate tilesheet property `{prop.Key}` for tilesheet `{sheet.Id}` in patch at index [{patches.IndexOf(patch)}], using first.", StardewModdingAPI.LogLevel.Warn);
                     for (var c = 0; c < sheet.TileCount; c++)
                         foreach (KeyValuePair<string, PropertyValue> prop in sheet.TileIndexProperties[c])
-                            if (!editSheet.TileIndexProperties[c].ContainsKey(prop.Key))
+                            if (!editSheet.TileIndexProperties[c].ContainsKey(prop.Key) )
                                 editSheet.TileIndexProperties[c].Add(prop);
-                            else
+                            else if(@base.GetTileSheet(sheet.Id)==null || @base.GetTileSheet(sheet.Id).TileCount < c || !@base.GetTileSheet(sheet.Id).TileIndexProperties[c][prop.Key].Equals(prop.Value))
                                 EntoFramework.Logger.Log($"ContentManager: MapContentInjector encountered duplicate tile index property `{prop.Key}` for tile index [{c}] in tilesheet `{sheet.Id}` in patch at index [{patches.IndexOf(patch)}], using first.", StardewModdingAPI.LogLevel.Warn);
                 }
                 foreach (Layer layer in patch.Layers)

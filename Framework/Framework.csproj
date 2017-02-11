@@ -73,6 +73,7 @@
     <Compile Include="ContentManager\DelegatedTypeContentHandler.cs" />
     <Compile Include="ContentManager\DictionaryContentInjector.cs" />
     <Compile Include="ContentManager\MapContentInjector.cs" />
+    <Compile Include="ContentManager\MapMergeHelper.cs" />
     <Compile Include="ContentManager\TextureContentInjector.cs" />
     <Compile Include="ContentManager\XnbContentLoader.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
