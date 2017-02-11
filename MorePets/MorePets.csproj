@@ -63,7 +63,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\VersionChecker\MorePets.json">
+    <None Include="..\VersionChecker\MorePets.json">
       <Link>MorePets.json</Link>
     </None>
     <None Include="packages.config" />
