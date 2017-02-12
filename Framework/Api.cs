@@ -84,6 +84,11 @@ namespace Entoarox.Framework
      */
     public interface IContentRegistry
     {
+        /// <summary>
+        /// Calling this method will reload all static references SDV makes from the content manager.
+        /// Please note that some lesser-used static references may not yet have been added to the list, in such a case, report it so that the reference can be added.
+        /// </summary>
+        void ReloadStaticReferences();
         /**
          * <summary>Redirects all attempts to load a specific <see cref="Microsoft.Xna.Framework.Graphics.Texture2D"/> to the given file</summary>
          * <param name="file">The full path to the replacement texture file, with extension</param>

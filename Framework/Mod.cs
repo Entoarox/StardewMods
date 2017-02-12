@@ -65,6 +65,11 @@ namespace Entoarox.Framework
         {
             return MessageBox.Singleton;
         }
+        public static void VersionRequired(string modRequiring, Version requiringVersion)
+        {
+            if (Version < requiringVersion)
+                Logger.ExitGameImmediately($"The `{modRequiring}` mod requires EntoaroxFramework version [{requiringVersion}] or newer to work.");
+        }
         internal static IMonitor Logger;
         public override void Entry(IModHelper helper)
         {

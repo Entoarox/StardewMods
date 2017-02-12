@@ -12,6 +12,43 @@ namespace Entoarox.Framework
     internal class ContentRegistry : IContentRegistry
     {
         internal static IContentRegistry Singleton { get; } = new ContentRegistry();
+        void IContentRegistry.ReloadStaticReferences()
+        {
+            Game1.daybg = Game1.content.Load<Texture2D>("LooseSprites\\daybg");
+            Game1.nightbg = Game1.content.Load<Texture2D>("LooseSprites\\nightbg");
+            Game1.menuTexture = Game1.content.Load<Texture2D>("Maps\\MenuTiles");
+            Game1.lantern = Game1.content.Load<Texture2D>("LooseSprites\\Lighting\\lantern");
+            Game1.windowLight = Game1.content.Load<Texture2D>("LooseSprites\\Lighting\\windowLight");
+            Game1.sconceLight = Game1.content.Load<Texture2D>("LooseSprites\\Lighting\\sconceLight");
+            Game1.cauldronLight = Game1.content.Load<Texture2D>("LooseSprites\\Lighting\\greenLight");
+            Game1.indoorWindowLight = Game1.content.Load<Texture2D>("LooseSprites\\Lighting\\indoorWindowLight");
+            Game1.shadowTexture = Game1.content.Load<Texture2D>("LooseSprites\\shadow");
+            Game1.mouseCursors = Game1.content.Load<Texture2D>("LooseSprites\\Cursors");
+            Game1.animations = Game1.content.Load<Texture2D>("TileSheets\\animations");
+            Game1.achievements = Game1.content.Load<Dictionary<int, string>>("Data\\Achievements");
+            Game1.eventConditions = Game1.content.Load<Dictionary<string, bool>>("Data\\eventConditions");
+            Game1.NPCGiftTastes = Game1.content.Load<Dictionary<string, string>>("Data\\NPCGiftTastes");
+            Game1.dialogueFont = Game1.content.Load<SpriteFont>("Fonts\\SpriteFont1");
+            Game1.smallFont = Game1.content.Load<SpriteFont>("Fonts\\SmallFont");
+            Game1.borderFont = Game1.content.Load<SpriteFont>("Fonts\\BorderFont");
+            Game1.tinyFont = Game1.content.Load<SpriteFont>("Fonts\\tinyFont");
+            Game1.tinyFontBorder = Game1.content.Load<SpriteFont>("Fonts\\tinyFontBorder");
+            Game1.smoothFont = Game1.content.Load<SpriteFont>("Fonts\\smoothFont");
+            Game1.objectSpriteSheet = Game1.content.Load<Texture2D>("Maps\\springobjects");
+            Game1.toolSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\tools");
+            Game1.cropSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\crops");
+            Game1.emoteSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\emotes");
+            Game1.debrisSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\debris");
+            Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
+            Game1.rainTexture = Game1.content.Load<Texture2D>("TileSheets\\rain");
+            Game1.buffsIcons = Game1.content.Load<Texture2D>("TileSheets\\BuffsIcons");
+            Game1.objectInformation = Game1.content.Load<Dictionary<int, string>>("Data\\ObjectInformation");
+            Game1.bigCraftablesInformation = Game1.content.Load<Dictionary<int, string>>("Data\\BigCraftablesInformation");
+            FarmerRenderer.hairStylesTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\hairstyles");
+            FarmerRenderer.shirtsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\shirts");
+            FarmerRenderer.hatsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\hats");
+            FarmerRenderer.accessoriesTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\accessories");
+        }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {
             try
@@ -179,7 +216,10 @@ namespace Entoarox.Framework
         private bool CanRegister(string assetName)
         {
             if (HandledFiles.Contains(assetName))
+            {
+                EntoFramework.Logger.Log("ContentManager: The `" + assetName + "` file is already being managed, this may cause issues", StardewModdingAPI.LogLevel.Warn);
                 return false;
+            }
             HandledFiles.Add(assetName);
             return true;
         }
