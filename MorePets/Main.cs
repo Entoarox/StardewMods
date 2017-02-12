@@ -61,7 +61,7 @@ namespace MorePets
         internal static Random random;
         private static bool replaceBus = false;
         internal static MorePetsConfig Config;
-        private static Version version = new Version(1,3,0);
+        private static Version version = new Version(1,3,1);
         // DEV PROPERTIES
         internal static int offsetX = 0;
         internal static int offsetY = 0;
@@ -80,7 +80,7 @@ namespace MorePets
                 Command.RegisterCommand("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>",new string[] { "type","skin"}).CommandFired += CommandFired_SpawnPet;
                 Command.RegisterCommand("test_adoption", "Triggers the adoption dialogue").CommandFired += CommandFired_TestAdoption;
             }
-            VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/MorePets.json");
+            VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
         }
         private void PopulatePetSkins()
         {

@@ -18,6 +18,11 @@ namespace Entoarox.Framework
      */
     public delegate T FileLoadMethod<T>(LoadBase<T> loadBase, string assetName);
 
+    public interface IChannelManager
+    {
+        void RegisterChannel(string name, Action<StardewValley.Objects.TV, Microsoft.Xna.Framework.Rectangle> handler);
+    }
+
     /// <summary>
     /// Enables simple message display, designed by Kithi and included into the framework with their permission
     /// </summary>

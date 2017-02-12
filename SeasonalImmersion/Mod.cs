@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -105,9 +106,9 @@ namespace Entoarox.SeasonalImmersion
             // Resolve content dir cause CA messes all stuffs up...
             List<string> Files;
             if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")))
-                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")));
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals("xnb")));
             else
-                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")));
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals("xnb")));
             Files.Add("Flooring.xnb");
             Files.Add("Craftables_outdoor.xnb");
             Files.Add("Craftables_indoor.xnb");
@@ -157,6 +158,8 @@ namespace Entoarox.SeasonalImmersion
             switch(Mode)
             {
                 case 1:
+                    if (!File.Exists(Path.Combine(FilePath, "ContentPack", file)))
+                        return null;
                     return new FileStream(Path.Combine(FilePath, "ContentPack", file), FileMode.Open);
                 case 2:
                     ZipArchiveEntry zipFile = Zip.GetEntry(file.Replace(Path.DirectorySeparatorChar, '/'));

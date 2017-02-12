@@ -126,6 +126,8 @@ namespace Entoarox.Framework.Extensions
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (_layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
+            if (_layer.Tiles[x, y] == null)
+                throw new ArgumentNullException(nameof(x) + ',' + nameof(y));
             if (_layer.Tiles[x, y].Properties.ContainsKey(key))
                 _layer.Tiles[x, y].Properties[key] = value;
             else
