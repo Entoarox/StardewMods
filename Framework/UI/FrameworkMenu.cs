@@ -138,7 +138,7 @@ namespace Entoarox.Framework.UI
         public virtual void RemoveComponent(IMenuComponent component)
         {
             bool Removed = false;
-            RemoveComponents(a => { bool b = a == component && !Removed; if (b) { Removed = true; a.Detach(this); } return b; });
+            RemoveComponents(a => a == component && !Removed);
         }
         public virtual void RemoveComponents<T>() where T : IMenuComponent
         {

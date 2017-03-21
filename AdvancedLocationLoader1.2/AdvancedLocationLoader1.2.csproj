@@ -66,6 +66,7 @@
     <Compile Include="Mod.cs" />
     <Compile Include="Processors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StructuredBinaryFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\VersionChecker\AdvancedLocationLoader.json">

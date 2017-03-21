@@ -15,7 +15,8 @@
             }
             set
             {
-                
+                if (value == false)
+                    Component.Selected = false;
             }
         }
         public void RecieveTextInput(char chr)

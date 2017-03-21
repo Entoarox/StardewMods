@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +14,8 @@ using Newtonsoft.Json.Converters;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+
+using Ionic.Zip;
 
 namespace Entoarox.SeasonalImmersion
 {
@@ -71,7 +72,7 @@ namespace Entoarox.SeasonalImmersion
             }
         }
         internal int Mode = 0;
-        internal ZipArchive Zip;
+        internal ZipFile Zip;
         internal void LoadContent()
         {
             Monitor.Log("Attempting to resolve content pack...", LogLevel.Trace);
@@ -79,11 +80,12 @@ namespace Entoarox.SeasonalImmersion
                 Mode = 1;
             else if (File.Exists(Path.Combine(FilePath, "ContentPack.zip")))
             {
-                Zip = new ZipArchive(new FileStream(Path.Combine(FilePath, "ContentPack.zip"), FileMode.Open), ZipArchiveMode.Read);
+                Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
                 Mode = 2;
             }
             else
                 Mode = 3;
+            Monitor.Log("Content pack resolved to mode: "+Mode.ToString(), LogLevel.Trace);
             Stream stream = GetStream("manifest.json");
             if (stream == null)
             {
@@ -106,16 +108,18 @@ namespace Entoarox.SeasonalImmersion
             // Resolve content dir cause CA messes all stuffs up...
             List<string> Files;
             if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")))
-                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals("xnb")));
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
             else
-                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals("xnb")));
+                Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
             Files.Add("Flooring.xnb");
             Files.Add("Craftables_outdoor.xnb");
             Files.Add("Craftables_indoor.xnb");
+            Files.Add("furniture.xnb");
             foreach (string file in Files)
             {
                 Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
                 string name = Path.GetFileNameWithoutExtension(file);
+                Monitor.Log("Checking if file is seasonal: " + name, LogLevel.Trace);
                 int count = 0;
                 foreach (string season in seasons)
                 {
@@ -128,11 +132,12 @@ namespace Entoarox.SeasonalImmersion
                 if (count != 4)
                 {
                     if (count > 0)
-                        Monitor.Log("Textures for `" + name + "` are incomplete, skipping file", LogLevel.Warn);
+                        Monitor.Log("Skipping file due to the textures being incomplete: " + file, LogLevel.Warn);
                     else
-                        Monitor.Log("Textures for `" + name + "` are omitted, skipping file", LogLevel.Trace);
+                        Monitor.Log("Skipping file due to there being no textures for it found: " + file, LogLevel.Trace);
                     continue;
                 }
+                Monitor.Log("Making file seasonal: " + file, LogLevel.Trace);
                 SeasonTextures.Add(name, textures);
             }
         }
@@ -147,6 +152,7 @@ namespace Entoarox.SeasonalImmersion
                 TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
                 DefaultBigCraftables = Game1.bigCraftableSpriteSheet;
                 ContentReady = true;
+                Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
             }
             catch (Exception err)
             {
@@ -155,24 +161,43 @@ namespace Entoarox.SeasonalImmersion
         }
         internal Stream GetStream(string file)
         {
-            switch(Mode)
+            try
             {
-                case 1:
-                    if (!File.Exists(Path.Combine(FilePath, "ContentPack", file)))
+                switch (Mode)
+                {
+                    case 1:
+                        if (!File.Exists(Path.Combine(FilePath, "ContentPack", file)))
+                        {
+                            Monitor.Log("Skipping file due to being unable to find it in the ContentPack directory: " + file, LogLevel.Trace);
+                            return null;
+                        }
+                        return new FileStream(Path.Combine(FilePath, "ContentPack", file), FileMode.Open);
+                    case 2:
+                        if (!Zip.ContainsEntry(file))
+                        {
+                            Monitor.Log("Skipping file due to being unable to find it in the ContentPack.zip: " + file, LogLevel.Trace);
+                            return null;
+                        }
+                        MemoryStream memoryStream = new MemoryStream();
+                        Zip[file].Extract(memoryStream);
+                        return memoryStream;
+                    case 3:
+                        Stream manifestStream=GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
+                        if (manifestStream == null)
+                        {
+                            Monitor.Log("Skipping file due to being unable to find it in the bundled resource pack: " + file, LogLevel.Trace);
+                            return null;
+                        }
+                        return manifestStream;
+                    default:
+                        Monitor.Log("Skipping file due to the content pack location being unknown: " + file, LogLevel.Error);
                         return null;
-                    return new FileStream(Path.Combine(FilePath, "ContentPack", file), FileMode.Open);
-                case 2:
-                    ZipArchiveEntry zipFile = Zip.GetEntry(file.Replace(Path.DirectorySeparatorChar, '/'));
-                    if (zipFile == null)
-                        return null;
-                    MemoryStream mst = new MemoryStream();
-                    zipFile.Open().CopyTo(mst);
-                    mst.Position = 0;
-                    return mst;
-                case 3:
-                    return GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
-                default:
-                    throw new InvalidOperationException("Was unable to resolve content pack location!");
+                }
+            }
+            catch
+            {
+                Monitor.Log("Skipping file due to a unknown error: " + file, LogLevel.Error);
+                return null;
             }
         }
         internal Texture2D GetTexture(string file)
@@ -180,10 +205,20 @@ namespace Entoarox.SeasonalImmersion
             Stream stream = GetStream(file);
             if (stream == null)
                 return null;
-            return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
+            try
+            {
+                return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
+            }
+            catch
+            {
+                Monitor.Log("Skipping texture due to a unknown error: " + file, LogLevel.Warn);
+                return null;
+            }
         }
         internal void UpdateTextures()
         {
+            if (SeasonTextures.Count == 0)
+                return;
             try
             {
                 Monitor.Log("Attempting to update seasonal textures...", LogLevel.Debug);
@@ -193,6 +228,9 @@ namespace Entoarox.SeasonalImmersion
                 // Check flooring
                 if (SeasonTextures.ContainsKey("Flooring"))
                     StardewValley.TerrainFeatures.Flooring.floorsTexture = SeasonTextures["Flooring"][Game1.currentSeason];
+                // Check furniture
+                if (SeasonTextures.ContainsKey("furniture"))
+                    StardewValley.Objects.Furniture.furnitureTexture = SeasonTextures["furniture"][Game1.currentSeason];
                 // Reset big craftables
                 Game1.bigCraftableSpriteSheet = DefaultBigCraftables;
                 // Check outdoor craftables

@@ -48,6 +48,7 @@ namespace Entoarox.Framework
             FarmerRenderer.shirtsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\shirts");
             FarmerRenderer.hatsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\hats");
             FarmerRenderer.accessoriesTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\accessories");
+            Tool.weaponsTexture = Game1.content.Load<Texture2D>("TileSheets\\weapons");
         }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {
@@ -119,6 +120,11 @@ namespace Entoarox.Framework
                 EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader"+ err);
             }
         }
+        [Obsolete("This method is for a not yet implemented API",true)]
+        void IContentRegistry.RegisterContentHandler(IContentHandler handler)
+        {
+            throw new NotImplementedException();
+        }
         private static Type modXnb;
         private static Type diskTexture;
         private static MethodInfo registerTexture;
@@ -170,6 +176,8 @@ namespace Entoarox.Framework
         {
             SmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
             SmartDevice = new SmartDisplayDevice(SmartManager, Game1.game1.GraphicsDevice);
+            Update(null, null);
+            Events.MoreEvents.FireSmartManagerReady();
         }
         internal static void Update(object s, EventArgs e)
         {

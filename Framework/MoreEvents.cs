@@ -26,6 +26,10 @@ namespace Entoarox.Framework.Events
         /// This event is fired whenever the item currently held by the player is changed
         /// </summary>
         public static event EventHandler<EventArgsActiveItemChanged> ActiveItemChanged;
+        /// <summary>
+        /// This event is fired after the framework content manager has been registered, or directly after LoadContent if the Farmhand content manager is active
+        /// </summary>
+        public static event EventHandler SmartManagerReady;
     }
     public class EventArgsActionTriggered : EventArgs
     {

@@ -73,7 +73,7 @@ namespace MorePets
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
             //LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-            Command.RegisterCommand("kill_pets", "Kills all the pets you adopted using ExtraPets, you monster").CommandFired += CommandFired_KillPets;
+            Command.RegisterCommand("kill_pets", "Kills all the pets you adopted using MorePets, you monster").CommandFired += CommandFired_KillPets;
             if (Config.DebugMode)
             {
                 // DEV COMMANDS, kept in should they be needed in the future
@@ -159,27 +159,36 @@ namespace MorePets
                 {
                     case "dog":
                         if (dogLimit == 0 || skin > catLimit || skin < 1)
+                        {
+                            Monitor.Log("Unable to spawn "+e.Command.CalledArgs[0]+", unknown skin number: " + skin, LogLevel.Error);
                             break;
+                        }
                         pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y);
                         pet.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/dog_" + skin), 0, 32, 32);
                         break;
                     case "cat":
                         if (catLimit == 0 || skin > catLimit || skin < 1)
+                        {
+                            Monitor.Log("Unable to spawn " + e.Command.CalledArgs[0] + ", unknown skin number: " + skin, LogLevel.Error);
                             break;
+                        }
                         pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y);
                         pet.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/cat_" + skin), 0, 32, 32);
+                        break;
+                    default:
+                        Monitor.Log("Unable to spawn pet, unknown type: "+e.Command.CalledArgs[0], LogLevel.Error);
                         break;
                 }
                 if(pet!=null)
                 {
-                    pet.manners = 1; // Skin
-                    pet.age = 1100;
+                    pet.manners = skin;
+                    pet.age = 0;
                     pet.position = Game1.player.position;
                     Game1.currentLocation.addCharacter(pet);
                     Monitor.Log("Pet spawned", LogLevel.Alert);
                 }
                 else
-                    Monitor.Log("Was unable to spawn pet, did you make sure the <type> and <skin> are valid?",LogLevel.Error);
+                    Monitor.Log("Unable to spawn pet, did you make sure the <type> and <skin> are valid?",LogLevel.Error);
             }
         }
         internal void CommandFired_KillPets(object s, EventArgs e)
@@ -230,7 +239,7 @@ namespace MorePets
                     int seed = Game1.year * 1000 + seasons.IndexOf(Game1.currentSeason) * 100 + Game1.dayOfMonth;
                     random = new Random(seed);
                     List<NPC> list = GetAllPets();
-                    if ((dogLimit == 0 && catLimit == 0) || (Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality) || list.FindIndex(a => a.age == seed) != -1)
+                    if ((dogLimit == 0 && catLimit == 0) || (Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Max(0.1,Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.age == seed) != -1)
                         Game1.drawObjectDialogue("Just an empty box.");
                     else
                         AdoptQuestion.Show();

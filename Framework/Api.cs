@@ -107,6 +107,12 @@ namespace Entoarox.Framework
          * <param name="key">The path used in <see cref="Microsoft.Xna.Framework.Content.ContentManager.Load{T}(string)"/> to load the file</param>
          */
         void RegisterHandler<T>(string key, FileLoadMethod<T> method);
+        /// <summary>
+        /// This method enables a IContentHandler to be registered for manually handling content loading with more control then <see cref="RegisterHandler{T}(string, FileLoadMethod{T})"/> enables 
+        /// </summary>
+        /// <param name="handler"></param>
+        [Obsolete("This method is part of a unfinished API, it should not be used",true)]
+        void RegisterContentHandler(IContentHandler handler);
     }
     /**
      * <summary>Contains EntoFramework methods to simplify operations to game locations</summary>
@@ -312,5 +318,21 @@ namespace Entoarox.Framework
         {
             return value.Value;
         }
+    }
+    ////////////////////////
+    // In-dev, do not use //
+    ////////////////////////
+    [Obsolete("This interface is part of a unfinished API, it should not be used yet",true)]
+    public interface IContentHandler
+    {
+        Func<LocalizedContentManager> GetModContentLoader { get; set; }
+        Func<string,string> GetModsRelativePath { get; set; }
+        Func<string,string> GetPlatformSafePath { get; set; }
+        bool Injector { get; }
+        bool Loader { get; }
+        bool CanInject<T>(string assetName);
+        bool CanLoad<T>(string assetName);
+        T Load<T>(string assetName, Func<string, T> loadBase);
+        void Inject<T>(string assetName, ref T asset);
     }
 }

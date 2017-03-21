@@ -93,10 +93,10 @@ namespace Entoarox.Framework
             Events.MoreEvents.Setup();
             if (LoaderType == LoaderTypes.SMAPI)
             {
-                GameEvents.FirstUpdateTick += GameEvents_FirstUpdateTick;
                 GameEvents.UpdateTick += TypeRegistry.Update;
                 GameEvents.Initialize += TypeRegistry.Init;
             }
+            GameEvents.LoadContent += GameEvents_LoadContent;
             if(Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
             if(LoaderType==LoaderTypes.Unknown)
@@ -104,10 +104,15 @@ namespace Entoarox.Framework
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
-        internal static void GameEvents_FirstUpdateTick(object s, EventArgs e)
+        internal static void GameEvents_LoadContent(object s, EventArgs e)
         {
-            ContentRegistry.Init();
-            GameEvents.UpdateTick += ContentRegistry.Update;
+            if (LoaderType == LoaderTypes.SMAPI)
+            {
+                ContentRegistry.Init();
+                GameEvents.UpdateTick += ContentRegistry.Update;
+            }
+            else
+                Events.MoreEvents.FireSmartManagerReady();
         }
         public static void CreditsTick(object s, EventArgs e)
         {

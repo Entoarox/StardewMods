@@ -41,13 +41,17 @@ namespace Entoarox.Framework.UI
                 Owner = owner;
                 Collection = collection;
                 Self = self;
-                Area=new Rectangle(position.X, position.Y, width, zoom2 + Game1.pixelZoom * Math.Min(7 * owner.Values.Count,70));
+                Area = new Rectangle(position.X, position.Y, width, zoom2 + Game1.pixelZoom * Math.Min(7 * owner.Values.Count, 70));
                 collection.GetAttachedMenu().GiveFocus(this);
-                if (!collection.GetAttachedMenu().EventRegion.Contains(Area.X, Area.Y + Area.Height))
+                if (Area.Y+Area.Height > Game1.viewport.Height)
                     Area.Y -= Area.Height + zoom9;
                 int index = owner.Values.IndexOf(Value);
                 ScrollOffset = Math.Max(0,index - 9);
                 KeyboardOffset = index;
+            }
+            public override bool InBounds(Point p, Point o)
+            {
+                return base.InBounds(p, new Point(0, 0));
             }
             public override void FocusGained()
             {
@@ -91,6 +95,8 @@ namespace Entoarox.Framework.UI
             }
             public override void Draw(SpriteBatch b, Point o)
             {
+                if (!Visible)
+                    return;
                 o = new Point(0, 0);
                 Color col = Color.Black * 0.25f;
                 // Background
