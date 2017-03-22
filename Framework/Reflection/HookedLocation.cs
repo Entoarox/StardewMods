@@ -17,14 +17,14 @@ namespace Entoarox.Framework.Reflection
             if (Game1.currentLocation.Map.GetLayer("Between") != null)
                 Game1.currentLocation.Map.GetLayer("Between").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
         }
-        private static void BuildConstructor(TypeBuilder tb, ConstructorInfo parent, ConstructorInfo from)
+        private static void BuildConstructor(TypeBuilder tb, ConstructorInfo parent)
         {
-            ParameterInfo[] parameters = from.GetParameters();
+            ParameterInfo[] parameters = parent.GetParameters();
             Type[] paramTypes = new Type[parameters.Length];
             for (var c = 0; c < parameters.Length; c++)
                 paramTypes[c] = parameters[c].ParameterType;
-            ConstructorBuilder cb = tb.DefineConstructor(from.Attributes, from.CallingConvention, paramTypes, null, null);
-            MethodBody constructorBody =from.GetMethodBody();
+            ConstructorBuilder cb = tb.DefineConstructor(parent.Attributes, parent.CallingConvention, paramTypes, null, null);
+            MethodBody constructorBody =parent.GetMethodBody();
             ILGenerator generator = cb.GetILGenerator();
             generator.Emit(OpCodes.Ldarg_0);
             generator.Emit(OpCodes.Ldarg_1);
@@ -54,8 +54,8 @@ namespace Entoarox.Framework.Reflection
             AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName,AssemblyBuilderAccess.RunAndSave);
             ModuleBuilder mb = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
             TypeBuilder tb = mb.DefineType(location.name + "_Hooked", TypeAttributes.Public,location.GetType());
-            BuildConstructor(tb, type.GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) }));
-            BuildMethod(tb, typeof(Location).GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance), type.GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance));
+            BuildConstructor(tb, location.GetType().GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) }));
+            BuildMethod(tb, location.GetType().GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance), type.GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance));
             Type result = tb.CreateType();
             return (GameLocation)Activator.CreateInstance(result, new object[] { location.map, location.name });
         }
