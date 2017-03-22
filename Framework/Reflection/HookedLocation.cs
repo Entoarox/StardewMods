@@ -33,6 +33,7 @@ namespace Entoarox.Framework.Reflection
             ConstructorInfo cbParent = location.GetType().GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) });
             ConstructorBuilder cb = tb.DefineConstructor(cbParent.Attributes, cbParent.CallingConvention, GetParamTypes(cbParent.GetParameters()), null, null);
             ILGenerator cbIL = cb.GetILGenerator();
+            cbIL.EmitWriteLine("Hooked class instance created");
             // load arg0 [this]
             cbIL.Emit(OpCodes.Ldarg_0);
             // load arg1 [map]
@@ -48,6 +49,8 @@ namespace Entoarox.Framework.Reflection
             ILGenerator mbIL = mb.GetILGenerator();
             // Console.WriteLine
             mbIL.EmitWriteLine("Begin: hooked drawWater");
+            // load null
+            mbIL.Emit(OpCodes.Ldnull);
             // load arg0 [this]
             mbIL.Emit(OpCodes.Ldarg_0);
             // call [DrawBetweenLayer] and push stack [this]
@@ -64,7 +67,9 @@ namespace Entoarox.Framework.Reflection
             mbIL.Emit(OpCodes.Ret);
             Type result = tb.CreateType();
             // Write to file to figure out why stuffs breaks >_<
-            assembly.Save(location.name + "_Hooked-assembly.dll");
+            assembly.Save(aName.Name + ".dll");
+            // Console.WriteLine the IL to see if something weird is going on
+            Console.WriteLine(String.Join(",",mb.GetMethodBody().GetILAsByteArray()));
             return (GameLocation)Activator.CreateInstance(result, new object[] { location.map, location.name });
         }
     }
