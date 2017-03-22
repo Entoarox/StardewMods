@@ -69,7 +69,7 @@ namespace Entoarox.Framework.Reflection
             // Write to file to figure out why stuffs breaks >_<
             assembly.Save(aName.Name + ".dll");
             // Console.WriteLine the IL to see if something weird is going on
-            Console.WriteLine(String.Join(",",mb.GetMethodBody().GetILAsByteArray()));
+            Console.WriteLine(String.Join(",",result.GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance).GetMethodBody().GetILAsByteArray()));
             return (GameLocation)Activator.CreateInstance(result, new object[] { location.map, location.name });
         }
     }
