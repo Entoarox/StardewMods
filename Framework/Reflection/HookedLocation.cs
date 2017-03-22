@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Collections.Generic;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -10,13 +11,18 @@ using xTile.Dimensions;
 
 namespace Entoarox.Framework.Reflection
 {
-    internal abstract class HookedLocation : GameLocation
+    public static class HookedLocation
     {
-        public static void DrawBetweenLayer(GameLocation self)
+        public static void DrawBetweenLayer(GameLocation self, SpriteBatch batch)
         {
             if (self.Map.GetLayer("Between") != null)
                 self.Map.GetLayer("Between").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
         }
+        private static bool Init = true;
+        private static AssemblyName assemblyName;
+        private static AssemblyBuilder assemblyBuilder;
+        private static ModuleBuilder moduleBuilder;
+        private static Dictionary<Type, Type> Cache = new Dictionary<Type, Type>();
         private static Type[] GetParamTypes(ParameterInfo[] parameters)
         {
             Type[] paramTypes = new Type[parameters.Length];
@@ -26,51 +32,53 @@ namespace Entoarox.Framework.Reflection
         }
         public static GameLocation Create(GameLocation location)
         {
-            AssemblyName aName = new AssemblyName("Entoarox.HookedLocations");
-            AssemblyBuilder assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(aName,AssemblyBuilderAccess.RunAndSave);
-            ModuleBuilder module = assembly.DefineDynamicModule(aName.Name, aName.Name + ".dll");
-            TypeBuilder tb = module.DefineType(location.name + "_Hooked", TypeAttributes.Public,location.GetType());
-            ConstructorInfo cbParent = location.GetType().GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) });
-            ConstructorBuilder cb = tb.DefineConstructor(cbParent.Attributes, cbParent.CallingConvention, GetParamTypes(cbParent.GetParameters()), null, null);
-            ILGenerator cbIL = cb.GetILGenerator();
-            cbIL.EmitWriteLine("Hooked class instance created");
-            // load arg0 [this]
-            cbIL.Emit(OpCodes.Ldarg_0);
-            // load arg1 [map]
-            cbIL.Emit(OpCodes.Ldarg_1);
-            // load arg2 [name]
-            cbIL.Emit(OpCodes.Ldarg_2);
-            // call [base] and push stack [this, map, name]
-            cbIL.Emit(OpCodes.Call, cbParent);
-            // return
-            cbIL.Emit(OpCodes.Ret);
-            MethodInfo mbParent = location.GetType().GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance);
-            MethodBuilder mb = tb.DefineMethod("drawWater", mbParent.Attributes, mbParent.CallingConvention, mbParent.ReturnType, GetParamTypes(mbParent.GetParameters()));
-            ILGenerator mbIL = mb.GetILGenerator();
-            // Console.WriteLine
-            mbIL.EmitWriteLine("Begin: hooked drawWater");
-            // load null
-            mbIL.Emit(OpCodes.Ldnull);
-            // load arg0 [this]
-            mbIL.Emit(OpCodes.Ldarg_0);
-            // call [DrawBetweenLayer] and push stack [this]
-            mbIL.Emit(OpCodes.Call, typeof(HookedLocation).GetMethod("DrawBetweenLayer", BindingFlags.Public | BindingFlags.Static));
-            // load arg0 [this]
-            mbIL.Emit(OpCodes.Ldarg_0);
-            // load arg1 [batch]
-            mbIL.Emit(OpCodes.Ldarg_1);
-            // call [base] and push stack [this, batch]
-            mbIL.Emit(OpCodes.Call, mbParent);
-            // Console.WriteLine
-            mbIL.EmitWriteLine("End: hooked drawWater");
-            // return
-            mbIL.Emit(OpCodes.Ret);
-            Type result = tb.CreateType();
-            // Write to file to figure out why stuffs breaks >_<
-            assembly.Save(aName.Name + ".dll");
-            // Console.WriteLine the IL to see if something weird is going on
-            Console.WriteLine(String.Join(",",result.GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance).GetMethodBody().GetILAsByteArray()));
-            return (GameLocation)Activator.CreateInstance(result, new object[] { location.map, location.name });
+            if (Init)
+            {
+                assemblyName = new AssemblyName("Entoarox.HookedLocations");
+                assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+                moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".dll");
+                Init = false;
+            }
+            Type key = location.GetType();
+            if (!Cache.ContainsKey(key))
+            {
+                TypeBuilder tb = moduleBuilder.DefineType("Entoarox.HookedLocations."+location.name + "_Hooked", TypeAttributes.Public, key);
+                ConstructorInfo cbParent = location.GetType().GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) });
+                ConstructorBuilder cb = tb.DefineConstructor(cbParent.Attributes, cbParent.CallingConvention, GetParamTypes(cbParent.GetParameters()), null, null);
+                ILGenerator cbIL = cb.GetILGenerator();
+                // load arg0 [this]
+                cbIL.Emit(OpCodes.Ldarg_0);
+                // load arg1 [map]
+                cbIL.Emit(OpCodes.Ldarg_1);
+                // load arg2 [name]
+                cbIL.Emit(OpCodes.Ldarg_2);
+                // call [base] and push stack [this, map, name]
+                cbIL.Emit(OpCodes.Call, cbParent);
+                // return
+                cbIL.Emit(OpCodes.Ret);
+                MethodInfo mbParent = typeof(GameLocation).GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance);
+                MethodBuilder mb = tb.DefineMethod("drawWater", mbParent.Attributes | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig, mbParent.ReturnType, GetParamTypes(mbParent.GetParameters()));
+                ILGenerator mbIL = mb.GetILGenerator();
+                // load arg0 [this]
+                mbIL.Emit(OpCodes.Ldarg_0);
+                // load arg1 [batch]
+                mbIL.Emit(OpCodes.Ldarg_1);
+                // call [DrawBetweenLayer] and push stack [this, batch]
+                mbIL.Emit(OpCodes.Call, typeof(HookedLocation).GetMethod("DrawBetweenLayer", new Type[] { typeof(GameLocation), typeof(SpriteBatch) }));
+                // load arg0 [this]
+                mbIL.Emit(OpCodes.Ldarg_0);
+                // load arg1 [batch]
+                mbIL.Emit(OpCodes.Ldarg_1);
+                // call [base] and push stack [this, batch]
+                mbIL.Emit(OpCodes.Call, mbParent);
+                // return
+                mbIL.Emit(OpCodes.Ret);
+
+                tb.DefineMethodOverride(mb, mbParent);
+                Cache.Add(key, tb.CreateType());
+                assemblyBuilder.Save(assemblyName.Name + ".dll");
+            }
+            return (GameLocation)Activator.CreateInstance(Cache[key], new object[] { location.map, location.name });
         }
     }
 }
