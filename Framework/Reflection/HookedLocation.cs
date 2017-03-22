@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
+using Microsoft.Xna.Framework.Graphics;
+
 using StardewValley;
 
 using xTile.Dimensions;
@@ -10,10 +12,10 @@ namespace Entoarox.Framework.Reflection
 {
     internal abstract class HookedLocation : GameLocation
     {
-        public static void DrawBetweenLayer()
+        public static void DrawBetweenLayer(GameLocation self)
         {
-            if (Game1.currentLocation.Map.GetLayer("Between") != null)
-                Game1.currentLocation.Map.GetLayer("Between").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
+            if (self.Map.GetLayer("Between") != null)
+                self.Map.GetLayer("Between").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
         }
         private static Type[] GetParamTypes(ParameterInfo[] parameters)
         {
@@ -32,27 +34,33 @@ namespace Entoarox.Framework.Reflection
             ConstructorBuilder cb = tb.DefineConstructor(cbParent.Attributes, cbParent.CallingConvention, GetParamTypes(cbParent.GetParameters()), null, null);
             MethodBody constructorBody = cbParent.GetMethodBody();
             ILGenerator cbIL = cb.GetILGenerator();
-            // get [this]
+            // load arg0 [this]
             cbIL.Emit(OpCodes.Ldarg_0);
-            // get [map]
+            // load arg1 [map]
             cbIL.Emit(OpCodes.Ldarg_1);
-            // get [name]
+            // load arg2 [name]
             cbIL.Emit(OpCodes.Ldarg_2);
-            // call [base] as [this] with [map,name]
+            // call [base] and push stack [this, map, name]
             cbIL.Emit(OpCodes.Call, cbParent);
             // return
             cbIL.Emit(OpCodes.Ret);
             MethodInfo mbParent = location.GetType().GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance);
             MethodBuilder mb = tb.DefineMethod(mbParent.Name, mbParent.Attributes, mbParent.CallingConvention, mbParent.ReturnType, GetParamTypes(mbParent.GetParameters()));
             ILGenerator mbIL = mb.GetILGenerator();
-            // call [DrawBetweenLayer]
-            mbIL.Emit(OpCodes.Call, typeof(HookedLocation).GetMethod("DrawBetweenLayer", BindingFlags.Public | BindingFlags.Static));
-            // get [this]
+            // Console.WriteLine
+            mbIL.EmitWriteLine("Begin: hooked drawWater");
+            // load arg0 [this]
             mbIL.Emit(OpCodes.Ldarg_0);
-            // get [batch]
+            // call [DrawBetweenLayer] and push stack [this]
+            mbIL.Emit(OpCodes.Call, typeof(HookedLocation).GetMethod("DrawBetweenLayer", BindingFlags.Public | BindingFlags.Static));
+            // load arg0 [this]
+            mbIL.Emit(OpCodes.Ldarg_0);
+            // load arg1 [batch]
             mbIL.Emit(OpCodes.Ldarg_1);
-            // call [base]
+            // call [base] and push stack [this, batch]
             mbIL.Emit(OpCodes.Call, mbParent);
+            // Console.WriteLine
+            mbIL.EmitWriteLine("End: hooked drawWater");
             // return
             mbIL.Emit(OpCodes.Ret);
             Type result = tb.CreateType();
