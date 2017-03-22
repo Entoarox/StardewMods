@@ -32,7 +32,6 @@ namespace Entoarox.Framework.Reflection
             TypeBuilder tb = module.DefineType(location.name + "_Hooked", TypeAttributes.Public,location.GetType());
             ConstructorInfo cbParent = location.GetType().GetConstructor(new Type[] { typeof(xTile.Map), typeof(string) });
             ConstructorBuilder cb = tb.DefineConstructor(cbParent.Attributes, cbParent.CallingConvention, GetParamTypes(cbParent.GetParameters()), null, null);
-            MethodBody constructorBody = cbParent.GetMethodBody();
             ILGenerator cbIL = cb.GetILGenerator();
             // load arg0 [this]
             cbIL.Emit(OpCodes.Ldarg_0);
@@ -45,7 +44,7 @@ namespace Entoarox.Framework.Reflection
             // return
             cbIL.Emit(OpCodes.Ret);
             MethodInfo mbParent = location.GetType().GetMethod("drawWater", BindingFlags.Public | BindingFlags.Instance);
-            MethodBuilder mb = tb.DefineMethod(mbParent.Name, mbParent.Attributes, mbParent.CallingConvention, mbParent.ReturnType, GetParamTypes(mbParent.GetParameters()));
+            MethodBuilder mb = tb.DefineMethod("drawWater", mbParent.Attributes, mbParent.CallingConvention, mbParent.ReturnType, GetParamTypes(mbParent.GetParameters()));
             ILGenerator mbIL = mb.GetILGenerator();
             // Console.WriteLine
             mbIL.EmitWriteLine("Begin: hooked drawWater");
@@ -64,6 +63,8 @@ namespace Entoarox.Framework.Reflection
             // return
             mbIL.Emit(OpCodes.Ret);
             Type result = tb.CreateType();
+            // Write to file to figure out why stuffs breaks >_<
+            assembly.Save(location.name + "_Hooked-assembly.dll");
             return (GameLocation)Activator.CreateInstance(result, new object[] { location.map, location.name });
         }
     }
