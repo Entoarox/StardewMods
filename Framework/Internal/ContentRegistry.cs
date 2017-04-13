@@ -49,6 +49,8 @@ namespace Entoarox.Framework
             FarmerRenderer.hatsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\hats");
             FarmerRenderer.accessoriesTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\accessories");
             Tool.weaponsTexture = Game1.content.Load<Texture2D>("TileSheets\\weapons");
+            if(Game1.player!=null)
+                Game1.player.FarmerRenderer = new FarmerRenderer(Game1.content.Load<Texture2D>("Characters\\Farmer\\farmer_" + (Game1.player.isMale ? "" : "girl_") + "base"));
         }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {

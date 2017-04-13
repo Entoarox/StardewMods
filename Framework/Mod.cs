@@ -154,6 +154,20 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick += PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged += PlayerHelper.LocationEvents_CurrentLocationChanged;
             Events.MoreEvents.FireWorldReady();
+
+
+            Logger.Log("DEBUG: HookedLocation handling", LogLevel.Alert);
+            GameLocation result = Reflection.HookedLocation.Create(new Shed(Game1.getFarm().map, "TestLoc"));
+            Logger.Log("DEBUG OUT:" + string.Join(",", result.GetType().GetMethod("drawWater", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetMethodBody().GetILAsByteArray()), LogLevel.Alert);
+            try
+            {
+                result.drawWater(Game1.spriteBatch);
+                Logger.Log("DEBUG OUT: Call succeeded.",LogLevel.Alert);
+            }
+            catch(Exception err)
+            {
+                Logger.Log(LogLevel.Alert, "DEBUG ERROR:", err);
+            }
         }
     }
 }
