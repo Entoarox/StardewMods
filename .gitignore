@@ -1,0 +1,6 @@
+bin/
+obj/
+.gitattributes
+.vs/
+*.csproj.user
+*.tmp
