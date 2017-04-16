@@ -41,12 +41,13 @@ namespace MorePets
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
             //LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-            Command.RegisterCommand("kill_pets", "Kills all the pets you adopted using MorePets, you monster").CommandFired += CommandFired_KillPets;
+            helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using MorePets, you monster", this.CommandFired_KillPets);
             if (Config.DebugMode)
             {
                 // DEV COMMANDS, kept in should they be needed in the future
-                Command.RegisterCommand("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>",new string[] { "type","skin"}).CommandFired += CommandFired_SpawnPet;
-                Command.RegisterCommand("test_adoption", "Triggers the adoption dialogue").CommandFired += CommandFired_TestAdoption;
+                helper.ConsoleCommands
+                    .Add("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>", this.CommandFired_SpawnPet)
+                    .Add("test_adoption", "Triggers the adoption dialogue", this.CommandFired_TestAdoption);
             }
             VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
         }
@@ -117,18 +118,18 @@ namespace MorePets
                 replaceBus = false;
             }
         }
-        internal void CommandFired_SpawnPet(object s, EventArgsCommand e)
+        internal void CommandFired_SpawnPet(string name, string[] args)
         {
-            if(e.Command.CalledArgs.Length==2)
+            if(args.Length==2)
             {
                 Pet pet=null;
-                int skin = Convert.ToInt32(e.Command.CalledArgs[1]);
-                switch (e.Command.CalledArgs[0])
+                int skin = Convert.ToInt32(args[1]);
+                switch (args[0])
                 {
                     case "dog":
                         if (dogLimit == 0 || skin > catLimit || skin < 1)
                         {
-                            Monitor.Log("Unable to spawn "+e.Command.CalledArgs[0]+", unknown skin number: " + skin, LogLevel.Error);
+                            Monitor.Log("Unable to spawn "+ args[0] + ", unknown skin number: " + skin, LogLevel.Error);
                             break;
                         }
                         pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y);
@@ -137,14 +138,14 @@ namespace MorePets
                     case "cat":
                         if (catLimit == 0 || skin > catLimit || skin < 1)
                         {
-                            Monitor.Log("Unable to spawn " + e.Command.CalledArgs[0] + ", unknown skin number: " + skin, LogLevel.Error);
+                            Monitor.Log("Unable to spawn " + args[0] + ", unknown skin number: " + skin, LogLevel.Error);
                             break;
                         }
                         pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y);
                         pet.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/cat_" + skin), 0, 32, 32);
                         break;
                     default:
-                        Monitor.Log("Unable to spawn pet, unknown type: "+e.Command.CalledArgs[0], LogLevel.Error);
+                        Monitor.Log("Unable to spawn pet, unknown type: " + args[0], LogLevel.Error);
                         break;
                 }
                 if(pet!=null)
@@ -159,7 +160,7 @@ namespace MorePets
                     Monitor.Log("Unable to spawn pet, did you make sure the <type> and <skin> are valid?",LogLevel.Error);
             }
         }
-        internal void CommandFired_KillPets(object s, EventArgs e)
+        internal void CommandFired_KillPets(string name, string[] args)
         {
             GameLocation farm = Game1.getLocationFromName("Farm");
             GameLocation house = Game1.getLocationFromName("FarmHouse");
@@ -171,7 +172,7 @@ namespace MorePets
                         house.characters.Remove(pet);
             Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
         }
-        internal void CommandFired_TestAdoption(object s, EventArgs e)
+        internal void CommandFired_TestAdoption(string name, string[] args)
         {
             if (dogLimit == 0 && catLimit == 0)
                 return;

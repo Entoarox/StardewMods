@@ -24,7 +24,7 @@ namespace Entoarox.FasterPaths
             VersionChecker.AddCheck("FasterPaths", Version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/FasterPaths.json");
             cfg = Helper.ReadConfig<ConfigFP>();
             GameEvents.UpdateTick += UpdateTick;
-            Command.RegisterCommand("fp_info", "Gives info about the path you are currently standing on").CommandFired += CommandInfo;
+            helper.ConsoleCommands.Add("fp_info", "Gives info about the path you are currently standing on", this.CommandInfo);
             Modifiers= new FarmerModifier[10] {
                 new FarmerModifier() { WalkSpeedModifier = cfg.woodFloorBoost, RunSpeedModifier = cfg.woodFloorBoost },
                 new FarmerModifier() { WalkSpeedModifier = cfg.stoneFloorBoost, RunSpeedModifier = cfg.stoneFloorBoost },
@@ -66,7 +66,7 @@ namespace Entoarox.FasterPaths
                 CurrentBoost = null;
             }
         }
-        public void CommandInfo(object s, EventArgsCommand e)
+        public void CommandInfo(string name, string[] args)
         {
             if(Game1.currentLocation.terrainFeatures.ContainsKey(Game1.player.getTileLocation()) && Game1.currentLocation.terrainFeatures[Game1.player.getTileLocation()] is Flooring)
             {

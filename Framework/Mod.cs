@@ -79,7 +79,7 @@ namespace Entoarox.Framework
                 Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
             }
             Logger.Log("Registering framework events...",LogLevel.Trace);
-            Command.RegisterCommand("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.").CommandFired += Internal.BushReset.Trigger;
+            helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
