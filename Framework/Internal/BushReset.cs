@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 using xTile.Tiles;
 
@@ -15,7 +9,7 @@ namespace Entoarox.Framework.Internal
 {
     internal static class BushReset
     {
-        internal static void Trigger(object s, EventArgs e)
+        internal static void Trigger(string name, string[] args)
         {
             foreach(GameLocation loc in Game1.locations)
             {

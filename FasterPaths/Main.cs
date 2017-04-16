@@ -12,27 +12,6 @@ using Microsoft.Xna.Framework;
 
 namespace Entoarox.FasterPaths
 {
-    public class ConfigFP
-    {
-        public int walkSpeedBoost=0;
-        public int runSpeedBoost=0;
-
-        public int gravelPathBoost=0;
-
-        public int woodFloorBoost=1;
-        public int woodPathBoost=1;
-
-        public int weatheredFloorBoost=2;
-        public int strawFloorBoost=2;
-
-        public int stoneFloorBoost=3;
-        public int cobblePathBoost=3;
-        public int steppingStoneBoost=3;
-
-        public int crystalFloorBoost=4;
-        public int crystalPathBoost=4;
-
-    }
     public class FasterPaths : Mod
     {
         private ConfigFP cfg;
@@ -45,7 +24,7 @@ namespace Entoarox.FasterPaths
             VersionChecker.AddCheck("FasterPaths", Version, "https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/VersionChecker/FasterPaths.json");
             cfg = Helper.ReadConfig<ConfigFP>();
             GameEvents.UpdateTick += UpdateTick;
-            Command.RegisterCommand("fp_info", "Gives info about the path you are currently standing on").CommandFired += CommandInfo;
+            helper.ConsoleCommands.Add("fp_info", "Gives info about the path you are currently standing on", this.CommandInfo);
             Modifiers= new FarmerModifier[10] {
                 new FarmerModifier() { WalkSpeedModifier = cfg.woodFloorBoost, RunSpeedModifier = cfg.woodFloorBoost },
                 new FarmerModifier() { WalkSpeedModifier = cfg.stoneFloorBoost, RunSpeedModifier = cfg.stoneFloorBoost },
@@ -87,7 +66,7 @@ namespace Entoarox.FasterPaths
                 CurrentBoost = null;
             }
         }
-        public void CommandInfo(object s, EventArgsCommand e)
+        public void CommandInfo(string name, string[] args)
         {
             if(Game1.currentLocation.terrainFeatures.ContainsKey(Game1.player.getTileLocation()) && Game1.currentLocation.terrainFeatures[Game1.player.getTileLocation()] is Flooring)
             {

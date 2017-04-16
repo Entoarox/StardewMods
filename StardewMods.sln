@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
@@ -10,8 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedLocationLoader1.2", "AdvancedLocationLoader1.2\AdvancedLocationLoader1.2.csproj", "{9EA06249-2096-43E0-B616-DDD3FE731147}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FurnitureAnywhere", "FurnitureAnywhere\FurnitureAnywhere.csproj", "{753CFB03-2CC1-478E-AA3D-9F42CD724709}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameworkMenuTest", "FrameworkMenuTest\FrameworkMenuTest.csproj", "{D46E147A-B1A1-4009-937D-DC9D265F0060}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmhandUI", "FarmhandUI\FarmhandUI.csproj", "{7097AB0B-6590-4F5C-B26A-C672DE5C3C31}"
 EndProject
@@ -47,10 +45,6 @@ Global
 		{753CFB03-2CC1-478E-AA3D-9F42CD724709}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{753CFB03-2CC1-478E-AA3D-9F42CD724709}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{753CFB03-2CC1-478E-AA3D-9F42CD724709}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D46E147A-B1A1-4009-937D-DC9D265F0060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D46E147A-B1A1-4009-937D-DC9D265F0060}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D46E147A-B1A1-4009-937D-DC9D265F0060}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D46E147A-B1A1-4009-937D-DC9D265F0060}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7097AB0B-6590-4F5C-B26A-C672DE5C3C31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7097AB0B-6590-4F5C-B26A-C672DE5C3C31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7097AB0B-6590-4F5C-B26A-C672DE5C3C31}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,6 +1,25 @@
-bin/
-obj/
-.gitattributes
+# user-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio cache/options
 .vs/
-*.csproj.user
-*.tmp
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet packages
+*.nupkg
+**/packages/*
+*.nuget.props
+*.nuget.targets

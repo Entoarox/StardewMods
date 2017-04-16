@@ -9,13 +9,6 @@ using StardewValley;
 
 namespace Entoarox.Framework
 {
-    internal class FrameworkConfig
-    {
-        public bool GamePatcher=true;
-        public bool SkipCredits=false;
-        public bool DebugMode=false;
-        public bool IngameUpdateNotices = true;
-    }
     public class EntoFramework : Mod
     {
         private static bool CreditsDone = true;
@@ -86,7 +79,7 @@ namespace Entoarox.Framework
                 Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
             }
             Logger.Log("Registering framework events...",LogLevel.Trace);
-            Command.RegisterCommand("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.").CommandFired += Internal.BushReset.Trigger;
+            helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
