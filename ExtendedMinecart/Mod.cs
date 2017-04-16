@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Microsoft.Xna.Framework;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
@@ -17,31 +14,6 @@ using Entoarox.Framework.UI;
 */
 namespace Entoarox.ExtendedMinecart
 {
-    internal class Config
-    {
-        public bool RefuelingEnabled = true;
-        public bool AlternateDesertMinecart = false;
-        public bool AlternateFarmMinecart = false;
-        public bool FarmDestinationEnabled = true;
-        public bool DesertDestinationEnabled = true;
-        public bool WoodsDestinationEnabled = true;
-        public bool BeachDestinationEnabled = true;
-        public bool WizardDestinationEnabled = true;
-        public bool UseCustomFarmDestination = false;
-        public Point CustomFarmDestinationPoint = new Point(0, 0);
-    }
-    internal static class GLExtension
-    {
-        public static void SetTile(this GameLocation self, int x, int y, int index ,string layer, string sheet)
-        {
-            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, sheet);
-        }
-        public static void SetTile(this GameLocation self, int x, int y, int index, string layer, string value, string sheet)
-        {
-            EntoFramework.GetLocationHelper().SetStaticTile(self, layer, x, y, index, sheet);
-            EntoFramework.GetLocationHelper().SetTileProperty(self, layer, x, y, "Action", value);
-        }
-    }
     public class ExtendedMinecart : Mod
     {
         private static List<KeyValuePair<string, string>> DestinationData = new List<KeyValuePair<string, string>>()

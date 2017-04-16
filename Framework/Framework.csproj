@@ -46,6 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\EventArgsActiveItemChanged.cs" />
+    <Compile Include="Events\EventArgsActionTriggered.cs" />
+    <Compile Include="FrameworkConfig.cs" />
+    <Compile Include="Internal\Message.cs" />
+    <Compile Include="Internal\SmartContentManager.cs" />
+    <Compile Include="Internal\SmartDisplayDevice.cs" />
+    <Compile Include="Reflection\FieldHelper.cs" />
+    <Compile Include="Reflection\MethodHelper.cs" />
+    <Compile Include="Reflection\PropertyHelper.cs" />
+    <Compile Include="VersionInfo.cs" />
     <None Include="Abstraction\Character.cs" />
     <None Include="Abstraction\Enums.cs" />
     <None Include="Abstraction\Farmer.cs" />
@@ -138,6 +148,7 @@
     <Compile Include="UI\Wrapper\ClickableObjectComponent.cs" />
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
     <Compile Include="UpdateMenu.cs" />
+    <Compile Include="VersionCheck.cs" />
     <Compile Include="VersionChecker.cs" />
   </ItemGroup>
   <ItemGroup>

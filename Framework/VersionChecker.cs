@@ -11,30 +11,6 @@ using Newtonsoft.Json;
 
 namespace Entoarox.Framework
 {
-    internal struct VersionCheck
-    {
-        public string Mod;
-        public Version Version;
-        public string Url;
-        public VersionCheck(string mod, Version version, string url)
-        {
-            Mod = mod;
-            Version = version;
-            Url = url;
-        }
-    }
-    public class VersionInfo
-    {
-        public Version Latest;
-        public Version Recommended;
-        public Version Minimum;
-        public VersionInfo()
-        {
-            Latest = new Version(0, 0, 0);
-            Recommended = new Version(0, 0, 0);
-            Minimum = new Version(0, 0, 0);
-        }
-    }
     public static class VersionChecker
     {
         internal static WebClient Client;

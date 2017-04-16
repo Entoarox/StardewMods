@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 
@@ -185,76 +184,6 @@ namespace Entoarox.Framework
         {
             Game1.content = SmartManager;
             Game1.mapDisplayDevice = SmartDevice;
-        }
-    }
-    internal class SmartDisplayDevice : xTile.Display.XnaDisplayDevice
-    {
-        public SmartDisplayDevice(Microsoft.Xna.Framework.Content.ContentManager contentManager, GraphicsDevice graphicsDevice) : base(contentManager, graphicsDevice)
-        {
-
-        }
-    }
-    internal class SmartContentManager : LocalizedContentManager
-    {
-        private Dictionary<string, SmartContentManager> Registry = new Dictionary<string, SmartContentManager>();
-        private List<string> HandledFiles = new List<string>();
-        private Dictionary<string, string> XnbMatches = new Dictionary<string, string>();
-        private Dictionary<string, string> TextureMatches = new Dictionary<string, string>();
-        private Dictionary<string, KeyValuePair<Type,Delegate>> DelegateMatches = new Dictionary<string, KeyValuePair<Type,Delegate>>();
-        private Dictionary<string, object> TextureCache = new Dictionary<string, object>();
-        public SmartContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
-        {
-        }
-        public override T Load<T>(string assetName)
-        {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar=='/'?'\\':'/',Path.DirectorySeparatorChar);
-            if (HandledFiles.Contains(assetName))
-            {
-                if (XnbMatches.ContainsKey(assetName))
-                    return Registry[Path.GetDirectoryName(XnbMatches[assetName])].Load<T>(Path.GetFileName(XnbMatches[assetName]));
-                if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
-                {
-                    if(!TextureCache.ContainsKey(assetName))
-                        TextureCache.Add(assetName,Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open)));
-                    return (T)TextureCache[assetName];
-                }
-                if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
-                    return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
-            }
-            return base.Load<T>(assetName);
-        }
-        private bool CanRegister(string assetName)
-        {
-            if (HandledFiles.Contains(assetName))
-            {
-                EntoFramework.Logger.Log("ContentManager: The `" + assetName + "` file is already being managed, this may cause issues", StardewModdingAPI.LogLevel.Warn);
-                return false;
-            }
-            HandledFiles.Add(assetName);
-            return true;
-        }
-        internal void RegisterTexture(string assetName, string fileName)
-        {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (CanRegister(assetName) && File.Exists(fileName))
-                TextureMatches.Add(assetName, fileName);
-        }
-        internal void RegisterXnb(string assetName, string fileName)
-        {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (!CanRegister(assetName))
-                return;
-            string manager = Path.GetDirectoryName(fileName);
-            if (!Registry.ContainsKey(manager))
-                Registry.Add(manager, new SmartContentManager(ServiceProvider, manager));
-            if (File.Exists(fileName + ".xnb"))
-                XnbMatches.Add(assetName, fileName);
-        }
-        internal void RegisterHandler<T>(string assetName, FileLoadMethod<T> handler)
-        {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (CanRegister(assetName))
-                DelegateMatches.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));
         }
     }
 }
