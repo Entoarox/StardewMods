@@ -7,7 +7,7 @@
     <ProjectGuid>{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>XnbLoader</RootNamespace>
+    <RootNamespace>Entoarox.XnbLoader</RootNamespace>
     <AssemblyName>XnbLoader</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

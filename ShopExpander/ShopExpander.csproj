@@ -7,7 +7,7 @@
     <ProjectGuid>{99F3DE47-D310-4FD1-ACC6-8362D9D35CD7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ShopExpander</RootNamespace>
+    <RootNamespace>Entoarox.ShopExpander</RootNamespace>
     <AssemblyName>ShopExpander</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

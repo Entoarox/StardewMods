@@ -7,7 +7,7 @@
     <ProjectGuid>{CA467BEA-932F-4133-ACA0-D634670C2488}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ExtendedMinecart</RootNamespace>
+    <RootNamespace>Entoarox.ExtendedMinecart</RootNamespace>
     <AssemblyName>ExtendedMinecart</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

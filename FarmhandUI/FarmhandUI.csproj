@@ -7,7 +7,7 @@
     <ProjectGuid>{7097AB0B-6590-4F5C-B26A-C672DE5C3C31}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FarmhandUI</RootNamespace>
+    <RootNamespace>Farmhand.UI</RootNamespace>
     <AssemblyName>FarmhandUI</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
