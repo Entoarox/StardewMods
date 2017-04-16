@@ -17,7 +17,7 @@ namespace Entoarox.FasterPaths
         private ConfigFP cfg;
         private IPlayerHelper PlayerHelper;
         private FarmerModifier[] Modifiers;
-        private Version Version = new Version(1, 3, 0);
+        private Version Version = new Version(1, 3, 1);
         private FarmerModifier CurrentBoost;
         public override void Entry(IModHelper helper)
         {

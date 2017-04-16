@@ -29,7 +29,7 @@ namespace MorePets
         internal static Random random;
         private static bool replaceBus = false;
         internal static MorePetsConfig Config;
-        private static Version version = new Version(1,3,1);
+        private static Version version = new Version(1,3,2);
         // DEV PROPERTIES
         internal static int offsetX = 0;
         internal static int offsetY = 0;
