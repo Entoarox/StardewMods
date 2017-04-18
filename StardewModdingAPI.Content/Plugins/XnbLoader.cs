@@ -8,7 +8,7 @@ namespace StardewModdingAPI.Content.Plugins
 {
     class XnbLoader : IContentHandler
     {
-        protected Dictionary<string, string> Map = new Dictionary<string, string>();
+        internal Dictionary<string, string> Map = new Dictionary<string, string>();
         protected StardewValley.LocalizedContentManager ContentManager;
 
         public bool IsLoader { get; } = true;

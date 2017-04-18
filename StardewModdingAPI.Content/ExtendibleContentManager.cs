@@ -13,7 +13,7 @@ namespace StardewModdingAPI.Content
         private IContentHandler[] _Load;
         public ExtendibleContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider,rootDirectory)
         {
-
+            AddContentHandler(new Plugins.XnbLoader());
         }
         public void AddContentHandler(IContentHandler handler)
         {
