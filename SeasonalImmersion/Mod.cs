@@ -80,8 +80,16 @@ namespace Entoarox.SeasonalImmersion
                 Mode = 1;
             else if (File.Exists(Path.Combine(FilePath, "ContentPack.zip")))
             {
-                Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
-                Mode = 2;
+                try
+                {
+                    Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
+                    Mode = 2;
+                }
+                catch(Exception err)
+                {
+                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                    Mode = 3;
+                }
             }
             else
                 Mode = 3;
