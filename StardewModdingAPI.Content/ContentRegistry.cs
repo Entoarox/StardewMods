@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 
+using StardewModdingAPI;
 using StardewModdingAPI.Content.Utilities;
 
 namespace StardewModdingAPI.Content
@@ -10,18 +12,21 @@ namespace StardewModdingAPI.Content
     class ContentRegistry
     {
         private IMod Mod;
+        private IMonitor Monitor;
         public delegate T AssetLoader<T>(string assetName, Func<string, T> loadBase);
         public delegate void AssetInjector<T>(string assetName, ref T asset);
-        public ContentRegistry(IMod mod)
+        public ContentRegistry(IMonitor monitor, IMod mod)
         {
+            Monitor = monitor;
             Mod = mod;
         }
         /// <summary>
         /// Enables you to add a custom <see cref="IContentHandler"/> that the content manager will process for content
         /// </summary>
         /// <param name="handler">Your content handler implementation</param>
-        public void AddContentHandler(IContentHandler handler)
+        public void RegisterContentHandler(IContentHandler handler)
         {
+            Monitor.Log("Custom content handler added by mod: "+Mod.ModManifest.Name, LogLevel.Trace);
             ExtendibleContentManager.AddContentHandler(handler);
         }
         /// <summary>
@@ -33,7 +38,8 @@ namespace StardewModdingAPI.Content
         /// <param name="region">The area you wish to replace</param>
         public void RegisterTexturePatch(string asset, string patch, Rectangle region)
         {
-                if (!Plugins.TextureLoader.AssetMap.ContainsKey(asset))
+            Monitor.Log("Texture patch registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
+            if (!Plugins.TextureLoader.AssetMap.ContainsKey(asset))
                     Plugins.TextureLoader.AssetMap.Add(asset, new List<TextureData>());
                 Plugins.TextureLoader.AssetMap[asset].Add(new TextureData(patch, region));
             if (Plugins.TextureLoader.AssetCache.ContainsKey(asset))
@@ -45,8 +51,9 @@ namespace StardewModdingAPI.Content
         /// </summary>
         /// <param name="asset">The asset (Relative to Content and without extension) to replace</param>
         /// <param name="replacement">The asset (Relative to Mods and without extension) to use instead</param>
-        public void RegisterXnbLoader(string asset, string replacement)
+        public void RegisterXnbReplacement(string asset, string replacement)
         {
+            Monitor.Log("Xnb replacement registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
             Plugins.XnbLoader.AssetMap.Add(asset, replacement);
         }
         /// <summary>
@@ -55,8 +62,9 @@ namespace StardewModdingAPI.Content
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="asset">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="loader">The delegate assigned to handle loading for this asset</param>
-        public void RegisterAssetLoader<T>(string asset, AssetLoader<T> loader)
+        public void RegisterLoader<T>(string asset, AssetLoader<T> loader)
         {
+            Monitor.Log("Asset loader registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
             Plugins.DelegatedContentHandler.AssetLoadMap.Add(asset, loader);
         }
         /// <summary>
@@ -64,8 +72,9 @@ namespace StardewModdingAPI.Content
         /// </summary>
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="loader">The delegate assigned to handle loading for this type</param>
-        public void RegisterTypeLoader<T>(AssetLoader<T> loader)
+        public void RegisterLoader<T>(AssetLoader<T> loader)
         {
+            Monitor.Log("Type loader registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
             Plugins.DelegatedContentHandler.TypeLoadMap.Add(typeof(T), loader);
         }
         /// <summary>
@@ -74,8 +83,9 @@ namespace StardewModdingAPI.Content
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="asset">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="injector">The delegate assigned to handle injection for this asset</param>
-        public void RegisterAssetInjector<T>(string asset, AssetInjector<T> injector)
+        public void RegisterInjector<T>(string asset, AssetInjector<T> injector)
         {
+            Monitor.Log("Asset injector registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
             if (!Plugins.DelegatedContentHandler.AssetInjectMap.ContainsKey(asset))
                 Plugins.DelegatedContentHandler.AssetInjectMap.Add(asset, new List<Delegate>());
             Plugins.DelegatedContentHandler.AssetInjectMap[asset].Add(injector);
@@ -85,8 +95,9 @@ namespace StardewModdingAPI.Content
         /// </summary>
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="injector">The delegate assigned to handle loading for this type</param>
-        public void RegisterAssetInjector<T>(AssetInjector<T> injector)
+        public void RegisterInjector<T>(AssetInjector<T> injector)
         {
+            Monitor.Log("Type injector registered by mod: " + Mod.ModManifest.Name, LogLevel.Trace);
             if (!Plugins.DelegatedContentHandler.TypeInjectMap.ContainsKey(typeof(T)))
                 Plugins.DelegatedContentHandler.TypeInjectMap.Add(typeof(T), new List<Delegate>());
             Plugins.DelegatedContentHandler.TypeInjectMap[typeof(T)].Add(injector);
