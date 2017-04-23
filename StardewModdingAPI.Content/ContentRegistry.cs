@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 
@@ -13,12 +14,18 @@ namespace StardewModdingAPI.Content
     {
         private IMod Mod;
         private IMonitor Monitor;
+        private string ModPath;
         public delegate T AssetLoader<T>(string assetName, Func<string, T> loadBase);
         public delegate void AssetInjector<T>(string assetName, ref T asset);
         public ContentRegistry(IMonitor monitor, IMod mod)
         {
             Monitor = monitor;
             Mod = mod;
+            ModPath = Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
+        }
+        public T Load<T>(string assetName)
+        {
+            return ExtendibleContentManager.ModContent.Load<T>(Path.Combine(ModPath, assetName));
         }
         /// <summary>
         /// Enables you to add a custom <see cref="IContentHandler"/> that the content manager will process for content
