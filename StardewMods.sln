@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.3
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
@@ -22,6 +22,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XnbLoader", "XnbLoader\XnbLoader.csproj", "{3DBFB980-B11C-4171-AAD6-C39DD0AD312F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterPaths", "FasterPaths\FasterPaths.csproj", "{B9CDF893-2243-46D1-8CB6-CE48B8973023}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StardewModdingAPI.Content", "StardewModdingAPI.Content\StardewModdingAPI.Content.csproj", "{C64CBEA3-96A4-4892-A613-64B762C5EB2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavrialPersonalConfirmClose", "DavrialPersonalConfirmClose\DavrialPersonalConfirmClose.csproj", "{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +73,14 @@ Global
 		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9CDF893-2243-46D1-8CB6-CE48B8973023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C64CBEA3-96A4-4892-A613-64B762C5EB2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C64CBEA3-96A4-4892-A613-64B762C5EB2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C64CBEA3-96A4-4892-A613-64B762C5EB2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C64CBEA3-96A4-4892-A613-64B762C5EB2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

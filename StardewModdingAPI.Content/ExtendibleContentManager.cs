@@ -8,14 +8,23 @@ namespace StardewModdingAPI.Content
 {
     public class ExtendibleContentManager : LocalizedContentManager
     {
-        private List<IContentHandler> Handlers = new List<IContentHandler>();
-        private IContentHandler[] _Inject;
-        private IContentHandler[] _Load;
+        private static List<IContentHandler> Handlers;
+        private static IContentHandler[] _Inject;
+        private static IContentHandler[] _Load;
         public ExtendibleContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider,rootDirectory)
         {
-            AddContentHandler(new Plugins.XnbLoader());
+            if (Handlers != null)
+                return;
+            Handlers = new List<IContentHandler>();
+            // Second to last, as it is a explicit redirect of xnb files from Content to somewhere else
+            Handlers.Add(new Plugins.XnbLoader());
+            // Always last, so that content handlers that do things in a fixed way have priority.
+            Handlers.Add(new Plugins.DelegatedContentHandler());
+            // Manually filter the injector and loader sets
+            _Inject = Handlers.Where(a => a.IsInjector).ToArray();
+            _Load = Handlers.Where(a => a.IsLoader).ToArray();
         }
-        public void AddContentHandler(IContentHandler handler)
+        internal static void AddContentHandler(IContentHandler handler)
         {
             Handlers.Add(handler);
             _Inject = Handlers.Where(a => a.IsInjector).ToArray();

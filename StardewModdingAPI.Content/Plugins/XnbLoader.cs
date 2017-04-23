@@ -1,15 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StardewModdingAPI.Content.Plugins
 {
     class XnbLoader : IContentHandler
     {
-        internal Dictionary<string, string> Map = new Dictionary<string, string>();
-        protected StardewValley.LocalizedContentManager ContentManager;
+        internal static Dictionary<string, string> Map = new Dictionary<string, string>();
+        internal static StardewValley.LocalizedContentManager ContentManager;
 
         public bool IsLoader { get; } = true;
         public bool CanLoad<T>(string assetName)

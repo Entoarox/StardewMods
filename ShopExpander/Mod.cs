@@ -14,11 +14,34 @@ namespace Entoarox.ShopExpander
     {
         internal ShopExpanderConfig Config;
         private bool eventsActive = false;
+        private bool skippedTick = false;
         public override void Entry(IModHelper helper)
         {
-            MenuEvents.MenuChanged += Event_MenuChanged;
-            GameEvents.LoadContent += Event_LoadContent;
-            Config = helper.ReadConfig<ShopExpanderConfig>();
+            GameEvents.FirstUpdateTick += Event_FirstUpdateTick;
+        }
+        private void Event_FirstUpdateTick(object s, EventArgs e)
+        {
+            GameEvents.UpdateTick += Events_UpdateTick;
+        }
+        private void Event_UpdateTick(object s, EventArgs e)
+        {
+            if (skippedTick)
+            {
+                MenuEvents.MenuChanged += Event_MenuChanged;
+                Config = Helper.ReadConfig<ShopExpanderConfig>();
+                GameEvents.UpdateTick -= Event_UpdateTick;
+                foreach (Reference obj in Config.objects)
+                    try
+                    {
+                        generateObject(obj.Owner, obj.Item, obj.Amount, obj.Conditions);
+                    }
+                    catch (Exception err)
+                    {
+                        Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj.ToString(), err);
+                    }
+            }
+            else
+                skippedTick = true;
         }
         private void generateObject(string owner, int replacement, int stackAmount, string requirements)
         {
@@ -46,19 +69,6 @@ namespace Entoarox.ShopExpander
         }
         static private Dictionary<string, SObject> AddedObjects = new Dictionary<string, SObject>();
         static private Dictionary<string, Item> ReplacementStacks = new Dictionary<string, Item>();
-        // Load our custom objects and their textures
-        private void Event_LoadContent(object sender, EventArgs e)
-        {
-            foreach(Reference obj in Config.objects)
-                try
-                {
-                    generateObject(obj.Owner, obj.Item, obj.Amount, obj.Conditions);
-                }
-                catch(Exception err)
-                {
-                    Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj.ToString(), err);
-                }
-        }
         // If the inventory changes while this even is hooked, we need to check if any SObject instances are in it, so we can replace them
         private void Event_InventoryChanged(object send, EventArgs e)
         {
