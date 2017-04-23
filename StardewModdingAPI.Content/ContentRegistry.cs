@@ -35,6 +35,8 @@ namespace StardewModdingAPI.Content
                 if (!Plugins.TextureLoader.AssetMap.ContainsKey(asset))
                     Plugins.TextureLoader.AssetMap.Add(asset, new List<TextureData>());
                 Plugins.TextureLoader.AssetMap[asset].Add(new TextureData(patch, region));
+            if (Plugins.TextureLoader.AssetCache.ContainsKey(asset))
+                Plugins.TextureLoader.AssetCache.Remove(asset);
         }
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
