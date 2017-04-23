@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContentRegistry.cs" />
     <Compile Include="ExtendibleContentManager.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="Plugins\DelegatedContentHandler.cs" />

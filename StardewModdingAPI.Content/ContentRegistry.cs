@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using StardewModdingAPI;
+
 namespace StardewModdingAPI.Content
 {
     class ContentRegistry
     {
-        private string Mod;
+        private IMod Mod;
         public delegate T AssetLoader<T>(string assetName, Func<string, T> loadBase);
         public delegate void AssetInjector<T>(string assetName, ref T asset);
-        public ContentRegistry(string mod)
+        public ContentRegistry(IMod mod)
         {
             Mod = mod;
         }
@@ -18,7 +20,7 @@ namespace StardewModdingAPI.Content
         }
         public void RegisterXnbLoader(string asset, string replacement)
         {
-            Plugins.XnbLoader.Map.Add(asset, replacement);
+            Plugins.XnbLoader.AssetMap.Add(asset, replacement);
         }
         public void RegisterAssetLoader<T>(string asset, AssetLoader<T> loader)
         {
