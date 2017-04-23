@@ -22,8 +22,8 @@ namespace StardewModdingAPI.Content.Plugins
         public T Load<T>(string assetName, Func<string, T> loadBase)
         {
             if (AssetLoadMap.ContainsKey(assetName))
-                return ((Func<string, Func<string, T>, T>)AssetLoadMap[assetName])(assetName, loadBase);
-            return ((Func<string, Func<string, T>, T>)TypeLoadMap[typeof(T)])(assetName, loadBase);
+                return ((AssetLoader<T>)AssetLoadMap[assetName])(assetName, loadBase);
+            return ((AssetLoader<T>)TypeLoadMap[typeof(T)])(assetName, loadBase);
         }
 
         // Injector
@@ -35,9 +35,9 @@ namespace StardewModdingAPI.Content.Plugins
         public void Inject<T>(string assetName, ref T asset)
         {
             if (TypeInjectMap.ContainsKey(typeof(T)))
-                foreach (ContentRegistry.AssetInjector<T> method in TypeInjectMap[typeof(T)])
+                foreach (AssetInjector<T> method in TypeInjectMap[typeof(T)])
                     method(assetName, ref asset);
-            foreach (ContentRegistry.AssetInjector<T> method in AssetInjectMap[assetName])
+            foreach (AssetInjector<T> method in AssetInjectMap[assetName])
                 method(assetName, ref asset);
         }
 

@@ -6,10 +6,12 @@ namespace StardewModdingAPI.Content.Utilities
     {
         public string Texture;
         public Rectangle Region;
-        public TextureData(string texture, Rectangle region)
+        public Rectangle? Source;
+        public TextureData(string texture, Rectangle region, Rectangle? source)
         {
             Texture = texture;
             Region = region;
+            Source = source;
         }
     }
 }
