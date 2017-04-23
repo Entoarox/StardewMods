@@ -26,9 +26,10 @@ namespace StardewModdingAPI.Content
         }
         /// <summary>
         /// Lets you replace a region of pixels in one texture with the contents of another texture
+        /// Note that both the source and patch texture need to be packaged into xnb files
         /// </summary>
-        /// <param name="asset">The texture that you wish to modify</param>
-        /// <param name="patch">The texture used for the modification</param>
+        /// <param name="asset">The texture asset (Relative to Content and without extension) that you wish to modify</param>
+        /// <param name="patch">The texture asset (Relative to Mods and without extension) used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         public void RegisterTexturePatch(string asset, string patch, Rectangle region)
         {
