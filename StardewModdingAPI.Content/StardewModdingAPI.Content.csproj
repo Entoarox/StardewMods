@@ -42,10 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utilities\TextureData.cs" />
     <Compile Include="ContentRegistry.cs" />
     <Compile Include="ExtendibleContentManager.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="Plugins\DelegatedContentHandler.cs" />
+    <Compile Include="Plugins\TextureInjector.cs" />
     <Compile Include="Plugins\XnbLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

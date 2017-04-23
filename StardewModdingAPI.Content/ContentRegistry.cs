@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using StardewModdingAPI;
+using Microsoft.Xna.Framework;
+
+using StardewModdingAPI.Content.Utilities;
 
 namespace StardewModdingAPI.Content
 {
@@ -21,6 +23,18 @@ namespace StardewModdingAPI.Content
         public void AddContentHandler(IContentHandler handler)
         {
             ExtendibleContentManager.AddContentHandler(handler);
+        }
+        /// <summary>
+        /// Lets you replace a region of pixels in one texture with the contents of another texture
+        /// </summary>
+        /// <param name="asset">The texture that you wish to modify</param>
+        /// <param name="patch">The texture used for the modification</param>
+        /// <param name="region">The area you wish to replace</param>
+        public void RegisterTexturePatch(string asset, string patch, Rectangle region)
+        {
+                if (!Plugins.TextureLoader.AssetMap.ContainsKey(asset))
+                    Plugins.TextureLoader.AssetMap.Add(asset, new List<TextureData>());
+                Plugins.TextureLoader.AssetMap[asset].Add(new TextureData(patch, region));
         }
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
