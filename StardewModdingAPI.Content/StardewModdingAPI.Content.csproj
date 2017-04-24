@@ -45,13 +45,12 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="IContentRegistry.cs" />
     <Compile Include="Plugins\DictionaryInjector.cs" />
-    <Compile Include="Utilities\DictionaryHelper.cs" />
     <Compile Include="Utilities\TextureData.cs" />
     <Compile Include="Internal\ContentRegistry.cs" />
     <Compile Include="Internal\ExtendibleContentManager.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="Plugins\DelegatedContentHandler.cs" />
-    <Compile Include="Plugins\TextureLoader.cs" />
+    <Compile Include="Plugins\TextureInjector.cs" />
     <Compile Include="Plugins\XnbLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -292,11 +292,7 @@ namespace Entoarox.ExtendedMinecart
                 }
             }
             foreach (KeyValuePair<string, ButtonFormComponent> item in Destinations)
-            {
-                item.Value.Disabled = false;
-                if (item.Key == Game1.currentLocation.Name)
-                    item.Value.Disabled = true;
-            }
+                item.Value.Disabled = (item.Key.Equals(Game1.currentLocation.Name) || (Game1.isFestival() && item.Key.Equals(Game1.whereIsTodaysFest)));
             if (!Game1.player.mailReceived.Contains("ccCraftsRoom"))
                 Destinations["Mountain"].Disabled = true;
             if (Config.DesertDestinationEnabled && !Game1.player.mailReceived.Contains("ccVault"))
