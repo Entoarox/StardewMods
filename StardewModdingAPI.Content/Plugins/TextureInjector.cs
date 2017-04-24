@@ -8,27 +8,25 @@ using StardewModdingAPI.Content.Utilities;
 
 namespace StardewModdingAPI.Content.Plugins
 {
-    class TextureLoader : IContentHandler
+    class TextureInjector : IContentHandler
     {
         internal static Dictionary<string, List<TextureData>> AssetMap = new Dictionary<string, List<TextureData>>();
-        internal static Dictionary<string, Texture2D> AssetCache = new Dictionary<string, Texture2D>();
-
-        // Loader
-        public bool IsLoader { get; } = true;
-        public bool CanLoad<T>(string assetName)
+        internal static Dictionary<string, object> AssetCache = new Dictionary<string, object>();
+        
+        public bool IsInjector { get; } = true;
+        public bool CanInject<T>(string assetName)
         {
             return typeof(T) == typeof(Texture2D) && AssetMap.ContainsKey(assetName);
         }
-        public T Load<T>(string assetName, Func<string, T> loadBase)
+        public void Inject<T>(string assetName, ref T asset)
         {
             if (!AssetCache.ContainsKey(assetName))
             {
-                var texture=loadBase(assetName) as Texture2D;
+                var texture=asset as Texture2D;
                 foreach(TextureData data in AssetMap[assetName])
                 {
-                    var patch = ExtendibleContentManager.ModContent.Load<Texture2D>(data.Texture);
-                    var newData = new Color[patch.Width * patch.Height];
-                    patch.GetData(0, patch.Bounds, newData, 0, patch.Width * patch.Height);
+                    var newData = new Color[data.Source.Width * data.Source.Height];
+                    data.Texture.GetData(0, data.Source, newData, 0, data.Source.Width * data.Source.Height);
 
                     if (data.Region.Bottom > texture.Height || data.Region.Right > texture.Width)
                     {
@@ -46,16 +44,15 @@ namespace StardewModdingAPI.Content.Plugins
                 }
                 AssetCache[assetName] = texture;
             }
-            return (T)(object)AssetCache[assetName];
+            asset=(T)AssetCache[assetName];
         }
-
-        // Injector
-        public bool IsInjector { get; } = false;
-        public bool CanInject<T>(string assetName)
+        
+        public bool IsLoader { get; } = false;
+        public bool CanLoad<T>(string assetName)
         {
             throw new NotImplementedException();
         }
-        public void Inject<T>(string assetName, ref T asset)
+        public T Load<T>(string assetName, Func<string,T> loadBase)
         {
             throw new NotImplementedException();
         }
