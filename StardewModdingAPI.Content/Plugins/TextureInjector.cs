@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using StardewModdingAPI.Content.Utilities;
-
 namespace StardewModdingAPI.Content.Plugins
 {
+    using Utilities;
+
     class TextureInjector : IContentHandler
     {
         internal static Dictionary<string, List<TextureData>> AssetMap = new Dictionary<string, List<TextureData>>();

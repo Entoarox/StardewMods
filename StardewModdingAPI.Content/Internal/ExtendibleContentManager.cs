@@ -4,10 +4,10 @@ using System.Linq;
 
 using StardewValley;
 
-using StardewModdingAPI.Content.Plugins;
-
 namespace StardewModdingAPI.Content
 {
+    using Plugins;
+
     public class ExtendibleContentManager : LocalizedContentManager
     {
         private static List<IContentHandler> Handlers;

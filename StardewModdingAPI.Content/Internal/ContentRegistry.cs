@@ -5,20 +5,17 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using StardewModdingAPI;
-using StardewModdingAPI.Content.Utilities;
-using StardewModdingAPI.Content.Plugins;
-
 namespace StardewModdingAPI.Content
 {
+    using Plugins;
+    using Utilities;
+
     class ContentRegistry : IContentRegistry
     {
         private IMod Mod;
-        private IMonitor Monitor;
         private string ModPath;
-        public ContentRegistry(IMonitor monitor, IMod mod)
+        public ContentRegistry(IMod mod)
         {
-            Monitor = monitor;
             Mod = mod;
             ModPath = Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
         }
@@ -79,11 +76,6 @@ namespace StardewModdingAPI.Content
                 DelegatedContentHandler.AssetInjectMap.Add(asset, new List<Delegate>());
             DelegatedContentHandler.AssetInjectMap[asset].Add(injector);
         }
-        /// <summary>
-        /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the injection for a specific type of asset
-        /// </summary>
-        /// <typeparam name="T">The Type the asset is loaded as</typeparam>
-        /// <param name="injector">The delegate assigned to handle loading for this type</param>
         public void RegisterInjector<T>(AssetInjector<T> injector)
         {
             if (!DelegatedContentHandler.TypeInjectMap.ContainsKey(typeof(T)))
