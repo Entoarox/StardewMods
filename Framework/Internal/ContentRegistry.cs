@@ -3,6 +3,9 @@ using System.Reflection;
 using System.Collections.Generic;
 
 using StardewValley;
+using StardewValley.Objects;
+using StardewValley.BellsAndWhistles;
+using StardewValley.Projectiles;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -44,8 +47,12 @@ namespace Entoarox.Framework
             FarmerRenderer.shirtsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\shirts");
             FarmerRenderer.hatsTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\hats");
             FarmerRenderer.accessoriesTexture = Game1.content.Load<Texture2D>("Characters\\Farmer\\accessories");
+            Furniture.furnitureTexture = Game1.content.Load<Texture2D>("TileSheets\\furniture");
+            SpriteText.spriteTexture = Game1.content.Load<Texture2D>("LooseSprites\\font_bold");
+            SpriteText.coloredTexture = Game1.content.Load<Texture2D>("LooseSprites\\font_colored");
             Tool.weaponsTexture = Game1.content.Load<Texture2D>("TileSheets\\weapons");
-            if(Game1.player!=null)
+            Projectile.projectileSheet = Game1.content.Load<Texture2D>("TileSheets\\Projectiles");
+            if (Game1.player!=null)
                 Game1.player.FarmerRenderer = new FarmerRenderer(Game1.content.Load<Texture2D>("Characters\\Farmer\\farmer_" + (Game1.player.isMale ? "" : "girl_") + "base"));
         }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
