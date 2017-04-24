@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StardewModdingAPI.Content
+namespace StardewModdingAPI.Content.Internal
 {
     using Plugins;
     using Utilities;

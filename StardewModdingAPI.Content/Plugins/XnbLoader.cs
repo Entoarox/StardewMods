@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace StardewModdingAPI.Content.Plugins
 {
+    using Internal;
     class XnbLoader : IContentHandler
     {
         internal static Dictionary<string, string> AssetMap = new Dictionary<string, string>();

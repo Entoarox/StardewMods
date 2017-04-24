@@ -80,6 +80,15 @@ namespace Entoarox.Framework
             }
             Logger.Log("Registering framework events...",LogLevel.Trace);
             helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
+            if(Config.TrainerCommands)
+            {
+                helper.ConsoleCommands
+                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",",Commands.Commands.Farms), Commands.Commands.farm)
+                    .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", Commands.Commands.farm)
+
+                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
+                ;
+            }
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
@@ -90,7 +99,8 @@ namespace Entoarox.Framework
                 GameEvents.Initialize += TypeRegistry.Init;
             }
             GameEvents.LoadContent += GameEvents_LoadContent;
-            if(Config.SkipCredits)
+            SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
+            if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
             if(LoaderType==LoaderTypes.Unknown)
                 Monitor.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
@@ -106,6 +116,17 @@ namespace Entoarox.Framework
             }
             else
                 Events.MoreEvents.FireSmartManagerReady();
+        }
+        public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
+        {
+            GameEvents.UpdateTick -= PlayerHelper.Update;
+            LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
+            if (Config.GamePatcher)
+            {
+                GameEvents.UpdateTick -= GamePatcher.Update;
+                TimeEvents.DayOfMonthChanged -= GamePatcher.TimeEvents_DayOfMonthChanged;
+                Events.MoreEvents.ActionTriggered -= GamePatcher.MoreEvents_ActionTriggered;
+            }
         }
         public static void CreditsTick(object s, EventArgs e)
         {

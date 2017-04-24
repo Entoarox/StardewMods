@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Delegates.cs" />
+    <Compile Include="Extensions\CropData.cs" />
+    <Compile Include="Extensions\Crops.cs" />
+    <Compile Include="Extensions\ItemData.cs" />
     <Compile Include="IContentRegistry.cs" />
     <Compile Include="Plugins\DictionaryInjector.cs" />
     <Compile Include="Utilities\TextureData.cs" />

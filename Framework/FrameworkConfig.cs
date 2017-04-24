@@ -6,5 +6,6 @@ namespace Entoarox.Framework
         public bool SkipCredits = false;
         public bool DebugMode = false;
         public bool IngameUpdateNotices = true;
+        public bool TrainerCommands = true;
     }
 }

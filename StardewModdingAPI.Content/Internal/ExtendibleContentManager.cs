@@ -4,7 +4,7 @@ using System.Linq;
 
 using StardewValley;
 
-namespace StardewModdingAPI.Content
+namespace StardewModdingAPI.Content.Internal
 {
     using Plugins;
 

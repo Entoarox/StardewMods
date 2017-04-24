@@ -25,16 +25,13 @@ namespace Entoarox.Framework
             Game1.mouseCursors = Game1.content.Load<Texture2D>("LooseSprites\\Cursors");
             Game1.animations = Game1.content.Load<Texture2D>("TileSheets\\animations");
             Game1.achievements = Game1.content.Load<Dictionary<int, string>>("Data\\Achievements");
-            Game1.eventConditions = Game1.content.Load<Dictionary<string, bool>>("Data\\eventConditions");
             Game1.NPCGiftTastes = Game1.content.Load<Dictionary<string, string>>("Data\\NPCGiftTastes");
             Game1.dialogueFont = Game1.content.Load<SpriteFont>("Fonts\\SpriteFont1");
             Game1.smallFont = Game1.content.Load<SpriteFont>("Fonts\\SmallFont");
-            Game1.borderFont = Game1.content.Load<SpriteFont>("Fonts\\BorderFont");
             Game1.tinyFont = Game1.content.Load<SpriteFont>("Fonts\\tinyFont");
             Game1.tinyFontBorder = Game1.content.Load<SpriteFont>("Fonts\\tinyFontBorder");
-            Game1.smoothFont = Game1.content.Load<SpriteFont>("Fonts\\smoothFont");
             Game1.objectSpriteSheet = Game1.content.Load<Texture2D>("Maps\\springobjects");
-            Game1.toolSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\tools");
+            Game1.ResetToolSpriteSheet();
             Game1.cropSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\crops");
             Game1.emoteSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\emotes");
             Game1.debrisSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\debris");
