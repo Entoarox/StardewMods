@@ -5,11 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace StardewModdingAPI.Content
 {
-    public delegate T AssetLoader<T>(string assetName, Func<string, T> loadBase);
-    public delegate void AssetInjector<T>(string assetName, ref T asset);
     public interface IContentRegistry
     {
         /// <summary>
@@ -26,13 +25,38 @@ namespace StardewModdingAPI.Content
         void RegisterContentHandler(IContentHandler handler);
         /// <summary>
         /// Lets you replace a region of pixels in one texture with the contents of another texture
-        /// Note that both the source and patch texture need to be packaged into xnb files
+        /// The texture asset referenced by patchAssetName has to be in xnb format
         /// </summary>
         /// <param name="assetName">The texture asset (Relative to Content and without extension) that you wish to modify</param>
         /// <param name="patchAssetName">The texture asset (Relative to your mod directory and without extension) used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
         void RegisterTexturePatch(string assetName, string patchAssetName, Rectangle destination, Rectangle? source = null);
+        /// <summary>
+        /// Lets you replace a region of pixels in one texture with the contents of another texture
+        /// </summary>
+        /// <param name="assetName">The texture asset (Relative to Content and without extension) that you wish to modify</param>
+        /// <param name="patchAssetName">The texture used for the modification</param>
+        /// <param name="region">The area you wish to replace</param>
+        /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
+        void RegisterTexturePatch(string assetName, Texture2D patchAsset, Rectangle destination, Rectangle? source = null);
+        /// <summary>
+        /// Lets you add and replace keys in a content dictionary
+        /// The dictionary asset referenced by patchAssetName has to be in xnb format
+        /// </summary>
+        /// <typeparam name="TKey">The type used for keys in the dictionary</typeparam>
+        /// <typeparam name="TValue">The type used for values in the dictionary</typeparam>
+        /// <param name="assetName">The dictionary asset (Relative to Content and without extension) that you wish to modify</param>
+        /// <param name="patchAsset">The dictionary asset (Relative to your mod directory and without extension) used for the modification</param>
+        void RegisterDictionaryPatch<TKey, TValue>(string assetName, string patchAssetName);
+        /// <summary>
+        /// Lets you add and replace keys in a content dictionary
+        /// </summary>
+        /// <typeparam name="TKey">The type used for keys in the dictionary</typeparam>
+        /// <typeparam name="TValue">The type used for values in the dictionary</typeparam>
+        /// <param name="assetName">The dictionary asset (Relative to Content and without extension) that you wish to modify</param>
+        /// <param name="patchAsset">The dictionary used for the modification</param>
+        void RegisterDictionaryPatch<TKey, TValue>(string assetName, Dictionary<TKey, TValue> patchAsset);
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
         /// This will only work if none of the more specific loaders deal with the file first
