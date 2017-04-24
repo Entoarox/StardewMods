@@ -21,7 +21,8 @@ namespace StardewModdingAPI.Content
                 return;
             Handlers = new List<IContentHandler>();
             // Specific loaders / injectors for certain files & file types
-            Handlers.Add(new TextureLoader());
+            Handlers.Add(new TextureInjector());
+            Handlers.Add(new DictionaryInjector());
             // Second to last, as it is a explicit redirect of xnb files from Content to somewhere else
             Handlers.Add(new XnbLoader());
             // Always last, so that content handlers that do things in a fixed way have priority.
@@ -30,7 +31,7 @@ namespace StardewModdingAPI.Content
             _Inject = Handlers.Where(a => a.IsInjector).ToArray();
             _Load = Handlers.Where(a => a.IsLoader).ToArray();
 
-            ModContent = new StardewValley.LocalizedContentManager(StardewValley.Game1.content.ServiceProvider, System.IO.Path.Combine(Constants.ExecutionPath, "Mods"));
+            ModContent = new LocalizedContentManager(Game1.content.ServiceProvider, System.IO.Path.Combine(Constants.ExecutionPath, "Mods"));
         }
         internal static void AddContentHandler(IContentHandler handler)
         {
