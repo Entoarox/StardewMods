@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
-
-using StardewModdingAPI.Content.Utilities;
 
 namespace StardewModdingAPI.Content.Plugins
 {
@@ -15,18 +13,24 @@ namespace StardewModdingAPI.Content.Plugins
         public bool IsInjector { get; } = true;
         public bool CanInject<T>(string assetName)
         {
-            return typeof(T).Is(typeof(Dictionary<,>)) && AssetMap.ContainsKey(assetName);
+            return typeof(IDictionary).IsAssignableFrom(typeof(T)) && AssetMap.ContainsKey(assetName);
         }
         public void Inject<T>(string assetName, ref T asset)
         {
             if (!AssetCache.ContainsKey(assetName))
             {
-                T copy = asset;
-                typeof(DictionaryHelper)
-                    .GetMethod(nameof(DictionaryHelper.InjectPairs), BindingFlags.NonPublic | BindingFlags.Static)
-                    .MakeGenericMethod(typeof(T).GetGenericArguments())
-                    .Invoke(null, new object[] { copy, AssetMap[assetName] });
-                AssetCache.Add(assetName, copy);
+                var dictionary = asset as IDictionary;
+                foreach(IDictionary patch in AssetMap[assetName])
+                {
+                    if (patch.GetType() != typeof(T))
+                        continue;
+                    foreach (var key in patch)
+                        if (dictionary.Contains(key))
+                            dictionary[key] = patch[key];
+                        else
+                            dictionary.Add(key, patch[key]);
+                }
+                AssetCache[assetName] = dictionary;
             }
             asset = (T)AssetCache[assetName];
         }

@@ -41,6 +41,7 @@ namespace StardewModdingAPI.Content
         }
         public override T Load<T>(string assetName)
         {
+            assetName = assetName.Replace('/', '\\');
             T asset = default(T);
             var Loaders = _Load.Where(a => a.CanLoad<T>(assetName)).ToArray();
             if (Loaders.Length > 1)
