@@ -137,6 +137,7 @@ namespace Entoarox.Framework
         private static MethodInfo registerHandler;
         private static dynamic myManifest;
         private static SmartContentManager SmartManager;
+        private static SmartContentManager TempSmartManager;
         private static SmartDisplayDevice SmartDevice;
         private static FieldInfo TempContent;
         internal static void Setup()
@@ -181,6 +182,7 @@ namespace Entoarox.Framework
         internal static void Init()
         {
             SmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
+            TempSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
             SmartDevice = new SmartDisplayDevice(SmartManager, Game1.game1.GraphicsDevice);
             TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
             Update(null, null);
@@ -191,7 +193,7 @@ namespace Entoarox.Framework
             Game1.content = SmartManager;
             Game1.mapDisplayDevice = SmartDevice;
             Game1.game1.xTileContent = SmartManager;
-            TempContent.SetValue(null, SmartManager);
+            TempContent.SetValue(null, TempSmartManager);
         }
     }
 }
