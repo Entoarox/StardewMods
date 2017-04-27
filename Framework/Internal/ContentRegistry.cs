@@ -34,7 +34,7 @@ namespace Entoarox.Framework
             Game1.tinyFont = Game1.content.Load<SpriteFont>("Fonts\\tinyFont");
             Game1.tinyFontBorder = Game1.content.Load<SpriteFont>("Fonts\\tinyFontBorder");
             Game1.objectSpriteSheet = Game1.content.Load<Texture2D>("Maps\\springobjects");
-            Game1.ResetToolSpriteSheet();
+            typeof(Game1).GetField("_toolSpriteSheet", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, Game1.content.Load<Texture2D>("TileSheets\\tools"));
             Game1.cropSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\crops");
             Game1.emoteSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\emotes");
             Game1.debrisSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\debris");
@@ -138,6 +138,7 @@ namespace Entoarox.Framework
         private static dynamic myManifest;
         private static SmartContentManager SmartManager;
         private static SmartDisplayDevice SmartDevice;
+        private static FieldInfo TempContent;
         internal static void Setup()
         {
             if (EntoFramework.LoaderType == EntoFramework.LoaderTypes.FarmHand)
@@ -181,6 +182,7 @@ namespace Entoarox.Framework
         {
             SmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
             SmartDevice = new SmartDisplayDevice(SmartManager, Game1.game1.GraphicsDevice);
+            TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
             Update(null, null);
             Events.MoreEvents.FireSmartManagerReady();
         }
@@ -188,6 +190,8 @@ namespace Entoarox.Framework
         {
             Game1.content = SmartManager;
             Game1.mapDisplayDevice = SmartDevice;
+            Game1.game1.xTileContent = SmartManager;
+            TempContent.SetValue(null, SmartManager);
         }
     }
 }
