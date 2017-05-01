@@ -64,6 +64,7 @@ namespace Entoarox.Framework
                 Logger.ExitGameImmediately($"The `{modRequiring}` mod requires EntoaroxFramework version [{requiringVersion}] or newer to work.");
         }
         internal static IMonitor Logger;
+        internal static bool Repair = false;
         public override void Entry(IModHelper helper)
         {
             Logger = Monitor;
@@ -89,16 +90,20 @@ namespace Entoarox.Framework
                     .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
                 ;
             }
-            GameEvents.UpdateTick += GameEvents_LoadTick;
+            SaveEvents.AfterLoad += SaveEvents_AfterLoad;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
             Events.MoreEvents.Setup();
             if (LoaderType == LoaderTypes.SMAPI)
             {
+                ContentRegistry.Init();
+                ContentRegistry.Singleton.ReloadStaticReferences();
+                GameEvents.UpdateTick += ContentRegistry.Update;
                 GameEvents.UpdateTick += TypeRegistry.Update;
                 GameEvents.Initialize += TypeRegistry.Init;
             }
-            GameEvents.LoadContent += GameEvents_LoadContent;
+            else
+                Events.MoreEvents.FireSmartManagerReady();
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
@@ -107,20 +112,12 @@ namespace Entoarox.Framework
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
-        {
-            if (LoaderType == LoaderTypes.SMAPI)
-            {
-                ContentRegistry.Init();
-                GameEvents.UpdateTick += ContentRegistry.Update;
-            }
-            else
-                Events.MoreEvents.FireSmartManagerReady();
-        }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
         {
             GameEvents.UpdateTick -= PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
+            if(LoaderType==LoaderTypes.SMAPI)
+                GameEvents.UpdateTick -= ContentRegistry.Update;
             if (Config.GamePatcher)
             {
                 GameEvents.UpdateTick -= GamePatcher.Update;
@@ -150,14 +147,19 @@ namespace Entoarox.Framework
             Game1.changeMusicTrack("MainTheme");
             CreditsDone = true;
         }
-        internal static void GameEvents_LoadTick(object s, EventArgs e)
+        internal static void SaveEvents_AfterLoad(object s, EventArgs e)
         {
-            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
-                return;
+            if (Repair)
+            {
+                ContentRegistry.Init();
+                ContentRegistry.Singleton.ReloadStaticReferences();
+                GameEvents.UpdateTick += ContentRegistry.Update;
+            }
+            else
+                Repair = true;
             MessageBox.Setup();
             VersionChecker.DoChecks();
             PlayerHelper.ResetForNewGame();
-            GameEvents.UpdateTick -= GameEvents_LoadTick;
             if (Config.GamePatcher)
             {
                 GamePatcher.Patch();
@@ -168,21 +170,6 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick += PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged += PlayerHelper.LocationEvents_CurrentLocationChanged;
             Events.MoreEvents.FireWorldReady();
-
-            /*
-            Logger.Log("DEBUG: HookedLocation handling", LogLevel.Alert);
-            GameLocation result = Reflection.HookedLocation.Create(new Shed(Game1.getFarm().map, "TestLoc"));
-            Logger.Log("DEBUG OUT:" + string.Join(",", result.GetType().GetMethod("drawWater", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).GetMethodBody().GetILAsByteArray()), LogLevel.Alert);
-            try
-            {
-                result.drawWater(Game1.spriteBatch);
-                Logger.Log("DEBUG OUT: Call succeeded.",LogLevel.Alert);
-            }
-            catch(Exception err)
-            {
-                Logger.Log(LogLevel.Alert, "DEBUG ERROR:", err);
-            }
-            */
         }
     }
 }

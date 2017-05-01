@@ -8,65 +8,75 @@ namespace Entoarox.Framework
 {
     internal class SmartContentManager : LocalizedContentManager
     {
-        private Dictionary<string, SmartContentManager> Registry = new Dictionary<string, SmartContentManager>();
-        private List<string> HandledFiles = new List<string>();
-        private Dictionary<string, string> XnbMatches = new Dictionary<string, string>();
-        private Dictionary<string, string> TextureMatches = new Dictionary<string, string>();
-        private Dictionary<string, KeyValuePair<Type, Delegate>> DelegateMatches = new Dictionary<string, KeyValuePair<Type, Delegate>>();
-        private Dictionary<string, object> TextureCache = new Dictionary<string, object>();
+        private static Dictionary<string, SmartContentManager> Registry = new Dictionary<string, SmartContentManager>();
+        private static Dictionary<string,string> HandledFiles = new Dictionary<string,string>();
+        private static Dictionary<string, string> XnbMatches = new Dictionary<string, string>();
+        private static Dictionary<string, string> TextureMatches = new Dictionary<string, string>();
+        private static Dictionary<string, KeyValuePair<Type, Delegate>> DelegateMatches = new Dictionary<string, KeyValuePair<Type, Delegate>>();
+        private static Dictionary<string, object> TextureCache = new Dictionary<string, object>();
+        private static LocalizedContentManager ModContent;
         public SmartContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
         {
+            ModContent = new LocalizedContentManager(serviceProvider, Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"));
         }
         public override T Load<T>(string assetName)
         {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (this.HandledFiles.Contains(assetName))
+            assetName = Normalize(assetName);
+            if (HandledFiles.ContainsKey(assetName))
             {
-                if (this.XnbMatches.ContainsKey(assetName))
-                    return this.Registry[Path.GetDirectoryName(this.XnbMatches[assetName])].Load<T>(Path.GetFileName(this.XnbMatches[assetName]));
-                if (this.TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
+                if (XnbMatches.ContainsKey(assetName))
+                    return ModContent.Load<T>(MakeModsRelative(XnbMatches[assetName]));
+                if (TextureMatches.ContainsKey(assetName) && typeof(T) == typeof(Texture2D))
                 {
-                    if (!this.TextureCache.ContainsKey(assetName))
-                        this.TextureCache.Add(assetName, Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(this.TextureMatches[assetName], FileMode.Open)));
-                    return (T)this.TextureCache[assetName];
+                    if (!TextureCache.ContainsKey(assetName))
+                        TextureCache.Add(assetName, Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(TextureMatches[assetName], FileMode.Open)));
+                    return (T)TextureCache[assetName];
                 }
-                if (this.DelegateMatches.ContainsKey(assetName) && this.DelegateMatches[assetName].Key == typeof(T))
-                    return ((FileLoadMethod<T>)this.DelegateMatches[assetName].Value)(base.Load<T>, assetName);
+                if (DelegateMatches.ContainsKey(assetName) && DelegateMatches[assetName].Key == typeof(T))
+                    return ((FileLoadMethod<T>)DelegateMatches[assetName].Value)(base.Load<T>, assetName);
             }
             return base.Load<T>(assetName);
         }
-        private bool CanRegister(string assetName)
+        private static string Normalize(string path)
         {
-            if (this.HandledFiles.Contains(assetName))
+            return path.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
+        }
+        private static string MakeModsRelative(string fileName)
+        {
+            return fileName.Replace(ModContent.RootDirectory, "");
+        }
+        private static bool CanRegister(string assetName, string redirect)
+        {
+            if (HandledFiles.ContainsKey(assetName))
             {
-                EntoFramework.Logger.Log("ContentManager: The `" + assetName + "` file is already being managed, this may cause issues", StardewModdingAPI.LogLevel.Warn);
+                if (!HandledFiles[assetName].Equals(redirect))
+                    EntoFramework.Logger.Log("ContentManager: Multiple redirects for the `"+assetName+"` file found, the first will be used." + Environment.NewLine + "> "+HandledFiles[assetName] + Environment.NewLine + "> "+ redirect, StardewModdingAPI.LogLevel.Error);
                 return false;
             }
-            this.HandledFiles.Add(assetName);
+            HandledFiles.Add(assetName, redirect);
             return true;
         }
-        internal void RegisterTexture(string assetName, string fileName)
+        internal static void RegisterTexture(string assetName, string fileName)
         {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (this.CanRegister(assetName) && File.Exists(fileName))
-                this.TextureMatches.Add(assetName, fileName);
+            assetName = Normalize(assetName);
+            fileName = Normalize(fileName);
+            if (CanRegister(assetName,fileName) && File.Exists(fileName))
+                TextureMatches.Add(assetName, fileName);
         }
-        internal void RegisterXnb(string assetName, string fileName)
+        internal static void RegisterXnb(string assetName, string fileName)
         {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (!this.CanRegister(assetName))
+            assetName = Normalize(assetName);
+            fileName = Normalize(fileName);
+            if (!CanRegister(assetName,fileName))
                 return;
-            string manager = Path.GetDirectoryName(fileName);
-            if (!this.Registry.ContainsKey(manager))
-                this.Registry.Add(manager, new SmartContentManager(this.ServiceProvider, manager));
             if (File.Exists(fileName + ".xnb"))
-                this.XnbMatches.Add(assetName, fileName);
+                XnbMatches.Add(assetName, fileName);
         }
-        internal void RegisterHandler<T>(string assetName, FileLoadMethod<T> handler)
+        internal static void RegisterHandler<T>(string assetName, FileLoadMethod<T> handler)
         {
-            assetName = assetName.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-            if (this.CanRegister(assetName))
-                this.DelegateMatches.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));
+            assetName = Normalize(assetName);
+            if (CanRegister(assetName, handler.GetType().AssemblyQualifiedName))
+                DelegateMatches.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));
         }
     }
 }
