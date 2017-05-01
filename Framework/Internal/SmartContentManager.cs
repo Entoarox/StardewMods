@@ -17,7 +17,11 @@ namespace Entoarox.Framework
         private static LocalizedContentManager ModContent;
         public SmartContentManager(IServiceProvider serviceProvider, string rootDirectory) : base(serviceProvider, rootDirectory)
         {
-            ModContent = new LocalizedContentManager(serviceProvider, Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"));
+            if (ModContent == null)
+            {
+                ModContent = new LocalizedContentManager(serviceProvider, Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"));
+                EntoFramework.Logger.Log("Loading modded content as relative to: " + ModContent.RootDirectory);
+                    }
         }
         public override T Load<T>(string assetName)
         {
@@ -43,7 +47,7 @@ namespace Entoarox.Framework
         }
         private static string MakeModsRelative(string fileName)
         {
-            return fileName.Replace(ModContent.RootDirectory, "");
+            return fileName.Replace(ModContent.RootDirectory + Path.DirectorySeparatorChar, "");
         }
         private static bool CanRegister(string assetName, string redirect)
         {

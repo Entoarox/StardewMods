@@ -53,7 +53,6 @@
     <Compile Include="FrameworkConfig.cs" />
     <Compile Include="Internal\Message.cs" />
     <Compile Include="Internal\SmartContentManager.cs" />
-    <Compile Include="Internal\SmartDisplayDevice.cs" />
     <Compile Include="Reflection\FieldHelper.cs" />
     <Compile Include="Reflection\MethodHelper.cs" />
     <Compile Include="Reflection\PropertyHelper.cs" />
