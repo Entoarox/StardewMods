@@ -84,7 +84,7 @@ namespace Entoarox.Framework
                         return Game1.player.spouse != null && Game1.player.spouse.Contains("engaged");
                     // Condition that is only true after the earthquake event has happened
                     case "earthquake":
-                        return Game1.stats.daysPlayed > 31;
+                        return Game1.stats.daysPlayed > 30;
                     // Condition that is only true after the player has received the rusty key
                     case "rustyKey":
                         return Game1.player.hasRustyKey;

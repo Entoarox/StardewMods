@@ -24,13 +24,24 @@ namespace Entoarox.SeasonalImmersion
         public override void Entry(IModHelper helper)
         {
             FilePath = helper.DirectoryPath;
-            GameEvents.LoadContent += GameEvents_LoadContent;
+            try
+            {
+                Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
+                LoadContent();
+                LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
+                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
+                ContentReady = true;
+                Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
+            }
+            catch (Exception err)
+            {
+                Monitor.Log("Could not load ContentPack" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+            }
         }
         private static bool ContentReady = false;
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
         private static string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
-        private static Texture2D DefaultBigCraftables;
         private static BlendState blendColor = new BlendState
         {
             ColorWriteChannels = ColorWriteChannels.Red | ColorWriteChannels.Green | ColorWriteChannels.Blue,
@@ -149,24 +160,6 @@ namespace Entoarox.SeasonalImmersion
                 SeasonTextures.Add(name, textures);
             }
         }
-        internal void GameEvents_LoadContent(object s, EventArgs e)
-        {
-            try
-            {
-                Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
-                LoadContent();
-                LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-                GameEvents.LoadContent -= GameEvents_LoadContent;
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
-                DefaultBigCraftables = Game1.bigCraftableSpriteSheet;
-                ContentReady = true;
-                Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
-            }
-            catch (Exception err)
-            {
-                Monitor.Log("Could not load ContentPack" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
-            }
-        }
         internal Stream GetStream(string file)
         {
             try
@@ -240,7 +233,7 @@ namespace Entoarox.SeasonalImmersion
                 if (SeasonTextures.ContainsKey("furniture"))
                     StardewValley.Objects.Furniture.furnitureTexture = SeasonTextures["furniture"][Game1.currentSeason];
                 // Reset big craftables
-                Game1.bigCraftableSpriteSheet = DefaultBigCraftables;
+                Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
                 // Check outdoor craftables
                 if (Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_outdoor"))
                     Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables_outdoor"][Game1.currentSeason];

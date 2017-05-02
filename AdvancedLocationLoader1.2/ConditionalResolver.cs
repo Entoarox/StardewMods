@@ -45,6 +45,8 @@ namespace Entoarox.AdvancedLocationLoader
                 who.mailReceived.Add("ALLCondition_" + this.Conditional.Name);
                 AdvancedLocationLoaderMod.Logger.Log("Conditional completed: " + this.Conditional.Name, StardewModdingAPI.LogLevel.Trace);
                 AdvancedLocationLoaderMod.UpdateConditionalEdits();
+                if (this.Conditional.Success != null)
+                    Game1.drawDialogueBox(this.Conditional.Success);
             }
             else
                 Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("notEnough", this.GetItemName()));

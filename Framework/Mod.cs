@@ -100,7 +100,7 @@ namespace Entoarox.Framework
                 ContentRegistry.Singleton.ReloadStaticReferences();
                 GameEvents.UpdateTick += ContentRegistry.Update;
                 GameEvents.UpdateTick += TypeRegistry.Update;
-                GameEvents.Initialize += TypeRegistry.Init;
+                TypeRegistry.Init();
             }
             else
                 Events.MoreEvents.FireSmartManagerReady();

@@ -107,7 +107,7 @@ namespace Entoarox.Framework
                 SaveGame.locationSerializer = injectedLocationSerializer;
             }
         }
-        internal static void Init(object s, EventArgs e)
+        internal static void Init()
         {
             try
             {

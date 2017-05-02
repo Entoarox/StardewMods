@@ -182,6 +182,9 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public int Item;
         public int Amount;
         public string Question;
+        [DefaultValue(null)]
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
+        public string Success;
         public override string ToString()
         {
             return "Conditional(" + Name + "[" + Item + ':' + Amount + "] = `" + Question + "`)";

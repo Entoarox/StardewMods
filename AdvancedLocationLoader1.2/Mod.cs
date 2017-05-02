@@ -31,7 +31,7 @@ namespace Entoarox.AdvancedLocationLoader
             Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
 
-            GameEvents.LoadContent += Events.GameEvents_LoadContent;
+            Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
