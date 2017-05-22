@@ -59,15 +59,7 @@ namespace Entoarox.Framework
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        SmartContentManager.RegisterHandler(key, method);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        registerHandler.MakeGenericMethod(typeof(T)).Invoke(null, new object[] {key,method});
-                        break;
-                }
+                SmartContentManager.RegisterHandler(key, method);
             }
             catch (Exception err)
             {
@@ -78,47 +70,18 @@ namespace Entoarox.Framework
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        SmartContentManager.RegisterTexture(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        dynamic tex = Activator.CreateInstance(diskTexture);
-                        xnb.Original = key;
-                        xnb.Texture = key;
-                        xnb.OwingMod = myManifest;
-                        tex.Id = key;
-                        tex.AbsoluteFilePath = path;
-                        registerTexture.Invoke(null, new object[] { key, tex, myManifest });
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                SmartContentManager.RegisterTexture(key, path);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader"+err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader" + err);
             }
         }
         void IContentRegistry.RegisterXnb(string key, string path)
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        SmartContentManager.RegisterXnb(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        xnb.Original = key;
-                        xnb.File = key;
-                        xnb.OwingMod = myManifest;
-                        xnb.AbsoluteFilePath = path;
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                SmartContentManager.RegisterXnb(key, path);
             }
             catch (Exception err)
             {
@@ -136,74 +99,54 @@ namespace Entoarox.Framework
         private static MethodInfo registerXnb;
         private static MethodInfo registerHandler;
         private static dynamic myManifest;
-        private static SmartContentManager MainSmartManager;
-        private static SmartContentManager TileSmartManager;
-        private static SmartContentManager TempSmartManager;
+        private static WeakReference<SmartContentManager> MainSmartManager;
+        private static WeakReference<SmartContentManager> TileSmartManager;
+        private static WeakReference<SmartContentManager> TempSmartManager;
         private static xTile.Display.XnaDisplayDevice SmartDevice;
         private static FieldInfo TempContent;
-        internal static void Setup()
-        {
-            if (EntoFramework.LoaderType == EntoFramework.LoaderTypes.FarmHand)
-            {
-                try
-                {
-                    Type textureRegistry = Type.GetType("Farmhand.Registries.TextureRegistry");
-                    Type xnbRegistry = Type.GetType("Farmhand.Registries.XnbRegistry");
-                    Type modManifest = Type.GetType("Farmhand.Registries.Containers.ModManifest");
-                    Type contentHandler = Type.GetType("Farmhand.Content.DelegatedContentInjector");
-                    modXnb = Type.GetType("Farmhand.Registries.Containers.ModXnb");
-                    diskTexture = Type.GetType("Farmhand.Registries.Containers.DiskTexture");
-                    registerTexture = textureRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerXnb = xnbRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerHandler = contentHandler.GetMethod("RegisterFileLoader", BindingFlags.Static | BindingFlags.Public);
-                    myManifest = Activator.CreateInstance(modManifest);
-                    myManifest.ModDLL = "EntoaroxFramework.dll";
-                    myManifest.Name = "Entoarox Framework";
-                    myManifest.Author = "Entoarox";
-                    myManifest.Version = EntoFramework.Version;
-                    myManifest.Description = "A collection of framework classes to make modding stardew easier";
-                    // Secure tests to make sure there are no crashes when register methods are called
-                    dynamic xnb = Activator.CreateInstance(modXnb);
-                    dynamic tex = Activator.CreateInstance(diskTexture);
-                    xnb.Original = "";
-                    xnb.Texture = "";
-                    xnb.File = "";
-                    xnb.OwingMod = myManifest;
-                    xnb.AbsoluteFilePath = "";
-                    tex.Id = "";
-                    tex.AbsoluteFilePath = "";
-                }
-                catch (Exception err)
-                {
-                    EntoFramework.Logger.ExitGameImmediately("Was unable to hook into FarmHand content loading"+ err);
-                    EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
-                }
-            }
-        }
         internal static string RootDirectory;
         internal static IServiceProvider ServiceProvider;
         internal static void Init()
         {
+            if(TempContent==null)
+                TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
             if (RootDirectory == null)
             {
                 ServiceProvider = Game1.content.ServiceProvider;
                 RootDirectory = Game1.content.RootDirectory;
+                MainSmartManager = new WeakReference<SmartContentManager>(null);
+                TileSmartManager = new WeakReference<SmartContentManager>(null);
+                TempSmartManager = new WeakReference<SmartContentManager>(null);
             }
-            MainSmartManager = new SmartContentManager(ServiceProvider, RootDirectory);
-            TileSmartManager = new SmartContentManager(ServiceProvider, RootDirectory);
-            TempSmartManager = new SmartContentManager(ServiceProvider, RootDirectory);
+            if (!MainSmartManager.TryGetTarget(out SmartContentManager mainSmartManager))
+            {
+                mainSmartManager = new SmartContentManager(ServiceProvider, RootDirectory);
+                MainSmartManager.SetTarget(mainSmartManager);
+            }
+            if (!TileSmartManager.TryGetTarget(out SmartContentManager tileSmartManager))
+            {
+                tileSmartManager=new SmartContentManager(ServiceProvider, RootDirectory);
+                TileSmartManager.SetTarget(tileSmartManager);
+            }
+            if (!TempSmartManager.TryGetTarget(out SmartContentManager tempSmartManager))
+            {
+                tempSmartManager = new SmartContentManager(ServiceProvider, RootDirectory);
+                TempSmartManager.SetTarget(tempSmartManager);
+            }
             if (SmartDevice == null)
-                SmartDevice = new xTile.Display.XnaDisplayDevice(MainSmartManager, Game1.game1.GraphicsDevice);
-            TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
+                SmartDevice = new xTile.Display.XnaDisplayDevice(mainSmartManager, Game1.game1.GraphicsDevice);
             Update(null, null);
             Events.MoreEvents.FireSmartManagerReady();
         }
         internal static void Update(object s, EventArgs e)
         {
-            Game1.content = MainSmartManager;
+            MainSmartManager.TryGetTarget(out SmartContentManager mainSmartManager);
+            TileSmartManager.TryGetTarget(out SmartContentManager tileSmartManager);
+            TempSmartManager.TryGetTarget(out SmartContentManager tempSmartManager);
+            Game1.content = mainSmartManager;
             Game1.mapDisplayDevice = SmartDevice;
-            Game1.game1.xTileContent = TileSmartManager;
-            TempContent.SetValue(null, TempSmartManager);
+            Game1.game1.xTileContent = tileSmartManager;
+            TempContent.SetValue(null, tempSmartManager);
         }
     }
 }

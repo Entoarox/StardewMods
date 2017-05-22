@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StardewModdingAPI.Content.Plugins
+namespace Entoarox.Framework.Content.Plugins
 {
     class DelegatedContentHandler : IContentHandler
     {

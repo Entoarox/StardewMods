@@ -439,7 +439,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 AffectedLocations = null;
                 MapSizes = null;
                 stage++; // 19
-                VerifyPatchIntegrity();
+                VerifyGameIntegrity();
                 stage++; // 20
                 AdvancedLocationLoaderMod.Logger.Log("Patches have been applied", LogLevel.Debug);
             }
@@ -448,7 +448,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch the game, a unexpected error occured at stage "+stage.ToString(), err);
             }
         }
-        internal static void VerifyPatchIntegrity()
+        internal static void VerifyGameIntegrity()
         {
             string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
             foreach (GameLocation loc in Game1.locations)
@@ -462,9 +462,9 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs!");
                             foreach (string season in seasons)
                             {
-                                string file = Path.Combine(Game1.content.RootDirectory, Path.Combine("Maps",season + "_" + path[1] + ".xnb"));
+                                string file = Path.Combine(EntoFramework.PlatformContentDir, "Maps", season + "_" + path[1] + ".xnb");
                                 if (!File.Exists(file))
-                                    AdvancedLocationLoaderMod.Logger.Log("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this might cause bugs!",LogLevel.Warn);
+                                    AdvancedLocationLoaderMod.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this will cause bugs!");
                             }
                         }
             }

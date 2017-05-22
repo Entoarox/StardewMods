@@ -27,7 +27,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
+    <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -44,10 +44,23 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Commands.cs" />
+    <Compile Include="Content\ContentSource.cs" />
+    <Compile Include="Content\Delegates.cs" />
+    <Compile Include="Content\IContentHandler.cs" />
+    <Compile Include="Content\IContentRegistry.cs" />
+    <Compile Include="Content\Internal\ContentRegistry.cs" />
+    <Compile Include="Content\Internal\ExtendibleContentManager.cs" />
+    <Compile Include="Content\Plugins\DelegatedContentHandler.cs" />
+    <Compile Include="Content\Plugins\DictionaryInjector.cs" />
+    <Compile Include="Content\Plugins\TextureInjector.cs" />
+    <Compile Include="Content\Plugins\XnbLoader.cs" />
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="FrameworkConfig.cs" />
@@ -69,15 +82,6 @@
     <None Include="Abstraction\WrappedContentManager.cs" />
     <None Include="Abstraction\WrappedList.cs" />
     <Compile Include="Conditions.cs" />
-    <Compile Include="ContentManager\Asset.cs" />
-    <Compile Include="ContentManager\ContentHandler.cs" />
-    <Compile Include="ContentManager\DelegatedAssetContentHandler.cs" />
-    <Compile Include="ContentManager\DelegatedTypeContentHandler.cs" />
-    <Compile Include="ContentManager\DictionaryContentInjector.cs" />
-    <Compile Include="ContentManager\MapContentInjector.cs" />
-    <Compile Include="ContentManager\MapMergeHelper.cs" />
-    <Compile Include="ContentManager\TextureContentInjector.cs" />
-    <Compile Include="ContentManager\XnbContentLoader.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
@@ -107,7 +111,6 @@
     <Compile Include="Reflection\ReflectedMethod.cs" />
     <Compile Include="Reflection\ReflectedProperty.cs" />
     <Compile Include="Reflection\ReflectionUtility.cs" />
-    <Compile Include="ContentManager\SmartContentManager.cs" />
     <Compile Include="StackableShopObject.cs" />
     <Compile Include="UI\Base\BaseFormComponent.cs" />
     <Compile Include="UI\Base\BaseInteractiveMenuComponent.cs" />
@@ -158,6 +161,9 @@
     </None>
     <None Include="ConditionDocumentation.md" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Utilities\" />
   </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>

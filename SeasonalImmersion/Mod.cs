@@ -96,7 +96,7 @@ namespace Entoarox.SeasonalImmersion
                     Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
                     Mode = 2;
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
                     Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
                     Mode = 3;
@@ -104,7 +104,7 @@ namespace Entoarox.SeasonalImmersion
             }
             else
                 Mode = 3;
-            Monitor.Log("Content pack resolved to mode: "+Mode.ToString(), LogLevel.Trace);
+            Monitor.Log("Content pack resolved to mode: " + Mode.ToString(), LogLevel.Trace);
             Stream stream = GetStream("manifest.json");
             if (stream == null)
             {
@@ -130,10 +130,12 @@ namespace Entoarox.SeasonalImmersion
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
             else
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
-            Files.Add("Flooring.xnb");
-            Files.Add("Craftables_outdoor.xnb");
-            Files.Add("Craftables_indoor.xnb");
-            Files.Add("furniture.xnb");
+            Files.AddRange(new string[] {
+                "Flooring.xnb",
+                "Craftables.xnb",
+                "Craftables_outdoor.xnb",
+                "Craftables_indoor.xnb"
+            });
             foreach (string file in Files)
             {
                 Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
@@ -181,6 +183,7 @@ namespace Entoarox.SeasonalImmersion
                         }
                         MemoryStream memoryStream = new MemoryStream();
                         Zip[file].Extract(memoryStream);
+                        memoryStream.Seek(0, SeekOrigin.Begin);
                         return memoryStream;
                     case 3:
                         Stream manifestStream=GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
@@ -195,9 +198,9 @@ namespace Entoarox.SeasonalImmersion
                         return null;
                 }
             }
-            catch
+            catch(Exception err)
             {
-                Monitor.Log("Skipping file due to a unknown error: " + file, LogLevel.Error);
+                Monitor.Log($"Skipping file due to a unknown error: {file}\n{err}", LogLevel.Error);
                 return null;
             }
         }
@@ -210,9 +213,9 @@ namespace Entoarox.SeasonalImmersion
             {
                 return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
             }
-            catch
+            catch(Exception err)
             {
-                Monitor.Log("Skipping texture due to a unknown error: " + file, LogLevel.Warn);
+                Monitor.Log($"Skipping texture due to a unknown error: {file}\n{err}", LogLevel.Warn);
                 return null;
             }
         }
@@ -233,7 +236,10 @@ namespace Entoarox.SeasonalImmersion
                 if (SeasonTextures.ContainsKey("furniture"))
                     StardewValley.Objects.Furniture.furnitureTexture = SeasonTextures["furniture"][Game1.currentSeason];
                 // Reset big craftables
-                Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
+                if (!SeasonTextures.ContainsKey("Craftables"))
+                    Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
+                else
+                    Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables"][Game1.currentSeason];
                 // Check outdoor craftables
                 if (Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_outdoor"))
                     Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables_outdoor"][Game1.currentSeason];
@@ -247,7 +253,7 @@ namespace Entoarox.SeasonalImmersion
             }
             catch (Exception err)
             {
-                Monitor.Log("Failed to update seasonal textures" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                Monitor.Log($"Failed to update seasonal textures\n{err}",LogLevel.Error);
             }
         }
         internal void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
@@ -255,9 +261,9 @@ namespace Entoarox.SeasonalImmersion
             if (ContentReady && Game1.hasLoadedGame)
                 UpdateTextures();
         }
-        internal void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
+        internal void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)
         {
-            if (Game1.hasLoadedGame && Game1.currentLocation != null && ContentReady)
+            if (Game1.hasLoadedGame && Game1.currentLocation != null && ContentReady && (e.NewLocation.name=="Farm" || e.PriorLocation!=null && e.PriorLocation.isOutdoors!=e.NewLocation.isOutdoors))
                 UpdateTextures();
         }
     }

@@ -262,16 +262,14 @@ namespace Entoarox.ExtendedMinecart
         }
         private void MenuEvents_MenuChanged(object s, EventArgs e)
         {
-            if (Game1.activeClickableMenu == null || !(Game1.activeClickableMenu is DialogueBox) || Game1.currentLocation.lastQuestionKey != "Minecart")
+            if (Game1.activeClickableMenu == null || !(Game1.activeClickableMenu is DialogueBox) || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
                 return;
             (Game1.activeClickableMenu as DialogueBox)?.closeDialogue();
-            /* OLD force-close CODE *\
-            
-            Game1.currentLocation.lastQuestionKey = null;
+            if (Game1.currentLocation != null)
+                Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;
-            Game1.player.CanMove = true;
-
-            \* OLD force-close CODE */
+            if (Game1.player != null)
+                Game1.player.CanMove = true;
             if (Config.RefuelingEnabled)
             {
                 if (CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && Rand.NextDouble() < 0.05)

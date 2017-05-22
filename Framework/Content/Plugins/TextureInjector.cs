@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StardewModdingAPI.Content.Plugins
+namespace Entoarox.Framework.Content.Plugins
 {
     class TextureInjector : IContentHandler
     {

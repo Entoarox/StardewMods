@@ -30,6 +30,36 @@ namespace Entoarox.Framework.Reflection
                 paramTypes[c] = parameters[c].ParameterType;
             return paramTypes;
         }
+        private static void LoadArgs(ILGenerator mbIL, int count)
+        {
+            for (int c = 0; c < count; c++)
+                mbIL.Emit(OpCodes.Ldarg, c);
+        }
+        private static void HookEditable(TypeBuilder tb, MethodInfo method, MethodInfo hook)
+        {
+            MethodBuilder mb = tb.DefineMethod(method.Name, method.Attributes | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig, method.ReturnType, GetParamTypes(method.GetParameters()));
+            ILGenerator mbIL = mb.GetILGenerator();
+            // load arg0 [this]
+            mbIL.Emit(OpCodes.Ldarg_0);
+            // load arg1 [batch]
+            mbIL.Emit(OpCodes.Ldarg_1);
+            // call [DrawBetweenLayer] and push stack [this, batch]
+            mbIL.Emit(OpCodes.Call, typeof(HookedLocation).GetMethod("DrawBetweenLayer", new Type[] { typeof(GameLocation), typeof(SpriteBatch) }));
+            // load arg0 [this]
+            mbIL.Emit(OpCodes.Ldarg_0);
+            // load arg1 [batch]
+            mbIL.Emit(OpCodes.Ldarg_1);
+            LoadArgs(mbIL, method.GetParameters().Length);
+            // call [base] and push stack [this, batch]
+            mbIL.Emit(OpCodes.Call, method);
+            // load loc0 [base() return]
+            mbIL.Emit(OpCodes.Ldloc_0);
+            LoadArgs(mbIL, method.GetParameters().Length);
+            // return
+            mbIL.Emit(OpCodes.Ret);
+
+            tb.DefineMethodOverride(mb, method);
+        }
         public static GameLocation Create(GameLocation location)
         {
             if (Init)

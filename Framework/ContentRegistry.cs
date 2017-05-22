@@ -6,24 +6,34 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StardewModdingAPI.Content.Internal
+using StardewModdingAPI;
+
+namespace Entoarox.Framework.Content
 {
     using Plugins;
+    using Internal;
 
-    class ContentHelper : IContentHelper
+    public class ContentHelper : IContentHelper
     {
+        private static Dictionary<IMod, IContentHelper> Map = new Dictionary<IMod, IContentHelper>();
+        public static IContentHelper Create(IMod mod)
+        {
+            if (!Map.ContainsKey(mod))
+                Map.Add(mod, new ContentHelper(mod));
+            return Map[mod];
+        }
         private IMod Mod;
         private string ModPath;
-        public ContentHelper(IMod mod)
+        internal ContentHelper(IMod mod)
         {
             Mod = mod;
             ModPath = Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
         }
-        public string Normalize(string path)
+        internal string Normalize(string path)
         {
             return path.Replace('/', '\\');
         }
-        public object LoadImage(string assetName)
+        internal object LoadImage(string assetName)
         {
             string file = Path.Combine(ModPath, assetName);
             if (!File.Exists(file))
@@ -36,7 +46,7 @@ namespace StardewModdingAPI.Content.Internal
             texture.SetData(data);
             return texture;
         }
-        public T Load<T>(string assetName, ContentSource source = ContentSource.ModFolder)
+        T IContentHelper.Load<T>(string assetName, ContentSource source)
         {
             if (typeof(T) == typeof(Texture2D) && assetName.EndsWith(".png"))
                 return (T)LoadImage(assetName);
@@ -44,11 +54,15 @@ namespace StardewModdingAPI.Content.Internal
                 assetName = assetName.Substring(0, assetName.Length - 4);
             return source == ContentSource.ModFolder ? ExtendibleContentManager.ModContent.Load<T>(Path.Combine(ModPath, assetName)) : StardewValley.Game1.content.Load<T>(assetName);
         }
-        public void RegisterContentHandler(IContentHandler handler)
+        string IContentHelper.GetActualAssetKey(string assetName, ContentSource source)
+        {
+            return source == ContentSource.ModFolder ? Path.Combine(ModPath, assetName) : assetName;
+        }
+        void IContentHelper.RegisterContentHandler(IContentHandler handler)
         {
             ExtendibleContentManager.AddContentHandler(handler);
         }
-        public void RegisterTexturePatch(string asset, Texture2D patch, Rectangle destination, Rectangle? source)
+        void IContentHelper.RegisterTexturePatch(string asset, Texture2D patch, Rectangle destination, Rectangle? source)
         {
             asset = Normalize(asset);
             if (!TextureInjector.AssetMap.ContainsKey(asset))
@@ -57,11 +71,11 @@ namespace StardewModdingAPI.Content.Internal
             if (TextureInjector.AssetCache.ContainsKey(asset))
                 TextureInjector.AssetCache.Remove(asset);
         }
-        public void RegisterTexturePatch(string asset, string patch, Rectangle destination, Rectangle? source)
+        void IContentHelper.RegisterTexturePatch(string asset, string patch, Rectangle destination, Rectangle? source)
         {
-            RegisterTexturePatch(asset, Load<Texture2D>(patch), destination, source);
+            (this as IContentHelper).RegisterTexturePatch(asset, (this as IContentHelper).Load<Texture2D>(patch), destination, source);
         }
-        public void RegisterDictionaryPatch<Tkey,TValue>(string asset, Dictionary<Tkey,TValue> patch)
+        void IContentHelper.RegisterDictionaryPatch<Tkey,TValue>(string asset, Dictionary<Tkey,TValue> patch)
         {
             asset = Normalize(asset);
             if (!DictionaryInjector.AssetMap.ContainsKey(asset))
@@ -70,30 +84,30 @@ namespace StardewModdingAPI.Content.Internal
             if (DictionaryInjector.AssetCache.ContainsKey(asset))
                 DictionaryInjector.AssetCache.Remove(asset);
         }
-        public void RegisterDictionaryPatch<TKey,TValue>(string asset, string patch)
+        void IContentHelper.RegisterDictionaryPatch<TKey,TValue>(string asset, string patch)
         {
-            RegisterDictionaryPatch(asset, Load<Dictionary<TKey, TValue>>(patch));
+            (this as IContentHelper).RegisterDictionaryPatch(asset, (this as IContentHelper).Load<Dictionary<TKey, TValue>>(patch));
         }
-        public void RegisterXnbReplacement(string asset, string replacement)
+        void IContentHelper.RegisterXnbReplacement(string asset, string replacement)
         {
             XnbLoader.AssetMap.Add(Normalize(asset), Path.Combine(ModPath,replacement));
         }
-        public void RegisterLoader<T>(string asset, AssetLoader<T> loader)
+        void IContentHelper.RegisterLoader<T>(string asset, AssetLoader<T> loader)
         {
             DelegatedContentHandler.AssetLoadMap.Add(Normalize(asset), loader);
         }
-        public void RegisterLoader<T>(AssetLoader<T> loader)
+        void IContentHelper.RegisterLoader<T>(AssetLoader<T> loader)
         {
             DelegatedContentHandler.TypeLoadMap.Add(typeof(T), loader);
         }
-        public void RegisterInjector<T>(string asset, AssetInjector<T> injector)
+        void IContentHelper.RegisterInjector<T>(string asset, AssetInjector<T> injector)
         {
             asset = Normalize(asset);
             if (!DelegatedContentHandler.AssetInjectMap.ContainsKey(asset))
                 DelegatedContentHandler.AssetInjectMap.Add(asset, new List<Delegate>());
             DelegatedContentHandler.AssetInjectMap[asset].Add(injector);
         }
-        public void RegisterInjector<T>(AssetInjector<T> injector)
+        void IContentHelper.RegisterInjector<T>(AssetInjector<T> injector)
         {
             if (!DelegatedContentHandler.TypeInjectMap.ContainsKey(typeof(T)))
                 DelegatedContentHandler.TypeInjectMap.Add(typeof(T), new List<Delegate>());

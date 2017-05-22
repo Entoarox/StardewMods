@@ -1,6 +1,6 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using Version = System.Version;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -12,14 +12,18 @@ namespace Entoarox.Framework
     public class EntoFramework : Mod
     {
         private static bool CreditsDone = true;
-        internal static LoaderTypes LoaderType;
         internal static FrameworkConfig Config;
-        public static Version Version { get { return typeof(EntoFramework).Assembly.GetName().Version; } }
-        internal enum LoaderTypes
+        private static Version _Version;
+        public static Version Version { get => _Version; }
+        private static string _PlatformContentDir;
+        public static string PlatformContentDir
         {
-            Unknown,
-            SMAPI,
-            FarmHand
+            get
+            {
+                if (_PlatformContentDir == null)
+                    _PlatformContentDir = File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content");
+                return _PlatformContentDir;
+            }
         }
         /**
          * <summary>Retrieves a pointer to the <see cref="ILocationHelper"/> interface</summary>
@@ -67,18 +71,9 @@ namespace Entoarox.Framework
         internal static bool Repair = false;
         public override void Entry(IModHelper helper)
         {
+            _Version = new Version(ModManifest.Version.MajorVersion, ModManifest.Version.MinorVersion, ModManifest.Version.PatchVersion);
             Logger = Monitor;
             Config = helper.ReadConfig<FrameworkConfig>();
-            if (Constants.ApiVersion.Build == "Farmhand-Smapi")
-            {
-                LoaderType = LoaderTypes.FarmHand;
-                Logger.Log("The loader has been detected as being the `FarmHand` loader",LogLevel.Trace);
-            }
-            else
-            {
-                LoaderType = LoaderTypes.SMAPI;
-                Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
-            }
             Logger.Log("Registering framework events...",LogLevel.Trace);
             helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
             if(Config.TrainerCommands)
@@ -91,24 +86,15 @@ namespace Entoarox.Framework
                 ;
             }
             SaveEvents.AfterLoad += SaveEvents_AfterLoad;
-            ContentRegistry.Setup();
-            TypeRegistry.Setup();
             Events.MoreEvents.Setup();
-            if (LoaderType == LoaderTypes.SMAPI)
-            {
-                ContentRegistry.Init();
-                ContentRegistry.Singleton.ReloadStaticReferences();
-                GameEvents.UpdateTick += ContentRegistry.Update;
-                GameEvents.UpdateTick += TypeRegistry.Update;
-                TypeRegistry.Init();
-            }
-            else
-                Events.MoreEvents.FireSmartManagerReady();
+            ContentRegistry.Init();
+            ContentRegistry.Singleton.ReloadStaticReferences();
+            GameEvents.UpdateTick += ContentRegistry.Update;
+            GameEvents.UpdateTick += TypeRegistry.Update;
+            TypeRegistry.Init();
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
-            if(LoaderType==LoaderTypes.Unknown)
-                Monitor.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
@@ -116,8 +102,7 @@ namespace Entoarox.Framework
         {
             GameEvents.UpdateTick -= PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
-            if(LoaderType==LoaderTypes.SMAPI)
-                GameEvents.UpdateTick -= ContentRegistry.Update;
+            GameEvents.UpdateTick -= ContentRegistry.Update;
             if (Config.GamePatcher)
             {
                 GameEvents.UpdateTick -= GamePatcher.Update;
