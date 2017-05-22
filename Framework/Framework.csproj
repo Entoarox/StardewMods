@@ -54,8 +54,8 @@
     <Compile Include="Content\ContentSource.cs" />
     <Compile Include="Content\Delegates.cs" />
     <Compile Include="Content\IContentHandler.cs" />
-    <Compile Include="Content\IContentRegistry.cs" />
-    <Compile Include="Content\Internal\ContentRegistry.cs" />
+    <Compile Include="Content\IContentHelper.cs" />
+    <Compile Include="Content\ContentHelper.cs" />
     <Compile Include="Content\Internal\ExtendibleContentManager.cs" />
     <Compile Include="Content\Plugins\DelegatedContentHandler.cs" />
     <Compile Include="Content\Plugins\DictionaryInjector.cs" />
@@ -65,7 +65,6 @@
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="FrameworkConfig.cs" />
     <Compile Include="Internal\Message.cs" />
-    <Compile Include="Internal\SmartContentManager.cs" />
     <Compile Include="Reflection\FieldHelper.cs" />
     <Compile Include="Reflection\MethodHelper.cs" />
     <Compile Include="Reflection\PropertyHelper.cs" />
@@ -86,7 +85,6 @@
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
     <Compile Include="Internal\BushReset.cs" />
-    <Compile Include="Internal\ContentRegistry.cs" />
     <Compile Include="Internal\GamePatcher.cs" />
     <Compile Include="Api.cs" />
     <Compile Include="Internal\MoreEvents.cs" />
@@ -162,9 +160,7 @@
     <None Include="ConditionDocumentation.md" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Content\Utilities\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
   </PropertyGroup>

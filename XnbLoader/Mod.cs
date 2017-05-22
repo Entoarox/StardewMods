@@ -6,28 +6,24 @@ using StardewModdingAPI;
 namespace Entoarox.XnbLoader
 {
     using Framework;
-    using Framework.Events;
+    using Framework.Content;
     public class XnbLoaderMod : Mod
     {
+        private string _Path;
+        private int Files = 0;
+        private IContentHelper Content;
         public override void Entry(IModHelper helper)
         {
             if (EntoFramework.Version < new Version(1, 6, 5))
                 throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for XnbLoader to use.");
             EntoFramework.VersionRequired("XnbLoader", new Version(1, 6, 6));
             VersionChecker.AddCheck("XnbLoader", new Version(ModManifest.Version.MajorVersion, ModManifest.Version.MinorVersion, ModManifest.Version.PatchVersion), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
-            MoreEvents.SmartManagerReady += MoreEvents_SmartManagerReady;
-        }
-        private string _Path;
-        private int Files = 0;
-        private void MoreEvents_SmartManagerReady(object s, object e)
-        {
-            MoreEvents.SmartManagerReady -= MoreEvents_SmartManagerReady;
-            _Path = Path.Combine(Helper.DirectoryPath, "ModContent","");
+            _Path = Path.Combine(Helper.DirectoryPath, "ModContent", "");
             Directory.CreateDirectory(_Path);
+            Content = ContentHelper.Create(this);
             Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
             ParseDir(_Path);
             Monitor.Log("Reloading static content references...", LogLevel.Trace);
-            EntoFramework.GetContentRegistry().ReloadStaticReferences();
             Monitor.Log($"Parsing complete, found and redirected [{Files}] files", LogLevel.Info);
         }
         private void ParseDir(string path)
@@ -42,7 +38,7 @@ namespace Entoarox.XnbLoader
                 string from = filePath.Replace(_Path+separator, "");
                 Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", LogLevel.Trace);
                 Files++;
-                EntoFramework.GetContentRegistry().RegisterXnb(from, filePath);
+                Content.RegisterXnbReplacement(from, filePath);
             }
         }
     }

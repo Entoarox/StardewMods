@@ -100,8 +100,7 @@ namespace Entoarox.AdvancedLocationLoader
                         Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
                         List<Item> stock = new List<Item>();
                         NPC portrait = new NPC();
-                        EntoFramework.GetContentRegistry().RegisterXnb(shop.Portrait, shop.Portrait);
-                        portrait.Portrait = Game1.content.Load<Texture2D>(shop.Portrait);
+                        portrait.Portrait = AdvancedLocationLoaderMod.Content.Load<Texture2D>(shop.Portrait);
                         portrait.name = shop.Owner;
                         foreach (Configs.ShopItem item in shop.Items)
                         {

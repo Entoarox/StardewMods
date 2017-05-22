@@ -17,7 +17,6 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Processors
     {
-        internal static IContentRegistry ContentRegistry = EntoFramework.GetContentRegistry();
         internal static void ApplyTile(Tile tile)
         {
             int stage = 0;
@@ -144,7 +143,7 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 3
-                    ContentRegistry.RegisterXnb(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                    AdvancedLocationLoaderMod.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
                     stage++; // 4
                     if (location.map.GetTileSheet(tilesheet.SheetId) != null)
                     {
@@ -180,8 +179,7 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 GameLocation loc;
-                ContentRegistry.RegisterXnb(location.FileName, location.FileName);
-                xTile.Map map = Game1.content.Load<xTile.Map>(location.FileName);
+                xTile.Map map = AdvancedLocationLoaderMod.Content.Load<xTile.Map>(location.FileName);
                 switch (location.Type)
                 {
                     case "Cellar":
@@ -221,8 +219,7 @@ namespace Entoarox.AdvancedLocationLoader
             AdvancedLocationLoaderMod.Logger.Log(obj.ToString(),LogLevel.Trace);
             try
             {
-                ContentRegistry.RegisterXnb(obj.FileName, obj.FileName);
-                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), Game1.content.Load<xTile.Map>(obj.FileName), obj.MapName);
+                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), AdvancedLocationLoaderMod.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
             }
             catch (Exception err)
             {

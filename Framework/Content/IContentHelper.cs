@@ -9,7 +9,6 @@ namespace Entoarox.Framework.Content
 {
     public interface IContentHelper// : IContentHelper
     {
-
         /// <summary>Load content from the game folder or mod folder (if not already cached), and return it.</summary>
         /// <typeparam name="T">The expected data type. The main supported types are <see cref="Texture2D"/> and dictionaries; other types may be supported by the game's content pipeline.</typeparam>
         /// <param name="key">The asset key to fetch (if the <paramref name="source"/> is <see cref="ContentSource.GameContent"/>), or the local path to a content file relative to the mod folder.</param>
@@ -35,7 +34,7 @@ namespace Entoarox.Framework.Content
         /// <param name="patchAssetName">The texture asset (Relative to your mod directory and without extension) used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
-        void RegisterTexturePatch(string assetName, string patchAssetName, Rectangle destination, Rectangle? source = null);
+        void RegisterTexturePatch(string assetName, string patchAssetName, Rectangle? destination = null, Rectangle? source = null);
         /// <summary>
         /// Lets you replace a region of pixels in one texture with the contents of another texture
         /// </summary>
@@ -43,7 +42,7 @@ namespace Entoarox.Framework.Content
         /// <param name="patchAssetName">The texture used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
-        void RegisterTexturePatch(string assetName, Texture2D patchAsset, Rectangle destination, Rectangle? source = null);
+        void RegisterTexturePatch(string assetName, Texture2D patchAsset, Rectangle? destination = null, Rectangle? source = null);
         /// <summary>
         /// Lets you add and replace keys in a content dictionary
         /// The dictionary asset referenced by patchAssetName has to be in xnb format

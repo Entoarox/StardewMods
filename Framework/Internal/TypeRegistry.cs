@@ -67,8 +67,6 @@ namespace Entoarox.Framework
         internal static XmlSerializer injectedFarmerSerializer;
         internal static XmlSerializer injectedLocationSerializer;
 
-        private static MethodInfo FarmHandRegistry;
-
         private static bool _injected = false;
 
         internal static void Update(object s, EventArgs e)

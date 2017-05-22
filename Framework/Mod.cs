@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 
 using StardewModdingAPI;
@@ -9,6 +10,7 @@ using StardewValley;
 
 namespace Entoarox.Framework
 {
+    using Content.Internal;
     public class EntoFramework : Mod
     {
         private static bool CreditsDone = true;
@@ -44,9 +46,10 @@ namespace Entoarox.Framework
         /**
          * <summary>Retrieves a pointer to the <see cref="IContentRegistry"/> interface</summary>
          */
+        [Obsolete("The ContentRegistry API has been replaced by the new Content API, mods that use the old API will no longer function.",true)]
         public static IContentRegistry GetContentRegistry()
         {
-            return ContentRegistry.Singleton;
+            throw new InvalidOperationException("The ContentRegistry API has been replaced by the new Content API, mods that use the old API will no longer function.");
         }
         /**
          * <summary>Retrieves a pointer to the <see cref="IPlayerHelper"/> interface</summary>
@@ -87,9 +90,6 @@ namespace Entoarox.Framework
             }
             SaveEvents.AfterLoad += SaveEvents_AfterLoad;
             Events.MoreEvents.Setup();
-            ContentRegistry.Init();
-            ContentRegistry.Singleton.ReloadStaticReferences();
-            GameEvents.UpdateTick += ContentRegistry.Update;
             GameEvents.UpdateTick += TypeRegistry.Update;
             TypeRegistry.Init();
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
@@ -97,12 +97,61 @@ namespace Entoarox.Framework
                 GameEvents.UpdateTick += CreditsTick;
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
+            SetupContentManager();
+        }
+        private WeakReference<ExtendibleContentManager> MainManager;
+        private WeakReference<ExtendibleContentManager> TileManager;
+        private WeakReference<ExtendibleContentManager> TempManager;
+        private xTile.Display.XnaDisplayDevice DisplayDevice;
+        private FieldInfo TempContent;
+        private string RootDirectory;
+        private IServiceProvider ServiceProvider;
+        private void SetupContentManager()
+        {
+            if (TempContent == null)
+                TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
+            if (RootDirectory == null)
+            {
+                ServiceProvider = Game1.content.ServiceProvider;
+                RootDirectory = Game1.content.RootDirectory;
+                MainManager = new WeakReference<ExtendibleContentManager>(null);
+                TileManager = new WeakReference<ExtendibleContentManager>(null);
+                TempManager = new WeakReference<ExtendibleContentManager>(null);
+            }
+            if (!MainManager.TryGetTarget(out ExtendibleContentManager mainManager))
+            {
+                mainManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                MainManager.SetTarget(mainManager);
+            }
+            if (!TileManager.TryGetTarget(out ExtendibleContentManager tileManager))
+            {
+                tileManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                TileManager.SetTarget(tileManager);
+            }
+            if (!TempManager.TryGetTarget(out ExtendibleContentManager tempManager))
+            {
+                tempManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                TempManager.SetTarget(tempManager);
+            }
+            if (DisplayDevice == null)
+                DisplayDevice = new xTile.Display.XnaDisplayDevice(mainManager, Game1.game1.GraphicsDevice);
+            EnforceContentManager();
+            Events.MoreEvents.FireSmartManagerReady();
+        }
+        private void EnforceContentManager()
+        {
+            MainManager.TryGetTarget(out ExtendibleContentManager mainManager);
+            TileManager.TryGetTarget(out ExtendibleContentManager tileManager);
+            TempManager.TryGetTarget(out ExtendibleContentManager tempManager);
+            Game1.content = mainManager;
+            Game1.mapDisplayDevice = DisplayDevice;
+            Game1.game1.xTileContent = tileManager;
+            TempContent.SetValue(null, tempManager);
         }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
         {
             GameEvents.UpdateTick -= PlayerHelper.Update;
             LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
-            GameEvents.UpdateTick -= ContentRegistry.Update;
             if (Config.GamePatcher)
             {
                 GameEvents.UpdateTick -= GamePatcher.Update;
@@ -134,14 +183,6 @@ namespace Entoarox.Framework
         }
         internal static void SaveEvents_AfterLoad(object s, EventArgs e)
         {
-            if (Repair)
-            {
-                ContentRegistry.Init();
-                ContentRegistry.Singleton.ReloadStaticReferences();
-                GameEvents.UpdateTick += ContentRegistry.Update;
-            }
-            else
-                Repair = true;
             MessageBox.Setup();
             VersionChecker.DoChecks();
             PlayerHelper.ResetForNewGame();

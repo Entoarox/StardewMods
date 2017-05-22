@@ -77,6 +77,7 @@ namespace Entoarox.Framework.Events
         }
         internal static void Setup()
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             WorldReady += (s, e) =>
              {
                  MenuEvents.MenuChanged += MenuEvents_MenuChanged;
@@ -89,6 +90,7 @@ namespace Entoarox.Framework.Events
             BeforeSaving += EventSink;
             AfterSaving += EventSink;
             ActiveItemChanged += EventSink;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
         internal static void EventSink(object s, EventArgs e)
         {

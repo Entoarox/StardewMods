@@ -9,6 +9,7 @@ using StardewValley;
 
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
+using Entoarox.Framework.Content;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
@@ -19,8 +20,10 @@ namespace Entoarox.AdvancedLocationLoader
         internal static IMonitor Logger;
         internal static LocalizationHelper Localizer;
         internal static string ModPath;
+        internal static IContentHelper Content;
         public override void Entry(IModHelper helper)
         {
+            Content = ContentHelper.Create(this);
             ModPath = helper.DirectoryPath;
             if (EntoFramework.Version < new Version(1, 6, 5))
                 throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
@@ -31,7 +34,7 @@ namespace Entoarox.AdvancedLocationLoader
 
             Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
-            MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
+            SaveEvents.AfterSave+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
             ITypeRegistry registry = EntoFramework.GetTypeRegistry();

@@ -402,7 +402,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Processors.ApplyOverride(obj);
                 stage++; // 12
                 foreach (Redirect obj in trueCompound.Redirects)
-                    EntoFramework.GetContentRegistry().RegisterXnb(obj.FromFile, obj.ToFile);
+                    AdvancedLocationLoaderMod.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
                 stage++; // 13
                 foreach (Tilesheet obj in trueCompound.Tilesheets)
                 {

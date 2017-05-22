@@ -46,7 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compatibility\IContentHandlerWrapper.cs" />
     <Compile Include="ContentSource.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="IContentRegistry.cs" />
