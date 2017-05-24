@@ -13,7 +13,7 @@ using Rectangle = xTile.Dimensions.Rectangle;
  Class designed by Pathoschild, included into EntoaroxFramework with their permission
  Thanks a lot for letting me include it!
 */
-namespace Entoarox.Framework
+namespace Entoarox.Framework.UI
 {
     /// <summary>An interface which supports user interaction and overlays the active menu (if any).</summary>
     public abstract class BaseOverlay : IDisposable

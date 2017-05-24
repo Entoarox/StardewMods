@@ -54,6 +54,7 @@
     <Compile Include="Core\UpdateInfo.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="IConditionHelper.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="IContentHelper.cs" />
     <Compile Include="IFrameworkHelper.cs" />
@@ -67,26 +68,19 @@
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="FrameworkConfig.cs" />
     <Compile Include="FrameworkHelper.cs" />
-    <Compile Include="Internal\Message.cs" />
+    <Compile Include="IMessageHelper.cs" />
+    <Compile Include="Core\Message.cs" />
     <Compile Include="IUpdateHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
-    <Compile Include="VersionInfo.cs" />
-    <Compile Include="Conditions.cs" />
+    <Compile Include="Core\Conditions.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
-    <Compile Include="Internal\BushReset.cs" />
-    <Compile Include="Internal\GamePatcher.cs" />
-    <Compile Include="Internal\MoreEvents.cs" />
-    <Compile Include="LocalizationHelper.cs" />
-    <Compile Include="Internal\LocationHelper.cs" />
-    <Compile Include="ModEntry.cs" />
-    <Compile Include="Internal\MessageBox.cs" />
-    <Compile Include="MoreEvents.cs" />
-    <Compile Include="OverlayMenu.cs" />
-    <Compile Include="Internal\PlayerHelper.cs" />
+    <Compile Include="Core\ModEntry.cs" />
+    <Compile Include="Core\MessageHelper.cs" />
+    <Compile Include="Events\MoreEvents.cs" />
+    <Compile Include="UI\OverlayMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Internal\TypeRegistry.cs" />
     <Compile Include="StackableShopObject.cs" />
     <Compile Include="UI\Base\BaseFormComponent.cs" />
     <Compile Include="UI\Base\BaseInteractiveMenuComponent.cs" />
@@ -127,9 +121,6 @@
     <Compile Include="UI\Wrapper\ClickableConfirmComponent.cs" />
     <Compile Include="UI\Wrapper\ClickableObjectComponent.cs" />
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
-    <Compile Include="UpdateMenu.cs" />
-    <Compile Include="VersionCheck.cs" />
-    <Compile Include="VersionChecker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\VersionChecker\EntoaroxFramework.json">

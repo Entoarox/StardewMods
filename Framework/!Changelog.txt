@@ -1,6 +1,19 @@
-﻿- Completely replaced the ContentRegistry with a new Content API
-- Made a change to how `MoreEvents.ActionTriggered` triggers, this should make it much more reliable
-- Removed the reflection API as SMAPI provides its own API for this
-- Removed the pretty much unused Observer API
-- Removed the PackedValue API
-- Removed outdated API support from the VersionChecker
+﻿This version of Entoarox Framework is a almost complete rewrite of the whole framework.
+
+Only the following namespaces have remained unchanged:
+- Entoarox.Framework.UI
+- Entoarox.Framework.Extensions
+
+Next to these unchanged namespaces, the following classes are also still in place:
+- Entoarox.Framework.OverlayMenu
+- Entoarox.Framework.StackableShopObject
+
+A major part of the goal behind the framework overhaul is to lower how many `using` statements a user of the framework needs.
+As of 2.0, the amount of namespaces in the public framework are the following:
+- Entoarox.Framework
+- Entoarox.Framework.UI
+- Entoarox.Framework.Events
+- Entoarox.Framework.Extensions
+There is also the internal `Core` namespace that is only used by internal mechanics.
+
+In the Events namespace, many events have been removed as SMAPI now provides build-in support for these.

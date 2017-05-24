@@ -14,9 +14,9 @@ namespace Entoarox.Framework.Core
 {
     internal class UpdateInfo
     {
-        public SemanticVersion Latest;
-        public SemanticVersion Recommended;
-        public SemanticVersion Minimum;
+        public string Latest;
+        public string Recommended;
+        public string Minimum;
 
         public static Dictionary<IMod, string> Map = new Dictionary<IMod, string>();
 
@@ -52,11 +52,14 @@ namespace Entoarox.Framework.Core
                             pair.Key.Monitor.ExitGameImmediately("Update check failed, the current version of Stardew Valley is not supported");
                         if(info!=null)
                         {
-                            if (info.Minimum.IsNewerThan(modVersion))
+                            SemanticVersion min = new SemanticVersion(info.Minimum);
+                            SemanticVersion rec = new SemanticVersion(info.Recommended);
+                            SemanticVersion max = new SemanticVersion(info.Latest);
+                            if (min.IsNewerThan(modVersion))
                                 pair.Key.Monitor.ExitGameImmediately("Update required, the current mod version is below the allowed minimum");
-                            if (info.Recommended.IsNewerThan(modVersion))
+                            if (rec.IsNewerThan(modVersion))
                                 pair.Key.Monitor.Log("A new version is available, it is recommended you update now", LogLevel.Alert);
-                            if(modVersion.IsBetween(info.Recommended,info.Latest))
+                            if(modVersion.IsBetween(rec,max))
                                 pair.Key.Monitor.Log("A new version is available, you can choose to update to this version now", LogLevel.Info);
                         }
 

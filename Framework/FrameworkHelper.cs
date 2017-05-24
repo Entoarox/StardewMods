@@ -22,6 +22,7 @@ namespace Entoarox.Framework
         private static WebClient Client = new WebClient();
         private static Dictionary<IMod, IFrameworkHelper> Cache = new Dictionary<IMod, IFrameworkHelper>();
         private static string _PlatformRelativeContent;
+        private static IMessageHelper _MessageHelper;
         public static IFrameworkHelper Get(IMod mod)
         {
             if (!Cache.ContainsKey(mod))
@@ -30,6 +31,15 @@ namespace Entoarox.Framework
         }
 
         public IContentHelper Content { get; private set; }
+        public IMessageHelper Messages
+        {
+            get
+            {
+                if (_MessageHelper == null)
+                    _MessageHelper = new MessageHelper();
+                return _MessageHelper;
+            }
+        }
         public void CheckForUpdates(string url)
         {
             if (!UpdateInfo.Map.ContainsKey(Mod))
