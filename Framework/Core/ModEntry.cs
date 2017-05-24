@@ -49,7 +49,7 @@ namespace Entoarox.Framework
                 ;
             GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
             FHelper = FrameworkHelper.Get(this);
-            FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/NewVersionChecker/EntoaroxFramework.json");
+            FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
             SetupContentManager();
         }
         #endregion

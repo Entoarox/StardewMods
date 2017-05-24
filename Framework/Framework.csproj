@@ -123,14 +123,15 @@
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\VersionChecker\EntoaroxFramework.json">
-      <Link>EntoaroxFramework.json</Link>
+    <None Include="About\ConditionDocumentation.md" />
+    <None Include="About\manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="ConditionDocumentation.md" />
+    <None Include="About\update.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="!Changelog.txt" />
+    <Content Include="About\!Changelog.txt" />
   </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
