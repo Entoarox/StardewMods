@@ -11,7 +11,7 @@ using StardewValley;
 
 using StardewModdingAPI;
 
-namespace Entoarox.Framework.Utilities
+namespace Entoarox.Framework.Core.Utilities
 {
     public static class TextureHelper
     {
@@ -33,14 +33,14 @@ namespace Entoarox.Framework.Utilities
             ColorSourceBlend = Blend.One
         };
         private static Dictionary<string, Texture2D> Cache = new Dictionary<string, Texture2D>();
-        public static Texture2D GetTexture(string file)
+        public static Texture2D GetTexture(string file, IMonitor monitor=null)
         {
             if (!Cache.ContainsKey(file))
             {
                 Texture2D texture = Texture2D.FromStream(Game1.graphics.GraphicsDevice, new FileStream(file, FileMode.Open));
                 if ((bool)DrawLoop.GetValue(null)==true)
                 {
-                    ModEntry.Logger.Log("It is not recommended to load a texture during the draw loop!" + Environment.NewLine + file,LogLevel.Warn);
+                    (monitor ?? ModEntry.Logger).Log("It is not recommended to load a texture during the draw loop!" + Environment.NewLine + file,LogLevel.Warn);
                     Cache.Add(file, PremultiplyCPU(texture));
                 }
                 else
@@ -48,11 +48,11 @@ namespace Entoarox.Framework.Utilities
             }
             return Cache[file];
         }
-        public static Texture2D Premultiply(Texture2D texture)
+        public static Texture2D Premultiply(Texture2D texture, IMonitor monitor=null)
         {
             if ((bool)DrawLoop.GetValue(null) == true)
             {
-                ModEntry.Logger.Log("It is not recommended to load a texture during the draw loop!", LogLevel.Warn);
+                (monitor ?? ModEntry.Logger).Log("It is not recommended to load a texture during the draw loop!", LogLevel.Warn);
                 return PremultiplyCPU(texture);
             }
             else

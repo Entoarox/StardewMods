@@ -34,7 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
@@ -50,7 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\Commands.cs" />
+    <Compile Include="Core\Override\SerializableDictionary.cs" />
+    <Compile Include="Core\UpdateInfo.cs" />
+    <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="IContentHelper.cs" />
@@ -66,7 +68,8 @@
     <Compile Include="FrameworkConfig.cs" />
     <Compile Include="FrameworkHelper.cs" />
     <Compile Include="Internal\Message.cs" />
-    <Compile Include="Utilities\TextureHelper.cs" />
+    <Compile Include="IUpdateHelper.cs" />
+    <Compile Include="Core\Utilities\TextureHelper.cs" />
     <Compile Include="VersionInfo.cs" />
     <Compile Include="Conditions.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
@@ -77,7 +80,7 @@
     <Compile Include="Internal\MoreEvents.cs" />
     <Compile Include="LocalizationHelper.cs" />
     <Compile Include="Internal\LocationHelper.cs" />
-    <Compile Include="Mod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Internal\MessageBox.cs" />
     <Compile Include="MoreEvents.cs" />
     <Compile Include="OverlayMenu.cs" />

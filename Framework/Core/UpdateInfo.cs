@@ -88,6 +88,9 @@ namespace Entoarox.Framework.Core
                                 HttpWebResponse response = (HttpWebResponse)err.Response;
                                 pair.Key.Monitor.Log($"Unable to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
                                 break;
+                            default:
+                                pair.Key.Monitor.Log("Unable to check for updates, unknown error occured"+Environment.NewLine+err.ToString(), LogLevel.Error);
+                                break;
                         }
                     }
                 }

@@ -2,32 +2,32 @@
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Serialization;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
 using StardewValley;
+using StardewValley.Characters;
+using StardewValley.Monsters;
+using StardewValley.Quests;
+using StardewValley.Objects;
+using StardewValley.TerrainFeatures;
 
 namespace Entoarox.Framework
 {
     using Core.Content;
+    using Core.Utilities;
+    using Core.Override;
     using Extensions;
     internal class ModEntry : Mod
     {
+#region Mod
         private static bool CreditsDone = true;
         internal static FrameworkConfig Config;
         private static Version _Version;
         public static Version Version { get => _Version; }
-        private static string _PlatformContentDir;
-        public static string PlatformContentDir
-        {
-            get
-            {
-                if (_PlatformContentDir == null)
-                    _PlatformContentDir = File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content");
-                return _PlatformContentDir;
-            }
-        }
         public static void VersionRequired(string modRequiring, Version requiringVersion)
         {
             if (Version < requiringVersion)
@@ -45,10 +45,10 @@ namespace Entoarox.Framework
             if(Config.TrainerCommands)
             {
                 helper.ConsoleCommands
-                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",",Commands.Commands.Farms), Commands.Commands.farm)
-                    .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", Commands.Commands.farm)
+                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",",Farms), farm)
+                    .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", farm)
 
-                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
+                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",player)
                 ;
             }
             SaveEvents.AfterLoad += SaveEvents_AfterLoad;
@@ -61,7 +61,23 @@ namespace Entoarox.Framework
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
             SetupContentManager();
+            UnsafeHelper.ReplaceMethod(typeof(SerializableDictionary<,>).GetMethod("ReadXml",BindingFlags.Instance|BindingFlags.Public), typeof(HookedSerializableDictionary<,>).GetMethod("HookedReadXml", BindingFlags.Instance | BindingFlags.Public))
         }
+        #endregion
+#region Events
+        void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
+        {
+            GameEvents.UpdateTick -= PlayerHelper.Update;
+            LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
+            if (Config.GamePatcher)
+            {
+                GameEvents.UpdateTick -= GamePatcher.Update;
+                TimeEvents.DayOfMonthChanged -= GamePatcher.TimeEvents_DayOfMonthChanged;
+                Events.MoreEvents.ActionTriggered -= GamePatcher.MoreEvents_ActionTriggered;
+            }
+        }
+#endregion
+#region ContentManager
         private WeakReference<ExtendibleContentManager> MainManager;
         private WeakReference<ExtendibleContentManager> TileManager;
         private WeakReference<ExtendibleContentManager> TempManager;
@@ -99,7 +115,6 @@ namespace Entoarox.Framework
             if (DisplayDevice == null)
                 DisplayDevice = new xTile.Display.XnaDisplayDevice(mainManager, Game1.game1.GraphicsDevice);
             EnforceContentManager();
-            Events.MoreEvents.FireSmartManagerReady();
         }
         private void EnforceContentManager()
         {
@@ -111,16 +126,57 @@ namespace Entoarox.Framework
             Game1.game1.xTileContent = tileManager;
             TempContent.SetValue(null, tempManager);
         }
+        #endregion
+#region Serializer
+        public static bool SerializerInjected = false;
+        public static List<Type> SerializerTypes = new List<Type>();
+        private XmlSerializer MainSerializer;
+        private XmlSerializer FarmerSerializer;
+        private XmlSerializer LocationSerializer;
+        private static Type[] _serialiserTypes = new Type[27]
+        {
+            typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
+            typeof (Fireball), typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
+            typeof (StardewValley.Characters.Cat),
+            typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
+            typeof (SkeletonMage),
+            typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
+            typeof (ShadowGirl),
+            typeof (Monster), typeof (TerrainFeature)
+        };
+
+        private static Type[] _farmerTypes = new Type[1] {
+            typeof (Tool)
+        };
+
+        private static Type[] _locationTypes = new Type[26]
+        {
+            typeof (Tool), typeof (Crow), typeof (Duggy), typeof (Fireball), typeof (Ghost),
+            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), typeof (SkeletonWarrior),
+            typeof (Child), typeof (Pet), typeof (Dog), typeof (StardewValley.Characters.Cat), typeof (Horse),
+            typeof (SquidKid),
+            typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
+            typeof (BreakableContainer),
+            typeof (MetalHead), typeof (ShadowGirl), typeof (Monster), typeof (TerrainFeature)
+        };
+        private void SetupSerializer(object s, EventArgs e)
+        {
+            GameEvents.UpdateTick -= SetupSerializer;
+            MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
+            FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
+            LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
+            SerializerInjected = true;
+            GameEvents.UpdateTick += EnforceSerializer;
+        }
+        private void EnforceSerializer(object s, EventArgs e)
+        {
+            SaveGame.serializer = MainSerializer;
+            SaveGame.farmerSerializer = FarmerSerializer;
+            SaveGame.locationSerializer = LocationSerializer;
+        }
+#endregion
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
         {
-            GameEvents.UpdateTick -= PlayerHelper.Update;
-            LocationEvents.CurrentLocationChanged -= PlayerHelper.LocationEvents_CurrentLocationChanged;
-            if (Config.GamePatcher)
-            {
-                GameEvents.UpdateTick -= GamePatcher.Update;
-                TimeEvents.DayOfMonthChanged -= GamePatcher.TimeEvents_DayOfMonthChanged;
-                Events.MoreEvents.ActionTriggered -= GamePatcher.MoreEvents_ActionTriggered;
-            }
         }
         public void CreditsTick(object s, EventArgs e)
         {
