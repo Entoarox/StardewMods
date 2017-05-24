@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Entoarox.Framework.Content.Plugins
+namespace Entoarox.Framework.Core.Content.Plugins
 {
     class TextureInjector : IContentHandler
     {

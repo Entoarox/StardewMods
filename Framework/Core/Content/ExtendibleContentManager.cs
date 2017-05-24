@@ -4,10 +4,9 @@ using System.Linq;
 
 using StardewValley;
 
-namespace Entoarox.Framework.Content.Internal
+namespace Entoarox.Framework.Core.Content
 {
     using Plugins;
-
     public class ExtendibleContentManager : LocalizedContentManager
     {
         private static List<IContentHandler> Handlers;

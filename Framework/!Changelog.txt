@@ -1,0 +1,6 @@
+﻿- Completely replaced the ContentRegistry with a new Content API
+- Made a change to how `MoreEvents.ActionTriggered` triggers, this should make it much more reliable
+- Removed the reflection API as SMAPI provides its own API for this
+- Removed the pretty much unused Observer API
+- Removed the PackedValue API
+- Removed outdated API support from the VersionChecker

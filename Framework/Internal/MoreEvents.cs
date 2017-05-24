@@ -15,21 +15,36 @@ namespace Entoarox.Framework.Events
 {
     public static partial class MoreEvents
     {
+        internal static EventArgsActionTriggered ActionInfo;
         internal static Item prevItem=null;
         internal static void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
                 CheckForAction();
         }
+        internal static void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
+        {
+            if (ActionInfo!=null && e.ButtonReleased == Buttons.A)
+            {
+                ActionTriggered(null, ActionInfo);
+                ActionInfo = null;
+            }
+        }
         internal static void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
+            if(ActionInfo!=null && e.NewState.RightButton==ButtonState.Released)
+            {
+                ActionTriggered(null, ActionInfo);
+                ActionInfo = null;
+            }
         }
         private static void CheckForAction()
         {
             if (Game1.activeClickableMenu==null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
+                ActionInfo = null;
                 Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
                     grabTile = Game1.player.GetGrabTile();
@@ -42,7 +57,7 @@ namespace Entoarox.Framework.Events
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    ActionTriggered(null, new EventArgsActionTriggered(Game1.player, split[0], args, grabTile));
+                    ActionInfo=new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
                 }
             }
         }
@@ -82,6 +97,7 @@ namespace Entoarox.Framework.Events
              {
                  MenuEvents.MenuChanged += MenuEvents_MenuChanged;
                  ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
+                 ControlEvents.ControllerButtonReleased += ControlEvents_ControllerButtonReleased;
                  ControlEvents.MouseChanged += ControlEvents_MouseChanged;
                  GameEvents.UpdateTick += GameEvents_UpdateTick;
              };

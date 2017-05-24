@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Entoarox.Framework.Content.Plugins
+namespace Entoarox.Framework.Core.Content.Plugins
 {
-    using Internal;
     class XnbLoader : IContentHandler
     {
         internal static Dictionary<string, string> AssetMap = new Dictionary<string, string>();

@@ -14,43 +14,22 @@ using StardewValley.Objects;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Projectiles;
 
-namespace Entoarox.Framework.Content
+namespace Entoarox.Framework.Core.Content
 {
     using Plugins;
-    using Internal;
 
-    public class ContentHelper : IContentHelper
+    internal class ContentHelper : IContentHelper
     {
-        private static Dictionary<IMod, IContentHelper> Map = new Dictionary<IMod, IContentHelper>();
-        public static IContentHelper Create(IMod mod)
-        {
-            if (!Map.ContainsKey(mod))
-                Map.Add(mod, new ContentHelper(mod));
-            return Map[mod];
-        }
-        private IMod Mod;
+        private FrameworkHelper FrameworkHelper;
         private string ModPath;
-        internal ContentHelper(IMod mod)
+        internal ContentHelper(FrameworkHelper frameworkHelper)
         {
-            Mod = mod;
-            ModPath = Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
+            FrameworkHelper = frameworkHelper;
+            ModPath = FrameworkHelper.Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
         }
         internal string Normalize(string path)
         {
             return path.Replace('/', '\\');
-        }
-        internal object LoadImage(string assetName)
-        {
-            string file = Path.Combine(ModPath, assetName);
-            if (!File.Exists(file))
-                return default(Texture2D);
-            Texture2D texture = Texture2D.FromStream(StardewValley.Game1.graphics.GraphicsDevice, new FileStream(file, FileMode.Open));
-            var data = new Color[texture.Width * texture.Height];
-            texture.GetData(data);
-            Parallel.For(0, data.Length, i => { data[i] = Color.FromNonPremultiplied(data[i].ToVector4()); });
-
-            texture.SetData(data);
-            return texture;
         }
         internal void ReloadStaticReferences()
         {
@@ -96,7 +75,7 @@ namespace Entoarox.Framework.Content
         T IContentHelper.Load<T>(string assetName, ContentSource source)
         {
             if (typeof(T) == typeof(Texture2D) && assetName.EndsWith(".png"))
-                return (T)LoadImage(assetName);
+                return (T)(object)Utilities.TextureHelper.GetTexture(assetName);
             if (assetName.EndsWith(".xnb"))
                 assetName = assetName.Substring(0, assetName.Length - 4);
             return source == ContentSource.ModFolder ? ExtendibleContentManager.ModContent.Load<T>(Path.Combine(ModPath, assetName)) : StardewValley.Game1.content.Load<T>(assetName);
@@ -109,19 +88,23 @@ namespace Entoarox.Framework.Content
         {
             ExtendibleContentManager.AddContentHandler(handler);
         }
-        void IContentHelper.RegisterTexturePatch(string asset, Texture2D patch, Rectangle? destination, Rectangle? source)
+        private void RegisterTexturePatch(string asset, Texture2D patch, Rectangle? destination, Rectangle? source)
         {
             asset = Normalize(asset);
             if (!TextureInjector.AssetMap.ContainsKey(asset))
-                TextureInjector.AssetMap.Add(asset, new List<(Texture2D Texture,Rectangle Region,Rectangle Source)>());
+                TextureInjector.AssetMap.Add(asset, new List<(Texture2D Texture, Rectangle Region, Rectangle Source)>());
             TextureInjector.AssetMap[asset].Add((Texture: patch, Region: destination ?? new Rectangle(0, 0, patch.Width, patch.Height), Source: source ?? new Rectangle(0, 0, patch.Width, patch.Height)));
             if (TextureInjector.AssetCache.ContainsKey(asset))
                 TextureInjector.AssetCache.Remove(asset);
             ReloadStaticReferences();
         }
+        void IContentHelper.RegisterTexturePatch(string asset, Texture2D patch, Rectangle? destination, Rectangle? source)
+        {
+            RegisterTexturePatch(asset, Utilities.TextureHelper.Premultiply(patch,FrameworkHelper.Mod.Monitor), destination, source);
+        }
         void IContentHelper.RegisterTexturePatch(string asset, string patch, Rectangle? destination, Rectangle? source)
         {
-            (this as IContentHelper).RegisterTexturePatch(asset, (this as IContentHelper).Load<Texture2D>(patch), destination, source);
+            RegisterTexturePatch(asset, (this as IContentHelper).Load<Texture2D>(patch), destination, source);
         }
         void IContentHelper.RegisterDictionaryPatch<Tkey,TValue>(string asset, Dictionary<Tkey,TValue> patch)
         {

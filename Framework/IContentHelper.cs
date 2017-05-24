@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using StardewModdingAPI;
 
-namespace Entoarox.Framework.Content
+namespace Entoarox.Framework
 {
     public interface IContentHelper// : IContentHelper
     {

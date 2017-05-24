@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Entoarox.Framework.Content
+namespace Entoarox.Framework
 {
     public interface IContentHandler
     {
