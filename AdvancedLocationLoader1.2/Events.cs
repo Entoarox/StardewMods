@@ -8,6 +8,7 @@ using StardewModdingAPI.Events;
 
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
+using Entoarox.Framework.Extensions;
 
 namespace Entoarox.AdvancedLocationLoader
 {
@@ -17,8 +18,8 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                AdvancedLocationLoaderMod.Logger.Log("Loading location mods into memory...",LogLevel.Debug);
-                string baseDir = Path.Combine(AdvancedLocationLoaderMod.ModPath, "locations");
+                ModEntry.Logger.Log("Loading location mods into memory...",LogLevel.Debug);
+                string baseDir = Path.Combine(ModEntry.ModPath, "locations");
                 int count = 0;
                 Directory.CreateDirectory(baseDir);
                 foreach (string dir in Directory.EnumerateDirectories(baseDir))
@@ -33,7 +34,7 @@ namespace Entoarox.AdvancedLocationLoader
                         }
                         catch (Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Unable to load manifest, json is invalid:" + file, err);
+                            ModEntry.Logger.Log("Unable to load manifest, json is invalid:" + file,LogLevel.Error, err);
                             return;
                         }
                         string loaderVersion = (string)o["LoaderVersion"];
@@ -41,12 +42,12 @@ namespace Entoarox.AdvancedLocationLoader
                             loaderVersion = (string)o["loaderVersion"];
                         if (loaderVersion == null)
                             loaderVersion = "1.0";
-                        AdvancedLocationLoaderMod.Logger.Log("Attempting to load manifest version `" + loaderVersion + "` at: " + file,LogLevel.Trace);
+                        ModEntry.Logger.Log("Attempting to load manifest version `" + loaderVersion + "` at: " + file,LogLevel.Trace);
                         string parserVersion = loaderVersion.Substring(0, 3);
                         switch (parserVersion)
                         {
                             case "1.0":
-                                AdvancedLocationLoaderMod.Logger.Log("Unable to load manifest, version `1.0` is no longer supported: " + file,LogLevel.Error);
+                                ModEntry.Logger.Log("Unable to load manifest, version `1.0` is no longer supported: " + file,LogLevel.Error);
                                 break;
                             case "1.1":
                                 Loaders.Loader1_1.Load(file);
@@ -57,30 +58,30 @@ namespace Entoarox.AdvancedLocationLoader
                                 count++;
                                 break;
                             default:
-                                AdvancedLocationLoaderMod.Logger.Log("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file,LogLevel.Error);
+                                ModEntry.Logger.Log("Unable to load manifest, version `" + loaderVersion + "` is unknown: " + file,LogLevel.Error);
                                 break;
                         }
                     }
                     else
-                        AdvancedLocationLoaderMod.Logger.Log("Could not find a manifest.json in the "+dir+" directory, if this is intentional you can ignore this message", LogLevel.Warn);
+                        ModEntry.Logger.Log("Could not find a manifest.json in the "+dir+" directory, if this is intentional you can ignore this message", LogLevel.Warn);
                 }
                 if(count>0)
-                    AdvancedLocationLoaderMod.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
+                    ModEntry.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
                 else
-                    AdvancedLocationLoaderMod.Logger.Log("Was unable to load any location mods, if you do not have any installed yet you can ignore this message", LogLevel.Warn);
+                    ModEntry.Logger.Log("Was unable to load any location mods, if you do not have any installed yet you can ignore this message", LogLevel.Warn);
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
+                ModEntry.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
             }
         }
         internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
         {
-            AdvancedLocationLoaderMod.UpdateTilesheets();
+            ModEntry.UpdateTilesheets();
         }
         internal static void TimeEvents_DayOfMonthChanged(object s, EventArgs e)
         {
-            AdvancedLocationLoaderMod.UpdateConditionalEdits();
+            ModEntry.UpdateConditionalEdits();
         }
         internal static void MoreEvents_WorldReady(object s, EventArgs e)
         {
@@ -119,17 +120,17 @@ namespace Entoarox.AdvancedLocationLoader
                     default:
                         return;
                 }
-                AdvancedLocationLoaderMod.Logger.Log("ActionTriggered(" + e.Action + ")", LogLevel.Trace);
+                ModEntry.Logger.Log("ActionTriggered(" + e.Action + ")", LogLevel.Trace);
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened",err);
+                ModEntry.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened",err);
             }
         }
         internal static void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
         {
             LocationEvents.CurrentLocationChanged -= LocationEvents_CurrentLocationChanged;
-            AdvancedLocationLoaderMod.UpdateConditionalEdits();
+            ModEntry.UpdateConditionalEdits();
         }
     }
 }

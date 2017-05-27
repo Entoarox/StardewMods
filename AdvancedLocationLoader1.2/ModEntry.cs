@@ -9,52 +9,42 @@ using StardewValley;
 
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
-using Entoarox.Framework.Content;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
 namespace Entoarox.AdvancedLocationLoader
 {
-    internal class AdvancedLocationLoaderMod : Mod
+    internal class ModEntry : Mod
     {
+        public static Dictionary<string, string> Strings = new Dictionary<string, string>()
+        {
+            {"sparkle","Despite the sparkle you saw, there doesnt seem to be anything here." },
+            {"gold","Gold" },
+            {"yesCost","Yes, costs {0} {1}"},
+            {"no","No" },
+            {"notEnough","You do not have enough {0} to do this." },
+            {"cancel","Cancel" },
+            {"teleporter","Choose a destination:" }
+        };
         internal static IMonitor Logger;
-        internal static LocalizationHelper Localizer;
         internal static string ModPath;
-        internal static IContentHelper Content;
+        internal static IFrameworkHelper FHelper;
         public override void Entry(IModHelper helper)
         {
-            Content = ContentHelper.Create(this);
-            ModPath = helper.DirectoryPath;
-            if (EntoFramework.Version < new Version(1, 6, 5))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
-            EntoFramework.VersionRequired("AdvancedLocationLoader", new Version(1, 7, 10));
             Logger = Monitor;
-            Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
-            VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
+            FHelper = FrameworkHelper.Get(this);
+            ModPath = helper.DirectoryPath;
+            FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/version.json");
 
             Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             SaveEvents.AfterSave+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
-            ITypeRegistry registry = EntoFramework.GetTypeRegistry();
-            registry.RegisterType<Locations.Greenhouse>();
-            registry.RegisterType<Locations.Sewer>();
-            registry.RegisterType<Locations.Desert>();
-            registry.RegisterType<Locations.DecoratableLocation>();
-#if DEBUG
-            Logger.Log("Warning, this is a BETA version, features may be buggy or not work as intended!",LogLevel.Alert);
-            GameEvents.UpdateTick += DebugNotification;
-        }
-        internal static void DebugNotification(object s, EventArgs e)
-        {
-            if (Game1.activeClickableMenu is TitleMenu && Game1.activeClickableMenu != null)
-            {
-                EntoFramework.CreditsTick(s, e);
-                typeof(TitleMenu).GetField("subMenu", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(Game1.activeClickableMenu, new TitleMenuDialogue(Localizer.Localize("betaNotice", "BETA")));
-                GameEvents.UpdateTick -= DebugNotification;
-            }
-#endif
+            FHelper.AddTypeToSerializer<Locations.Greenhouse>();
+            FHelper.AddTypeToSerializer<Locations.Sewer>();
+            FHelper.AddTypeToSerializer<Locations.Desert>();
+            FHelper.AddTypeToSerializer<Locations.DecoratableLocation>();
         }
         internal static void UpdateConditionalEdits()
         {

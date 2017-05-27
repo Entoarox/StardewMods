@@ -50,7 +50,6 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
             FHelper = FrameworkHelper.Get(this);
             FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
-            SetupContentManager();
         }
         #endregion
         #region Events
@@ -188,6 +187,7 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick -= GameEvents_FirstUpdateTick;
             if (Config.SkipCredits)
                 SkipCredits();
+            SetupContentManager();
             SetupSerializer();
             Core.UpdateInfo.DoUpdateChecks();
             GameEvents.UpdateTick += GameEvents_UpdateTick;
@@ -287,13 +287,15 @@ namespace Entoarox.Framework
         };
         private void SetupSerializer()
         {
-            MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
-            FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
-            LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
-            // SerializableDictionary
+            try
             {
-                Type[] Whitelist = new Type[]
+                MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
+                FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
+                LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
+                // SerializableDictionary
                 {
+                    Type[] Whitelist = new Type[]
+                    {
                 typeof(SerializableDictionary<int,int>),
                 typeof(SerializableDictionary<int,int[]>),
                 typeof(SerializableDictionary<int,bool>),
@@ -306,17 +308,22 @@ namespace Entoarox.Framework
                 typeof(SerializableDictionary<Vector2,SObject>),
                 typeof(SerializableDictionary<Vector2,TerrainFeature>),
                 typeof(SerializableDictionary<,>)
-                };
-                MethodInfo ReadXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
-                MethodInfo WriteXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
-                foreach (Type type in Whitelist)
-                {
-                    UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), ReadXml);
-                    UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), WriteXml);
+                    };
+                    MethodInfo ReadXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
+                    MethodInfo WriteXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
+                    foreach (Type type in Whitelist)
+                    {
+                        UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), ReadXml);
+                        UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), WriteXml);
+                    }
                 }
+                SerializerInjected = true;
+                EnforceSerializer();
             }
-            SerializerInjected = true;
-            EnforceSerializer();
+            catch (Exception err)
+            {
+                Monitor.Log("SerializableDictionary could not be injected, this might crash your game when you try to sleep", LogLevel.Error, err);
+            }
         }
         private void EnforceSerializer()
         {

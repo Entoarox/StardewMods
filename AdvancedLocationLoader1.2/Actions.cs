@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using StardewValley;
 
 using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 
 using StardewModdingAPI.Events;
 
@@ -34,14 +35,14 @@ namespace Entoarox.AdvancedLocationLoader
             int[] indexes = arguments[1].Split(',').Select(e => Convert.ToInt32(e)).ToArray();
             var layer = who.currentLocation.Map.GetLayer("Buildings");
             var source = layer.Tiles[(int)tile.X, (int)tile.Y];
-            xTile.ObjectModel.PropertyValue property = EntoFramework.GetLocationHelper().GetTileProperty(who.currentLocation, "Buildings", (int)tile.X, (int)tile.Y, "Action");
+            xTile.ObjectModel.PropertyValue property = who.currentLocation.GetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action");
             int delay = interval * indexes.Length;
-            EntoFramework.GetLocationHelper().SetAnimatedTile(who.currentLocation, "Buildings", (int)tile.X, (int)tile.Y, indexes, interval, source.TileSheet.Id);
+            who.currentLocation.SetTile((int)tile.X, (int)tile.Y, "Buildings", indexes, interval, source.TileSheet.Id);
             System.Threading.Timer timer = null;
             timer = new System.Threading.Timer((obj) =>
             {
-                EntoFramework.GetLocationHelper().SetStaticTile(who.currentLocation, "Buildings", (int)tile.X, (int)tile.Y, source.TileIndex, source.TileSheet.Id);
-                EntoFramework.GetLocationHelper().SetTileProperty(who.currentLocation, "Buildings", (int)tile.X, (int)tile.Y, "Action", property);
+                who.currentLocation.SetTile((int)tile.X, (int)tile.Y, "Buildings", source.TileIndex, source.TileSheet.Id);
+                who.currentLocation.SetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action",property);
                 timer.Dispose();
             },
             null, delay, System.Threading.Timeout.Infinite);
@@ -52,12 +53,12 @@ namespace Entoarox.AdvancedLocationLoader
                 TeleportationResolver.Request(arguments[0]).Init();
             else
             {
-                AdvancedLocationLoaderMod.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
+                ModEntry.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
                 List<string> lists = new List<string>();
                 foreach (var list in Configs.Compound.Teleporters)
                     lists.Add(list.ListName);
-                AdvancedLocationLoaderMod.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
-                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
+                ModEntry.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
+                Game1.drawObjectDialogue(ModEntry.Strings["sparkle"]);
             }
         }
         internal static void Conditional(StardewValley.Farmer who, string[] arguments, Vector2 tile)
@@ -67,10 +68,10 @@ namespace Entoarox.AdvancedLocationLoader
             else
             {
                 if(who.mailReceived.Contains("ALLCondition_"+arguments[0]))
-                    AdvancedLocationLoaderMod.Logger.Log("Conditional has already been completed: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                    ModEntry.Logger.Log("Conditional has already been completed: " + arguments[0], StardewModdingAPI.LogLevel.Error);
                 else
-                    AdvancedLocationLoaderMod.Logger.Log("Conditional does not exist: " + arguments[0], StardewModdingAPI.LogLevel.Error);
-                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
+                    ModEntry.Logger.Log("Conditional does not exist: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                Game1.drawObjectDialogue(ModEntry.Strings["sparkle"]);
             }
         }
         internal static StardewValley.Farmer _who;
@@ -93,18 +94,18 @@ namespace Entoarox.AdvancedLocationLoader
                     if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
                     {
                         Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to open shop, shop not found: " + _arguments[0], StardewModdingAPI.LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to open shop, shop not found: " + _arguments[0], StardewModdingAPI.LogLevel.Error);
                     }
                     else
                     {
                         Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
                         List<Item> stock = new List<Item>();
                         NPC portrait = new NPC();
-                        portrait.Portrait = AdvancedLocationLoaderMod.Content.Load<Texture2D>(shop.Portrait);
+                        portrait.Portrait = ModEntry.FHelper.Content.Load<Texture2D>(shop.Portrait);
                         portrait.name = shop.Owner;
                         foreach (Configs.ShopItem item in shop.Items)
                         {
-                            if (!string.IsNullOrEmpty(item.Conditions) && !Conditions.CheckConditionList(item.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                            if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(item.Conditions))
                                 continue;
                             StardewValley.Object result;
                             if (item.Price != null)
@@ -119,7 +120,7 @@ namespace Entoarox.AdvancedLocationLoader
                                 stock.Add(result);
                         }
                         if (stock.Count == 0)
-                            AdvancedLocationLoaderMod.Logger.Log("No stock: " + _arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
+                            ModEntry.Logger.Log("No stock: " + _arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
                         ShopMenu menu = new ShopMenu(stock);
                         menu.portraitPerson = portrait;
                         menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
@@ -128,7 +129,7 @@ namespace Entoarox.AdvancedLocationLoader
                 }
                 catch (Exception err)
                 {
-                    AdvancedLocationLoaderMod.Logger.Log(StardewModdingAPI.LogLevel.Error, "Unable to open shop due to unexpected error: ", err);
+                    ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", StardewModdingAPI.LogLevel.Error, err);
                 }
             }
         }

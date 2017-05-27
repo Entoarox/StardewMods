@@ -6,7 +6,7 @@ using StardewValley;
 
 namespace Entoarox.Framework.Core
 {
-    public class Conditions
+    public class ConditionHelper : IConditionHelper
     {
         private static string[] Weekdays = new string[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
         private static string[] WeekdaysInverted = new string[] { "!sunday", "!monday", "!tuesday", "!wednesday", "!thursday", "!friday", "!saturday" };
@@ -15,7 +15,7 @@ namespace Entoarox.Framework.Core
         private static string[] WeatherTypes = new string[] { "weatherWedding", "weatherFestival", "weatherSun", "weatherSummerDebris", "weatherRain", "weatherStorm", "weatherFallDebris", "weatherSnow" };
         private static string[] FarmTypes = new string[] { "farmDefault", "farmFishing", "farmForest", "farmHilltop", "farmWilderness" };
 
-        public bool CheckCondition(string condition)
+        public bool ValidateCondition(string condition)
         {
             // Check if this is a negated condition
             if (condition.StartsWith("!"))
@@ -25,7 +25,7 @@ namespace Entoarox.Framework.Core
                     return false;
                 else
                     // If we dont find multiple negations, we negate the result of a positive condition lookup
-                    return !CheckCondition(condition.Substring(1));
+                    return !ValidateCondition(condition.Substring(1));
             // If it is not a negated condition, we perform a positive condition lookup
             else
                 // First, we check for the mostly-static conditions
@@ -152,7 +152,7 @@ namespace Entoarox.Framework.Core
             if (conditions.Length > 5)
                 return false;
             foreach (string condition in conditions)
-                if (!CheckCondition(condition))
+                if (!ValidateCondition(condition))
                     return false;
             return true;
         }

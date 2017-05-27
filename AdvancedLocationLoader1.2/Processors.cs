@@ -24,16 +24,16 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 stage++; // 1
-                if (!string.IsNullOrEmpty(tile.Conditions) && !Conditions.CheckConditionList(tile.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                if (!string.IsNullOrEmpty(tile.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(tile.Conditions))
                 {
-                    AdvancedLocationLoaderMod.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
+                    ModEntry.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
                     return;
                 }
                 stage++; // 2
                 GameLocation loc = Game1.getLocationFromName(tile.MapName);
                 if(loc==null)
                 {
-                    AdvancedLocationLoaderMod.Logger.Log("Unable to set required tile, location does not exist: " + tile.ToString(), LogLevel.Error);
+                    ModEntry.Logger.Log("Unable to set required tile, location does not exist: " + tile.ToString(), LogLevel.Error);
                 }
                 stage++; // 3
                 if (tile.TileIndex != null)
@@ -43,7 +43,7 @@ namespace Entoarox.AdvancedLocationLoader
                     {
                         if (!loc.TryRemoveTile(tile.TileX, tile.TileY, tile.LayerId) && !tile.Optional)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log("Unable to remove required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Unable to remove required tile, tile does not exist: " + tile.ToString(), LogLevel.Error);
                             return;
                         }
                     }
@@ -55,7 +55,7 @@ namespace Entoarox.AdvancedLocationLoader
                         catch (Exception err)
                         {
                             if (!tile.Optional)
-                                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to set required tile: " + tile.ToString(), err);
+                                ModEntry.Logger.Log( "Unable to set required tile: " + tile.ToString(),LogLevel.Error, err);
                             return;
                         }
                 }
@@ -69,59 +69,59 @@ namespace Entoarox.AdvancedLocationLoader
                     catch (Exception err)
                     {
                         if (!tile.Optional)
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to set required tile: " + tile.ToString(), err);
+                            ModEntry.Logger.Log("Unable to set required tile: " + tile.ToString(),LogLevel.Error,  err);
                         return;
                     }
                 }
                 stage++; // 4
-                AdvancedLocationLoaderMod.Logger.Log(tile.ToString() + " ~> true", LogLevel.Trace);
+                ModEntry.Logger.Log(tile.ToString() + " ~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately($"Unable to patch tile, a unexpected error occured at stage {stage}{(branch > 0 ? ("-" + branch) : "")}: {tile}", err);
+                ModEntry.Logger.ExitGameImmediately($"Unable to patch tile, a unexpected error occured at stage {stage}{(branch > 0 ? ("-" + branch) : "")}: {tile}", err);
             }
         }
         internal static void ApplyProperty(Property property)
         {
             try
             {
-                if (string.IsNullOrEmpty(property.Conditions) || Conditions.CheckConditionList(property.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                if (string.IsNullOrEmpty(property.Conditions) || ModEntry.FHelper.Conditions.ValidateConditions(property.Conditions))
                 {
-                    AdvancedLocationLoaderMod.Logger.Log(property.ToString()+" ~> true", LogLevel.Trace);
+                    ModEntry.Logger.Log(property.ToString()+" ~> true", LogLevel.Trace);
                     if (Game1.getLocationFromName(property.MapName).HasTile(property.TileX, property.TileY, property.LayerId))
                         Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
                     else if (property.Optional)
                         return;
                     else
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to patch required property, tile does not exist: " + property.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to patch required property, tile does not exist: " + property.ToString(), LogLevel.Error);
                 }
                 else
-                    AdvancedLocationLoaderMod.Logger.Log(property.ToString() + " ~> false", LogLevel.Trace);
+                    ModEntry.Logger.Log(property.ToString() + " ~> false", LogLevel.Trace);
             }
             catch (Exception err)
             {
                 if(!property.Optional)
-                    AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
+                    ModEntry.Logger.ExitGameImmediately("Unable to patch property, a unexpected error occured: " + property.ToString(), err);
             }
         }
         internal static void ApplyWarp(Configs.Warp warp)
         {
             try
             {
-                if (!string.IsNullOrEmpty(warp.Conditions) && !Conditions.CheckConditionList(warp.Conditions, AdvancedLocationLoaderMod.ConditionResolver))
+                if (!string.IsNullOrEmpty(warp.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(warp.Conditions))
                 {
-                    AdvancedLocationLoaderMod.Logger.Log(warp.ToString() +"~> false", LogLevel.Trace);
+                    ModEntry.Logger.Log(warp.ToString() +"~> false", LogLevel.Trace);
                     return;
                 }
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
                 loc.warps.RemoveAll((a) => a.X == _warp.X && a.Y == _warp.Y);
                 loc.warps.Add(_warp);
-                AdvancedLocationLoaderMod.Logger.Log(warp.ToString() + "~> true", LogLevel.Trace);
+                ModEntry.Logger.Log(warp.ToString() + "~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
+                ModEntry.Logger.ExitGameImmediately("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
             }
         }
         internal static void ApplyTilesheet(Tilesheet tilesheet)
@@ -143,20 +143,20 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 3
-                    AdvancedLocationLoaderMod.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                    ModEntry.FHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
                     stage++; // 4
                     if (location.map.GetTileSheet(tilesheet.SheetId) != null)
                     {
                         branch = 1;
                         location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
-                        AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/override", LogLevel.Trace);
+                        ModEntry.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/override", LogLevel.Trace);
                     }
                     else
                     {
                         branch = 2;
                         Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
                         location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId, location.map, fakepath, new xTile.Dimensions.Size((int)Math.Ceiling(sheet.Width / 16.0), (int)Math.Ceiling(sheet.Height / 16.0)), new xTile.Dimensions.Size(16, 16)));
-                        AdvancedLocationLoaderMod.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/insert", LogLevel.Trace);
+                        ModEntry.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/insert", LogLevel.Trace);
                     }
                 }
                 stage++; // 5 (skip 3)
@@ -170,16 +170,16 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately($"Unable to patch tilesheet, a unexpected error occured at stage {stage}{(skip > 0 ? ("-" + skip) : "")}{(branch > 0 ? ("-" + branch) : "")}: {tilesheet}", err);
+                ModEntry.Logger.ExitGameImmediately($"Unable to patch tilesheet, a unexpected error occured at stage {stage}{(skip > 0 ? ("-" + skip) : "")}{(branch > 0 ? ("-" + branch) : "")}: {tilesheet}", err);
             }
         }
         internal static void ApplyLocation(Location location)
         {
-            AdvancedLocationLoaderMod.Logger.Log(location.ToString(),LogLevel.Trace);
+            ModEntry.Logger.Log(location.ToString(),LogLevel.Trace);
             try
             {
                 GameLocation loc;
-                xTile.Map map = AdvancedLocationLoaderMod.Content.Load<xTile.Map>(location.FileName);
+                xTile.Map map = ModEntry.FHelper.Content.Load<xTile.Map>(location.FileName);
                 switch (location.Type)
                 {
                     case "Cellar":
@@ -211,19 +211,19 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
+                ModEntry.Logger.ExitGameImmediately("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
             }
         }
         internal static void ApplyOverride(Override obj)
         {
-            AdvancedLocationLoaderMod.Logger.Log(obj.ToString(),LogLevel.Trace);
+            ModEntry.Logger.Log(obj.ToString(),LogLevel.Trace);
             try
             {
-                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), AdvancedLocationLoaderMod.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
+                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), ModEntry.FHelper.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to override location, a unexpected error occured: " +obj.ToString(),err);
+                ModEntry.Logger.ExitGameImmediately("Unable to override location, a unexpected error occured: " +obj.ToString(),err);
             }
         }
     }

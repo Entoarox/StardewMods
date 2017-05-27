@@ -25,7 +25,7 @@ namespace Entoarox.Framework.Core.Content
         internal ContentHelper(FrameworkHelper frameworkHelper)
         {
             FrameworkHelper = frameworkHelper;
-            ModPath = FrameworkHelper.Mod.Helper.DirectoryPath.Replace(ExtendibleContentManager.ModContent.RootDirectory,"");
+            ModPath = FrameworkHelper.Mod.Helper.DirectoryPath.Replace(System.IO.Path.Combine(StardewModdingAPI.Constants.ExecutionPath, "Mods"), "");
         }
         internal string Normalize(string path)
         {

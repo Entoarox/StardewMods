@@ -23,6 +23,7 @@ namespace Entoarox.Framework
         private static Dictionary<IMod, IFrameworkHelper> Cache = new Dictionary<IMod, IFrameworkHelper>();
         private static string _PlatformRelativeContent;
         private static IMessageHelper _MessageHelper;
+        private static IConditionHelper _ConditionHelper;
         public static IFrameworkHelper Get(IMod mod)
         {
             if (!Cache.ContainsKey(mod))
@@ -38,6 +39,15 @@ namespace Entoarox.Framework
                 if (_MessageHelper == null)
                     _MessageHelper = new MessageHelper();
                 return _MessageHelper;
+            }
+        }
+        public IConditionHelper Conditions
+        {
+            get
+            {
+                if (_ConditionHelper == null)
+                    _ConditionHelper = new ConditionHelper();
+                return _ConditionHelper;
             }
         }
         public void CheckForUpdates(string url)

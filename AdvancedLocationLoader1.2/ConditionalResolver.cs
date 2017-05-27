@@ -20,15 +20,15 @@ namespace Entoarox.AdvancedLocationLoader
         private string GetItemName()
         {
             if (this.Conditional.Item == -1)
-                return AdvancedLocationLoaderMod.Localizer.Localize("gold");
+                return ModEntry.Strings["gold"];
             else
                 return new StardewValley.Object(this.Conditional.Item, 1).Name;
         }
         internal void Init()
         {
             Response[] answers = new Response[2];
-            answers[0] = new Response("y", AdvancedLocationLoaderMod.Localizer.Localize("yesCost", this.Conditional.Amount.ToString(), this.GetItemName()));
-            answers[1] = new Response("n", AdvancedLocationLoaderMod.Localizer.Localize("no"));
+            answers[0] = new Response("y", ModEntry.Strings["yesCost"].Replace("{0}", Conditional.Amount.ToString()).Replace("{1}", GetItemName()));
+            answers[1] = new Response("n", ModEntry.Strings["no"]);
             Game1.currentLocation.lastQuestionKey = "CompleteConditionalQuestion";
             Game1.currentLocation.createQuestionDialogue(this.Conditional.Question, answers, this.Resolver, null);
         }
@@ -43,13 +43,13 @@ namespace Entoarox.AdvancedLocationLoader
                 else
                     who.removeItemsFromInventory(this.Conditional.Item, this.Conditional.Amount);
                 who.mailReceived.Add("ALLCondition_" + this.Conditional.Name);
-                AdvancedLocationLoaderMod.Logger.Log("Conditional completed: " + this.Conditional.Name, StardewModdingAPI.LogLevel.Trace);
-                AdvancedLocationLoaderMod.UpdateConditionalEdits();
+                ModEntry.Logger.Log("Conditional completed: " + this.Conditional.Name, StardewModdingAPI.LogLevel.Trace);
+                ModEntry.UpdateConditionalEdits();
                 if (this.Conditional.Success != null)
                     Game1.drawDialogueBox(this.Conditional.Success);
             }
             else
-                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("notEnough", this.GetItemName()));
+                Game1.drawObjectDialogue(ModEntry.Strings["notEnough"].Replace("{0}",GetItemName()));
 
         }
     }

@@ -72,7 +72,7 @@
     <Compile Include="Core\Message.cs" />
     <Compile Include="IUpdateHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
-    <Compile Include="Core\Conditions.cs" />
+    <Compile Include="Core\ConditionHelper.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />
     <Compile Include="Extensions\MonitorExtensions.cs" />
     <Compile Include="Extensions\GameLocationExtensions.cs" />
@@ -124,14 +124,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="About\ConditionDocumentation.md" />
-    <None Include="About\manifest.json">
+    <None Include="manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="About\update.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="About\!Changelog.txt" />
+    <Content Include="About\Changelog.txt" />
   </ItemGroup>
   <PropertyGroup>
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>

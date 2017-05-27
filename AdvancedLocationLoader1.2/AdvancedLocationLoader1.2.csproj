@@ -55,7 +55,7 @@
     <Compile Include="Locations\Greenhouse.cs" />
     <Compile Include="Locations\Sewer.cs" />
     <Compile Include="Menus\CarpenterMenu.cs" />
-    <Compile Include="Mod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Processors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructuredBinaryFile.cs" />

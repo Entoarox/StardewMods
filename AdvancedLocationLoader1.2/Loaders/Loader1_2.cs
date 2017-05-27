@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
-using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 
 using Newtonsoft.Json;
 
@@ -43,7 +43,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         }
                         catch(Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to merge child manifest, json cannot be parsed: " + childPath, err);
+                            ModEntry.Logger.Log("Unable to merge child manifest, json cannot be parsed: " + childPath,LogLevel.Error,  err);
                             continue;
                         }
                         try
@@ -61,13 +61,13 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         }
                         catch(Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to merge child manifest, a unexpected error occured: " + childPath, err);
+                            ModEntry.Logger.Log("Unable to merge child manifest, a unexpected error occured: " + childPath,LogLevel.Error,  err);
                         }
                     }
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load manifest, json cannot be parsed: " + filepath, err);
+                ModEntry.Logger.Log("Unable to load manifest, json cannot be parsed: " + filepath,LogLevel.Error,  err);
                 return;
             }
             try
@@ -76,7 +76,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             }
             catch (Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to load manifest, a unexpected error occured: " + filepath, err);
+                ModEntry.Logger.Log("Unable to load manifest, a unexpected error occured: " + filepath,LogLevel.Error,  err);
             }
         }
         private static bool FileCheck(string path, string file)
@@ -84,7 +84,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             string full = Path.Combine(path, file + ".xnb");
             if (!File.Exists(full))
             {
-                AdvancedLocationLoaderMod.Logger.Log("File does not exist: " + full, LogLevel.Error);
+                ModEntry.Logger.Log("File does not exist: " + full, LogLevel.Error);
                 return false;
             }
             return true;
@@ -95,7 +95,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 return false;
             if (AffectedLocations.Contains(name))
             {
-                AdvancedLocationLoaderMod.Logger.Log("Location is already being modified: " + name, LogLevel.Error);
+                ModEntry.Logger.Log("Location is already being modified: " + name, LogLevel.Error);
                 return false;
             }
             AffectedLocations.Add(name);
@@ -104,16 +104,16 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
         public static void Parse(string filepath, MainLocationManifest1_2 config)
         {
             // Print mod info into the log
-            AdvancedLocationLoaderMod.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
+            ModEntry.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
             // Parse locations
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Locations` section...",LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Locations` section...",LogLevel.Trace);
             if (config.Locations != null)
                 foreach (Location loc in config.Locations)
                     if (LocationChecks(filepath, loc.FileName, loc.MapName))
                     {
                         if (!LocationTypes.Contains(loc.Type))
                         {
-                            AdvancedLocationLoaderMod.Logger.Log("Unknown location Type, using `Default` instead: " + loc.ToString(),LogLevel.Error);
+                            ModEntry.Logger.Log("Unknown location Type, using `Default` instead: " + loc.ToString(),LogLevel.Error);
                             loc.Type = "Default";
                         }
                         loc.FileName = Path.Combine(filepath, loc.FileName);
@@ -121,7 +121,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
 
                     }
             // Parse overrides
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Overrides` section...",LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Overrides` section...",LogLevel.Trace);
             if (config.Overrides != null)
                 foreach (Override ovr in config.Overrides)
                     if (LocationChecks(filepath, ovr.FileName, ovr.MapName))
@@ -130,7 +130,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         Compound.Overrides.Add(ovr);
                     }
             // Parse redirects
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Redirects` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Redirects` section...", LogLevel.Trace);
             if (config.Redirects != null)
                 foreach (Redirect red in config.Redirects)
                     if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
@@ -139,7 +139,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         Compound.Redirects.Add(red);
                     }
             // Parse tilesheets
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Tilesheets` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Tilesheets` section...", LogLevel.Trace);
             if (config.Tilesheets != null)
                 foreach (Tilesheet sht in config.Tilesheets)
                 {
@@ -167,47 +167,47 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Compound.Tilesheets.Add(sht);
                 }
             // Parse tiles
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `tiles` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `tiles` section...", LogLevel.Trace);
             if (config.Tiles != null)
                 foreach (Tile til in config.Tiles)
                 {
                     if (!Layers.Contains(til.LayerId))
-                        AdvancedLocationLoaderMod.Logger.Log("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId,LogLevel.Error);
+                        ModEntry.Logger.Log("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId,LogLevel.Error);
                     else
                         Compound.Tiles.Add(til);
                 }
             // Parse properties
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Properties` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Properties` section...", LogLevel.Trace);
             if (config.Properties != null)
                 foreach (Property pro in config.Properties)
                 {
                     if (!Layers.Contains(pro.LayerId))
-                        AdvancedLocationLoaderMod.Logger.Log("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId,LogLevel.Error);
+                        ModEntry.Logger.Log("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId,LogLevel.Error);
                     else
                         Compound.Properties.Add(pro);
                 }
             // Parse warps
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Warps` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Warps` section...", LogLevel.Trace);
             if (config.Warps != null)
                 foreach (Warp war in config.Warps)
                     Compound.Warps.Add(war);
             // Parse conditionals
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Conditionals` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Conditionals` section...", LogLevel.Trace);
             if (config.Conditionals != null)
                 foreach (Conditional con in config.Conditionals)
                     if (con.Item < -1)
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to parse conditional, it references a null item: " + con.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to parse conditional, it references a null item: " + con.ToString(), LogLevel.Error);
                     else if (con.Amount < 1)
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to validate conditional, the item amount is less then 1: " + con.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to validate conditional, the item amount is less then 1: " + con.ToString(), LogLevel.Error);
                     else if (Conditionals.Contains(con.Name))
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to validate conditional, another condition with this name already exists: " + con.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to validate conditional, another condition with this name already exists: " + con.ToString(), LogLevel.Error);
                     else
                     {
                         Configs.Compound.Conditionals.Add(con);
                         Conditionals.Add(con.Name);
                     }
             // Parse minecarts
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Teleporters` section...",LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Teleporters` section...",LogLevel.Trace);
             if (config.Teleporters != null)
                 foreach (TeleporterList min in config.Teleporters)
                 {
@@ -220,24 +220,24 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                 if (tes.Destinations.TrueForAll(a => { return !a.Equals(dest); }))
                                     tes.Destinations.Add(dest);
                                 else
-                                    AdvancedLocationLoaderMod.Logger.Log("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString(), LogLevel.Error);
-                            AdvancedLocationLoaderMod.Logger.Log("Teleporter updated: " + tes.ToString(), LogLevel.Trace);
+                                    ModEntry.Logger.Log("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Teleporter updated: " + tes.ToString(), LogLevel.Trace);
                             break;
                         }
                     if (add)
                     {
                         Compound.Teleporters.Add(min);
-                        AdvancedLocationLoaderMod.Logger.Log("Teleporter created: " + min.ToString(), LogLevel.Trace);
+                        ModEntry.Logger.Log("Teleporter created: " + min.ToString(), LogLevel.Trace);
                     }
                 }
             // Parse shops
-            AdvancedLocationLoaderMod.Logger.Log("Parsing the `Shops` section...", LogLevel.Trace);
+            ModEntry.Logger.Log("Parsing the `Shops` section...", LogLevel.Trace);
             if (config.Shops != null)
                 foreach (string shop in config.Shops)
                 {
                     string path = Path.Combine(filepath, shop + ".json");
                     if (!File.Exists(path))
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to load shop, file does not exist: " + path, LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to load shop, file does not exist: " + path, LogLevel.Error);
                     else
                     {
                         try
@@ -248,7 +248,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         }
                         catch(Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error,"Could not load shop due to unexpected error: " + path, err);
+                            ModEntry.Logger.Log("Could not load shop due to unexpected error: " + path,LogLevel.Error, err);
                             continue;
                         }
                     }
@@ -290,12 +290,12 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             {
                 stage++; // 1
                 SecondaryLocationManifest1_2 trueCompound = new SecondaryLocationManifest1_2();
-                AdvancedLocationLoaderMod.Logger.Log("Applying Patches...", LogLevel.Trace);
+                ModEntry.Logger.Log("Applying Patches...", LogLevel.Trace);
                 // First we need to check any things we couldnt before
                 foreach (Location obj in Compound.Locations)
                     if (Game1.getLocationFromName(obj.MapName) != null)
                     {
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to add location, it already exists: " + obj.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to add location, it already exists: " + obj.ToString(), LogLevel.Error);
                     }
                     else
                     {
@@ -309,14 +309,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         }
                         catch (Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to add location, the map file caused a error when loaded: " + obj.ToString(), err);
+                            ModEntry.Logger.Log("Unable to add location, the map file caused a error when loaded: " + obj.ToString(), LogLevel.Error, err);
                         }
                     }
                 stage++; // 2
                 foreach (Override obj in Compound.Overrides)
                     if (Game1.getLocationFromName(obj.MapName) == null)
                     {
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to override location, it does not exist: " + obj.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to override location, it does not exist: " + obj.ToString(), LogLevel.Error);
                     }
                     else
                     {
@@ -328,7 +328,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         }
                         catch (Exception err)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log(LogLevel.Error, "Unable to override location, the map file caused a error when loaded: " + obj.ToString(), err);
+                            ModEntry.Logger.Log("Unable to override location, the map file caused a error when loaded: " + obj.ToString(), LogLevel.Error, err);
                         }
                     }
                 stage++; // 3
@@ -337,7 +337,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 foreach (Tilesheet obj in Compound.Tilesheets)
                     if (Game1.getLocationFromName(obj.MapName) == null && !AffectedLocations.Contains(obj.MapName))
                     {
-                        AdvancedLocationLoaderMod.Logger.Log("Unable to patch tilesheet, location does not exist: " + obj.ToString(), LogLevel.Error);
+                        ModEntry.Logger.Log("Unable to patch tilesheet, location does not exist: " + obj.ToString(), LogLevel.Error);
                     }
                     else
                         trueCompound.Tilesheets.Add(obj);
@@ -349,7 +349,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     {
                         if (info != "OPTIONAL")
                         {
-                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Unable to apply tile patch, " + info + ":" + obj.ToString(), LogLevel.Error);
                             continue;
                         }
                     }
@@ -358,7 +358,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         xTile.Map map = MapCache.ContainsKey(obj.MapName) ? MapCache[obj.MapName] : Game1.getLocationFromName(obj.MapName).map;
                         if (map.GetTileSheet(obj.SheetId) == null)
                         {
-                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
                             continue;
                         }
                     }
@@ -371,7 +371,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     if (info != null)
                     {
                         if (info != "OPTIONAL")
-                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply property patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Unable to apply property patch, " + info + ":" + obj.ToString(), LogLevel.Error);
                     }
                     else
                         trueCompound.Properties.Add(obj);
@@ -383,7 +383,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     if (info != null)
                     {
                         if (info != "OPTIONAL")
-                            AdvancedLocationLoaderMod.Logger.Log("Unable to apply warp patch, " + info + ":" + obj.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("Unable to apply warp patch, " + info + ":" + obj.ToString(), LogLevel.Error);
                     }
                     trueCompound.Warps.Add(obj);
                 }
@@ -402,7 +402,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Processors.ApplyOverride(obj);
                 stage++; // 12
                 foreach (Redirect obj in trueCompound.Redirects)
-                    AdvancedLocationLoaderMod.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
+                    ModEntry.FHelper.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
                 stage++; // 13
                 foreach (Tilesheet obj in trueCompound.Tilesheets)
                 {
@@ -441,11 +441,11 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 stage++; // 19
                 VerifyGameIntegrity();
                 stage++; // 20
-                AdvancedLocationLoaderMod.Logger.Log("Patches have been applied", LogLevel.Debug);
+                ModEntry.Logger.Log("Patches have been applied", LogLevel.Debug);
             }
             catch(Exception err)
             {
-                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("Unable to patch the game, a unexpected error occured at stage "+stage.ToString(), err);
+                ModEntry.Logger.ExitGameImmediately("Unable to patch the game, a unexpected error occured at stage "+stage.ToString(), err);
             }
         }
         internal static void VerifyGameIntegrity()
@@ -459,12 +459,12 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                         {
                             string[] path = sheet.ImageSource.Split('_');
                             if (path.Length != 2)
-                                AdvancedLocationLoaderMod.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs!");
+                                ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs!");
                             foreach (string season in seasons)
                             {
-                                string file = Path.Combine(EntoFramework.PlatformContentDir, "Maps", season + "_" + path[1] + ".xnb");
+                                string file = Path.Combine(ModEntry.FHelper.PlatformRelativeContent, "Maps", season + "_" + path[1] + ".xnb");
                                 if (!File.Exists(file))
-                                    AdvancedLocationLoaderMod.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this will cause bugs!");
+                                    ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this will cause bugs!");
                             }
                         }
             }

@@ -1,6 +1,6 @@
 ﻿namespace Entoarox.Framework
 {
-    interface IConditionHelper
+    public interface IConditionHelper
     {
         bool ValidateConditions(string conditions, char separator = ',');
         bool ValidateConditions(string[] conditions);
