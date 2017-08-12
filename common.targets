@@ -1,5 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <IsEntoMod Condition="$(MSBuildProjectName) != 'FarmhandUI' AND $(MSBuildProjectName) != 'StardewModdingAPI.Content'">1</IsEntoMod>
+    
     <GamePath>D:\Applications\Steam\steamapps\common\Stardew Valley</GamePath>
+    <DeployModFolderName Condition="'$(IsEntoMod)' == '1'">$(MSBuildProjectName)</DeployModFolderName>
+    <DeployModZipTo Condition="'$(Configuration)' == 'Release' AND '$(IsEntoMod)' == '1'">$(SolutionDir)\_releases</DeployModZipTo>
   </PropertyGroup>
 </Project>
