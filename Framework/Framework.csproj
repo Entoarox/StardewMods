@@ -158,6 +158,7 @@
       <Link>EntoaroxFramework.json</Link>
     </None>
     <None Include="ConditionDocumentation.md" />
+    <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

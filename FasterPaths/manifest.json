@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Faster Paths",
+  "Author": "Entoarox",
+  "Version": {
+    "MajorVersion": 1,
+    "MinorVersion": 3,
+    "PatchVersion": 1,
+    "Build": ""
+  },
+  "Description": "Walk faster on paths, better paths faster movement!",
+  "UniqueID": "Entoarox.FasterPaths",
+  "EntryDll": "FasterPaths.dll"
+}

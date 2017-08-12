@@ -1,0 +1,13 @@
+{
+  "Name": "Extended Minecart",
+  "Author": "Entoarox",
+  "Version": {
+    "MajorVersion": 1,
+    "MinorVersion": 6,
+    "PatchVersion": 5,
+    "Build": ""
+  },
+  "Description": "More destinations for your minecart needs!",
+  "UniqueID": "Entoarox.ExtendedMinecart",
+  "EntryDll": "ExtendedMinecart.dll"
+}

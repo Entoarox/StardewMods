@@ -42,6 +42,7 @@
     <None Include="..\VersionChecker\XnbLoader.json">
       <Link>XnbLoader.json</Link>
     </None>
+    <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
