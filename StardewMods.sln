@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
@@ -26,6 +26,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StardewModdingAPI.Content", "StardewModdingAPI.Content\StardewModdingAPI.Content.csproj", "{C64CBEA3-96A4-4892-A613-64B762C5EB2C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DavrialPersonalConfirmClose", "DavrialPersonalConfirmClose\DavrialPersonalConfirmClose.csproj", "{FCC183A2-0A4B-4FA9-B675-8D50A217FC64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".metadata", ".metadata", "{D696579F-C0B5-4E93-BEF0-76EE3381E3B4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
