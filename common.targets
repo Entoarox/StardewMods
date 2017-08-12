@@ -8,6 +8,7 @@
     <!--deploy mods-->
     <DeployModFolderName>$(MSBuildProjectName)</DeployModFolderName>
     <DeployModFolderName Condition="$(MSBuildProjectName) == 'Framework'">!EntoaroxFramework</DeployModFolderName>
+    <DeployModFolderName Condition="$(MSBuildProjectName) == 'AdvancedLocationLoader1.2'">AdvancedLocationLoader</DeployModFolderName>
 
     <!--create release zips when compiled in release mode-->
     <DeployModZipTo Condition="'$(Configuration)' == 'Release'">$(SolutionDir)\_releases</DeployModZipTo>
