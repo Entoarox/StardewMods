@@ -21,7 +21,7 @@ namespace Entoarox.ShopExpander
         }
         private void Event_FirstUpdateTick(object s, EventArgs e)
         {
-            GameEvents.UpdateTick += Events_UpdateTick;
+            GameEvents.UpdateTick += Event_UpdateTick;
         }
         private void Event_UpdateTick(object s, EventArgs e)
         {

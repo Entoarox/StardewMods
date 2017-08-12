@@ -8,7 +8,7 @@ namespace StardewModdingAPI.Content.Extensions
 {
     public static class Crops
     {
-        public static ItemData GetItemDataFromId(this IContentRegistry, int id)
+        public static ItemData GetItemDataFromId(this IContentRegistry registry, int id)
         {
             return new ItemData();
         }
