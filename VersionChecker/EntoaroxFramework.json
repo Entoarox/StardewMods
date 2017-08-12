@@ -1,5 +1,7 @@
 {
-    "Latest": "1.7.9",
-    "Minimum": "1.7.0",
-    "Recommended": "1.7.9"
+  "1.2": {
+    "Latest": "2.0.0",
+    "Minimum": "2.0.0",
+    "Recommended": "2.0.0"
+  }
 }

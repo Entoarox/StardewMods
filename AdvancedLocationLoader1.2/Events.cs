@@ -85,6 +85,9 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void MoreEvents_WorldReady(object s, EventArgs e)
         {
+            if (!StardewValley.Game1.hasLoadedGame)
+                return;
+            GameEvents.UpdateTick -= MoreEvents_WorldReady;
             Loaders.Loader1_2.ApplyPatches();
             if(Configs.Compound.DynamicTiles.Count>0 || Configs.Compound.DynamicProperties.Count>0 || Configs.Compound.DynamicWarps.Count>0)
                 TimeEvents.DayOfMonthChanged += TimeEvents_DayOfMonthChanged;

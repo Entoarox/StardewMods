@@ -50,13 +50,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ContentHelper\Utilities.cs" />
+    <Compile Include="Core\ContentHelper\WrappedHandler.cs" />
+    <Compile Include="Core\ContentHelper\WrappedLoader.cs" />
+    <Compile Include="Core\ContentHelper\WrappedInjector.cs" />
     <Compile Include="Core\Override\SerializableDictionary.cs" />
+    <Compile Include="Core\PlayerHelper.cs" />
+    <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\UpdateInfo.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="IConditionHelper.cs" />
     <Compile Include="IContentHandler.cs" />
     <Compile Include="IContentHelper.cs" />
+    <Compile Include="IContentHelperExtensions.cs" />
     <Compile Include="IFrameworkHelper.cs" />
     <Compile Include="Core\Content\ContentHelper.cs" />
     <Compile Include="Core\Content\ExtendibleContentManager.cs" />
@@ -67,9 +74,10 @@
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="FrameworkConfig.cs" />
-    <Compile Include="FrameworkHelper.cs" />
     <Compile Include="IMessageHelper.cs" />
     <Compile Include="Core\Message.cs" />
+    <Compile Include="IPlayerHelper.cs" />
+    <Compile Include="IPlayerModifierHelper.cs" />
     <Compile Include="IUpdateHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
     <Compile Include="Core\ConditionHelper.cs" />
@@ -79,6 +87,8 @@
     <Compile Include="Core\ModEntry.cs" />
     <Compile Include="Core\MessageHelper.cs" />
     <Compile Include="Events\MoreEvents.cs" />
+    <Compile Include="IModHelperExtensions.cs" />
+    <Compile Include="PlayerModifier.cs" />
     <Compile Include="UI\OverlayMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StackableShopObject.cs" />

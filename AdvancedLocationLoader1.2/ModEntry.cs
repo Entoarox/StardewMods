@@ -38,7 +38,7 @@ namespace Entoarox.AdvancedLocationLoader
 
             Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
-            SaveEvents.AfterSave+=Events.MoreEvents_WorldReady;
+            GameEvents.UpdateTick+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
             FHelper.AddTypeToSerializer<Locations.Greenhouse>();

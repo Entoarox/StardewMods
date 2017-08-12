@@ -2,7 +2,6 @@
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -122,8 +121,12 @@ namespace Entoarox.Framework.Core.Content
         }
         void IContentHelper.RegisterXnbReplacement(string asset, string replacement)
         {
-            XnbLoader.AssetMap.Add(Normalize(asset), Path.Combine(ModPath,replacement));
-            ReloadStaticReferences();
+            asset = Normalize(asset);
+            if(!XnbLoader.AssetMap.ContainsKey(asset))
+            {
+                XnbLoader.AssetMap.Add(Normalize(asset), Path.Combine(ModPath,replacement));
+                ReloadStaticReferences();
+            }
         }
         void IContentHelper.RegisterLoader<T>(string asset, AssetLoader<T> loader)
         {
