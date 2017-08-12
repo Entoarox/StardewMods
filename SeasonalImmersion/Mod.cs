@@ -24,13 +24,26 @@ namespace Entoarox.SeasonalImmersion
         public override void Entry(IModHelper helper)
         {
             FilePath = helper.DirectoryPath;
-            GameEvents.LoadContent += GameEvents_LoadContent;
+
+            try
+            {
+                this.Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
+                this.LoadContent();
+                LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
+                TimeEvents.SeasonOfYearChanged += this.TimeEvents_SeasonOfYearChanged;
+                SeasonalImmersion.ContentReady = true;
+                this.Monitor.Log($"ContentPack processed, found [{SeasonTextures.Count}] seasonal files", LogLevel.Info);
+            }
+            catch (Exception ex)
+            {
+                this.Monitor.Log("Could not load ContentPack" + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
+            }
         }
+
         private static bool ContentReady = false;
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
         private static string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
-        private static Texture2D DefaultBigCraftables;
         private static BlendState blendColor = new BlendState
         {
             ColorWriteChannels = ColorWriteChannels.Red | ColorWriteChannels.Green | ColorWriteChannels.Blue,
@@ -85,9 +98,9 @@ namespace Entoarox.SeasonalImmersion
                     Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
                     Mode = 2;
                 }
-                catch(Exception err)
+                catch(Exception ex)
                 {
-                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
                     Mode = 3;
                 }
             }
@@ -119,10 +132,13 @@ namespace Entoarox.SeasonalImmersion
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
             else
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
-            Files.Add("Flooring.xnb");
-            Files.Add("Craftables_outdoor.xnb");
-            Files.Add("Craftables_indoor.xnb");
-            Files.Add("furniture.xnb");
+            Files.AddRange(new[]
+            {
+                "Flooring.xnb",
+                "Craftables.xnb",
+                "Craftables_outdoor.xnb",
+                "Craftables_indoor.xnb"
+            });
             foreach (string file in Files)
             {
                 Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
@@ -149,24 +165,6 @@ namespace Entoarox.SeasonalImmersion
                 SeasonTextures.Add(name, textures);
             }
         }
-        internal void GameEvents_LoadContent(object s, EventArgs e)
-        {
-            try
-            {
-                Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
-                LoadContent();
-                LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-                GameEvents.LoadContent -= GameEvents_LoadContent;
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
-                DefaultBigCraftables = Game1.bigCraftableSpriteSheet;
-                ContentReady = true;
-                Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
-            }
-            catch (Exception err)
-            {
-                Monitor.Log("Could not load ContentPack" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
-            }
-        }
         internal Stream GetStream(string file)
         {
             try
@@ -188,6 +186,7 @@ namespace Entoarox.SeasonalImmersion
                         }
                         MemoryStream memoryStream = new MemoryStream();
                         Zip[file].Extract(memoryStream);
+                        memoryStream.Seek(0, SeekOrigin.Begin);
                         return memoryStream;
                     case 3:
                         Stream manifestStream=GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
@@ -202,9 +201,9 @@ namespace Entoarox.SeasonalImmersion
                         return null;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Monitor.Log("Skipping file due to a unknown error: " + file, LogLevel.Error);
+                Monitor.Log($"Skipping file due to a unknown error: {file}\n{ex}", LogLevel.Error);
                 return null;
             }
         }
@@ -217,9 +216,9 @@ namespace Entoarox.SeasonalImmersion
             {
                 return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
             }
-            catch
+            catch (Exception ex)
             {
-                Monitor.Log("Skipping texture due to a unknown error: " + file, LogLevel.Warn);
+                Monitor.Log($"Skipping texture due to a unknown error: {file}\n{ex}", LogLevel.Warn);
                 return null;
             }
         }
@@ -240,7 +239,7 @@ namespace Entoarox.SeasonalImmersion
                 if (SeasonTextures.ContainsKey("furniture"))
                     StardewValley.Objects.Furniture.furnitureTexture = SeasonTextures["furniture"][Game1.currentSeason];
                 // Reset big craftables
-                Game1.bigCraftableSpriteSheet = DefaultBigCraftables;
+                Game1.bigCraftableSpriteSheet = SeasonalImmersion.SeasonTextures.ContainsKey("Craftables") ? SeasonalImmersion.SeasonTextures["Craftables"][Game1.currentSeason] : Game1.content.Load<Texture2D>("TileSheets\\Craftables");
                 // Check outdoor craftables
                 if (Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_outdoor"))
                     Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables_outdoor"][Game1.currentSeason];
@@ -252,9 +251,9 @@ namespace Entoarox.SeasonalImmersion
                     if (SeasonTextures.ContainsKey(building.buildingType))
                         building.texture = SeasonTextures[building.buildingType][Game1.currentSeason];
             }
-            catch (Exception err)
+            catch (Exception ex)
             {
-                Monitor.Log("Failed to update seasonal textures" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                Monitor.Log($"Failed to update seasonal textures\n{ex}", LogLevel.Error);
             }
         }
         internal void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
@@ -262,9 +261,9 @@ namespace Entoarox.SeasonalImmersion
             if (ContentReady && Game1.hasLoadedGame)
                 UpdateTextures();
         }
-        internal void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
+        internal void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)
         {
-            if (Game1.hasLoadedGame && Game1.currentLocation != null && ContentReady)
+            if (Game1.hasLoadedGame && Game1.currentLocation != null && ContentReady && e.NewLocation.name == "Farm")
                 UpdateTextures();
         }
     }
