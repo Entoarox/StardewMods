@@ -5,7 +5,7 @@
     "MajorVersion": 1,
     "MinorVersion": 0,
     "PatchVersion": 0,
-    "Build": ""
+    "Build": null
   },
   "Description": "Custom mod for Davrial and his windows 10 fullscreen issue.",
   "UniqueID": "Entoarox.DavrialPersonalConfirmClose",

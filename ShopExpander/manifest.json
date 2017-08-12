@@ -9,5 +9,10 @@
   },
   "Description": "Adds bulk options for wood & stone to the carpenter.",
   "UniqueID": "Entoarox.ShopExpander",
-  "EntryDll": "ShopExpander.dll"
+  "EntryDll": "ShopExpander.dll",
+  "Dependencies": [
+    {
+      "UniqueID": "Entoarox.EntoaroxFramework"
+    }
+  ]
 }

@@ -5,9 +5,14 @@
     "MajorVersion": 1,
     "MinorVersion": 0,
     "PatchVersion": 6,
-    "Build": ""
+    "Build": null
   },
   "Description": "Safely load custom xnb files without touching your Content directory!",
   "UniqueID": "Entoarox.XnbLoader",
-  "EntryDll": "XnbLoader.dll"
+  "EntryDll": "XnbLoader.dll",
+  "Dependencies": [
+    {
+      "UniqueID": "Entoarox.EntoaroxFramework"
+    }
+  ]
 }

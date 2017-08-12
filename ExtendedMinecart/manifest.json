@@ -5,9 +5,14 @@
     "MajorVersion": 1,
     "MinorVersion": 6,
     "PatchVersion": 5,
-    "Build": ""
+    "Build": null
   },
   "Description": "More destinations for your minecart needs!",
   "UniqueID": "Entoarox.ExtendedMinecart",
-  "EntryDll": "ExtendedMinecart.dll"
+  "EntryDll": "ExtendedMinecart.dll",
+  "Dependencies": [
+    {
+      "UniqueID": "Entoarox.EntoaroxFramework"
+    }
+  ]
 }
