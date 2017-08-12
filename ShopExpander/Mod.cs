@@ -92,7 +92,7 @@ namespace Entoarox.ShopExpander
             }
         }
         // Add a modified "stack" item to the shop
-        private void addItem(SObject item, string location)
+        private void AddItem(SObject item, string location)
         {
             // Check that makes sure only the items that the current shop is supposed to sell are added
             if (location != item.targetedShop)
@@ -100,7 +100,7 @@ namespace Entoarox.ShopExpander
                 Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false}", LogLevel.Trace);
                 return;
             }
-            if (!Conditions.CheckConditionList(item.requirements, ','))
+            if (!string.IsNullOrEmpty(item.requirements) && !Conditions.CheckConditionList(item.requirements, ','))
             {
                 Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false,Condition=false}", LogLevel.Trace);
                 return;
@@ -169,6 +169,9 @@ namespace Entoarox.ShopExpander
                         case "Club":
                             shopOwner = "MisterQi";
                             break;
+                        case "JojaMart":
+                            shopOwner = "Joja";
+                            break;
                     }
                 }
                 if (affectedShops.Contains(shopOwner))
@@ -183,7 +186,7 @@ namespace Entoarox.ShopExpander
                     forSale = (List<Item>)Sale.GetValue(Game1.activeClickableMenu);
                     // Add our custom items to the shop
                     foreach (string key in AddedObjects.Keys)
-                        addItem(AddedObjects[key], shopOwner);
+                        AddItem(AddedObjects[key], shopOwner);
                     // Use reflection to set the changed values
                     Stock.SetValue(Game1.activeClickableMenu, itemPriceAndStock);
                     Sale.SetValue(Game1.activeClickableMenu, forSale);
