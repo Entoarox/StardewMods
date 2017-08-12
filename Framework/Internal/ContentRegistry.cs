@@ -62,7 +62,9 @@ namespace Entoarox.Framework
                 switch (EntoFramework.LoaderType)
                 {
                     case EntoFramework.LoaderTypes.SMAPI:
-                        SmartManager.RegisterHandler(key, method);
+                        MainSmartManager.RegisterHandler(key, method);
+                        TileSmartManager.RegisterHandler(key, method);
+                        TempSmartManager.RegisterHandler(key, method);
                         break;
                     case EntoFramework.LoaderTypes.FarmHand:
                         registerHandler.MakeGenericMethod(typeof(T)).Invoke(null, new object[] {key,method});
@@ -81,7 +83,9 @@ namespace Entoarox.Framework
                 switch (EntoFramework.LoaderType)
                 {
                     case EntoFramework.LoaderTypes.SMAPI:
-                        SmartManager.RegisterTexture(key, path);
+                        MainSmartManager.RegisterTexture(key, path);
+                        TileSmartManager.RegisterTexture(key, path);
+                        TempSmartManager.RegisterTexture(key, path);
                         break;
                     case EntoFramework.LoaderTypes.FarmHand:
                         dynamic xnb = Activator.CreateInstance(modXnb);
@@ -108,7 +112,9 @@ namespace Entoarox.Framework
                 switch (EntoFramework.LoaderType)
                 {
                     case EntoFramework.LoaderTypes.SMAPI:
-                        SmartManager.RegisterXnb(key, path);
+                        MainSmartManager.RegisterXnb(key, path);
+                        TileSmartManager.RegisterXnb(key, path);
+                        TempSmartManager.RegisterXnb(key, path);
                         break;
                     case EntoFramework.LoaderTypes.FarmHand:
                         dynamic xnb = Activator.CreateInstance(modXnb);
@@ -136,7 +142,8 @@ namespace Entoarox.Framework
         private static MethodInfo registerXnb;
         private static MethodInfo registerHandler;
         private static dynamic myManifest;
-        private static SmartContentManager SmartManager;
+        private static SmartContentManager MainSmartManager;
+        private static SmartContentManager TileSmartManager;
         private static SmartContentManager TempSmartManager;
         private static SmartDisplayDevice SmartDevice;
         private static FieldInfo TempContent;
@@ -181,18 +188,19 @@ namespace Entoarox.Framework
         }
         internal static void Init()
         {
-            SmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
+            MainSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
+            TileSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
             TempSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            SmartDevice = new SmartDisplayDevice(SmartManager, Game1.game1.GraphicsDevice);
+            SmartDevice = new SmartDisplayDevice(TileSmartManager, Game1.game1.GraphicsDevice);
             TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
             Update(null, null);
             Events.MoreEvents.FireSmartManagerReady();
         }
         internal static void Update(object s, EventArgs e)
         {
-            Game1.content = SmartManager;
+            Game1.content = MainSmartManager;
             Game1.mapDisplayDevice = SmartDevice;
-            Game1.game1.xTileContent = SmartManager;
+            Game1.game1.xTileContent = TileSmartManager;
             TempContent.SetValue(null, TempSmartManager);
         }
     }
