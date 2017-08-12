@@ -1,15 +1,5 @@
 ﻿using System;
 
-using StardewValley;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-
-using StardewModdingAPI.Events;
-
-using xTile.Tiles;
-using xTile.ObjectModel;
-
 namespace Entoarox.Framework.Events
 {
     public static class MoreEvents
@@ -28,7 +18,7 @@ namespace Entoarox.Framework.Events
         {
             try
             {
-                ActionTriggered.Invoke(null, eventArgs);
+                ActionTriggered?.Invoke(null, eventArgs);
             }
             catch(Exception err)
             {
@@ -39,7 +29,7 @@ namespace Entoarox.Framework.Events
         {
             try
             {
-                ActiveItemChanged.Invoke(null, eventArgs);
+                ActiveItemChanged?.Invoke(null, eventArgs);
             }
             catch (Exception err)
             {

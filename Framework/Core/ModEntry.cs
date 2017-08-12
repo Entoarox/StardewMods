@@ -35,8 +35,10 @@ namespace Entoarox.Framework
         internal static FrameworkConfig Config;
         internal static IMonitor Logger;
         internal static IFrameworkHelper FHelper;
+        internal static IModHelper SHelper;
         public override void Entry(IModHelper helper)
         {
+            SHelper = helper;
             Logger = Monitor;
             Config = Helper.ReadConfig<FrameworkConfig>();
             Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Commands);
@@ -49,6 +51,7 @@ namespace Entoarox.Framework
                 ;
             GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
             FHelper = FrameworkHelper.Get(this);
+            SetupContentManager();
             FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
         }
         #endregion
@@ -187,7 +190,6 @@ namespace Entoarox.Framework
             GameEvents.UpdateTick -= GameEvents_FirstUpdateTick;
             if (Config.SkipCredits)
                 SkipCredits();
-            SetupContentManager();
             SetupSerializer();
             Core.UpdateInfo.DoUpdateChecks();
             GameEvents.UpdateTick += GameEvents_UpdateTick;
@@ -213,44 +215,56 @@ namespace Entoarox.Framework
         private IServiceProvider ServiceProvider;
         private void SetupContentManager()
         {
+            Monitor.Log("ContentManager: Performing setup");
             if (TempContent == null)
                 TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
             if (RootDirectory == null)
             {
                 ServiceProvider = Game1.content.ServiceProvider;
                 RootDirectory = Game1.content.RootDirectory;
-                MainManager = new WeakReference<ExtendibleContentManager>(null);
-                TileManager = new WeakReference<ExtendibleContentManager>(null);
-                TempManager = new WeakReference<ExtendibleContentManager>(null);
             }
-            if (!MainManager.TryGetTarget(out ExtendibleContentManager mainManager))
-            {
-                mainManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                MainManager.SetTarget(mainManager);
-            }
-            if (!TileManager.TryGetTarget(out ExtendibleContentManager tileManager))
-            {
-                tileManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                TileManager.SetTarget(tileManager);
-            }
-            if (!TempManager.TryGetTarget(out ExtendibleContentManager tempManager))
-            {
-                tempManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                TempManager.SetTarget(tempManager);
-            }
-            if (DisplayDevice == null)
-                DisplayDevice = new xTile.Display.XnaDisplayDevice(mainManager, Game1.game1.GraphicsDevice);
+            Monitor.Log("ContentManager: Hooking into content managers...");
             EnforceContentManager();
+            Monitor.Log("ContentManager: Setup complete, EF.CM is being enforced");
         }
         private void EnforceContentManager()
         {
-            MainManager.TryGetTarget(out ExtendibleContentManager mainManager);
-            TileManager.TryGetTarget(out ExtendibleContentManager tileManager);
-            TempManager.TryGetTarget(out ExtendibleContentManager tempManager);
-            Game1.content = mainManager;
+            if (MainManager == null || !MainManager.TryGetTarget(out ExtendibleContentManager mainManager) || mainManager==null)
+            {
+                Monitor.Log("ContentManager: MainManager is null, recreating");
+                mainManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                MainManager=new WeakReference<ExtendibleContentManager>(mainManager);
+            }
+            if (TileManager == null || !TileManager.TryGetTarget(out ExtendibleContentManager tileManager) || tileManager==null)
+            {
+                Monitor.Log("ContentManager: TileManager is null, recreating");
+                tileManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                TileManager = new WeakReference<ExtendibleContentManager>(tileManager);
+            }
+            if (TempManager == null || !TempManager.TryGetTarget(out ExtendibleContentManager tempManager) || tempManager==null)
+            {
+                Monitor.Log("ContentManager: TempManager is null, recreating");
+                tempManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
+                TempManager = new WeakReference<ExtendibleContentManager>(tempManager);
+            }
+            if (DisplayDevice == null)
+                DisplayDevice = new xTile.Display.XnaDisplayDevice(mainManager, Game1.game1.GraphicsDevice);
             Game1.mapDisplayDevice = DisplayDevice;
-            Game1.game1.xTileContent = tileManager;
-            TempContent.SetValue(null, tempManager);
+            if (!(Game1.content is ExtendibleContentManager) || Game1.content==null)
+            {
+                Monitor.Log("ContentManager: MainManager not referenced, enforcing");
+                Game1.content = mainManager;
+            }
+            if (!(Game1.game1.xTileContent is ExtendibleContentManager) || Game1.game1.xTileContent==null)
+            {
+                Monitor.Log("ContentManager: TileManager not referenced, enforcing");
+                Game1.game1.xTileContent = tileManager;
+            }
+            if (!(Game1.temporaryContent is ExtendibleContentManager) || Game1.temporaryContent==null)
+            {
+                Monitor.Log("ContentManager: TempManager not referenced, enforcing");
+                TempContent.SetValue(null, tempManager);
+            }
         }
         #endregion
         #region Serializer
@@ -296,6 +310,7 @@ namespace Entoarox.Framework
                 {
                     Type[] Whitelist = new Type[]
                     {
+                typeof(SerializableDictionary<,>),
                 typeof(SerializableDictionary<int,int>),
                 typeof(SerializableDictionary<int,int[]>),
                 typeof(SerializableDictionary<int,bool>),
@@ -306,15 +321,21 @@ namespace Entoarox.Framework
                 typeof(SerializableDictionary<long,FarmAnimal>),
                 typeof(SerializableDictionary<Vector2,int>),
                 typeof(SerializableDictionary<Vector2,SObject>),
-                typeof(SerializableDictionary<Vector2,TerrainFeature>),
-                typeof(SerializableDictionary<,>)
+                typeof(SerializableDictionary<Vector2,TerrainFeature>)
                     };
                     MethodInfo ReadXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
                     MethodInfo WriteXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
                     foreach (Type type in Whitelist)
                     {
-                        UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), ReadXml);
-                        UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), WriteXml);
+                        try
+                        {
+                            UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), ReadXml);
+                            UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), WriteXml);
+                        }
+                        catch(Exception err)
+                        {
+                            Monitor.Log("Serializer: Unable to inject into serializable dictionary of type: "+type.FullName, LogLevel.Error, err);
+                        }
                     }
                 }
                 SerializerInjected = true;
@@ -322,7 +343,7 @@ namespace Entoarox.Framework
             }
             catch (Exception err)
             {
-                Monitor.Log("SerializableDictionary could not be injected, this might crash your game when you try to sleep", LogLevel.Error, err);
+                Monitor.Log("Serializer: Injection into dictionaries unexpectedly failed", LogLevel.Error, err);
             }
         }
         private void EnforceSerializer()

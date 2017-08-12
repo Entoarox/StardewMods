@@ -5,7 +5,7 @@
     "MajorVersion": 2,
     "MinorVersion": 0,
     "PatchVersion": 0,
-    "Build": "beta.2"
+    "Build": "beta.12"
   },
   "MinimumApiVersion": "1.13",
   "Description": "A collection of API's to make modding easier",

@@ -18,90 +18,120 @@ namespace Entoarox.Framework.Core
         public string Recommended;
         public string Minimum;
 
-        public static Dictionary<IMod, string> Map = new Dictionary<IMod, string>();
+        public static Dictionary<IManifest, string> Map = new Dictionary<IManifest, string>();
 
+        private static void HandleError(string name,WebException err)
+        {
+            switch (err.Status)
+            {
+                case WebExceptionStatus.ConnectFailure:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, connection failed.", LogLevel.Error);
+                    break;
+                case WebExceptionStatus.NameResolutionFailure:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, DNS resolution failed", LogLevel.Error);
+                    break;
+                case WebExceptionStatus.SecureChannelFailure:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL handshake failed", LogLevel.Error);
+                    break;
+                case WebExceptionStatus.Timeout:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, Connection timed out", LogLevel.Error);
+                    break;
+                case WebExceptionStatus.TrustFailure:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL certificate cannot be validated", LogLevel.Error);
+                    break;
+                case WebExceptionStatus.ProtocolError:
+                    HttpWebResponse response = (HttpWebResponse)err.Response;
+                    ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
+                    break;
+                default:
+                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, a unknown error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                    break;
+            }
+        }
         public static void DoUpdateChecks()
         {
-            string version = typeof(Game1).Assembly.GetName().Version.ToString(2);
-            bool Connected;
             try
             {
-                using (WebClient client = new WebClient())
-                using (Stream stream = client.OpenRead("http://www.google.com"))
-                    Connected = true;
-            }
-            catch
-            {
-                Connected = false;
-            }
-            Parallel.ForEach(Map, (pair) => {
-                if (Connected)
+                string version = typeof(Game1).Assembly.GetName().Version.ToString(2);
+                bool Connected;
+                try
                 {
-                    WebClient Client = new WebClient();
-                    Uri uri = new Uri(pair.Value);
-                    SemanticVersion modVersion = (SemanticVersion)pair.Key.ModManifest.Version;
-                    Client.DownloadStringCompleted += (sender, evt) =>
-                    {
-                        Dictionary<string, UpdateInfo> Data = JsonConvert.DeserializeObject<Dictionary<string, UpdateInfo>>(evt.Result);
-                        UpdateInfo info = null;
-                        if (Data.ContainsKey(version))
-                            info = Data[version];
-                        else if (Data.ContainsKey("Default"))
-                            info = Data["Default"];
-                        else
-                            pair.Key.Monitor.ExitGameImmediately("Update check failed, the current version of Stardew Valley is not supported");
-                        if(info!=null)
-                        {
-                            SemanticVersion min = new SemanticVersion(info.Minimum);
-                            SemanticVersion rec = new SemanticVersion(info.Recommended);
-                            SemanticVersion max = new SemanticVersion(info.Latest);
-                            if (min.IsNewerThan(modVersion))
-                                pair.Key.Monitor.ExitGameImmediately("Update required, the current mod version is below the allowed minimum");
-                            if (rec.IsNewerThan(modVersion))
-                                pair.Key.Monitor.Log("A new version is available, it is recommended you update now", LogLevel.Alert);
-                            if(modVersion.IsBetween(rec,max))
-                                pair.Key.Monitor.Log("A new version is available, you can choose to update to this version now", LogLevel.Info);
-                        }
-
-                    };
-                    try
-                    {
-                        Client.DownloadStringAsync(uri);
-                    }
-                    catch (WebException err)
-                    {
-                        switch (err.Status)
-                        {
-                            case WebExceptionStatus.ConnectFailure:
-                                pair.Key.Monitor.Log("Unable to check for updates, connection failed", LogLevel.Error);
-                                break;
-                            case WebExceptionStatus.NameResolutionFailure:
-                                pair.Key.Monitor.Log("Unable to check for updates, DNS resolution failed", LogLevel.Error);
-                                break;
-                            case WebExceptionStatus.SecureChannelFailure:
-                                pair.Key.Monitor.Log("Unable to check for updates, SSL handshake failed", LogLevel.Error);
-                                break;
-                            case WebExceptionStatus.Timeout:
-                                pair.Key.Monitor.Log("Unable to check for updates, Connection timed out", LogLevel.Error);
-                                break;
-                            case WebExceptionStatus.TrustFailure:
-                                pair.Key.Monitor.Log("Unable to check for updates, SSL certificate cannot be validated", LogLevel.Error);
-                                break;
-                            case WebExceptionStatus.ProtocolError:
-                                HttpWebResponse response = (HttpWebResponse)err.Response;
-                                pair.Key.Monitor.Log($"Unable to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
-                                break;
-                            default:
-                                pair.Key.Monitor.Log("Unable to check for updates, unknown error occured"+Environment.NewLine+err.ToString(), LogLevel.Error);
-                                break;
-                        }
-                    }
+                    using (WebClient client = new WebClient())
+                    using (Stream stream = client.OpenRead("http://www.google.com"))
+                        Connected = true;
                 }
+                catch
+                {
+                    Connected = false;
+                }
+                if(Connected)
+                    Parallel.ForEach(Map, (pair) =>
+                    {
+                        try
+                        {
+                            WebClient Client = new WebClient();
+                            Uri uri = new Uri(pair.Value);
+                            SemanticVersion modVersion = (SemanticVersion)pair.Key.Version;
+                            try
+                            {
+                                Client.DownloadStringCompleted += (sender, evt) =>
+                                {
+                                    try
+                                    {
+                                        if (evt.Error != null)
+                                        {
+                                            HandleError(pair.Key.Name, (WebException)evt.Error);
+                                            return;
+                                        }
+                                        Dictionary<string, UpdateInfo> Data = JsonConvert.DeserializeObject<Dictionary<string, UpdateInfo>>(evt.Result);
+                                        UpdateInfo info = null;
+                                        if (Data.ContainsKey(version))
+                                            info = Data[version];
+                                        else if (Data.ContainsKey("Default"))
+                                            info = Data["Default"];
+                                        else
+                                            ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod does not support the current version of SDV.");
+                                        if (info != null)
+                                        {
+                                            SemanticVersion min = new SemanticVersion(info.Minimum);
+                                            SemanticVersion rec = new SemanticVersion(info.Recommended);
+                                            SemanticVersion max = new SemanticVersion(info.Latest);
+                                            if (min.IsNewerThan(modVersion))
+                                                ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod is too old, a newer version is required.");
+                                            if (rec.IsNewerThan(modVersion))
+                                                ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available, it is recommended you update now.", LogLevel.Alert);
+                                            if (modVersion.IsBetween(rec, max))
+                                                ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available.", LogLevel.Info);
+                                        }
+                                    }
+                                    catch (WebException err)
+                                    {
+                                        HandleError(pair.Key.Name, err);
+                                    }
+                                    catch (Exception err)
+                                    {
+                                        ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured while reading result." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                                    }
+                                };
+                                Client.DownloadStringAsync(uri);
+                            }
+                            catch (WebException err)
+                            {
+                                HandleError(pair.Key.Name, err);
+                            }
+                        }
+                        catch(Exception err)
+                        {
+                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                        }
+                    });
                 else
-                {
-                    pair.Key.Monitor.Log("No internet connection, skipping update check.", LogLevel.Debug);
-                }
-            });
+                    ModEntry.Logger.Log("[UpdateChecker] No internet connection, skipping update checks.", LogLevel.Debug);
+            }
+            catch(Exception err)
+            {
+                ModEntry.Logger.Log("[UpdateChecker] Unexpected failure, unexpected error occured."+Environment.NewLine+err.ToString(), LogLevel.Error);
+            }
         }
     }
 }
