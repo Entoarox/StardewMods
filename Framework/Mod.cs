@@ -97,7 +97,7 @@ namespace Entoarox.Framework
             if (Config.GamePatcher)
             {
                 GameEvents.UpdateTick -= GamePatcher.Update;
-                TimeEvents.DayOfMonthChanged -= GamePatcher.TimeEvents_DayOfMonthChanged;
+                SaveEvents.BeforeSave -= GamePatcher.SaveEvents_BeforeSave;
                 Events.MoreEvents.ActionTriggered -= GamePatcher.MoreEvents_ActionTriggered;
             }
         }
@@ -135,7 +135,7 @@ namespace Entoarox.Framework
             {
                 GamePatcher.Patch();
                 GameEvents.UpdateTick += GamePatcher.Update;
-                TimeEvents.DayOfMonthChanged += GamePatcher.TimeEvents_DayOfMonthChanged;
+                SaveEvents.BeforeSave += GamePatcher.SaveEvents_BeforeSave;
                 Events.MoreEvents.ActionTriggered += GamePatcher.MoreEvents_ActionTriggered;
             }
             GameEvents.UpdateTick += PlayerHelper.Update;
