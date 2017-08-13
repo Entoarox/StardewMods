@@ -1,0 +1,10 @@
+﻿{
+  "teleporter": "Choose your destination:",
+  "gold": "Gold",
+  "no": "No",
+  "cancel": "Cancel",
+  "sparkle": "Despite what you thought you saw, there does not seem to be anything here.",
+  "betaNotice": "Please note that this is a {$0} version and may contain issues or bugs, use at your own risk!",
+  "yesCost": "Yes (costs {{amount}} {{itemName}})",
+  "notEnough": "You do not have enough {{itemName}} for this."
+}

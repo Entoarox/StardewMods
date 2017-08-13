@@ -57,7 +57,7 @@ namespace Entoarox.AdvancedLocationLoader
                 foreach (var list in Configs.Compound.Teleporters)
                     lists.Add(list.ListName);
                 AdvancedLocationLoaderMod.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
-                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
+                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Get("sparkle"));
             }
         }
         internal static void Conditional(StardewValley.Farmer who, string[] arguments, Vector2 tile)
@@ -70,7 +70,7 @@ namespace Entoarox.AdvancedLocationLoader
                     AdvancedLocationLoaderMod.Logger.Log("Conditional has already been completed: " + arguments[0], StardewModdingAPI.LogLevel.Error);
                 else
                     AdvancedLocationLoaderMod.Logger.Log("Conditional does not exist: " + arguments[0], StardewModdingAPI.LogLevel.Error);
-                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Localize("sparkle"));
+                Game1.drawObjectDialogue(AdvancedLocationLoaderMod.Localizer.Get("sparkle"));
             }
         }
         internal static StardewValley.Farmer _who;
