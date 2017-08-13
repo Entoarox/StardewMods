@@ -3,8 +3,8 @@
   "Author": "Entoarox",
   "Version": {
     "MajorVersion": 1,
-    "MinorVersion": 7,
-    "PatchVersion": 10,
+    "MinorVersion": 8,
+    "PatchVersion": 0,
     "Build": null
   },
   "Description": "A framework to make stardew modding easier!",
