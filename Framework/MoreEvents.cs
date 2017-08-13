@@ -25,7 +25,7 @@ namespace Entoarox.Framework.Events
         /// </summary>
         public static event EventHandler<EventArgsActiveItemChanged> ActiveItemChanged;
         /// <summary>
-        /// This event is fired after the framework content manager has been registered, or directly after LoadContent if the Farmhand content manager is active
+        /// This event is fired after the framework content manager has been registered
         /// </summary>
         public static event EventHandler SmartManagerReady;
     }

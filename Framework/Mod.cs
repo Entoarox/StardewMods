@@ -12,15 +12,8 @@ namespace Entoarox.Framework
     public class EntoFramework : Mod
     {
         private static bool CreditsDone = true;
-        internal static LoaderTypes LoaderType;
         internal static FrameworkConfig Config;
         public static Version Version { get { return typeof(EntoFramework).Assembly.GetName().Version; } }
-        internal enum LoaderTypes
-        {
-            Unknown,
-            SMAPI,
-            FarmHand
-        }
         /**
          * <summary>Retrieves a pointer to the <see cref="ILocationHelper"/> interface</summary>
          */
@@ -68,16 +61,6 @@ namespace Entoarox.Framework
         {
             Logger = Monitor;
             Config = helper.ReadConfig<FrameworkConfig>();
-            if (Constants.ApiVersion.Build == "Farmhand-Smapi")
-            {
-                LoaderType = LoaderTypes.FarmHand;
-                Logger.Log("The loader has been detected as being the `FarmHand` loader",LogLevel.Trace);
-            }
-            else
-            {
-                LoaderType = LoaderTypes.SMAPI;
-                Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
-            }
             Logger.Log("Registering framework events...",LogLevel.Trace);
             helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
             if(Config.TrainerCommands)
@@ -91,29 +74,19 @@ namespace Entoarox.Framework
             }
             GameEvents.UpdateTick += FirstUpdateTick;
             GameEvents.UpdateTick += GameEvents_LoadTick;
-            ContentRegistry.Setup();
-            TypeRegistry.Setup();
             Events.MoreEvents.Setup();
-            if (LoaderType == LoaderTypes.SMAPI)
-                GameEvents.UpdateTick += TypeRegistry.Update;
+            GameEvents.UpdateTick += TypeRegistry.Update;
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
-            if(LoaderType==LoaderTypes.Unknown)
-                Monitor.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
         internal static void FirstUpdateTick(object s, EventArgs e)
         {
-            if (LoaderType == LoaderTypes.SMAPI)
-            {
-                TypeRegistry.Init();
-                ContentRegistry.Init();
-                GameEvents.UpdateTick += ContentRegistry.Update;
-            }
-            else
-                Events.MoreEvents.FireSmartManagerReady();
+            TypeRegistry.Init();
+            ContentRegistry.Init();
+            GameEvents.UpdateTick += ContentRegistry.Update;
 
             GameEvents.UpdateTick -= FirstUpdateTick;
         }

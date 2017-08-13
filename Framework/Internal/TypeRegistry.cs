@@ -31,16 +31,8 @@ namespace Entoarox.Framework
             else
             {
                 Type type = typeof(T);
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        if (!InjectedTypes.Contains(type))
-                            InjectedTypes.Add(type);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        FarmHandRegistry.MakeGenericMethod(type).Invoke(null, null);
-                        break;
-                }
+                if (!InjectedTypes.Contains(type))
+                    InjectedTypes.Add(type);
             }
         }
         internal static readonly List<Type> InjectedTypes = new List<Type>();
@@ -75,28 +67,7 @@ namespace Entoarox.Framework
         internal static XmlSerializer injectedFarmerSerializer;
         internal static XmlSerializer injectedLocationSerializer;
 
-        private static MethodInfo FarmHandRegistry;
-
         private static bool _injected = false;
-
-        internal static void Setup()
-        {
-            if (EntoFramework.LoaderType == EntoFramework.LoaderTypes.FarmHand)
-            {
-                Type t = Type.GetType("FarmHand.API.Serializer");
-                if (t == null)
-                {
-                    EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
-                    return;
-                }
-                FarmHandRegistry = t.GetMethod("RegisterType", BindingFlags.Public | BindingFlags.Static);
-                if (FarmHandRegistry == null)
-                {
-                    EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
-                    return;
-                }
-            }
-        }
 
         internal static void Update(object s, EventArgs e)
         {

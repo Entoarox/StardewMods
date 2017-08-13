@@ -59,17 +59,9 @@ namespace Entoarox.Framework
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterHandler(key, method);
-                        TileSmartManager.RegisterHandler(key, method);
-                        TempSmartManager.RegisterHandler(key, method);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        registerHandler.MakeGenericMethod(typeof(T)).Invoke(null, new object[] {key,method});
-                        break;
-                }
+                MainSmartManager.RegisterHandler(key, method);
+                TileSmartManager.RegisterHandler(key, method);
+                TempSmartManager.RegisterHandler(key, method);
             }
             catch (Exception err)
             {
@@ -80,25 +72,9 @@ namespace Entoarox.Framework
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterTexture(key, path);
-                        TileSmartManager.RegisterTexture(key, path);
-                        TempSmartManager.RegisterTexture(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        dynamic tex = Activator.CreateInstance(diskTexture);
-                        xnb.Original = key;
-                        xnb.Texture = key;
-                        xnb.OwingMod = myManifest;
-                        tex.Id = key;
-                        tex.AbsoluteFilePath = path;
-                        registerTexture.Invoke(null, new object[] { key, tex, myManifest });
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                MainSmartManager.RegisterTexture(key, path);
+                TileSmartManager.RegisterTexture(key, path);
+                TempSmartManager.RegisterTexture(key, path);
             }
             catch(Exception err)
             {
@@ -109,22 +85,9 @@ namespace Entoarox.Framework
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterXnb(key, path);
-                        TileSmartManager.RegisterXnb(key, path);
-                        TempSmartManager.RegisterXnb(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        xnb.Original = key;
-                        xnb.File = key;
-                        xnb.OwingMod = myManifest;
-                        xnb.AbsoluteFilePath = path;
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                MainSmartManager.RegisterXnb(key, path);
+                TileSmartManager.RegisterXnb(key, path);
+                TempSmartManager.RegisterXnb(key, path);
             }
             catch (Exception err)
             {
@@ -136,56 +99,11 @@ namespace Entoarox.Framework
         {
             throw new NotImplementedException();
         }
-        private static Type modXnb;
-        private static Type diskTexture;
-        private static MethodInfo registerTexture;
-        private static MethodInfo registerXnb;
-        private static MethodInfo registerHandler;
-        private static dynamic myManifest;
         private static SmartContentManager MainSmartManager;
         private static SmartContentManager TileSmartManager;
         private static SmartContentManager TempSmartManager;
         private static SmartDisplayDevice SmartDevice;
         private static FieldInfo TempContent;
-        internal static void Setup()
-        {
-            if (EntoFramework.LoaderType == EntoFramework.LoaderTypes.FarmHand)
-            {
-                try
-                {
-                    Type textureRegistry = Type.GetType("Farmhand.Registries.TextureRegistry");
-                    Type xnbRegistry = Type.GetType("Farmhand.Registries.XnbRegistry");
-                    Type modManifest = Type.GetType("Farmhand.Registries.Containers.ModManifest");
-                    Type contentHandler = Type.GetType("Farmhand.Content.DelegatedContentInjector");
-                    modXnb = Type.GetType("Farmhand.Registries.Containers.ModXnb");
-                    diskTexture = Type.GetType("Farmhand.Registries.Containers.DiskTexture");
-                    registerTexture = textureRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerXnb = xnbRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerHandler = contentHandler.GetMethod("RegisterFileLoader", BindingFlags.Static | BindingFlags.Public);
-                    myManifest = Activator.CreateInstance(modManifest);
-                    myManifest.ModDLL = "EntoaroxFramework.dll";
-                    myManifest.Name = "Entoarox Framework";
-                    myManifest.Author = "Entoarox";
-                    myManifest.Version = EntoFramework.Version;
-                    myManifest.Description = "A collection of framework classes to make modding stardew easier";
-                    // Secure tests to make sure there are no crashes when register methods are called
-                    dynamic xnb = Activator.CreateInstance(modXnb);
-                    dynamic tex = Activator.CreateInstance(diskTexture);
-                    xnb.Original = "";
-                    xnb.Texture = "";
-                    xnb.File = "";
-                    xnb.OwingMod = myManifest;
-                    xnb.AbsoluteFilePath = "";
-                    tex.Id = "";
-                    tex.AbsoluteFilePath = "";
-                }
-                catch (Exception err)
-                {
-                    EntoFramework.Logger.ExitGameImmediately("Was unable to hook into FarmHand content loading"+ err);
-                    EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
-                }
-            }
-        }
         internal static void Init()
         {
             MainSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
