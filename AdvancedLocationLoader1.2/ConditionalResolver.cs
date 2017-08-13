@@ -20,15 +20,15 @@ namespace Entoarox.AdvancedLocationLoader
         private string GetItemName()
         {
             if (this.Conditional.Item == -1)
-                return ModEntry.Strings["gold"];
+                return ModEntry.Strings.Get("gold");
             else
                 return new StardewValley.Object(this.Conditional.Item, 1).Name;
         }
         internal void Init()
         {
             Response[] answers = new Response[2];
-            answers[0] = new Response("y", ModEntry.Strings["yesCost"].Replace("{0}", Conditional.Amount.ToString()).Replace("{1}", GetItemName()));
-            answers[1] = new Response("n", ModEntry.Strings["no"]);
+            answers[0] = new Response("y", ModEntry.Strings.Get("yesCost", new { amount = Conditional.Amount, itemName = GetItemName() }));
+            answers[1] = new Response("n", ModEntry.Strings.Get("no"));
             Game1.currentLocation.lastQuestionKey = "CompleteConditionalQuestion";
             Game1.currentLocation.createQuestionDialogue(this.Conditional.Question, answers, this.Resolver, null);
         }
@@ -49,8 +49,7 @@ namespace Entoarox.AdvancedLocationLoader
                     Game1.drawDialogueBox(this.Conditional.Success);
             }
             else
-                Game1.drawObjectDialogue(ModEntry.Strings["notEnough"].Replace("{0}",GetItemName()));
-
+                Game1.drawObjectDialogue(ModEntry.Strings.Get("notEnough", new { itemName = GetItemName() }));
         }
     }
 }

@@ -14,16 +14,7 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal class ModEntry : Mod
     {
-        public static Dictionary<string, string> Strings = new Dictionary<string, string>()
-        {
-            {"sparkle","Despite the sparkle you saw, there doesnt seem to be anything here." },
-            {"gold","Gold" },
-            {"yesCost","Yes, costs {0} {1}"},
-            {"no","No" },
-            {"notEnough","You do not have enough {0} to do this." },
-            {"cancel","Cancel" },
-            {"teleporter","Choose a destination:" }
-        };
+        internal static ITranslationHelper Strings;
         internal static IMonitor Logger;
         internal static string ModPath;
         internal static IModHelper SHelper;
@@ -31,7 +22,8 @@ namespace Entoarox.AdvancedLocationLoader
         {
             Logger = Monitor;
             ModPath = helper.DirectoryPath;
-            SHelper = Helper;
+            SHelper = helper;
+            Strings = helper.Translation;
             Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/version.json");
 
             Events.GameEvents_LoadContent(null,null);

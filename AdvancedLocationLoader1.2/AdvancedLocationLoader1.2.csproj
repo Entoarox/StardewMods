@@ -66,9 +66,7 @@
     <None Include="..\VersionChecker\AdvancedLocationLoader.json">
       <Link>AdvancedLocationLoader.json</Link>
     </None>
-    <None Include="localization.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
@@ -87,11 +85,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\common.targets" />
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties localization_1json__JSONSchema="http://json.schemastore.org/config" />
-    </VisualStudio>
-  </ProjectExtensions>
   <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
