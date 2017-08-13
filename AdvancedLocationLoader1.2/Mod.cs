@@ -25,7 +25,7 @@ namespace Entoarox.AdvancedLocationLoader
             Localizer = helper.Translation;
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
 
-            GameEvents.LoadContent += Events.GameEvents_LoadContent;
+            GameEvents.UpdateTick += FirstUpdateTick;
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
@@ -36,6 +36,13 @@ namespace Entoarox.AdvancedLocationLoader
             registry.RegisterType<Locations.Desert>();
             registry.RegisterType<Locations.DecoratableLocation>();
         }
+
+        internal static void FirstUpdateTick(object sender, EventArgs e)
+        {
+            Events.GameEvents_FirstUpdateTick();
+            GameEvents.UpdateTick -= FirstUpdateTick;
+        }
+
         internal static void UpdateConditionalEdits()
         {
             foreach(Tile t in Compound.DynamicTiles)

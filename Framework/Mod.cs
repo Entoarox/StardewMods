@@ -89,16 +89,13 @@ namespace Entoarox.Framework
                     .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
                 ;
             }
+            GameEvents.UpdateTick += FirstUpdateTick;
             GameEvents.UpdateTick += GameEvents_LoadTick;
             ContentRegistry.Setup();
             TypeRegistry.Setup();
             Events.MoreEvents.Setup();
             if (LoaderType == LoaderTypes.SMAPI)
-            {
                 GameEvents.UpdateTick += TypeRegistry.Update;
-                GameEvents.Initialize += TypeRegistry.Init;
-            }
-            GameEvents.LoadContent += GameEvents_LoadContent;
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
@@ -107,15 +104,18 @@ namespace Entoarox.Framework
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        internal static void FirstUpdateTick(object s, EventArgs e)
         {
             if (LoaderType == LoaderTypes.SMAPI)
             {
+                TypeRegistry.Init();
                 ContentRegistry.Init();
                 GameEvents.UpdateTick += ContentRegistry.Update;
             }
             else
                 Events.MoreEvents.FireSmartManagerReady();
+
+            GameEvents.UpdateTick -= FirstUpdateTick;
         }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
         {

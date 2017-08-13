@@ -13,7 +13,7 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Events
     {
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        internal static void GameEvents_FirstUpdateTick()
         {
             try
             {
