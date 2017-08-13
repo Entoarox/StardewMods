@@ -1,0 +1,13 @@
+﻿{
+  "Name": "Entoarox Framework",
+  "Author": "Entoarox",
+  "Version": {
+    "MajorVersion": 1,
+    "MinorVersion": 7,
+    "PatchVersion": 10,
+    "Build": null
+  },
+  "Description": "A framework to make stardew modding easier!",
+  "UniqueID": "Entoarox.EntoaroxFramework",
+  "EntryDll": "EntoaroxFramework.dll"
+}

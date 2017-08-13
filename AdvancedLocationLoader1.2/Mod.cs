@@ -41,19 +41,6 @@ namespace Entoarox.AdvancedLocationLoader
             registry.RegisterType<Locations.Sewer>();
             registry.RegisterType<Locations.Desert>();
             registry.RegisterType<Locations.DecoratableLocation>();
-#if DEBUG
-            Logger.Log("Warning, this is a BETA version, features may be buggy or not work as intended!",LogLevel.Alert);
-            GameEvents.UpdateTick += DebugNotification;
-        }
-        internal static void DebugNotification(object s, EventArgs e)
-        {
-            if (Game1.activeClickableMenu is TitleMenu && Game1.activeClickableMenu != null)
-            {
-                EntoFramework.CreditsTick(s, e);
-                typeof(TitleMenu).GetField("subMenu", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(Game1.activeClickableMenu, new TitleMenuDialogue(Localizer.Localize("betaNotice", "BETA")));
-                GameEvents.UpdateTick -= DebugNotification;
-            }
-#endif
         }
         internal static void UpdateConditionalEdits()
         {
