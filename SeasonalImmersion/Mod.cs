@@ -24,20 +24,22 @@ namespace Entoarox.SeasonalImmersion
         public override void Entry(IModHelper helper)
         {
             FilePath = helper.DirectoryPath;
+
             try
             {
-                Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
-                LoadContent();
-                LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
-                ContentReady = true;
-                Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
+                this.Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
+                this.LoadContent();
+                LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
+                TimeEvents.SeasonOfYearChanged += this.TimeEvents_SeasonOfYearChanged;
+                SeasonalImmersion.ContentReady = true;
+                this.Monitor.Log($"ContentPack processed, found [{SeasonTextures.Count}] seasonal files", LogLevel.Info);
             }
-            catch (Exception err)
+            catch (Exception ex)
             {
-                Monitor.Log("Could not load ContentPack" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                this.Monitor.Log("Could not load ContentPack" + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
             }
         }
+
         private static bool ContentReady = false;
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
@@ -96,9 +98,9 @@ namespace Entoarox.SeasonalImmersion
                     Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
                     Mode = 2;
                 }
-                catch (Exception err)
+                catch (Exception ex)
                 {
-                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Error);
+                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
                     Mode = 3;
                 }
             }
@@ -130,7 +132,8 @@ namespace Entoarox.SeasonalImmersion
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
             else
                 Files = new List<string>(Directory.EnumerateFiles(Path.Combine(Game1.content.RootDirectory, "Buildings")).Where(a => Path.GetExtension(a).Equals(".xnb")));
-            Files.AddRange(new string[] {
+            Files.AddRange(new[]
+            {
                 "Flooring.xnb",
                 "Craftables.xnb",
                 "Craftables_outdoor.xnb",
@@ -198,9 +201,9 @@ namespace Entoarox.SeasonalImmersion
                         return null;
                 }
             }
-            catch(Exception err)
+            catch (Exception ex)
             {
-                Monitor.Log($"Skipping file due to a unknown error: {file}\n{err}", LogLevel.Error);
+                Monitor.Log($"Skipping file due to a unknown error: {file}\n{ex}", LogLevel.Error);
                 return null;
             }
         }
@@ -213,9 +216,9 @@ namespace Entoarox.SeasonalImmersion
             {
                 return PreMultiply(Texture2D.FromStream(Game1.graphics.GraphicsDevice, stream));
             }
-            catch(Exception err)
+            catch (Exception ex)
             {
-                Monitor.Log($"Skipping texture due to a unknown error: {file}\n{err}", LogLevel.Warn);
+                Monitor.Log($"Skipping texture due to a unknown error: {file}\n{ex}", LogLevel.Warn);
                 return null;
             }
         }
@@ -251,9 +254,9 @@ namespace Entoarox.SeasonalImmersion
                     if (SeasonTextures.ContainsKey(building.buildingType))
                         building.texture = SeasonTextures[building.buildingType][Game1.currentSeason];
             }
-            catch (Exception err)
+            catch (Exception ex)
             {
-                Monitor.Log($"Failed to update seasonal textures\n{err}",LogLevel.Error);
+                Monitor.Log($"Failed to update seasonal textures\n{ex}", LogLevel.Error);
             }
         }
         internal void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)

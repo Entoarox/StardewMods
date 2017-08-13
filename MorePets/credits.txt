@@ -1,0 +1,19 @@
+dog_1	Bouhm
+dog_2	WildSpirits
+dog_3	WildSpirits
+dog_4	iWonTheWorld
+dog_5	Zhuria
+dog_6	Zhuria
+dog_7	Zhuria
+dog_8	Tofuffalo
+dog_9	BunnyBuns
+
+cat_1	WildSpirits
+cat_2	WildSpirits
+cat_3	JamieDepledge
+cat_4	Inccubus
+cat_5	Vixxi
+cat_6	mkslux00
+cat_7	BlackBodyX64
+cat_8	Ex0dus13
+cat_9	Ex0dus13
