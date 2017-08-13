@@ -91,7 +91,7 @@ namespace Entoarox.Framework
 
             // register loader
             Type contentHelperType = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
-            PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders");
+            PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             if (loadersProperty == null)
             {
                 this.Monitor.ExitGameImmediately("Could not access SMAPI's asset loaders. Make sure you have the latest version of both Entoarox Framework and SMAPI.");
