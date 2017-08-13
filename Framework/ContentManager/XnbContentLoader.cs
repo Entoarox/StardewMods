@@ -15,7 +15,7 @@ namespace Entoarox.Framework.ContentManager
         {
             return Mapping.ContainsKey(assetName);
         }
-        public override T Load<T>(string assetName, Func<string, T> loadBase)
+        public override T Load<T>(string assetName)
         {
             return ModManager.Load<T>(GetModsRelativePath(Mapping[assetName]));
         }

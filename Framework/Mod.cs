@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Version = System.Version;
 
 using StardewModdingAPI;
@@ -82,12 +83,23 @@ namespace Entoarox.Framework
             Logger.Log("Framework has finished!",LogLevel.Info);
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
-        internal static void FirstUpdateTick(object s, EventArgs e)
+        private void FirstUpdateTick(object s, EventArgs e)
         {
+            // init
             TypeRegistry.Init();
-            ContentRegistry.Init();
-            GameEvents.UpdateTick += ContentRegistry.Update;
+            IAssetLoader loader = ContentRegistry.Init(this.Helper.Content, this.Helper.DirectoryPath);
 
+            // register loader
+            Type contentHelperType = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
+            PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders");
+            if (loadersProperty == null)
+            {
+                this.Monitor.ExitGameImmediately("Could not access SMAPI's asset loaders. Make sure you have the latest version of both Entoarox Framework and SMAPI.");
+                return;
+            }
+            IList<IAssetLoader> loaders = (IList<IAssetLoader>)loadersProperty.GetValue(this.Helper.Content);
+            loaders.Add(loader);
+            
             GameEvents.UpdateTick -= FirstUpdateTick;
         }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)

@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
-
-using StardewValley;
-using StardewValley.Objects;
-using StardewValley.BellsAndWhistles;
-using StardewValley.Projectiles;
-
+using System.Reflection;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
+using StardewValley;
+using StardewValley.BellsAndWhistles;
+using StardewValley.Objects;
+using StardewValley.Projectiles;
 
 namespace Entoarox.Framework
 {
@@ -52,74 +51,53 @@ namespace Entoarox.Framework
             SpriteText.coloredTexture = Game1.content.Load<Texture2D>("LooseSprites\\font_colored");
             Tool.weaponsTexture = Game1.content.Load<Texture2D>("TileSheets\\weapons");
             Projectile.projectileSheet = Game1.content.Load<Texture2D>("TileSheets\\Projectiles");
-            if (Game1.player!=null)
+            if (Game1.player != null)
                 Game1.player.FarmerRenderer = new FarmerRenderer(Game1.content.Load<Texture2D>("Characters\\Farmer\\farmer_" + (Game1.player.isMale ? "" : "girl_") + "base"));
         }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {
             try
             {
-                MainSmartManager.RegisterHandler(key, method);
-                TileSmartManager.RegisterHandler(key, method);
-                TempSmartManager.RegisterHandler(key, method);
+                Interceptor.RegisterHandler(key, method);
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register custom handler in loader"+ err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register custom handler in loader" + err);
             }
         }
         void IContentRegistry.RegisterTexture(string key, string path)
         {
             try
             {
-                MainSmartManager.RegisterTexture(key, path);
-                TileSmartManager.RegisterTexture(key, path);
-                TempSmartManager.RegisterTexture(key, path);
+                Interceptor.RegisterRedirect(key, path);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader"+err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader" + err);
             }
         }
         void IContentRegistry.RegisterXnb(string key, string path)
         {
             try
             {
-                MainSmartManager.RegisterXnb(key, path);
-                TileSmartManager.RegisterXnb(key, path);
-                TempSmartManager.RegisterXnb(key, path);
+                Interceptor.RegisterRedirect(key, path);
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader"+ err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader" + err);
             }
         }
-        [Obsolete("This method is for a not yet implemented API",true)]
+        [Obsolete("This method is for a not yet implemented API", true)]
         void IContentRegistry.RegisterContentHandler(IContentHandler handler)
         {
             throw new NotImplementedException();
         }
-        private static SmartContentManager MainSmartManager;
-        private static SmartContentManager TileSmartManager;
-        private static SmartContentManager TempSmartManager;
-        private static SmartDisplayDevice SmartDevice;
-        private static FieldInfo TempContent;
-        internal static void Init()
+        private static SmartContentInterceptor Interceptor;
+        internal static IAssetLoader Init(IContentHelper contentHelper, string modPath)
         {
-            MainSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            TileSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            TempSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            SmartDevice = new SmartDisplayDevice(TileSmartManager, Game1.game1.GraphicsDevice);
-            TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
-            Update(null, null);
+            Interceptor = new SmartContentInterceptor(contentHelper, modPath);
             Events.MoreEvents.FireSmartManagerReady();
-        }
-        internal static void Update(object s, EventArgs e)
-        {
-            Game1.content = MainSmartManager;
-            Game1.mapDisplayDevice = SmartDevice;
-            Game1.game1.xTileContent = TileSmartManager;
-            TempContent.SetValue(null, TempSmartManager);
+            return Interceptor;
         }
     }
 }

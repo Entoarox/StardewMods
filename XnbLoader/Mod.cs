@@ -18,8 +18,6 @@ namespace Entoarox.XnbLoader
             System.IO.Directory.CreateDirectory(_Path);
             Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", StardewModdingAPI.LogLevel.Info);
             ParseDir(_Path);
-            Monitor.Log("Reloading static content references...", StardewModdingAPI.LogLevel.Trace);
-            Framework.EntoFramework.GetContentRegistry().ReloadStaticReferences();
             Monitor.Log($"Parsing complete, found and redirected [{Files}] files", StardewModdingAPI.LogLevel.Info);
         }
 

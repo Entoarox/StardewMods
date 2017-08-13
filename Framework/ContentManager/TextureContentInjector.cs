@@ -62,7 +62,7 @@ namespace Entoarox.Framework.ContentManager
             }
             asset = (T)Cache[assetName];
         }
-        public override T Load<T>(string assetName, Func<string, T> loadBase)
+        public override T Load<T>(string assetName)
         {
             throw new NotImplementedException();
         }

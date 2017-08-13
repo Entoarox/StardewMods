@@ -8,7 +8,7 @@ namespace Entoarox.Framework.ContentManager
         public override bool Injector { get; } = true;
         public override bool Loader { get; } = true;
         public delegate void InjectHandler<T>(string assetName, ref T asset);
-        public delegate T Loadhandler<T>(string assetName, Func<string, T> loadBase);
+        public delegate T Loadhandler<T>(string assetName);
         private static Dictionary<Type, Delegate> Loaders = new Dictionary<Type, Delegate>();
         private static Dictionary<Type, List<Delegate>> Injectors = new Dictionary<Type, List<Delegate>>();
 
@@ -36,9 +36,9 @@ namespace Entoarox.Framework.ContentManager
             foreach (InjectHandler<T> injector in Injectors[typeof(T)])
                 injector(assetName, ref asset);
         }
-        public override T Load<T>(string assetName, Func<string, T> loadBase)
+        public override T Load<T>(string assetName)
         {
-            return ((Loadhandler<T>)Loaders[typeof(T)])(assetName, loadBase);
+            return ((Loadhandler<T>)Loaders[typeof(T)])(assetName);
         }
     }
 }
