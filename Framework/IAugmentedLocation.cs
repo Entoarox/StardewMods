@@ -12,6 +12,7 @@ namespace Entoarox.Framework
         /// If you are adding a new location, it should be set to null
         /// When not null, the framework will during saving restore the vanilla version, then load the modded version again after loading
         /// </summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
         Type VanillaEquivalent { get; }
         /// <summary>
         /// When true, it makes it so the location is treated identical to the Greenhouse for crop behaviour
@@ -22,7 +23,7 @@ namespace Entoarox.Framework
         /// Flooring and wallpaper currently will not work in such locations
         /// Serialization of decoratable locations is automatically handled by the framework
         /// </summary>
-        [Obsolete("This functionality has not yet been implemented")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         bool IsDecoratable { get; }
     }
 }

@@ -69,31 +69,31 @@ namespace Entoarox.Framework
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
-        [Obsolete("Experience modifiers are currently not functional yet.")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public float ExperienceModifierFarming { get { return Unlocked ? _Farming : Math.Min(5f,Math.Max(-1f, _Farming)); } set { _Farming = value; } }
         private float _Fishing = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
-        [Obsolete("Experience modifiers are currently not functional yet.")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public float ExperienceModifierFishing { get { return Unlocked ? _Fishing : Math.Min(5f, Math.Max(-1f, _Fishing)); } set { _Fishing = value; } }
         private float _Foraging = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
-        [Obsolete("Experience modifiers are currently not functional yet.")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public float ExperienceModifierForaging { get { return Unlocked ? _Foraging : Math.Min(5f, Math.Max(-1f, _Foraging)); } set { _Foraging = value; } }
         private float _Mining = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
-        [Obsolete("Experience modifiers are currently not functional yet.")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public float ExperienceModifierMining { get { return Unlocked ? _Mining : Math.Min(5f, Math.Max(-1f, _Mining)); } set { _Mining = value; } }
         private float _Combat = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
-        [Obsolete("Experience modifiers are currently not functional yet.")]
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public float ExperienceModifierCombat { get { return Unlocked ? _Combat : Math.Min(5f, Math.Max(-1f, _Farming)); } set { _Combat = value; } }
     }
 }

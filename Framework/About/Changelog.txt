@@ -1,10 +1,9 @@
 ﻿This version of Entoarox Framework is a almost complete rewrite of the whole framework.
 
-Currently, in 2.0 only the `Entoarox.Framework.UI` namespace remains as-is
-Everything else has been overhauled so that a single `using Entoarox.Framework;` will allow you to access the full framework functionality.
 
-The functionality in 2.0 is completely build around extension methods.
+The functionality in 2.0 is build around extension methods.
 This means that rather then adding new classes or API's for you to work with, everything has been hooked into existing classes or derived from existing API's
+Some functionality still remains as it was in the previous version of the framework, but most of this is subject to change in 2.1 and later.
 
 The following SMAPI classes have extension methods:
 - IModHelper
@@ -23,3 +22,17 @@ The following API's can be reached through extension methods on IModHelper:
 The following interfaces and classes are available for use with extensions made available:
 - IContentHandler (IContentHelper)
 - PlayerModifier (IPlayerModifierHelper)
+
+The following functionality has remained as-is for now:
+- The whole UI framework (Entoarox.Framework.UI)
+- The `StackableShopObject` class
+
+Events provided by the framework have changed as such:
+- The `WorldReady`, `BeforeSaving` and `AfterSaving` events have been removed as SMAPI now provides similar events
+- The `SmartManagerReady` event has been completely removed, as the new implementation no longer requires this
+- The `ActionTriggered` event still exists, but the internal implementation has been vastly improved to fix issues it had
+- The `ActiveItemChanged` event also still exists, and is completely unchanged
+
+New API functionality is provided all across the framework:
+- The IAugmentedLocation interface that allows framework supported custom locations with special behaviour (In development)
+- The new and improved content API, for even more control over how content is handled!
