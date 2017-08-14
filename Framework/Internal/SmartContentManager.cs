@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Entoarox.Framework.ContentManager;
+using Entoarox.Framework.Internal;
 using StardewModdingAPI;
 
 namespace Entoarox.Framework
@@ -12,7 +13,7 @@ namespace Entoarox.Framework
         ** Properties
         *********/
         /// <summary>The underlying content helper.</summary>
-        private readonly IContentHelper ContentHelper;
+        private readonly ContentHelperWrapper ContentHelper;
 
         /// <summary>The root path for the Entoarox Framework mod.</summary>
         private readonly string ModPath;
@@ -33,7 +34,7 @@ namespace Entoarox.Framework
         /// <summary>Construct an instance.</summary>
         /// <param name="contentHelper">The underlying content helper.</param>
         /// <param name="modPath">The root path for the Entoarox Framework mod.</param>
-        public SmartContentInterceptor(IContentHelper contentHelper, string modPath)
+        public SmartContentInterceptor(ContentHelperWrapper contentHelper, string modPath)
         {
             this.ContentHelper = contentHelper;
             this.ModPath = modPath;
@@ -51,7 +52,10 @@ namespace Entoarox.Framework
 
             // add
             if (File.Exists(fileName) || File.Exists(fileName + ".xnb"))
+            {
                 this.Redirects.Add(assetName, fileName);
+                this.ContentHelper.InvalidateCache(assetName);
+            }
         }
 
         /// <summary>Register a delegate which loads an asset.</summary>
@@ -67,6 +71,7 @@ namespace Entoarox.Framework
 
             // add
             this.LoaderDelegate.Add(assetName, new KeyValuePair<Type, Delegate>(typeof(T), handler));
+            this.ContentHelper.InvalidateCache(assetName);
         }
 
         /// <summary>Get whether this instance can load the initial version of the given asset.</summary>

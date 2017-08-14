@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using Entoarox.Framework.Internal;
 using Version = System.Version;
 
 using StardewModdingAPI;
@@ -65,18 +65,10 @@ namespace Entoarox.Framework
             Config = helper.ReadConfig<FrameworkConfig>();
 
             // init content registry
-            {
-                IAssetLoader loader = ContentRegistry.Init(this.Helper.Content, this.Helper.DirectoryPath);
-                Type contentHelperType = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
-                PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                if (loadersProperty == null)
-                {
-                    this.Monitor.ExitGameImmediately("Could not access SMAPI's asset loaders. Make sure you have the latest version of both Entoarox Framework and SMAPI.");
-                    return;
-                }
-                IList<IAssetLoader> loaders = (IList<IAssetLoader>)loadersProperty.GetValue(this.Helper.Content);
-                loaders.Add(loader);
-            }
+            var contentHelperWrapper = new ContentHelperWrapper(this.Helper.Content, this.Monitor);
+            contentHelperWrapper.AssetLoaders.Add(
+                ContentRegistry.Init(contentHelperWrapper, this.Helper.DirectoryPath)
+            );
 
             // add console commands
             Logger.Log("Registering framework events...",LogLevel.Trace);

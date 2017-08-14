@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Entoarox.Framework.Internal;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
@@ -93,7 +94,7 @@ namespace Entoarox.Framework
             throw new NotImplementedException();
         }
         private static SmartContentInterceptor Interceptor;
-        internal static IAssetLoader Init(IContentHelper contentHelper, string modPath)
+        internal static IAssetLoader Init(ContentHelperWrapper contentHelper, string modPath)
         {
             Interceptor = new SmartContentInterceptor(contentHelper, modPath);
             Events.MoreEvents.FireSmartManagerReady();

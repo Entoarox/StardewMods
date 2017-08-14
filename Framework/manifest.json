@@ -7,7 +7,7 @@
     "PatchVersion": 0,
     "Build": null
   },
-  "MinimumApiVersion": "1.15.1",
+  "MinimumApiVersion": "1.15.2",
   "Description": "A framework to make stardew modding easier!",
   "UniqueID": "Entoarox.EntoaroxFramework",
   "EntryDll": "EntoaroxFramework.dll"
