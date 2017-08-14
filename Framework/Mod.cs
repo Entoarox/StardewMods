@@ -60,19 +60,37 @@ namespace Entoarox.Framework
         internal static IMonitor Logger;
         public override void Entry(IModHelper helper)
         {
+            // init
             Logger = Monitor;
             Config = helper.ReadConfig<FrameworkConfig>();
+
+            // init content registry
+            {
+                IAssetLoader loader = ContentRegistry.Init(this.Helper.Content, this.Helper.DirectoryPath);
+                Type contentHelperType = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
+                PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (loadersProperty == null)
+                {
+                    this.Monitor.ExitGameImmediately("Could not access SMAPI's asset loaders. Make sure you have the latest version of both Entoarox Framework and SMAPI.");
+                    return;
+                }
+                IList<IAssetLoader> loaders = (IList<IAssetLoader>)loadersProperty.GetValue(this.Helper.Content);
+                loaders.Add(loader);
+            }
+
+            // add console commands
             Logger.Log("Registering framework events...",LogLevel.Trace);
             helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
-            if(Config.TrainerCommands)
+            if (Config.TrainerCommands)
             {
                 helper.ConsoleCommands
                     .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",",Commands.Commands.Farms), Commands.Commands.farm)
                     .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", Commands.Commands.farm)
 
-                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
-                ;
+                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player);
             }
+
+            // add events
             GameEvents.UpdateTick += FirstUpdateTick;
             GameEvents.UpdateTick += GameEvents_LoadTick;
             Events.MoreEvents.Setup();
@@ -81,25 +99,14 @@ namespace Entoarox.Framework
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
             Logger.Log("Framework has finished!",LogLevel.Info);
+
+            // version check
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
         private void FirstUpdateTick(object s, EventArgs e)
         {
-            // init
             TypeRegistry.Init();
-            IAssetLoader loader = ContentRegistry.Init(this.Helper.Content, this.Helper.DirectoryPath);
 
-            // register loader
-            Type contentHelperType = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
-            PropertyInfo loadersProperty = contentHelperType?.GetProperty("AssetLoaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (loadersProperty == null)
-            {
-                this.Monitor.ExitGameImmediately("Could not access SMAPI's asset loaders. Make sure you have the latest version of both Entoarox Framework and SMAPI.");
-                return;
-            }
-            IList<IAssetLoader> loaders = (IList<IAssetLoader>)loadersProperty.GetValue(this.Helper.Content);
-            loaders.Add(loader);
-            
             GameEvents.UpdateTick -= FirstUpdateTick;
         }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
