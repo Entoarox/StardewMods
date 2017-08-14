@@ -14,8 +14,14 @@ namespace Entoarox.ShopExpander
         private bool eventsActive = false;
         public override void Entry(IModHelper helper)
         {
-            Config = helper.ReadConfig<ShopExpanderConfig>();
-            foreach (Reference obj in Config.objects)
+            this.Config = this.Helper.ReadConfig<ShopExpanderConfig>();
+
+            GameEvents.UpdateTick += this.FirstUpdateTick;
+            MenuEvents.MenuChanged += Event_MenuChanged;
+        }
+        private void FirstUpdateTick(object sender, EventArgs e)
+        {
+            foreach (Reference obj in this.Config.objects)
             {
                 try
                 {
@@ -23,11 +29,11 @@ namespace Entoarox.ShopExpander
                 }
                 catch (Exception err)
                 {
-                    Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj.ToString(), err);
+                    Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj, err);
                 }
             }
 
-            MenuEvents.MenuChanged += Event_MenuChanged;
+            GameEvents.UpdateTick -= this.FirstUpdateTick;
         }
         private void generateObject(string owner, int replacement, int stackAmount, string requirements)
         {
