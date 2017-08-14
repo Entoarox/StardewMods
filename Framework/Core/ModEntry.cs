@@ -27,8 +27,6 @@ namespace Entoarox.Framework.Core
     internal class ModEntry : Mod
     {
         #region References
-        internal static PropertyInfo Loaders;
-        internal static PropertyInfo Injectors;
         internal static FrameworkConfig Config;
         internal static IMonitor Logger;
         internal static IModHelper SHelper;

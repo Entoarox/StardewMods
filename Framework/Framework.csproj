@@ -66,7 +66,6 @@
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
     <Compile Include="Delegates.cs" />
-    <Compile Include="EventArgsMessageReceived.cs" />
     <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />
     <Compile Include="IConditionHelper.cs" />

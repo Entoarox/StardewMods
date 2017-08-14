@@ -16,13 +16,16 @@ namespace Entoarox.Framework.Core
 
         private string ModID;
         internal InterModHelper(string modID) => ModID=modID;
-        public event EventHandler<EventArgsMessageReceived> MessageReceived;
         
         public void Subscribe(string channel, ReceiveMessage handler)
         {
             if (!_Map.ContainsKey(channel))
                 _Map.Add(channel, new List<ReceiveMessage>());
             _Map[channel].Add(handler);
+        }
+        public void Subscribe(ReceiveMessage handler)
+        {
+            Subscribe(ModID, handler);
         }
         public void Publish(string channel, string message)
         {
