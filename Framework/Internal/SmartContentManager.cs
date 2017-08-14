@@ -44,12 +44,8 @@ namespace Entoarox.Framework
         /// <param name="fileName">The file path to load instead.</param>
         internal void RegisterRedirect(string assetName, string fileName)
         {
-            string x = assetName;
-
             // validate key
             assetName = this.NormaliseAssetName(assetName);
-            Console.WriteLine($"Redirecting {x} ({assetName}) => {fileName}");
-
             if (!this.MarkHandledOrWarn(assetName))
                 return;
 
