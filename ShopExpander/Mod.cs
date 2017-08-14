@@ -6,6 +6,7 @@ using StardewValley.Menus;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+
 using Entoarox.Framework;
 
 namespace Entoarox.ShopExpander
@@ -14,18 +15,14 @@ namespace Entoarox.ShopExpander
     {
         internal ShopExpanderConfig Config;
         private bool eventsActive = false;
-        private bool skippedTick = false;
+        private byte skippedTick = 0;
         public override void Entry(IModHelper helper)
-        {
-            GameEvents.FirstUpdateTick += Event_FirstUpdateTick;
-        }
-        private void Event_FirstUpdateTick(object s, EventArgs e)
         {
             GameEvents.UpdateTick += Event_UpdateTick;
         }
         private void Event_UpdateTick(object s, EventArgs e)
         {
-            if (skippedTick)
+            if (skippedTick > 1)
             {
                 MenuEvents.MenuChanged += Event_MenuChanged;
                 Config = Helper.ReadConfig<ShopExpanderConfig>();
@@ -37,11 +34,11 @@ namespace Entoarox.ShopExpander
                     }
                     catch (Exception err)
                     {
-                        Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj.ToString(), err);
+                        Monitor.Log("Object failed to generate: " + obj.ToString(), LogLevel.Error,err);
                     }
             }
             else
-                skippedTick = true;
+                skippedTick++;
         }
         private void generateObject(string owner, int replacement, int stackAmount, string requirements)
         {
@@ -100,7 +97,7 @@ namespace Entoarox.ShopExpander
                 Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false}", LogLevel.Trace);
                 return;
             }
-            if (!string.IsNullOrEmpty(item.requirements) && !Conditions.CheckConditionList(item.requirements, ','))
+            if (!string.IsNullOrEmpty(item.requirements) && !Helper.Conditions().ValidateConditions(item.requirements))
             {
                 Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=false}", LogLevel.Trace);
                 return;

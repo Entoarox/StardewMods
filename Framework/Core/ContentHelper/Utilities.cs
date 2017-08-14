@@ -13,6 +13,7 @@ using StardewValley.Projectiles;
 
 namespace Entoarox.Framework.Core.ContentHelper
 {
+    using AssetHandlers;
     internal static class Utilities
     {
         private static IList<IAssetLoader> _AssetLoaders;
@@ -34,6 +35,14 @@ namespace Entoarox.Framework.Core.ContentHelper
                     SetupReflection();
                 return _AssetEditors;
             }
+        }
+        internal static void PerformSetup()
+        {
+            var TypeHandler = new DeferredAssetHandler();
+            AssetLoaders.Add(TypeHandler);
+            AssetEditors.Add(TypeHandler);
+            AssetEditors.Add(new DeferredTypeHandler());
+            AssetLoaders.Add(new XnbLoader());
         }
         private static void SetupReflection()
         {

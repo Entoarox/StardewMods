@@ -50,10 +50,8 @@ namespace Entoarox.Framework.Core
                 ;
             GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
             Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
-            // Setup content manager hooks
-            Type t = Game1.content.GetType();
-            Loaders = t.GetProperty("Loaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            Injectors = t.GetProperty("Injectors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            // Setup content manager
+            ContentHelper.Utilities.PerformSetup();
         }
         #endregion
         #region Events

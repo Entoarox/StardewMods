@@ -29,7 +29,7 @@ namespace Entoarox.SeasonalImmersion
                 Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
                 LoadContent();
                 LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
+                TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
                 ContentReady = true;
                 Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
             }
@@ -256,14 +256,14 @@ namespace Entoarox.SeasonalImmersion
                 Monitor.Log($"Failed to update seasonal textures\n{err}",LogLevel.Error);
             }
         }
-        internal void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
+        internal void TimeEvents_AfterDayStarted(object s, EventArgs e)
         {
-            if (ContentReady && Game1.hasLoadedGame)
+            if (ContentReady && Game1.dayOfMonth == 1)
                 UpdateTextures();
         }
         internal void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)
         {
-            if (Game1.hasLoadedGame && Game1.currentLocation != null && ContentReady && (e.NewLocation.name=="Farm" || e.PriorLocation!=null && e.PriorLocation.isOutdoors!=e.NewLocation.isOutdoors))
+            if (ContentReady && (e.NewLocation.name=="Farm" || e.PriorLocation.isOutdoors!=e.NewLocation.isOutdoors))
                 UpdateTextures();
         }
     }

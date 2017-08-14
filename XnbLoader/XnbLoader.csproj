@@ -43,6 +43,7 @@
       <Link>XnbLoader.json</Link>
     </None>
     <None Include="packages.config" />
+    <None Include="update.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">

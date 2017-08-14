@@ -6,21 +6,15 @@ using StardewModdingAPI;
 namespace Entoarox.XnbLoader
 {
     using Framework;
-    using Framework.Content;
     public class XnbLoaderMod : Mod
     {
         private string _Path;
         private int Files = 0;
-        private IContentHelper Content;
         public override void Entry(IModHelper helper)
         {
-            if (EntoFramework.Version < new Version(1, 6, 5))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for XnbLoader to use.");
-            EntoFramework.VersionRequired("XnbLoader", new Version(1, 6, 6));
-            VersionChecker.AddCheck("XnbLoader", new Version(ModManifest.Version.MajorVersion, ModManifest.Version.MinorVersion, ModManifest.Version.PatchVersion), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
+            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/XnbLoader/update.json");
             _Path = Path.Combine(Helper.DirectoryPath, "ModContent", "");
             Directory.CreateDirectory(_Path);
-            Content = ContentHelper.Create(this);
             Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
             ParseDir(_Path);
             Monitor.Log("Reloading static content references...", LogLevel.Trace);
@@ -38,7 +32,7 @@ namespace Entoarox.XnbLoader
                 string from = filePath.Replace(_Path+separator, "");
                 Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", LogLevel.Trace);
                 Files++;
-                Content.RegisterXnbReplacement(from, filePath);
+                Helper.Content.RegisterXnbReplacement(from, filePath);
             }
         }
     }

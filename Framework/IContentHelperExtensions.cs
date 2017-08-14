@@ -10,6 +10,7 @@ namespace Entoarox.Framework
 {
     using Core;
     using Core.ContentHelper;
+    using Core.AssetHandlers;
     public static class IContentHelperExtensions
     {
         /// <summary>
@@ -107,15 +108,16 @@ namespace Entoarox.Framework
         }
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
-        /// This will only work if none of the more specific loaders deal with the file first
         /// </summary>
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to replace</param>
         /// <param name="replacementAssetName">The asset (Relative to your mod directory and without extension) to use instead</param>
-        [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RegisterXnbReplacement(this IContentHelper helper, string assetName, string replacementAssetName)
         {
-
+            if (XnbLoader._Map.ContainsKey(assetName))
+                ModEntry.Logger.Log("[IContentHelper] The `" + Utilities.ModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset failed, as another mod has already done so.", LogLevel.Error);
+            else
+                XnbLoader._Map.Add(assetName, (helper, replacementAssetName));
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the loading for one specific asset
@@ -124,21 +126,12 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="assetLoader">The delegate assigned to handle loading for this asset</param>
-        [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RegisterLoader<T>(this IContentHelper helper, string assetName, AssetLoader<T> assetLoader)
         {
-
-        }
-        /// <summary>
-        /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the loading for a specific type of asset
-        /// </summary>
-        /// <typeparam name="T">The Type the asset is loaded as</typeparam>
-        /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
-        /// <param name="assetLoader">The delegate assigned to handle loading for this type</param>
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public static void RegisterLoader<T>(this IContentHelper helper, AssetLoader<T> assetLoader)
-        {
-
+            if (DeferredAssetHandler._LoadMap.ContainsKey((typeof(T), assetName)))
+                ModEntry.Logger.Log("[IContentHelper] The `" + Utilities.ModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset of type `" + typeof(T).FullName + "` failed, as another mod has already done so.", LogLevel.Error);
+            else
+                DeferredAssetHandler._LoadMap.Add((typeof(T), assetName), assetLoader);
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the injection for one specific asset
@@ -147,10 +140,12 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="assetInjector">The delegate assigned to handle injection for this asset</param>
-        [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RegisterInjector<T>(this IContentHelper helper, string assetName, AssetInjector<T> assetInjector)
         {
-
+            if (!DeferredAssetHandler._EditMap.ContainsKey((typeof(T), assetName)))
+                DeferredAssetHandler._EditMap.Add((typeof(T), assetName), new List<Delegate>());
+            else
+                DeferredAssetHandler._EditMap[(typeof(T), assetName)].Add(assetInjector);
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the injection for a specific type of asset
@@ -158,10 +153,12 @@ namespace Entoarox.Framework
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetInjector">The delegate assigned to handle loading for this type</param>
-        [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RegisterInjector<T>(this IContentHelper helper, AssetInjector<T> assetInjector)
         {
-
+            if (DeferredTypeHandler._EditMap.ContainsKey(typeof(T)))
+                DeferredTypeHandler._EditMap.Add(typeof(T), new List<Delegate>());
+            else
+                DeferredTypeHandler._EditMap[typeof(T)].Add(assetInjector);
         }
     }
 }

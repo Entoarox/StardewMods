@@ -53,15 +53,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AssetHandlers\DeferredAssetHandler.cs" />
+    <Compile Include="Core\AssetHandlers\DeferredTypeHandler.cs" />
     <Compile Include="Core\ContentHelper\Utilities.cs" />
     <Compile Include="Core\ContentHelper\WrappedHandler.cs" />
     <Compile Include="Core\ContentHelper\WrappedLoader.cs" />
     <Compile Include="Core\ContentHelper\WrappedInjector.cs" />
+    <Compile Include="Core\InterMod.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
+    <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="EventArgsMessageReceived.cs" />
+    <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />
     <Compile Include="IConditionHelper.cs" />
     <Compile Include="IContentHandler.cs" />
@@ -69,6 +75,7 @@
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="Core\FrameworkConfig.cs" />
+    <Compile Include="IInterMod.cs" />
     <Compile Include="IMessageHelper.cs" />
     <Compile Include="Core\Message.cs" />
     <Compile Include="Injection\Crop_newDay.cs" />
@@ -77,13 +84,11 @@
     <Compile Include="IPlayerModifierHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
     <Compile Include="Core\ConditionHelper.cs" />
-    <Compile Include="Extensions\ConversionExtensions.cs" />
-    <Compile Include="Extensions\MonitorExtensions.cs" />
-    <Compile Include="Extensions\GameLocationExtensions.cs" />
     <Compile Include="Core\ModEntry.cs" />
     <Compile Include="Core\MessageHelper.cs" />
     <Compile Include="Events\MoreEvents.cs" />
     <Compile Include="IModHelperExtensions.cs" />
+    <Compile Include="IMonitorExtensions.cs" />
     <Compile Include="PlayerModifier.cs" />
     <Compile Include="UI\OverlayMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

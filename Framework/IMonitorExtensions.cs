@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 using StardewModdingAPI;
 
-namespace Entoarox.Framework.Extensions
+namespace Entoarox.Framework
 {
-    public static class MonitorExtensions
+    public static class IMonitorExtensions
     {
         private static readonly HashSet<string> Cache = new HashSet<string>();
         public static void Log(this IMonitor self, string message, LogLevel level = LogLevel.Debug, Exception error = null)
