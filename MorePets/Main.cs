@@ -37,6 +37,8 @@ namespace MorePets
         {
             modPath = helper.DirectoryPath;
             Config = helper.ReadConfig<MorePetsConfig>();
+            EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
+
             GameEvents.UpdateTick += GameEvents_UpdateTick;
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
@@ -108,7 +110,6 @@ namespace MorePets
             {
                 GameLocation bus = Game1.getLocationFromName("BusStop");
                 bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet",bus.map, "paths_objects_MorePetsTilesheet", new xTile.Dimensions.Size(2,2), new xTile.Dimensions.Size(16,16)));
-                EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
                 bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");
