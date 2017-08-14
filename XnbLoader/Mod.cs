@@ -9,9 +9,6 @@ namespace Entoarox.XnbLoader
 
         public override void Entry(StardewModdingAPI.IModHelper helper)
         {
-            if (Framework.EntoFramework.Version < new Version(1, 6, 6))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for XnbLoader to use.");
-            Framework.EntoFramework.VersionRequired("XnbLoader", new Version(1, 6, 6));
             Framework.VersionChecker.AddCheck("XnbLoader", new System.Version(1, 0, 6), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
 
             _Path = System.IO.Path.Combine(Helper.DirectoryPath, "ModContent", "");
