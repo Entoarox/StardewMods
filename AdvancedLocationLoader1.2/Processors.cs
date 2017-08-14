@@ -9,7 +9,6 @@ using StardewValley;
 using Warp = StardewValley.Warp;
 
 using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
@@ -24,7 +23,7 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 stage++; // 1
-                if (!string.IsNullOrEmpty(tile.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(tile.Conditions))
+                if (!string.IsNullOrEmpty(tile.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(tile.Conditions))
                 {
                     ModEntry.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
                     return;
@@ -85,7 +84,7 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                if (string.IsNullOrEmpty(property.Conditions) || ModEntry.FHelper.Conditions.ValidateConditions(property.Conditions))
+                if (string.IsNullOrEmpty(property.Conditions) || ModEntry.SHelper.Conditions().ValidateConditions(property.Conditions))
                 {
                     ModEntry.Logger.Log(property.ToString()+" ~> true", LogLevel.Trace);
                     if (Game1.getLocationFromName(property.MapName).HasTile(property.TileX, property.TileY, property.LayerId))
@@ -108,7 +107,7 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                if (!string.IsNullOrEmpty(warp.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(warp.Conditions))
+                if (!string.IsNullOrEmpty(warp.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(warp.Conditions))
                 {
                     ModEntry.Logger.Log(warp.ToString() +"~> false", LogLevel.Trace);
                     return;
@@ -143,7 +142,7 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 3
-                    ModEntry.FHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                    ModEntry.SHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
                     stage++; // 4
                     if (location.map.GetTileSheet(tilesheet.SheetId) != null)
                     {
@@ -179,7 +178,7 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 GameLocation loc;
-                xTile.Map map = ModEntry.FHelper.Content.Load<xTile.Map>(location.FileName);
+                xTile.Map map = ModEntry.SHelper.Content.Load<xTile.Map>(location.FileName);
                 switch (location.Type)
                 {
                     case "Cellar":
@@ -219,7 +218,7 @@ namespace Entoarox.AdvancedLocationLoader
             ModEntry.Logger.Log(obj.ToString(),LogLevel.Trace);
             try
             {
-                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), ModEntry.FHelper.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
+                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), ModEntry.SHelper.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
             }
             catch (Exception err)
             {

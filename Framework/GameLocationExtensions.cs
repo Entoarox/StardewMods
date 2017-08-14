@@ -9,7 +9,7 @@ using xTile.Tiles;
 using xTile.Layers;
 using xTile.ObjectModel;
 
-namespace Entoarox.Framework.Extensions
+namespace Entoarox.Framework
 {
     public static class GameLocationExtensions
     {

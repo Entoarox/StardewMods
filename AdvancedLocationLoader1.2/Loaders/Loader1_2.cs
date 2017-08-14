@@ -8,9 +8,10 @@ using StardewValley;
 
 using Microsoft.Xna.Framework;
 
+using Entoarox.Framework;
+
 using Entoarox.AdvancedLocationLoader.Configs;
 using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
-using Entoarox.Framework.Extensions;
 
 using Newtonsoft.Json;
 
@@ -402,7 +403,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     Processors.ApplyOverride(obj);
                 stage++; // 12
                 foreach (Redirect obj in trueCompound.Redirects)
-                    ModEntry.FHelper.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
+                    ModEntry.SHelper.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
                 stage++; // 13
                 foreach (Tilesheet obj in trueCompound.Tilesheets)
                 {
@@ -462,7 +463,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                 ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs!");
                             foreach (string season in seasons)
                             {
-                                string file = Path.Combine(ModEntry.FHelper.PlatformRelativeContent, "Maps", season + "_" + path[1] + ".xnb");
+                                string file = Path.Combine(ModEntry.SHelper.Content.GetPlatformRelativeContent(), "Maps", season + "_" + path[1] + ".xnb");
                                 if (!File.Exists(file))
                                     ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this will cause bugs!");
                             }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -19,7 +18,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Entoarox.Framework.Core
 {
-    using Extensions;
     using Events;
     using xTile.Tiles;
     using xTile.ObjectModel;

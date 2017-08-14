@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Input;
 using StardewValley;
 
 using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
 
 using StardewModdingAPI.Events;
 
@@ -101,11 +100,11 @@ namespace Entoarox.AdvancedLocationLoader
                         Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
                         List<Item> stock = new List<Item>();
                         NPC portrait = new NPC();
-                        portrait.Portrait = ModEntry.FHelper.Content.Load<Texture2D>(shop.Portrait);
+                        portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);
                         portrait.name = shop.Owner;
                         foreach (Configs.ShopItem item in shop.Items)
                         {
-                            if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.FHelper.Conditions.ValidateConditions(item.Conditions))
+                            if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(item.Conditions))
                                 continue;
                             StardewValley.Object result;
                             if (item.Price != null)

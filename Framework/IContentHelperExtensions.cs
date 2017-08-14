@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewModdingAPI;
+
+using StardewValley;
 
 namespace Entoarox.Framework
 {
@@ -159,6 +162,10 @@ namespace Entoarox.Framework
                 DeferredTypeHandler._EditMap.Add(typeof(T), new List<Delegate>());
             else
                 DeferredTypeHandler._EditMap[typeof(T)].Add(assetInjector);
+        }
+        public static string GetPlatformRelativeContent(this IContentHelper helper)
+        {
+            return File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory) : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content");
         }
     }
 }

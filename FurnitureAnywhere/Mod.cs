@@ -8,7 +8,6 @@ using StardewValley;
 using StardewValley.Objects;
 
 using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
 using Entoarox.Framework.Events;
 
 
@@ -20,7 +19,7 @@ namespace Entoarox.FurnitureAnywhere
     {
         public override void Entry(IModHelper helper)
         {
-            VersionChecker.AddCheck("FurnitureAnywhere", typeof(FurnitureAnywhereMod).Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/FurnitureAnywhere.json");
+            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
             MoreEvents.ActiveItemChanged += MoreEvents_ActiveItemChanged;
             LocationEvents.CurrentLocationChanged += TriggerItemChangedEvent;
             MenuEvents.MenuChanged += TriggerItemChangedEvent;
@@ -28,7 +27,7 @@ namespace Entoarox.FurnitureAnywhere
             SaveEvents.BeforeSave += SaveEvents_BeforeSave;
             SaveEvents.AfterSave += SaveEvents_AfterSave_AfterLoad;
             SaveEvents.AfterLoad += SaveEvents_AfterSave_AfterLoad;
-            EntoFramework.GetTypeRegistry().RegisterType<AnywhereFurniture>();
+            Helper.Content.RegisterSerializerType<AnywhereFurniture>();
         }
         private void RestoreVanillaObjects()
         {
@@ -53,7 +52,7 @@ namespace Entoarox.FurnitureAnywhere
             }
             catch(Exception err)
             {
-                Monitor.Log(LogLevel.Error,"Failed to run logic check due to unexpected error", err);
+                Monitor.Log("Failed to run logic check due to unexpected error",LogLevel.Error, err);
             }
         }
         internal void TriggerItemChangedEvent(object s, EventArgs e)

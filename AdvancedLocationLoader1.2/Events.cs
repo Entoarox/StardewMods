@@ -8,7 +8,8 @@ using StardewModdingAPI.Events;
 
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
-using Entoarox.Framework.Extensions;
+
+using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
 {
@@ -75,24 +76,20 @@ namespace Entoarox.AdvancedLocationLoader
                 ModEntry.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
             }
         }
-        internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
-        {
-            ModEntry.UpdateTilesheets();
-        }
-        internal static void TimeEvents_DayOfMonthChanged(object s, EventArgs e)
+        internal static void TimeEvents_AfterDayStarted(object s, EventArgs e)
         {
             ModEntry.UpdateConditionalEdits();
+            if(Game1.dayOfMonth==1)
+                ModEntry.UpdateTilesheets();
         }
-        internal static void MoreEvents_WorldReady(object s, EventArgs e)
+        internal static void GameEvents_UpdateTick(object s, EventArgs e)
         {
-            if (!StardewValley.Game1.hasLoadedGame)
+            if (!Context.IsWorldReady)
                 return;
-            GameEvents.UpdateTick -= MoreEvents_WorldReady;
+            GameEvents.UpdateTick -= GameEvents_UpdateTick;
             Loaders.Loader1_2.ApplyPatches();
             if(Configs.Compound.DynamicTiles.Count>0 || Configs.Compound.DynamicProperties.Count>0 || Configs.Compound.DynamicWarps.Count>0)
-                TimeEvents.DayOfMonthChanged += TimeEvents_DayOfMonthChanged;
-            if (Configs.Compound.SeasonalTilesheets.Count > 0)
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
+                TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {

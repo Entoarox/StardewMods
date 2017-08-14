@@ -16,7 +16,6 @@ using xTile.Tiles;
 using xTile.ObjectModel;
 
 using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
 
 namespace MorePets
 {
@@ -49,7 +48,7 @@ namespace MorePets
                     .Add("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>", this.CommandFired_SpawnPet)
                     .Add("test_adoption", "Triggers the adoption dialogue", this.CommandFired_TestAdoption);
             }
-            VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
+            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/MorePets/update.json");
         }
         private void PopulatePetSkins()
         {
@@ -107,8 +106,7 @@ namespace MorePets
             if (replaceBus && Game1.getLocationFromName("BusStop") != null)
             {
                 GameLocation bus = Game1.getLocationFromName("BusStop");
-                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet",bus.map, "paths_objects_MorePetsTilesheet", new xTile.Dimensions.Size(2,2), new xTile.Dimensions.Size(16,16)));
-                Entoarox.Framework.Content.ContentHelper.Create(this).RegisterTexturePatch("paths_objects_MorePetsTilesheet", "box.png");
+                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet",bus.map, Helper.Content.GetActualAssetKey("box.png"), new xTile.Dimensions.Size(2,2), new xTile.Dimensions.Size(16,16)));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
                 bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");

@@ -11,7 +11,7 @@ using StardewModdingAPI;
 
 using Entoarox.AdvancedLocationLoader.Configs;
 
-using Entoarox.Framework.Extensions;
+using Entoarox.Framework;
 
 namespace Entoarox.AdvancedLocationLoader.Loaders
 {
