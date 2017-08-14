@@ -8,6 +8,36 @@ namespace Entoarox.XnbLoader
     public class XnbLoaderMod : Mod
     {
         /*********
+        ** Properties
+        *********/
+        /// <summary>The name of the mod folder which contains the files to load.</summary>
+        private readonly string ContentFolderName = "ModContent";
+
+        /// <summary>The content paths to create when the mod starts.</summary>
+        private readonly string[] PathsToCreate =
+        {
+            @"Animals",
+            @"Buildings",
+            @"Characters\Dialogue",
+            @"Characters\Farmer",
+            @"Characters\Monsters",
+            @"Characters\schedules",
+            @"Data\Events",
+            @"Data\Festivals",
+            @"Data\TV",
+            @"Fonts",
+            @"LooseSprites\Lighting",
+            @"Maps",
+            @"Mines",
+            @"Minigames",
+            @"Portraits",
+            @"Strings",
+            @"TerrainFeatures",
+            @"TileSheets"
+        };
+
+
+        /*********
         ** Public methods
         *********/
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
@@ -16,13 +46,14 @@ namespace Entoarox.XnbLoader
         {
             Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/XnbLoader/update.json");
 
-            // get content path
-            string path = Path.Combine(Helper.DirectoryPath, "ModContent");
-            Directory.CreateDirectory(path);
+            // prepare directory structure
+            string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
+            foreach(string path in this.PathsToCreate)
+                Directory.CreateDirectory(Path.Combine(contentPath, path));
 
             // load files
             this.Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
-            int overrides = this.LoadOverrides(path, path);
+            int overrides = this.LoadOverrides(contentPath, contentPath);
             this.Monitor.Log($"Parsing complete, found and redirected {overrides} files", LogLevel.Info);
         }
 
