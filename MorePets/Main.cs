@@ -42,6 +42,7 @@ namespace MorePets
 
             // hook events
             GameEvents.UpdateTick += GameEvents_UpdateTick;
+            TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
             //LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
@@ -59,7 +60,10 @@ namespace MorePets
             // check version
             VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
         }
-
+        private void TimeEvents_AfterDayStarted(object sender, EventArgs eventArgs)
+        {
+            replaceBus = true;
+        }
         private void LoadPetSkins(out Texture2D[] catTextures, out Texture2D[] dogTextures)
         {
             List<Texture2D> catTextureList = new List<Texture2D>();
