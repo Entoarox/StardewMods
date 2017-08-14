@@ -6,7 +6,7 @@ using StardewModdingAPI;
 namespace Entoarox.Framework.Internal
 {
     /// <summary>Wraps <see cref="IContentHelper"/> to provide access to private fields until SMAPI 2.0 is released.</summary>
-    internal class ContentHelperWrapper : IContentHelper
+    internal class ContentHelperWrapper
     {
         /*********
         ** Properties
@@ -21,9 +21,6 @@ namespace Entoarox.Framework.Internal
         /*********
         ** Accessors
         *********/
-        /// <summary>The unique ID of the mod for which the instance was created.</summary>
-        public string ModID => this.ContentHelper.ModID;
-
         /// <summary>Interceptors which edit matching content assets after they're loaded.</summary>
         public IList<IAssetLoader> AssetLoaders;
 
@@ -85,11 +82,5 @@ namespace Entoarox.Framework.Internal
         /// <exception cref="T:System.ArgumentException">The <paramref name="key" /> is empty or contains invalid characters.</exception>
         /// <exception cref="T:Microsoft.Xna.Framework.Content.ContentLoadException">The content asset couldn't be loaded (e.g. because it doesn't exist).</exception>
         public T Load<T>(string key, ContentSource source = ContentSource.ModFolder) => this.ContentHelper.Load<T>(key, source);
-
-        /// <summary>Get the underlying key in the game's content cache for an asset. This can be used to load custom map tilesheets, but should be avoided when you can use the content API instead. This does not validate whether the asset exists.</summary>
-        /// <param name="key">The asset key to fetch (if the <paramref name="source" /> is <see cref="F:StardewModdingAPI.ContentSource.GameContent" />), or the local path to a content file relative to the mod folder.</param>
-        /// <param name="source">Where to search for a matching content asset.</param>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="key" /> is empty or contains invalid characters.</exception>
-        public string GetActualAssetKey(string key, ContentSource source = ContentSource.ModFolder) => this.ContentHelper.GetActualAssetKey(key, source);
     }
 }
