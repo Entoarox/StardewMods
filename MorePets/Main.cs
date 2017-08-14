@@ -21,7 +21,7 @@ namespace MorePets
 {
     public class MorePetsMod : Mod
     {
-        internal static LocalizedContentManager content;
+        internal static IContentHelper content;
         private static string modPath;
         internal static int dogLimit = 1;
         internal static int catLimit = 1;
@@ -86,7 +86,7 @@ namespace MorePets
                 return;
             if (content == null)
             {
-                content = new LocalizedContentManager(Game1.content.ServiceProvider, modPath);
+                content = this.Helper.Content;
                 PopulatePetSkins();
                 replaceBus = true;
             }
