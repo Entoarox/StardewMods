@@ -19,7 +19,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Entoarox.Framework.Core
 {
-    using Core.Utilities;
     using Extensions;
     using Events;
     using xTile.Tiles;
