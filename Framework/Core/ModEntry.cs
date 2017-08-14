@@ -8,13 +8,11 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
 using StardewValley;
-using StardewValley.Locations;
 using StardewValley.Characters;
 using StardewValley.Monsters;
 using StardewValley.Quests;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
-using SObject = StardewValley.Object;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
