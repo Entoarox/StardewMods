@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using StardewValley;
+using StardewValley.Characters;
 
 namespace Entoarox.Framework
 {
@@ -37,5 +38,21 @@ namespace Entoarox.Framework
         /// <param name="x">The X position to move the player to</param>
         /// <param name="y">The Y position to move the player to</param>
         void MoveTo(GameLocation location, int x, int y);
+        /// <summary>
+        /// Used to check if the farmer has any pet, with the option to only check for the vanilla pet
+        /// </summary>
+        /// <param name="onlyVanilla">When true, only the vanilla pet is looked for</param>
+        /// <returns>If the farmer has a pet</returns>
+        bool HasPet(bool onlyVanilla = false);
+        /// <summary>
+        /// Used to get a reference to the farmers pet, when multiple pets are found, it tries to identify the vanilla pet and prefers returning that
+        /// </summary>
+        /// <returns>A <see cref="Pet"/> instance</returns>
+        Pet GetPet();
+        /// <summary>
+        /// Returns a list of all pets found
+        /// </summary>
+        /// <returns>A list of all pets found in the game</returns>
+        Pet[] GetAllPets();
     }
 }

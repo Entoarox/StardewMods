@@ -38,6 +38,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Harmony">
+      <HintPath>..\..\..\..\Visual Studio 2017\Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
@@ -54,31 +57,24 @@
     <Compile Include="Core\ContentHelper\WrappedHandler.cs" />
     <Compile Include="Core\ContentHelper\WrappedLoader.cs" />
     <Compile Include="Core\ContentHelper\WrappedInjector.cs" />
-    <Compile Include="Core\Override\SerializableDictionary.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
-    <Compile Include="Core\UpdateInfo.cs" />
+    <Compile Include="Core\UpdateHandler.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="IAugmentedLocation.cs" />
     <Compile Include="IConditionHelper.cs" />
     <Compile Include="IContentHandler.cs" />
-    <Compile Include="IContentHelper.cs" />
     <Compile Include="IContentHelperExtensions.cs" />
-    <Compile Include="IFrameworkHelper.cs" />
-    <Compile Include="Core\Content\ContentHelper.cs" />
-    <Compile Include="Core\Content\ExtendibleContentManager.cs" />
-    <Compile Include="Core\Content\Plugins\DelegatedContentHandler.cs" />
-    <Compile Include="Core\Content\Plugins\DictionaryInjector.cs" />
-    <Compile Include="Core\Content\Plugins\TextureInjector.cs" />
-    <Compile Include="Core\Content\Plugins\XnbLoader.cs" />
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
-    <Compile Include="FrameworkConfig.cs" />
+    <Compile Include="Core\FrameworkConfig.cs" />
     <Compile Include="IMessageHelper.cs" />
     <Compile Include="Core\Message.cs" />
+    <Compile Include="Injection\Crop_newDay.cs" />
+    <Compile Include="Injection\HoeDirt_canPlantThisSeedHere.cs" />
     <Compile Include="IPlayerHelper.cs" />
     <Compile Include="IPlayerModifierHelper.cs" />
-    <Compile Include="IUpdateHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
     <Compile Include="Core\ConditionHelper.cs" />
     <Compile Include="Extensions\ConversionExtensions.cs" />

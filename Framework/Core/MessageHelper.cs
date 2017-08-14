@@ -35,38 +35,23 @@ namespace Entoarox.Framework.Core
         {
         }
 
-        public void Add(string message, string name, Color color)
+        void IMessageHelper.Add(string message, string name, Color color)
         {
-            var chatMessage = new Message();
-            var msg = name != null ? $"[{name}[ {message}" : message;
-            chatMessage.Text = Game1.parseText(msg, Game1.smallFont, 480);
-            chatMessage.Time = 600;
-            Console.WriteLine($"{chatMessage.Text} : {(int)Game1.smallFont.MeasureString(chatMessage.Text).Y}");
-            chatMessage.Size = (int)Game1.smallFont.MeasureString(chatMessage.Text).Y;
-            chatMessage.Color = color;
-
-            messages.Add(chatMessage);
-            if (messages.Count < maxMessages)
-                return;
-            messages.RemoveAt(0);
-        }
-        public void Add(string message, Color color)
-        {
-            Add(message, null, color);
-        }
-
-        internal void update()
-        {
-            foreach (Message msg in messages)
+            string text = Game1.parseText(name != null ? $"[{name}[ {message}" : message, Game1.smallFont, 480);
+            int size = (int)Game1.smallFont.MeasureString(text).Y;
+            Console.WriteLine($"{text} : {size}");
+            var chatMessage = new Message()
             {
-                if (msg.Time > 0)
-                    --msg.Time;
-                if (msg.Time < 75)
-                    msg.Alpha = msg.Time / 75f;
-            }
-            messages.Where(msg => Math.Abs(msg.Alpha) < 0.05f).ToList().ForEach(msg => messages.Remove(msg));
+                Text = text,
+                Time = 600,
+                Size = size,
+                Color=color
+            };
+            messages.Add(chatMessage);
+            if (messages.Count > maxMessages * 5)
+                messages.RemoveAt(0);
         }
-
+        void IMessageHelper.Add(string message, Color color) => (this as IMessageHelper).Add(message, null, color);
         public override void draw(SpriteBatch b)
         {
             if (messages.Any())
@@ -75,13 +60,16 @@ namespace Entoarox.Framework.Core
                 drawTextureBox(b, Game1.mouseCursors, new Rectangle(384, 373, 18, 18), 6, 6, width + 12, (messages.Sum(t => t.Size + 2) + 10), Color.White * messages.Last().Alpha);
 
                 int num = 0;
-                for (int index = 0; index < messages.Count; index++)
+                for (int index = 0; index < maxMessages; index++)
                 {
                     if (index > 0)
                         num += messages[index - 1].Size + 2;
                     Utility.drawTextWithShadow(b, messages[index].Text, Game1.smallFont, new Vector2(16f, 16 + num), messages[index].Color * messages[index].Alpha, 1f, 0.99f);
+                    messages[index].Time--;
+                    if (messages[index].Time < 75)
+                        messages[index].Alpha = messages[index].Time / 75f;
                 }
-                update();
+                messages.Where(msg => Math.Abs(msg.Alpha) < 0.05f).ToList().ForEach(msg => messages.Remove(msg));
             }
         }
     }

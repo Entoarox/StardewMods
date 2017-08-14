@@ -1,19 +1,25 @@
 ﻿This version of Entoarox Framework is a almost complete rewrite of the whole framework.
 
-Only the following namespaces have remained unchanged:
-- Entoarox.Framework.UI
-- Entoarox.Framework.Extensions
+Currently, in 2.0 only the `Entoarox.Framework.UI` namespace remains as-is
+Everything else has been overhauled so that a single `using Entoarox.Framework;` will allow you to access the full framework functionality.
 
-Next to these unchanged namespaces, the following classes are also still in place:
-- Entoarox.Framework.OverlayMenu
-- Entoarox.Framework.StackableShopObject
+The functionality in 2.0 is completely build around extension methods.
+This means that rather then adding new classes or API's for you to work with, everything has been hooked into existing classes or derived from existing API's
 
-A major part of the goal behind the framework overhaul is to lower how many `using` statements a user of the framework needs.
-As of 2.0, the amount of namespaces in the public framework are the following:
-- Entoarox.Framework
-- Entoarox.Framework.UI
-- Entoarox.Framework.Events
-- Entoarox.Framework.Extensions
-There is also the internal `Core` namespace that is only used by internal mechanics.
+The following SMAPI classes have extension methods:
+- IModHelper
+- IContentHelper
+- IMonitor
 
-In the Events namespace, many events have been removed as SMAPI now provides build-in support for these.
+The following SDV classes have extension methods:
+- GameLocation
+
+The following API's can be reached through extension methods on IModHelper:
+- IConditionHelper
+- IMessageHelper
+- IPlayerHelper
+- IPlayerHelper.IPlayerModifierHelper
+
+The following interfaces and classes are available for use with extensions made available:
+- IContentHandler (IContentHelper)
+- PlayerModifier (IPlayerModifierHelper)

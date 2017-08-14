@@ -2,6 +2,7 @@
 
 namespace Entoarox.Framework.Events
 {
+    using Core;
     public static class MoreEvents
     {
         /// <summary>
