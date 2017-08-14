@@ -13,7 +13,6 @@ using StardewValley;
 using StardewValley.Characters;
 using xTile.ObjectModel;
 using xTile.Tiles;
-using Version = System.Version;
 
 namespace MorePets
 {
@@ -23,7 +22,6 @@ namespace MorePets
         internal static Random random;
         private static bool replaceBus = false;
         internal static MorePetsConfig Config;
-        private static Version version = new Version(1, 3, 2);
         // DEV PROPERTIES
         internal static int offsetX = 0;
         internal static int offsetY = 0;
@@ -58,6 +56,7 @@ namespace MorePets
             }
 
             // check version
+            Version version = new Version(this.ModManifest.Version.MajorVersion, this.ModManifest.Version.MinorVersion, this.ModManifest.Version.PatchVersion);
             VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
         }
         private void TimeEvents_AfterDayStarted(object sender, EventArgs eventArgs)

@@ -6,7 +6,6 @@ using Entoarox.Framework.Events;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using Version = System.Version;
 
 namespace Entoarox.AdvancedLocationLoader
 {
@@ -18,9 +17,6 @@ namespace Entoarox.AdvancedLocationLoader
         public override void Entry(IModHelper helper)
         {
             ModPath = helper.DirectoryPath;
-            if (EntoFramework.Version < new Version(1, 6, 5))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
-            EntoFramework.VersionRequired("AdvancedLocationLoader", new Version(1, 6, 6));
             Logger = Monitor;
             Localizer = helper.Translation;
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
