@@ -3,6 +3,8 @@ using System.IO;
 
 using StardewModdingAPI;
 
+using Entoarox.Framework;
+
 namespace Entoarox.XnbLoader
 {
     using Framework;

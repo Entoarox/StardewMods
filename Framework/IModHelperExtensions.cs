@@ -36,9 +36,9 @@ namespace Entoarox.Framework
                 _PlayerHelper = new PlayerHelper();
             return _PlayerHelper;
         }
-        public static IInterMod InterMod(this IModHelper helper)
+        public static IInterModHelper InterMod(this IModHelper helper)
         {
-            return InterMod.Get((helper as IModLinked).ModID);
+            return InterModHelper.Get((helper as IModLinked).ModID);
         }
     }
 }

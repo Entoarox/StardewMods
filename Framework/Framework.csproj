@@ -59,7 +59,7 @@
     <Compile Include="Core\ContentHelper\WrappedHandler.cs" />
     <Compile Include="Core\ContentHelper\WrappedLoader.cs" />
     <Compile Include="Core\ContentHelper\WrappedInjector.cs" />
-    <Compile Include="Core\InterMod.cs" />
+    <Compile Include="Core\InterModHelper.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
@@ -75,7 +75,7 @@
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="Core\FrameworkConfig.cs" />
-    <Compile Include="IInterMod.cs" />
+    <Compile Include="IInterModHelper.cs" />
     <Compile Include="IMessageHelper.cs" />
     <Compile Include="Core\Message.cs" />
     <Compile Include="Injection\Crop_newDay.cs" />
