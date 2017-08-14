@@ -7,12 +7,14 @@
     "PatchVersion": 0,
     "Build": null
   },
+  "MinimumApiVersion": "1.15.2",
   "Description": "Lets you adopt more pets, with skins of your choice!",
   "UniqueID": "Entoarox.MorePets",
   "EntryDll": "MorePets.dll",
   "Dependencies": [
     {
-      "UniqueID": "Entoarox.EntoaroxFramework"
+      "UniqueID": "Entoarox.EntoaroxFramework",
+      "MinimumVersion": "1.8"
     }
   ]
 }
