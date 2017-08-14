@@ -7,6 +7,7 @@
     "PatchVersion": 5,
     "Build": null
   },
+  "MinimumApiVersion": "1.15.2",
   "Description": "More destinations for your minecart needs!",
   "UniqueID": "Entoarox.ExtendedMinecart",
   "EntryDll": "ExtendedMinecart.dll",

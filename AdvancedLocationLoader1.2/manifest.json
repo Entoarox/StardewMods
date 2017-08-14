@@ -7,6 +7,7 @@
     "PatchVersion": 0,
     "Build": null
   },
+  "MinimumApiVersion": "1.15.2",
   "Description": "Get your content into stardew without replacing any xnb files.",
   "UniqueID": "Entoarox.AdvancedLocationLoader",
   "EntryDll": "AdvancedLocationLoader.dll",
