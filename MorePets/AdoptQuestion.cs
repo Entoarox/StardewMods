@@ -18,14 +18,20 @@ namespace MorePets
         {
             this.Cat = cat;
             this.Skin = skin;
-            this.Sprite = new AnimatedSprite(MorePetsMod.content.Load<Texture2D>("pets/" + (this.Cat ? "cat_" : "dog_") + this.Skin), 28, 32, 32);
+
+            var textures = this.Cat ? MorePetsMod.CatTextures : MorePetsMod.DogTextures;
+            this.Sprite = new AnimatedSprite(textures[this.Skin], 28, 32, 32);
             this.Sprite.loop = true;
         }
         internal static void Show()
         {
             Random rnd = MorePetsMod.random;
-            bool cat = MorePetsMod.catLimit == 0 ? false : MorePetsMod.dogLimit == 0 ? true : rnd.NextDouble() < 0.5;
-            AdoptQuestion q = new AdoptQuestion(cat, rnd.Next(1, cat ? MorePetsMod.catLimit : MorePetsMod.dogLimit));
+
+            int catLimit = MorePetsMod.CatTextures.Length;
+            int dogLimit = MorePetsMod.DogTextures.Length;
+
+            bool cat = catLimit != 0 && (dogLimit == 0 || rnd.NextDouble() < 0.5);
+            AdoptQuestion q = new AdoptQuestion(cat, rnd.Next(1, cat ? catLimit : dogLimit));
             GraphicsEvents.OnPostRenderHudEvent += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
@@ -69,12 +75,12 @@ namespace MorePets
             if (this.Cat)
             {
                 pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y);
-                pet.sprite = new AnimatedSprite(MorePetsMod.content.Load<Texture2D>("pets/cat_" + this.Skin), 0, 32, 32);
+                pet.sprite = new AnimatedSprite(MorePetsMod.CatTextures[this.Skin], 0, 32, 32);
             }
             else
             {
                 pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y);
-                pet.sprite = new AnimatedSprite(MorePetsMod.content.Load<Texture2D>("pets/dog_" + this.Skin), 0, 32, 32);
+                pet.sprite = new AnimatedSprite(MorePetsMod.DogTextures[this.Skin], 0, 32, 32);
             }
             pet.name = petName;
             pet.manners = this.Skin;
