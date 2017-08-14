@@ -6,10 +6,10 @@ namespace Entoarox.Framework.Core.ContentHelper
     {
         private IContentHandler _Handler;
         internal WrappedInjector(IContentHandler handler) => _Handler = handler;
-        bool CanEdit<T>(IAssetInfo assetInfo) => _Handler.CanInject<T>(assetInfo.AssetName);
-        void Edit<T>(IAssetData assetData)
+        public bool CanEdit<T>(IAssetInfo assetInfo) => _Handler.CanInject<T>(assetInfo.AssetName);
+        public void Edit<T>(IAssetData assetData)
         {
-            T asset = assetData.AsData<T>();
+            T asset = assetData.GetData<T>();
             _Handler.Inject<T>(assetData.AssetName, ref asset);
             assetData.ReplaceWith(asset);
         }

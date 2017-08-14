@@ -41,9 +41,9 @@ namespace Entoarox.Framework.Core.ContentHelper
         }
         private static void SetupReflection()
         {
-            Type t = typeof(IModHelper).Assembly.GetType("StardewModdingAPI.Framework.ContentHelper");
-            PropertyInfo assetLoaders = t.GetProperty("AssetLoaders");
-            PropertyInfo assetEditors = t.GetProperty("AssetEditors");
+            Type t = Game1.content.GetType();
+            var assetLoaders = t.GetProperty("Loaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            var assetEditors = t.GetProperty("Injectors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             _AssetLoaders = (IList<IAssetLoader>)assetLoaders.GetValue(ModEntry.SHelper.Content);
             _AssetEditors = (IList<IAssetEditor>)assetEditors.GetValue(ModEntry.SHelper.Content);
         }
@@ -90,7 +90,7 @@ namespace Entoarox.Framework.Core.ContentHelper
         }
         internal static string ModName(object helper)
         {
-            return (helper is IModLinked) ? ModEntry.SHelper.ModRegistry.Get((helper as IModLinked).ModID).Name : "Unknown Mod";
+            return (helper is IModLinked) ? ModEntry.SHelper.ModRegistry.Get((helper as IModLinked).ModID).Name : "Name Unknown";
         }
     }
 }

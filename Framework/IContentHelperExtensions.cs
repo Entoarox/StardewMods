@@ -13,7 +13,6 @@ using StardewModdingAPI;
 namespace Entoarox.Framework
 {
     using Core;
-    using Core.Content;
     using Core.ContentHelper;
     public static class IContentHelperExtensions
     {
@@ -66,9 +65,9 @@ namespace Entoarox.Framework
         /// <param name="patchAssetName">The texture asset (Relative to your mod directory and without extension) used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterTexturePatch(this IContentHelper helper, string assetName, string patchAssetName, Rectangle? destination = null, Rectangle? source = null)
         {
-
         }
         /// <summary>
         /// Lets you replace a region of pixels in one texture with the contents of another texture
@@ -78,6 +77,7 @@ namespace Entoarox.Framework
         /// <param name="patchAssetName">The texture used for the modification</param>
         /// <param name="region">The area you wish to replace</param>
         /// <param name="source">The area you wish to use for replacement, if omitted the full patch texture is used</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterTexturePatch(this IContentHelper helper, string assetName, Texture2D patchAsset, Rectangle? destination = null, Rectangle? source = null)
         {
 
@@ -91,6 +91,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The dictionary asset (Relative to Content and without extension) that you wish to modify</param>
         /// <param name="patchAsset">The dictionary asset (Relative to your mod directory and without extension) used for the modification</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterDictionaryPatch<TKey, TValue>(this IContentHelper helper, string assetName, string patchAssetName)
         {
 
@@ -103,6 +104,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The dictionary asset (Relative to Content and without extension) that you wish to modify</param>
         /// <param name="patchAsset">The dictionary used for the modification</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterDictionaryPatch<TKey, TValue>(this IContentHelper helper, string assetName, Dictionary<TKey, TValue> patchAsset)
         {
 
@@ -114,6 +116,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to replace</param>
         /// <param name="replacementAssetName">The asset (Relative to your mod directory and without extension) to use instead</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterXnbReplacement(this IContentHelper helper, string assetName, string replacementAssetName)
         {
 
@@ -125,6 +128,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="assetLoader">The delegate assigned to handle loading for this asset</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterLoader<T>(this IContentHelper helper, string assetName, AssetLoader<T> assetLoader)
         {
 
@@ -135,6 +139,7 @@ namespace Entoarox.Framework
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetLoader">The delegate assigned to handle loading for this type</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterLoader<T>(this IContentHelper helper, AssetLoader<T> assetLoader)
         {
 
@@ -146,6 +151,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetName">The asset (Relative to Content and without extension) to handle</param>
         /// <param name="assetInjector">The delegate assigned to handle injection for this asset</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterInjector<T>(this IContentHelper helper, string assetName, AssetInjector<T> assetInjector)
         {
 
@@ -156,6 +162,7 @@ namespace Entoarox.Framework
         /// <typeparam name="T">The Type the asset is loaded as</typeparam>
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         /// <param name="assetInjector">The delegate assigned to handle loading for this type</param>
+        [Obsolete("This API method is not yet functional in the current development build.")]
         public static void RegisterInjector<T>(this IContentHelper helper, AssetInjector<T> assetInjector)
         {
 

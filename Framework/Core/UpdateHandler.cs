@@ -14,9 +14,11 @@ namespace Entoarox.Framework.Core
 {
     internal class UpdateInfo
     {
+#pragma warning disable CS0649
         public string Latest;
         public string Recommended;
         public string Minimum;
+#pragma warning restore CS0649
 
         public static Dictionary<IManifest, string> Map = new Dictionary<IManifest, string>();
 
@@ -48,7 +50,7 @@ namespace Entoarox.Framework.Core
                     break;
             }
         }
-        public static void DoUpdateChecks()
+        internal static void DoUpdateChecks()
         {
             try
             {
@@ -110,7 +112,7 @@ namespace Entoarox.Framework.Core
                                     }
                                     catch (Exception err)
                                     {
-                                        ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured while reading result." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                                        ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured while reading result, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
                                     }
                                 };
                                 Client.DownloadStringAsync(uri);
@@ -122,7 +124,7 @@ namespace Entoarox.Framework.Core
                         }
                         catch(Exception err)
                         {
-                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
                         }
                     });
                 else
@@ -130,7 +132,7 @@ namespace Entoarox.Framework.Core
             }
             catch(Exception err)
             {
-                ModEntry.Logger.Log("[UpdateChecker] Unexpected failure, unexpected error occured."+Environment.NewLine+err.ToString(), LogLevel.Error);
+                ModEntry.Logger.Log("[UpdateChecker] Unexpected failure, unexpected error occured, error message follows."+Environment.NewLine+err.ToString(), LogLevel.Error);
             }
         }
     }

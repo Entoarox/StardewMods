@@ -20,6 +20,10 @@ namespace Entoarox.Framework
             if (!UpdateInfo.Map.ContainsKey(manifest))
                 UpdateInfo.Map.Add(manifest, uri);
         }
+        public static void RequestCreditsSkip(this IModHelper helper)
+        {
+            ModEntry.SkipCredits = true;
+        }
         public static IConditionHelper Conditions(this IModHelper helper)
         {
             if (_ConditionHelper == null)

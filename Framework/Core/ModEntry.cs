@@ -19,11 +19,9 @@ using SObject = StardewValley.Object;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace Entoarox.Framework
+namespace Entoarox.Framework.Core
 {
-    using Core.Content;
     using Core.Utilities;
-    using Core.Override;
     using Extensions;
     using Events;
     using xTile.Tiles;
@@ -31,11 +29,15 @@ namespace Entoarox.Framework
 
     internal class ModEntry : Mod
     {
-        #region Mod
+        #region References
+        internal static PropertyInfo Loaders;
+        internal static PropertyInfo Injectors;
         internal static FrameworkConfig Config;
         internal static IMonitor Logger;
-        internal static IFrameworkHelper FHelper;
         internal static IModHelper SHelper;
+        internal static bool SkipCredits = false;
+        #endregion
+        #region Mod
         public override void Entry(IModHelper helper)
         {
             SHelper = helper;
@@ -50,15 +52,18 @@ namespace Entoarox.Framework
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", Commands)
                 ;
             GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
-            FHelper = FrameworkHelper.Get(this);
-            SetupContentManager();
-            FHelper.CheckForUpdates("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
+            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
+            // Setup content manager hooks
+            Type t = Game1.content.GetType();
+            Loaders = t.GetProperty("Loaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            Injectors = t.GetProperty("Injectors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         }
         #endregion
         #region Events
 
         private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
+        private static bool CreditsDone = false;
         private EventArgsActionTriggered ActionInfo;
         private Item prevItem = null;
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
@@ -161,14 +166,24 @@ namespace Entoarox.Framework
                         Logger.Log("Unknown farm type: " + args[0], LogLevel.Error);
                     break;
                 case "farm_clear":
-                    if (Verify == null || args.Length == 0 || !args[0].Equals(Verify))
+                    if (Verify == null && args.Length == 0)
                     {
-                        Verify = new Random().Next().ToString();
+                        Verify = new Random().Next().ToString("XXX");
                         Logger.Log($"This will remove all objects, natural and user-made from your farm, use `farm_clear {Verify}` to verify that you actually want to do this.", LogLevel.Alert);
                         return;
                     }
-                    Farm farm = Game1.getFarm();
-                    farm.objects.Clear();
+                    else if (!args[0].Equals(Verify))
+                    {
+                        Verify = null;
+                        Logger.Log($"Verification failed, attempt to remove objects has been cancelled.", LogLevel.Error);
+                        return;
+                    }
+                    else
+                    {
+                        Verify = null;
+                        Farm farm = Game1.getFarm();
+                        farm.objects.Clear();
+                    }
                     break;
                 case "player_warp":
                     try
@@ -188,82 +203,34 @@ namespace Entoarox.Framework
         private void GameEvents_FirstUpdateTick(object s, EventArgs e)
         {
             GameEvents.UpdateTick -= GameEvents_FirstUpdateTick;
-            if (Config.SkipCredits)
-                SkipCredits();
+            if (Config.SkipCredits || SkipCredits)
+            {
+                if (CreditsDone || !(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
+                    return;
+                Game1.playSound("bigDeSelect");
+                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
+                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
+                Game1.delayedActions.Clear();
+                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
+                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
+                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
+                Helper.Reflection.GetPrivateField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
+                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
+                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
+                Game1.changeMusicTrack("MainTheme");
+                CreditsDone = true;
+            }
             SetupSerializer();
             Core.UpdateInfo.DoUpdateChecks();
             GameEvents.UpdateTick += GameEvents_UpdateTick;
         }
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
-            EnforceContentManager();
             EnforceSerializer();
             if ((Game1.player.CurrentItem == null && prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(prevItem)))
             {
                 MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(prevItem, Game1.player.CurrentItem));
                 prevItem = Game1.player.CurrentItem;
-            }
-        }
-        #endregion
-        #region ContentManager
-        private WeakReference<ExtendibleContentManager> MainManager;
-        private WeakReference<ExtendibleContentManager> TileManager;
-        private WeakReference<ExtendibleContentManager> TempManager;
-        private xTile.Display.XnaDisplayDevice DisplayDevice;
-        private FieldInfo TempContent;
-        private string RootDirectory;
-        private IServiceProvider ServiceProvider;
-        private void SetupContentManager()
-        {
-            Monitor.Log("ContentManager: Performing setup");
-            if (TempContent == null)
-                TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
-            if (RootDirectory == null)
-            {
-                ServiceProvider = Game1.content.ServiceProvider;
-                RootDirectory = Game1.content.RootDirectory;
-            }
-            Monitor.Log("ContentManager: Hooking into content managers...");
-            EnforceContentManager();
-            Monitor.Log("ContentManager: Setup complete, EF.CM is being enforced");
-        }
-        private void EnforceContentManager()
-        {
-            if (MainManager == null || !MainManager.TryGetTarget(out ExtendibleContentManager mainManager) || mainManager==null)
-            {
-                Monitor.Log("ContentManager: MainManager is null, recreating");
-                mainManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                MainManager=new WeakReference<ExtendibleContentManager>(mainManager);
-            }
-            if (TileManager == null || !TileManager.TryGetTarget(out ExtendibleContentManager tileManager) || tileManager==null)
-            {
-                Monitor.Log("ContentManager: TileManager is null, recreating");
-                tileManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                TileManager = new WeakReference<ExtendibleContentManager>(tileManager);
-            }
-            if (TempManager == null || !TempManager.TryGetTarget(out ExtendibleContentManager tempManager) || tempManager==null)
-            {
-                Monitor.Log("ContentManager: TempManager is null, recreating");
-                tempManager = new ExtendibleContentManager(ServiceProvider, RootDirectory);
-                TempManager = new WeakReference<ExtendibleContentManager>(tempManager);
-            }
-            if (DisplayDevice == null)
-                DisplayDevice = new xTile.Display.XnaDisplayDevice(mainManager, Game1.game1.GraphicsDevice);
-            Game1.mapDisplayDevice = DisplayDevice;
-            if (!(Game1.content is ExtendibleContentManager) || Game1.content==null)
-            {
-                Monitor.Log("ContentManager: MainManager not referenced, enforcing");
-                Game1.content = mainManager;
-            }
-            if (!(Game1.game1.xTileContent is ExtendibleContentManager) || Game1.game1.xTileContent==null)
-            {
-                Monitor.Log("ContentManager: TileManager not referenced, enforcing");
-                Game1.game1.xTileContent = tileManager;
-            }
-            if (!(Game1.temporaryContent is ExtendibleContentManager) || Game1.temporaryContent==null)
-            {
-                Monitor.Log("ContentManager: TempManager not referenced, enforcing");
-                TempContent.SetValue(null, tempManager);
             }
         }
         #endregion
@@ -301,76 +268,17 @@ namespace Entoarox.Framework
         };
         private void SetupSerializer()
         {
-            try
-            {
-                MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
-                FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
-                LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
-                // SerializableDictionary
-                {
-                    Type[] Whitelist = new Type[]
-                    {
-                typeof(SerializableDictionary<,>),
-                typeof(SerializableDictionary<int,int>),
-                typeof(SerializableDictionary<int,int[]>),
-                typeof(SerializableDictionary<int,bool>),
-                typeof(SerializableDictionary<int,bool[]>),
-                typeof(SerializableDictionary<int,MineInfo>),
-                typeof(SerializableDictionary<string,int>),
-                typeof(SerializableDictionary<string,int[]>),
-                typeof(SerializableDictionary<long,FarmAnimal>),
-                typeof(SerializableDictionary<Vector2,int>),
-                typeof(SerializableDictionary<Vector2,SObject>),
-                typeof(SerializableDictionary<Vector2,TerrainFeature>)
-                    };
-                    MethodInfo ReadXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
-                    MethodInfo WriteXml = typeof(HookedSerializableDictionary).GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public);
-                    foreach (Type type in Whitelist)
-                    {
-                        try
-                        {
-                            UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), ReadXml);
-                            UnsafeHelper.ReplaceMethod(type.GetMethod("ReadXml", BindingFlags.Instance | BindingFlags.Public), WriteXml);
-                        }
-                        catch(Exception err)
-                        {
-                            Monitor.Log("Serializer: Unable to inject into serializable dictionary of type: "+type.FullName, LogLevel.Error, err);
-                        }
-                    }
-                }
-                SerializerInjected = true;
-                EnforceSerializer();
-            }
-            catch (Exception err)
-            {
-                Monitor.Log("Serializer: Injection into dictionaries unexpectedly failed", LogLevel.Error, err);
-            }
+            MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
+            FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
+            LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
+            SerializerInjected = true;
+            EnforceSerializer();
         }
         private void EnforceSerializer()
         {
             SaveGame.serializer = MainSerializer;
             SaveGame.farmerSerializer = FarmerSerializer;
             SaveGame.locationSerializer = LocationSerializer;
-        }
-        #endregion
-        #region Utility
-        private static bool CreditsDone = false;
-        internal void SkipCredits()
-        {
-            if (CreditsDone || !(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
-                return;
-            Game1.playSound("bigDeSelect");
-            Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
-            Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
-            Game1.delayedActions.Clear();
-            Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
-            Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
-            Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
-            Helper.Reflection.GetPrivateField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
-            Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
-            Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
-            Game1.changeMusicTrack("MainTheme");
-            CreditsDone = true;
         }
         #endregion
         #region Misc
