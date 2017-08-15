@@ -3,8 +3,8 @@ ALL Docs
 [Introduction](Introduction.md) / **Manifest & Shop Format** / [Custom Actions](Actions.md) / [Miscellaneous](Misc.md)
 
 ---------------------------------------------------------------------------------------------------------
-Custom Actions
-==============
+Manifest & Shop format
+======================
 This file contains the basic layouts for both location-mod and shop manifests.
 For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](../../Framework/Docs/Conditions.md) over in the Entoarox Framework github.
 
