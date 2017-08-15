@@ -6,7 +6,7 @@
 Custom Actions
 ==============
 ALL comes bundled with new custom actions that add extra functionality for mod makers to use.
-Even mods that do not get loaded through ALL can use most of these actions as long as ALL is installed.
+Even mods that do not get loaded through ALL can use some of these actions as long as ALL is installed.
 
 A full list of these actions, their argument list, and their description can be found below.
 Actions that only work for location mods have a `*` at the end, this is not part of the Action, but a identifier for location-mod only actions.
@@ -15,7 +15,7 @@ Actions that only work for location mods have a `*` at the end, this is not part
 |---------------------|---------------------------------------------|--------------------------------------------------------------------------------------------------------------|
 | `ALLMessage`*       | `ALLMessage <ModID> <MessageID>`            | Displays the localized message identified by the `ModID` and `MessageID` given by a location mod.            |
 | `ALLRawMessage`*    | `ALLRawMessage <Message>`                   | Displays the raw text as given, works identical to how `Messsage` used to work in SDV 1.1 and earlier.       |
-| `ALLRandomMessage`* | `ALLRandomMessage <Msg1>|<Msg2>|<...>`      | Displays one of the `|` separated messages at random each time it is activated. *Localization not supported* |
+| `ALLRandomMessage`  | `ALLRandomMessage <Msg1>\|<Msg2>\|<...>`    | Displays one of the `|` separated messages at random each time it is activated. *Localization not supported* |
 | `ALLTeleporter`*    | `ALLTeleporter <TeleporterID>`              | Displays the teleport destination menu for `TeleporterID` given.                                             |
 | `ALLConditional`*   | `ALLConditional <ConditionalID>`            | Displays the conditional completion menu for the `ConditionalID` given, if not already completed.            |
 | `ALLReact`          | `ALLReact <Interval> <Tile1>,<Tile2>,<...>` | Animates through the list of tile indexes given once, with a delay of `Interval` between each tile.          |
