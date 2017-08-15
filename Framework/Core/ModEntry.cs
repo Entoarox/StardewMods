@@ -29,6 +29,7 @@ namespace Entoarox.Framework.Core
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
+        internal static Vector2? LastTouchAction = null;
         #endregion
         #region Mod
         public override void Entry(IModHelper helper)
@@ -222,6 +223,20 @@ namespace Entoarox.Framework.Core
             {
                 MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(prevItem, Game1.player.CurrentItem));
                 prevItem = Game1.player.CurrentItem;
+            }
+            Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
+            if (LastTouchAction!=playerPos)
+            {
+                string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
+                LastTouchAction = playerPos;
+                if (text != null)
+                {
+                    string[] split = (text).Split(' ');
+                    string[] args = new string[split.Length - 1];
+                    Array.Copy(split, 1, args, 0, args.Length);
+                    ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
+                    MoreEvents.FireTouchActionTriggered(ActionInfo);
+                }
             }
         }
         #endregion

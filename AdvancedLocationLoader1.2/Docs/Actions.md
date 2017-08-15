@@ -15,7 +15,7 @@ Actions that only work for location mods have a `*` at the end, this is not part
 |---------------------|---------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
 | `ALLReact`          | `ALLReact <Interval> <Tile1>,<Tile2>,<...>` | Animates through the list of tile indexes given once, with a delay of `Interval` between each tile.                          |
 | `ALLShift`          | `ALLShift <X> <Y>`                          | Similar to `Warp` except that it moves you within the current location, meaning it works for any location.                   |
-| `ALLRawMessage`     | `ALLRawMessage <Message>`                   | Displays the raw text as given, works identical to how `Message` used to work in SDV 1.1 and earlier.                        |
+| `ALLRawMessage`     | `ALLRawMessage <Message>`                   | Displays the raw text as given rather then looking up a translated message.                                                  |
 | `ALLRandomMessage`  | `ALLRandomMessage <Msg1>\|<Msg2>\|<...>`    | Displays one of the `\|` separated messages at random each time it is activated, *Localization not supported*.               |
 | `ALLMessage`*       | `ALLMessage <ModID> <MessageID>`            | Displays the localized message identified by the `ModID` of the location mod and `MessageID` of the localization to use.     |
 | `ALLShop`*          | `ALLShop <ShopID>`                          | Displays the shop for the `ShopID` given, or a empty shop if none exists. ([More info](Shop.md))                             |

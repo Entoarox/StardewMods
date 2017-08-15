@@ -14,6 +14,12 @@ namespace Entoarox.Framework
             if (!UpdateHandler.Map.ContainsKey(manifest))
                 UpdateHandler.Map.Add(manifest, uri);
         }
+        public static void RequestUpdateCheck(this IModHelper helper, string name, SemanticVersion version, string uri)
+        {
+            IManifest manifest = new WrappedManifest(name, version);
+            if (!UpdateHandler.Map.ContainsKey(manifest))
+                UpdateHandler.Map.Add(manifest, uri);
+        }
         public static void RequestCreditsSkip(this IModHelper helper)
         {
             ModEntry.SkipCredits = true;
