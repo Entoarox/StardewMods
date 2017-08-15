@@ -7,7 +7,7 @@
     "PatchVersion": 0,
     "Build": "beta.13"
   },
-  "MinimumApiVersion": "1.13",
+  "MinimumApiVersion": "1.15.2",
   "Description": "A collection of API's to make modding easier",
   "UniqueID": "Entoarox.EntoaroxFramework",
   "EntryDll": "EntoaroxFramework.dll"
