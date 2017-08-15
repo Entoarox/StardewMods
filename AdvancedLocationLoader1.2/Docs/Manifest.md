@@ -1,8 +1,14 @@
-This file contains the basic layouts for both location-mod and shop manifests.
-For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](https://github.com/Entoarox/StardewMods/blob/master/Framework/ConditionDocumentation.md).
+ALL Docs
+==============
+[Introduction](Introduction.md) / **Manifest & Shop Format** / [Custom Actions](Actions.md) / [Miscellaneous](Misc.md)
 
-Note that ALL adds its own condition called `ALLCondition:*` this is used to reference any Conditional you define in your manifest, where `*` represents the name of your conditional
-Old versions of ALL used `ALLCondition_*` instead, and while this still works, it is no longer recommended.
+---------------------------------------------------------------------------------------------------------
+Custom Actions
+==============
+This file contains the basic layouts for both location-mod and shop manifests.
+For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](../../Framework/Docs/Conditions.md) over in the Entoarox Framework github.
+
+To use a `Conditional` in your conditions, use the name of the conditional prefixed with `ALLCondition_`.
 
 **Location Manifest (Version 1.2)**
 ```javascript
@@ -22,7 +28,14 @@ Old versions of ALL used `ALLCondition_*` instead, and while this still works, i
 		/* A short description of the mod, is printed to the log */
 		"Description":"",
 		/* The version of the mod this is, is printed to the log */
-		"Version":"1.0.0"
+		"Version":"1.0.0",
+		/*
+		A unique ID given to this mod, currently only used for localization but might be expanded upon in the future.
+		It is recommended to use the AuthorName.ModName format for your mod ID, as this makes collision less likely
+		*/
+		"ModID":"AuthorName.ModName",
+		/* A site to check for updates to this mod, currently is not used, but once it is it will be done using EntoaroxFramework's update checking mechanic */
+		"UpdateUrl":"http://example.com/dir/updatefile.json"
 	},
 	/* The locations section is where new locations are registered for addition to the game */
 	"Locations":[
