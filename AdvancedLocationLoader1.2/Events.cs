@@ -97,6 +97,12 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 switch (e.Action)
                 {
+                    case "ALLMessage":
+                        Actions.Message(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLRawMessage":
+                        Actions.RawMessage(e.Who, e.Arguments, e.Position);
+                        break;
                     case "ALLShift":
                         Actions.Shift(e.Who, e.Arguments, e.Position);
                         break;

@@ -23,6 +23,14 @@ namespace Entoarox.AdvancedLocationLoader
         {
             Game1.warpFarmer(who.currentLocation, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]),who.facingDirection,who.currentLocation.isStructure);
         }
+        internal static void Message(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+        {
+            Game1.drawDialogueNoTyping(ModEntry.Strings.Get(arguments[0] + ":" + arguments[1]));
+        }
+        internal static void RawMessage(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+        {
+            Game1.drawDialogueNoTyping(string.Join(" ", arguments));
+        }
         internal static void RandomMessage(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
             string[] opts = string.Join(" ", arguments).Split('|');
