@@ -84,7 +84,7 @@ namespace Entoarox.Framework
 
             // add events
             GameEvents.UpdateTick += FirstUpdateTick;
-            GameEvents.UpdateTick += GameEvents_LoadTick;
+            SaveEvents.AfterLoad += SaveEvents_AfterLoad;
             Events.MoreEvents.Setup();
             GameEvents.UpdateTick += TypeRegistry.Update;
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
@@ -134,14 +134,11 @@ namespace Entoarox.Framework
             Game1.changeMusicTrack("MainTheme");
             CreditsDone = true;
         }
-        internal static void GameEvents_LoadTick(object s, EventArgs e)
+        internal static void SaveEvents_AfterLoad(object s, EventArgs e)
         {
-            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
-                return;
             MessageBox.Setup();
             VersionChecker.DoChecks();
             PlayerHelper.ResetForNewGame();
-            GameEvents.UpdateTick -= GameEvents_LoadTick;
             if (Config.GamePatcher)
             {
                 GamePatcher.Patch();
