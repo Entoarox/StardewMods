@@ -1,37 +1,27 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using Version = System.Version;
-
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-
-using StardewValley;
-using StardewValley.Menus;
-
+using Entoarox.AdvancedLocationLoader.Configs;
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
-
-using Entoarox.AdvancedLocationLoader.Configs;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
 {
     internal class AdvancedLocationLoaderMod : Mod
     {
         internal static IMonitor Logger;
-        internal static LocalizationHelper Localizer;
+        internal static ITranslationHelper Localizer;
         internal static string ModPath;
         public override void Entry(IModHelper helper)
         {
             ModPath = helper.DirectoryPath;
-            if (EntoFramework.Version < new Version(1, 6, 5))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for AdvancedLocationLoader to use.");
-            EntoFramework.VersionRequired("AdvancedLocationLoader", new Version(1, 6, 6));
             Logger = Monitor;
-            Localizer = new LocalizationHelper(Path.Combine(ModPath,"localization"));
+            Localizer = helper.Translation;
             VersionChecker.AddCheck("AdvancedLocationLoader",GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/AdvancedLocationLoader.json");
 
-            GameEvents.LoadContent += Events.GameEvents_LoadContent;
+            GameEvents.UpdateTick += FirstUpdateTick;
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             MoreEvents.WorldReady+=Events.MoreEvents_WorldReady;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
@@ -42,6 +32,13 @@ namespace Entoarox.AdvancedLocationLoader
             registry.RegisterType<Locations.Desert>();
             registry.RegisterType<Locations.DecoratableLocation>();
         }
+
+        internal static void FirstUpdateTick(object sender, EventArgs e)
+        {
+            Events.GameEvents_FirstUpdateTick();
+            GameEvents.UpdateTick -= FirstUpdateTick;
+        }
+
         internal static void UpdateConditionalEdits()
         {
             foreach(Tile t in Compound.DynamicTiles)

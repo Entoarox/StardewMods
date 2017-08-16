@@ -18,7 +18,7 @@ namespace Entoarox.AdvancedLocationLoader
         private TeleportationResolver(string list)
         {
             this.List = Configs.Compound.Teleporters.Find(e => e.ListName == list);
-            this.Destinations = new Dictionary<string, Response>() { { "", new Response("cancel", AdvancedLocationLoaderMod.Localizer.Localize("cancel")) } };
+            this.Destinations = new Dictionary<string, Response>() { { "", new Response("cancel", AdvancedLocationLoaderMod.Localizer.Get("cancel")) } };
             for (int c = 0; c < this.List.Destinations.Count; c++)
             {
                 if (this.List.Destinations[c].MapName != Game1.currentLocation.name)
@@ -32,7 +32,7 @@ namespace Entoarox.AdvancedLocationLoader
                 if (entry.Key != Game1.currentLocation.name)
                     destinations.Add(entry.Value);
             Game1.currentLocation.lastQuestionKey = "SelectTeleportDestination";
-            Game1.currentLocation.createQuestionDialogue(AdvancedLocationLoaderMod.Localizer.Localize("teleporter"), destinations.ToArray(), this.Resolver, null);
+            Game1.currentLocation.createQuestionDialogue(AdvancedLocationLoaderMod.Localizer.Get("teleporter"), destinations.ToArray(), this.Resolver, null);
         }
         internal void Resolver(StardewValley.Farmer who, string answer)
         {

@@ -1,52 +1,94 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using Microsoft.Xna.Framework.Graphics;
-
-using StardewValley;
+using System.IO;
+using Entoarox.Framework;
+using StardewModdingAPI;
 
 namespace Entoarox.XnbLoader
 {
-    public class XnbLoaderMod : StardewModdingAPI.Mod
+    public class XnbLoaderMod : Mod
     {
-        public override void Entry(StardewModdingAPI.IModHelper helper)
+        /*********
+        ** Properties
+        *********/
+        /// <summary>The name of the mod folder which contains the files to load.</summary>
+        private readonly string ContentFolderName = "ModContent";
+
+        /// <summary>The content paths to create when the mod starts.</summary>
+        private readonly string[] PathsToCreate =
         {
-            if (Framework.EntoFramework.Version < new Version(1, 6, 6))
-                throw new DllNotFoundException("A newer version of EntoaroxFramework.dll is required as the currently installed one is to old for XnbLoader to use.");
-            Framework.EntoFramework.VersionRequired("XnbLoader", new Version(1, 6, 6));
-            StardewModdingAPI.Events.GameEvents.FirstUpdateTick += GameEvents_FirstUpdateTick;
-            Framework.VersionChecker.AddCheck("XnbLoader", new System.Version(1, 0, 6), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
+            @"Animals",
+            @"Buildings",
+            @"Characters\Dialogue",
+            @"Characters\Farmer",
+            @"Characters\Monsters",
+            @"Characters\schedules",
+            @"Data\Events",
+            @"Data\Festivals",
+            @"Data\TV",
+            @"Fonts",
+            @"LooseSprites\Lighting",
+            @"Maps",
+            @"Mines",
+            @"Minigames",
+            @"Portraits",
+            @"Strings",
+            @"TerrainFeatures",
+            @"TileSheets"
+        };
+
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
+        public override void Entry(IModHelper helper)
+        {
+            VersionChecker.AddCheck("XnbLoader", new Version(1, 0, 6), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
+
+            // prepare directory structure
+            string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
+            foreach(string path in this.PathsToCreate)
+                Directory.CreateDirectory(Path.Combine(contentPath, path));
+
+            // load files
+            this.Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
+            int overrides = this.LoadOverrides(contentPath, contentPath);
+            this.Monitor.Log($"Parsing complete, found and redirected {overrides} files", LogLevel.Info);
         }
-        private string _Path;
-        private int Files = 0;
-        private void GameEvents_FirstUpdateTick(object s, object e)
+
+
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Recursively find XNBs and register them with the content registry.</summary>
+        /// <param name="root">The root path being searched.</param>
+        /// <param name="path">The path for which to load XNBs.</param>
+        private int LoadOverrides(string root, string path)
         {
-            StardewModdingAPI.Events.GameEvents.UpdateTick += GameEvents_UpdateTick;
-        }
-        private void GameEvents_UpdateTick(object s, object e)
-        {
-            StardewModdingAPI.Events.GameEvents.UpdateTick -= GameEvents_UpdateTick;
-            _Path = System.IO.Path.Combine(Helper.DirectoryPath, "ModContent","");
-            System.IO.Directory.CreateDirectory(_Path);
-            Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", StardewModdingAPI.LogLevel.Info);
-            ParseDir(_Path);
-            Monitor.Log("Reloading static content references...", StardewModdingAPI.LogLevel.Trace);
-            Framework.EntoFramework.GetContentRegistry().ReloadStaticReferences();
-            Monitor.Log($"Parsing complete, found and redirected [{Files}] files", StardewModdingAPI.LogLevel.Info);
-        }
-        private void ParseDir(string path)
-        {
-            Monitor.Log("Scanning for files and directories in " + path.Replace(_Path + System.IO.Path.DirectorySeparatorChar, System.IO.Path.DirectorySeparatorChar.ToString()).Replace(_Path, System.IO.Path.DirectorySeparatorChar.ToString()), StardewModdingAPI.LogLevel.Trace);
-            foreach (string dir in System.IO.Directory.EnumerateDirectories(path))
-                ParseDir(System.IO.Path.Combine(path, dir));
-            foreach (string file in System.IO.Directory.EnumerateFiles(path))
+            int files = 0;
+
+            // log path
             {
-                string filePath = System.IO.Path.Combine(path, System.IO.Path.GetDirectoryName(file), System.IO.Path.GetFileNameWithoutExtension(file));
-                string from = filePath.Replace(_Path+System.IO.Path.DirectorySeparatorChar, "");
-                Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", StardewModdingAPI.LogLevel.Trace);
-                Files++;
-                Framework.EntoFramework.GetContentRegistry().RegisterXnb(from, filePath);
+                string relativePath = path.Replace(root + Path.DirectorySeparatorChar, Path.DirectorySeparatorChar.ToString()).Replace(root, Path.DirectorySeparatorChar.ToString());
+                this.Monitor.Log($"Scanning for files and directories in {relativePath}", LogLevel.Trace);
             }
+
+            // load subfolders
+            foreach (string dir in Directory.EnumerateDirectories(path))
+                files += this.LoadOverrides(root, Path.Combine(path, dir));
+
+            // load files
+            foreach (string file in Directory.EnumerateFiles(path))
+            {
+                string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
+                this.Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", LogLevel.Trace);
+                EntoFramework.GetContentRegistry().RegisterXnb(from, filePath);
+                files++;
+            }
+
+            return files;
         }
     }
 }

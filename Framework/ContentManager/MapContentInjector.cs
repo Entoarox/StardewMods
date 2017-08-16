@@ -196,7 +196,7 @@ namespace Entoarox.Framework.ContentManager
                 }
             PatchMap(assetName, (Map)(object)asset, Maps);
         }
-        public override T Load<T>(string assetName, Func<string, T> loadBase)
+        public override T Load<T>(string assetName)
         {
             throw new NotImplementedException();
         }

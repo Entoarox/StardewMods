@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using StardewValley;
-using StardewValley.Menus;
-
+using Entoarox.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using Entoarox.Framework;
+using StardewValley;
+using StardewValley.Menus;
 
 namespace Entoarox.ShopExpander
 {
@@ -14,34 +12,28 @@ namespace Entoarox.ShopExpander
     {
         internal ShopExpanderConfig Config;
         private bool eventsActive = false;
-        private bool skippedTick = false;
         public override void Entry(IModHelper helper)
         {
-            GameEvents.FirstUpdateTick += Event_FirstUpdateTick;
+            this.Config = this.Helper.ReadConfig<ShopExpanderConfig>();
+
+            GameEvents.UpdateTick += this.FirstUpdateTick;
+            MenuEvents.MenuChanged += Event_MenuChanged;
         }
-        private void Event_FirstUpdateTick(object s, EventArgs e)
+        private void FirstUpdateTick(object sender, EventArgs e)
         {
-            GameEvents.UpdateTick += Event_UpdateTick;
-        }
-        private void Event_UpdateTick(object s, EventArgs e)
-        {
-            if (skippedTick)
+            foreach (Reference obj in this.Config.objects)
             {
-                MenuEvents.MenuChanged += Event_MenuChanged;
-                Config = Helper.ReadConfig<ShopExpanderConfig>();
-                GameEvents.UpdateTick -= Event_UpdateTick;
-                foreach (Reference obj in Config.objects)
-                    try
-                    {
-                        generateObject(obj.Owner, obj.Item, obj.Amount, obj.Conditions);
-                    }
-                    catch (Exception err)
-                    {
-                        Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj.ToString(), err);
-                    }
+                try
+                {
+                    generateObject(obj.Owner, obj.Item, obj.Amount, obj.Conditions);
+                }
+                catch (Exception err)
+                {
+                    Monitor.Log(LogLevel.Error, "Object failed to generate: " + obj, err);
+                }
             }
-            else
-                skippedTick = true;
+
+            GameEvents.UpdateTick -= this.FirstUpdateTick;
         }
         private void generateObject(string owner, int replacement, int stackAmount, string requirements)
         {

@@ -3,16 +3,18 @@
   "Author": "Entoarox",
   "Version": {
     "MajorVersion": 1,
-    "MinorVersion": 5,
-    "PatchVersion": 3,
+    "MinorVersion": 6,
+    "PatchVersion": 0,
     "Build": null
   },
+  "MinimumApiVersion": "1.15.2",
   "Description": "Adds bulk options for wood & stone to the carpenter.",
   "UniqueID": "Entoarox.ShopExpander",
   "EntryDll": "ShopExpander.dll",
   "Dependencies": [
     {
-      "UniqueID": "Entoarox.EntoaroxFramework"
+      "UniqueID": "Entoarox.EntoaroxFramework",
+      "MinimumVersion": "1.8"
     }
   ]
 }

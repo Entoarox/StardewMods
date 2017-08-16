@@ -30,7 +30,7 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
                 this.LoadContent();
                 LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
-                TimeEvents.SeasonOfYearChanged += this.TimeEvents_SeasonOfYearChanged;
+                TimeEvents.AfterDayStarted += this.TimeEvents_AfterDayStarted;
                 SeasonalImmersion.ContentReady = true;
                 this.Monitor.Log($"ContentPack processed, found [{SeasonTextures.Count}] seasonal files", LogLevel.Info);
             }
@@ -256,9 +256,9 @@ namespace Entoarox.SeasonalImmersion
                 Monitor.Log($"Failed to update seasonal textures\n{ex}", LogLevel.Error);
             }
         }
-        internal void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
+        internal void TimeEvents_AfterDayStarted(object s, EventArgs e)
         {
-            if (ContentReady && Game1.hasLoadedGame)
+            if (ContentReady && Game1.hasLoadedGame && Game1.dayOfMonth == 1) // new season
                 UpdateTextures();
         }
         internal void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)

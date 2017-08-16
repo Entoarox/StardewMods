@@ -67,13 +67,13 @@ namespace Entoarox.Framework
                     break;
             }
         }
-        internal static void TimeEvents_DayOfMonthChanged(object s, EventArgsIntChanged e)
+        internal static void SaveEvents_BeforeSave(object s, EventArgs e)
         {
             switch(Game1.currentSeason)
             {
                 case "spring":
                     if (Game1.year == 1)
-                        switch (e.NewInt)
+                        switch (Game1.dayOfMonth)
                         {
                             case 1:
                             case 3:
@@ -83,7 +83,7 @@ namespace Entoarox.Framework
                         }
                     break;
                 case "summer":
-                    switch (e.NewInt)
+                    switch (Game1.dayOfMonth)
                     {
                         case 12:
                         case 25:

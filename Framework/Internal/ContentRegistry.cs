@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
-
-using StardewValley;
-using StardewValley.Objects;
-using StardewValley.BellsAndWhistles;
-using StardewValley.Projectiles;
-
+using System.Reflection;
+using Entoarox.Framework.Internal;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
+using StardewValley;
+using StardewValley.BellsAndWhistles;
+using StardewValley.Objects;
+using StardewValley.Projectiles;
 
 namespace Entoarox.Framework
 {
@@ -52,156 +52,53 @@ namespace Entoarox.Framework
             SpriteText.coloredTexture = Game1.content.Load<Texture2D>("LooseSprites\\font_colored");
             Tool.weaponsTexture = Game1.content.Load<Texture2D>("TileSheets\\weapons");
             Projectile.projectileSheet = Game1.content.Load<Texture2D>("TileSheets\\Projectiles");
-            if (Game1.player!=null)
+            if (Game1.player != null)
                 Game1.player.FarmerRenderer = new FarmerRenderer(Game1.content.Load<Texture2D>("Characters\\Farmer\\farmer_" + (Game1.player.isMale ? "" : "girl_") + "base"));
         }
         void IContentRegistry.RegisterHandler<T>(string key, FileLoadMethod<T> method)
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterHandler(key, method);
-                        TileSmartManager.RegisterHandler(key, method);
-                        TempSmartManager.RegisterHandler(key, method);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        registerHandler.MakeGenericMethod(typeof(T)).Invoke(null, new object[] {key,method});
-                        break;
-                }
+                Interceptor.RegisterHandler(key, method);
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register custom handler in loader"+ err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register custom handler in loader" + err);
             }
         }
         void IContentRegistry.RegisterTexture(string key, string path)
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterTexture(key, path);
-                        TileSmartManager.RegisterTexture(key, path);
-                        TempSmartManager.RegisterTexture(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        dynamic tex = Activator.CreateInstance(diskTexture);
-                        xnb.Original = key;
-                        xnb.Texture = key;
-                        xnb.OwingMod = myManifest;
-                        tex.Id = key;
-                        tex.AbsoluteFilePath = path;
-                        registerTexture.Invoke(null, new object[] { key, tex, myManifest });
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                Interceptor.RegisterRedirect(key, path);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader"+err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register texture file in loader" + err);
             }
         }
         void IContentRegistry.RegisterXnb(string key, string path)
         {
             try
             {
-                switch (EntoFramework.LoaderType)
-                {
-                    case EntoFramework.LoaderTypes.SMAPI:
-                        MainSmartManager.RegisterXnb(key, path);
-                        TileSmartManager.RegisterXnb(key, path);
-                        TempSmartManager.RegisterXnb(key, path);
-                        break;
-                    case EntoFramework.LoaderTypes.FarmHand:
-                        dynamic xnb = Activator.CreateInstance(modXnb);
-                        xnb.Original = key;
-                        xnb.File = key;
-                        xnb.OwingMod = myManifest;
-                        xnb.AbsoluteFilePath = path;
-                        registerXnb.Invoke(null, new object[] { key, xnb, myManifest });
-                        break;
-                }
+                Interceptor.RegisterRedirect(key, path);
             }
             catch (Exception err)
             {
-                EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader"+ err);
+                EntoFramework.Logger.ExitGameImmediately("Was unable to register xnb file in loader" + err);
             }
         }
-        [Obsolete("This method is for a not yet implemented API",true)]
+        [Obsolete("This method is for a not yet implemented API", true)]
         void IContentRegistry.RegisterContentHandler(IContentHandler handler)
         {
             throw new NotImplementedException();
         }
-        private static Type modXnb;
-        private static Type diskTexture;
-        private static MethodInfo registerTexture;
-        private static MethodInfo registerXnb;
-        private static MethodInfo registerHandler;
-        private static dynamic myManifest;
-        private static SmartContentManager MainSmartManager;
-        private static SmartContentManager TileSmartManager;
-        private static SmartContentManager TempSmartManager;
-        private static SmartDisplayDevice SmartDevice;
-        private static FieldInfo TempContent;
-        internal static void Setup()
+        private static SmartContentInterceptor Interceptor;
+        internal static IAssetLoader Init(ContentHelperWrapper contentHelper, string modPath)
         {
-            if (EntoFramework.LoaderType == EntoFramework.LoaderTypes.FarmHand)
-            {
-                try
-                {
-                    Type textureRegistry = Type.GetType("Farmhand.Registries.TextureRegistry");
-                    Type xnbRegistry = Type.GetType("Farmhand.Registries.XnbRegistry");
-                    Type modManifest = Type.GetType("Farmhand.Registries.Containers.ModManifest");
-                    Type contentHandler = Type.GetType("Farmhand.Content.DelegatedContentInjector");
-                    modXnb = Type.GetType("Farmhand.Registries.Containers.ModXnb");
-                    diskTexture = Type.GetType("Farmhand.Registries.Containers.DiskTexture");
-                    registerTexture = textureRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerXnb = xnbRegistry.GetMethod("RegisterItem", BindingFlags.Static | BindingFlags.Public);
-                    registerHandler = contentHandler.GetMethod("RegisterFileLoader", BindingFlags.Static | BindingFlags.Public);
-                    myManifest = Activator.CreateInstance(modManifest);
-                    myManifest.ModDLL = "EntoaroxFramework.dll";
-                    myManifest.Name = "Entoarox Framework";
-                    myManifest.Author = "Entoarox";
-                    myManifest.Version = EntoFramework.Version;
-                    myManifest.Description = "A collection of framework classes to make modding stardew easier";
-                    // Secure tests to make sure there are no crashes when register methods are called
-                    dynamic xnb = Activator.CreateInstance(modXnb);
-                    dynamic tex = Activator.CreateInstance(diskTexture);
-                    xnb.Original = "";
-                    xnb.Texture = "";
-                    xnb.File = "";
-                    xnb.OwingMod = myManifest;
-                    xnb.AbsoluteFilePath = "";
-                    tex.Id = "";
-                    tex.AbsoluteFilePath = "";
-                }
-                catch (Exception err)
-                {
-                    EntoFramework.Logger.ExitGameImmediately("Was unable to hook into FarmHand content loading"+ err);
-                    EntoFramework.LoaderType = EntoFramework.LoaderTypes.Unknown;
-                }
-            }
-        }
-        internal static void Init()
-        {
-            MainSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            TileSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            TempSmartManager = new SmartContentManager(Game1.content.ServiceProvider, Game1.content.RootDirectory);
-            SmartDevice = new SmartDisplayDevice(TileSmartManager, Game1.game1.GraphicsDevice);
-            TempContent = typeof(Game1).GetField("_temporaryContent", BindingFlags.NonPublic | BindingFlags.Static);
-            Update(null, null);
+            Interceptor = new SmartContentInterceptor(contentHelper, modPath);
             Events.MoreEvents.FireSmartManagerReady();
-        }
-        internal static void Update(object s, EventArgs e)
-        {
-            Game1.content = MainSmartManager;
-            Game1.mapDisplayDevice = SmartDevice;
-            Game1.game1.xTileContent = TileSmartManager;
-            TempContent.SetValue(null, TempSmartManager);
+            return Interceptor;
         }
     }
 }

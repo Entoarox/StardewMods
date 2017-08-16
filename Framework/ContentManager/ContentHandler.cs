@@ -17,7 +17,11 @@ namespace Entoarox.Framework.ContentManager
         }
         public static string GetModsRelativePath(string file)
         {
-            Uri fromUri = new Uri(ModManager.RootDirectory + Path.PathSeparator);
+            return ContentHandler.GetRelativePath(file, ModManager.RootDirectory);
+        }
+        internal static string GetRelativePath(string file, string rootPath)
+        {
+            Uri fromUri = new Uri(rootPath + Path.DirectorySeparatorChar);
             Uri toUri = new Uri(file);
             if (fromUri.Scheme != toUri.Scheme) { throw new InvalidOperationException("Unable to make path relative to the Mods directory: " + file); }
             return GetPlatformSafePath(Uri.UnescapeDataString(fromUri.MakeRelativeUri(toUri).ToString()));
@@ -36,7 +40,7 @@ namespace Entoarox.Framework.ContentManager
         {
             return false;
         }
-        public abstract T Load<T>(string assetName, Func<string, T> loadBase);
+        public abstract T Load<T>(string assetName);
         public abstract void Inject<T>(string assetName, ref T asset);
     }
 }

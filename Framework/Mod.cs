@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Entoarox.Framework.Internal;
 using Version = System.Version;
 
 using StardewModdingAPI;
@@ -12,15 +13,8 @@ namespace Entoarox.Framework
     public class EntoFramework : Mod
     {
         private static bool CreditsDone = true;
-        internal static LoaderTypes LoaderType;
         internal static FrameworkConfig Config;
         public static Version Version { get { return typeof(EntoFramework).Assembly.GetName().Version; } }
-        internal enum LoaderTypes
-        {
-            Unknown,
-            SMAPI,
-            FarmHand
-        }
         /**
          * <summary>Retrieves a pointer to the <see cref="ILocationHelper"/> interface</summary>
          */
@@ -66,56 +60,46 @@ namespace Entoarox.Framework
         internal static IMonitor Logger;
         public override void Entry(IModHelper helper)
         {
+            // init
             Logger = Monitor;
             Config = helper.ReadConfig<FrameworkConfig>();
-            if (Constants.ApiVersion.Build == "Farmhand-Smapi")
-            {
-                LoaderType = LoaderTypes.FarmHand;
-                Logger.Log("The loader has been detected as being the `FarmHand` loader",LogLevel.Trace);
-            }
-            else
-            {
-                LoaderType = LoaderTypes.SMAPI;
-                Logger.Log("The loader has been detected as being the `SMAPI` loader",LogLevel.Trace);
-            }
+
+            // init content registry
+            var contentHelperWrapper = new ContentHelperWrapper(this.Helper.Content, this.Monitor);
+            contentHelperWrapper.AssetLoaders.Add(
+                ContentRegistry.Init(contentHelperWrapper, this.Helper.DirectoryPath)
+            );
+
+            // add console commands
             Logger.Log("Registering framework events...",LogLevel.Trace);
             helper.ConsoleCommands.Add("ef_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Internal.BushReset.Trigger);
-            if(Config.TrainerCommands)
+            if (Config.TrainerCommands)
             {
                 helper.ConsoleCommands
                     .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",",Commands.Commands.Farms), Commands.Commands.farm)
                     .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", Commands.Commands.farm)
 
-                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player)
-                ;
+                    .Add("player_warp","player_warp <location> <x> <y> | Warps the player to the given position in the game.",Commands.Commands.player);
             }
-            GameEvents.UpdateTick += GameEvents_LoadTick;
-            ContentRegistry.Setup();
-            TypeRegistry.Setup();
+
+            // add events
+            GameEvents.UpdateTick += FirstUpdateTick;
+            SaveEvents.AfterLoad += SaveEvents_AfterLoad;
             Events.MoreEvents.Setup();
-            if (LoaderType == LoaderTypes.SMAPI)
-            {
-                GameEvents.UpdateTick += TypeRegistry.Update;
-                GameEvents.Initialize += TypeRegistry.Init;
-            }
-            GameEvents.LoadContent += GameEvents_LoadContent;
+            GameEvents.UpdateTick += TypeRegistry.Update;
             SaveEvents.AfterReturnToTitle += SaveEvents_AfterReturnToTitle;
             if (Config.SkipCredits)
                 GameEvents.UpdateTick += CreditsTick;
-            if(LoaderType==LoaderTypes.Unknown)
-                Monitor.ExitGameImmediately("Detected that the `FarmHand` loader was used, but was unable to hook into it");
             Logger.Log("Framework has finished!",LogLevel.Info);
+
+            // version check
             VersionChecker.AddCheck("EntoaroxFramework", Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/EntoaroxFramework.json");
         }
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        private void FirstUpdateTick(object s, EventArgs e)
         {
-            if (LoaderType == LoaderTypes.SMAPI)
-            {
-                ContentRegistry.Init();
-                GameEvents.UpdateTick += ContentRegistry.Update;
-            }
-            else
-                Events.MoreEvents.FireSmartManagerReady();
+            TypeRegistry.Init();
+
+            GameEvents.UpdateTick -= FirstUpdateTick;
         }
         public static void SaveEvents_AfterReturnToTitle(object s, EventArgs e)
         {
@@ -124,7 +108,7 @@ namespace Entoarox.Framework
             if (Config.GamePatcher)
             {
                 GameEvents.UpdateTick -= GamePatcher.Update;
-                TimeEvents.DayOfMonthChanged -= GamePatcher.TimeEvents_DayOfMonthChanged;
+                SaveEvents.BeforeSave -= GamePatcher.SaveEvents_BeforeSave;
                 Events.MoreEvents.ActionTriggered -= GamePatcher.MoreEvents_ActionTriggered;
             }
         }
@@ -150,19 +134,16 @@ namespace Entoarox.Framework
             Game1.changeMusicTrack("MainTheme");
             CreditsDone = true;
         }
-        internal static void GameEvents_LoadTick(object s, EventArgs e)
+        internal static void SaveEvents_AfterLoad(object s, EventArgs e)
         {
-            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
-                return;
             MessageBox.Setup();
             VersionChecker.DoChecks();
             PlayerHelper.ResetForNewGame();
-            GameEvents.UpdateTick -= GameEvents_LoadTick;
             if (Config.GamePatcher)
             {
                 GamePatcher.Patch();
                 GameEvents.UpdateTick += GamePatcher.Update;
-                TimeEvents.DayOfMonthChanged += GamePatcher.TimeEvents_DayOfMonthChanged;
+                SaveEvents.BeforeSave += GamePatcher.SaveEvents_BeforeSave;
                 Events.MoreEvents.ActionTriggered += GamePatcher.MoreEvents_ActionTriggered;
             }
             GameEvents.UpdateTick += PlayerHelper.Update;

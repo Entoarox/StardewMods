@@ -8,6 +8,7 @@ using StardewValley;
 
 namespace Entoarox.Framework
 {
+    [Obsolete("Use SMAPI's translation API instead.")]
     public class LocalizationHelper
     {
         private Dictionary<string, string> Strings;

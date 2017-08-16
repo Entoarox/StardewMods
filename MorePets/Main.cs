@@ -1,47 +1,52 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using Version = System.Version;
-
+using System.IO;
+using System.Linq;
+using Entoarox.Framework;
+using Entoarox.Framework.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-
 using StardewValley;
 using StardewValley.Characters;
-using xTile.Tiles;
 using xTile.ObjectModel;
-
-using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
+using xTile.Tiles;
 
 namespace MorePets
 {
     public class MorePetsMod : Mod
     {
-        internal static LocalizedContentManager content;
         private static string modPath;
-        internal static int dogLimit = 1;
-        internal static int catLimit = 1;
         internal static Random random;
         private static bool replaceBus = false;
         internal static MorePetsConfig Config;
-        private static Version version = new Version(1,3,2);
         // DEV PROPERTIES
         internal static int offsetX = 0;
         internal static int offsetY = 0;
+        internal static Texture2D[] CatTextures;
+        internal static Texture2D[] DogTextures;
         public override void Entry(IModHelper helper)
         {
+            // init
             modPath = helper.DirectoryPath;
             Config = helper.ReadConfig<MorePetsConfig>();
+
+            // load textures
+            EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
+            this.LoadPetSkins(out CatTextures, out DogTextures);
+            Monitor.Log($"Found [{CatTextures.Length}] Cat and [{DogTextures.Length}] Dog skins", LogLevel.Info);
+
+            // hook events
             GameEvents.UpdateTick += GameEvents_UpdateTick;
+            TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
             ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
             //LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
             helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using MorePets, you monster", this.CommandFired_KillPets);
+
+            // add console commands
             if (Config.DebugMode)
             {
                 // DEV COMMANDS, kept in should they be needed in the future
@@ -49,30 +54,30 @@ namespace MorePets
                     .Add("spawn_pet", "Spawns either a `dog` or a `cat` depending on the given name | spawn_pet <type> <skin>", this.CommandFired_SpawnPet)
                     .Add("test_adoption", "Triggers the adoption dialogue", this.CommandFired_TestAdoption);
             }
+
+            // check version
+            Version version = new Version(this.ModManifest.Version.MajorVersion, this.ModManifest.Version.MinorVersion, this.ModManifest.Version.PatchVersion);
             VersionChecker.AddCheck("MorePets", version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/MorePets.json");
         }
-        private void PopulatePetSkins()
+        private void TimeEvents_AfterDayStarted(object sender, EventArgs eventArgs)
         {
-            bool dogsDone = false;
-            bool catsDone = false;
-            dogLimit = 0;
-            catLimit = 0;
-            for (int c=1;c<int.MaxValue;c++)
+            replaceBus = true;
+        }
+        private void LoadPetSkins(out Texture2D[] catTextures, out Texture2D[] dogTextures)
+        {
+            List<Texture2D> catTextureList = new List<Texture2D>();
+            List<Texture2D> dogTextureList = new List<Texture2D>();
+
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "pets")).EnumerateFiles("*.xnb"))
             {
-                if(!dogsDone)
-                    if (File.Exists(Path.Combine(modPath, "pets", "dog_" + c + ".xnb")))
-                        dogLimit++;
-                    else
-                        dogsDone = true;
-                if (!catsDone)
-                    if (File.Exists(Path.Combine(modPath, "pets", "cat_" + c + ".xnb")))
-                        catLimit++;
-                    else
-                        catsDone = true;
-                if (dogsDone && catsDone)
-                    break;
+                if (file.Name.StartsWith("cat_"))
+                    catTextureList.Add(this.Helper.Content.Load<Texture2D>($"pets/{file.Name}"));
+                else if (file.Name.StartsWith("dog_"))
+                    dogTextureList.Add(this.Helper.Content.Load<Texture2D>($"pets/{file.Name}"));
             }
-            Monitor.Log("Found [" + catLimit + "] Cat and [" + dogLimit + "] Dog skins", LogLevel.Info);
+
+            catTextures = catTextureList.ToArray();
+            dogTextures = dogTextureList.ToArray();
         }
         private List<NPC> GetAllPets()
         {
@@ -85,18 +90,14 @@ namespace MorePets
         {
             if (!Game1.hasLoadedGame || Game1.CurrentEvent != null || Game1.fadeToBlack)
                 return;
-            if (content == null)
-            {
-                content = new LocalizedContentManager(Game1.content.ServiceProvider, modPath);
-                PopulatePetSkins();
-                replaceBus = true;
-            }
+
             foreach (NPC npc in GetAllPets())
                 if (npc.manners > 0 && npc.updatedDialogueYet == false)
                 {
                     try
                     {
-                        npc.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/" + (npc is Dog ? "dog_" : "cat_") + npc.manners), 0, 32, 32);
+                        var textures = npc is Dog ? DogTextures : CatTextures;
+                        npc.sprite = new AnimatedSprite(textures[npc.manners], 0, 32, 32);
                     }
                     catch
                     {
@@ -107,8 +108,7 @@ namespace MorePets
             if (replaceBus && Game1.getLocationFromName("BusStop") != null)
             {
                 GameLocation bus = Game1.getLocationFromName("BusStop");
-                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet",bus.map, "paths_objects_MorePetsTilesheet", new xTile.Dimensions.Size(2,2), new xTile.Dimensions.Size(16,16)));
-                EntoFramework.GetContentRegistry().RegisterTexture("paths_objects_MorePetsTilesheet", Path.Combine(modPath, "box.png"));
+                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, "paths_objects_MorePetsTilesheet", new xTile.Dimensions.Size(2, 2), new xTile.Dimensions.Size(16, 16)));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
                 bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");
@@ -120,35 +120,35 @@ namespace MorePets
         }
         internal void CommandFired_SpawnPet(string name, string[] args)
         {
-            if(args.Length==2)
+            if (args.Length == 2)
             {
-                Pet pet=null;
+                Pet pet = null;
                 int skin = Convert.ToInt32(args[1]);
                 switch (args[0])
                 {
                     case "dog":
-                        if (dogLimit == 0 || skin > catLimit || skin < 1)
+                        if (!DogTextures.Any() || skin > DogTextures.Length || skin < 1)
                         {
-                            Monitor.Log("Unable to spawn "+ args[0] + ", unknown skin number: " + skin, LogLevel.Error);
+                            Monitor.Log($"Unable to spawn {args[0]}, unknown skin number: {skin}", LogLevel.Error);
                             break;
                         }
                         pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y);
-                        pet.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/dog_" + skin), 0, 32, 32);
+                        pet.sprite = new AnimatedSprite(DogTextures[skin], 0, 32, 32);
                         break;
                     case "cat":
-                        if (catLimit == 0 || skin > catLimit || skin < 1)
+                        if (!CatTextures.Any() || skin > CatTextures.Length || skin < 1)
                         {
-                            Monitor.Log("Unable to spawn " + args[0] + ", unknown skin number: " + skin, LogLevel.Error);
+                            Monitor.Log($"Unable to spawn {args[0]}, unknown skin number: {skin}", LogLevel.Error);
                             break;
                         }
                         pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y);
-                        pet.sprite = new AnimatedSprite(content.Load<Texture2D>("pets/cat_" + skin), 0, 32, 32);
+                        pet.sprite = new AnimatedSprite(CatTextures[skin], 0, 32, 32);
                         break;
                     default:
                         Monitor.Log("Unable to spawn pet, unknown type: " + args[0], LogLevel.Error);
                         break;
                 }
-                if(pet!=null)
+                if (pet != null)
                 {
                     pet.manners = skin;
                     pet.age = 0;
@@ -157,7 +157,7 @@ namespace MorePets
                     Monitor.Log("Pet spawned", LogLevel.Alert);
                 }
                 else
-                    Monitor.Log("Unable to spawn pet, did you make sure the <type> and <skin> are valid?",LogLevel.Error);
+                    Monitor.Log("Unable to spawn pet, did you make sure the <type> and <skin> are valid?", LogLevel.Error);
             }
         }
         internal void CommandFired_KillPets(string name, string[] args)
@@ -165,7 +165,7 @@ namespace MorePets
             GameLocation farm = Game1.getLocationFromName("Farm");
             GameLocation house = Game1.getLocationFromName("FarmHouse");
             foreach (NPC pet in GetAllPets())
-                if(pet.age>0)
+                if (pet.age > 0)
                     if (farm.characters.Contains(pet))
                         farm.characters.Remove(pet);
                     else
@@ -174,7 +174,7 @@ namespace MorePets
         }
         internal void CommandFired_TestAdoption(string name, string[] args)
         {
-            if (dogLimit == 0 && catLimit == 0)
+            if (!DogTextures.Any() && !CatTextures.Any())
                 return;
             random = new Random();
             AdoptQuestion.Show();
@@ -189,7 +189,7 @@ namespace MorePets
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
         }
-        internal static List<string> seasons = new List<string>(){ "spring", "summer", "fall", "winter" };
+        internal static List<string> seasons = new List<string>() { "spring", "summer", "fall", "winter" };
         private void CheckForAction()
         {
             if (!Game1.hasLoadedGame)
@@ -208,7 +208,7 @@ namespace MorePets
                     int seed = Game1.year * 1000 + seasons.IndexOf(Game1.currentSeason) * 100 + Game1.dayOfMonth;
                     random = new Random(seed);
                     List<NPC> list = GetAllPets();
-                    if ((dogLimit == 0 && catLimit == 0) || (Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Max(0.1,Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.age == seed) != -1)
+                    if ((!DogTextures.Any() && !CatTextures.Any()) || (Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.age == seed) != -1)
                         Game1.drawObjectDialogue("Just an empty box.");
                     else
                         AdoptQuestion.Show();

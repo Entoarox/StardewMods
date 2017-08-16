@@ -1,19 +1,18 @@
 ﻿using System;
 using System.IO;
-
-using Newtonsoft.Json.Linq;
-
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-
+using System.Linq;
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
+using Newtonsoft.Json.Linq;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Events
     {
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        internal static void GameEvents_FirstUpdateTick()
         {
             try
             {
@@ -74,21 +73,20 @@ namespace Entoarox.AdvancedLocationLoader
                 AdvancedLocationLoaderMod.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
             }
         }
-        internal static void TimeEvents_SeasonOfYearChanged(object s, EventArgs e)
+        internal static void TimeEvents_AfterDayStarted(object s, EventArgs e)
         {
-            AdvancedLocationLoaderMod.UpdateTilesheets();
-        }
-        internal static void TimeEvents_DayOfMonthChanged(object s, EventArgs e)
-        {
-            AdvancedLocationLoaderMod.UpdateConditionalEdits();
+            // on new day
+            if(Configs.Compound.DynamicTiles.Any() || Configs.Compound.DynamicProperties.Any() || Configs.Compound.DynamicWarps.Any())
+                AdvancedLocationLoaderMod.UpdateConditionalEdits();
+
+            // on new season
+            if(Game1.dayOfMonth == 1 && Configs.Compound.SeasonalTilesheets.Any())
+                AdvancedLocationLoaderMod.UpdateTilesheets();
         }
         internal static void MoreEvents_WorldReady(object s, EventArgs e)
         {
             Loaders.Loader1_2.ApplyPatches();
-            if(Configs.Compound.DynamicTiles.Count>0 || Configs.Compound.DynamicProperties.Count>0 || Configs.Compound.DynamicWarps.Count>0)
-                TimeEvents.DayOfMonthChanged += TimeEvents_DayOfMonthChanged;
-            if (Configs.Compound.SeasonalTilesheets.Count > 0)
-                TimeEvents.SeasonOfYearChanged += TimeEvents_SeasonOfYearChanged;
+            TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {

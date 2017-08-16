@@ -10,13 +10,9 @@ using StardewValley;
 namespace Entoarox.Framework
 {
     /**
-     * <summary>Enables invoking of the base <see cref="Microsoft.Xna.Framework.Content.ContentManager.Load{T}(string)"/> method</summary>
-     */
-    public delegate T LoadBase<T>(string assetName);
-    /**
      * <summary>The delegate type required by <see cref="IContentRegistry.RegisterHandler{T}(string, FileLoadMethod{T})"/></summary>
      */
-    public delegate T FileLoadMethod<T>(LoadBase<T> loadBase, string assetName);
+    public delegate T FileLoadMethod<T>(string assetName);
 
     public interface IChannelManager
     {
