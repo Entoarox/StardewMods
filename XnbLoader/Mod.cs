@@ -16,24 +16,24 @@ namespace Entoarox.XnbLoader
         /// <summary>The content paths to create when the mod starts.</summary>
         private readonly string[] PathsToCreate =
         {
-            @"Animals",
-            @"Buildings",
-            @"Characters\Dialogue",
-            @"Characters\Farmer",
-            @"Characters\Monsters",
-            @"Characters\schedules",
-            @"Data\Events",
-            @"Data\Festivals",
-            @"Data\TV",
-            @"Fonts",
-            @"LooseSprites\Lighting",
-            @"Maps",
-            @"Mines",
-            @"Minigames",
-            @"Portraits",
-            @"Strings",
-            @"TerrainFeatures",
-            @"TileSheets"
+            "Animals",
+            "Buildings",
+            Path.Combine("Characters", "Dialogue"),
+            Path.Combine("Characters", "Farmer"),
+            Path.Combine("Characters", "Monsters"),
+            Path.Combine("Characters", "schedules"),
+            Path.Combine("Data", "Events"),
+            Path.Combine("Data", "Festivals"),
+            Path.Combine("Data", "TV"),
+            "Fonts",
+            Path.Combine("LooseSprites", "Lighting"),
+            "Maps",
+            "Mines",
+            "Minigames",
+            "Portraits",
+            "Strings",
+            "TerrainFeatures",
+            "TileSheets"
         };
 
 
