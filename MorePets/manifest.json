@@ -13,8 +13,7 @@
   "EntryDll": "MorePets.dll",
   "Dependencies": [
     {
-      "UniqueID": "Entoarox.EntoaroxFramework",
-      "MinimumVersion": "1.8"
+      "UniqueID": "Entoarox.EntoaroxFramework"
     }
   ]
 }
