@@ -44,7 +44,7 @@ namespace Entoarox.XnbLoader
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            VersionChecker.AddCheck("XnbLoader", new Version(1, 0, 6), "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
+            VersionChecker.AddCheck("XnbLoader", this.GetType().Assembly.GetName().Version, "https://raw.githubusercontent.com/Entoarox/StardewMods/master/VersionChecker/XnbLoader.json");
 
             // prepare directory structure
             string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
