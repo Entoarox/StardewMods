@@ -29,12 +29,20 @@ namespace Entoarox.Framework.Core
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
-        internal static Vector2? LastTouchAction = null;
+        internal static List<(string Mod, Keys key, Delegate Handler)> Keybinds = new List<(string Mod, Keys key, Delegate Handler)>();
+
+        private static Dictionary<Keys, (string Mod, Delegate Handler)> _Keybinds = new Dictionary<Keys, (string Mod, Delegate Handler)>();
+        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
+        private static string Verify;
+        private static bool CreditsDone = false;
+        private EventArgsActionTriggered ActionInfo;
+        private Item prevItem = null;
+        private static Vector2? LastTouchAction = null;
         #endregion
         #region Mod
         public override void Entry(IModHelper helper)
         {
-            SHelper = helper;
+            SHelper = Helper;
             Logger = Monitor;
             Config = Helper.ReadConfig<FrameworkConfig>();
             Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Commands);
@@ -52,12 +60,20 @@ namespace Entoarox.Framework.Core
         }
         #endregion
         #region Events
-
-        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
-        private static string Verify;
-        private static bool CreditsDone = false;
-        private EventArgsActionTriggered ActionInfo;
-        private Item prevItem = null;
+        private void ControlEvents_KeyboardChanged(object sender, EventArgsKeyboardStateChanged e)
+        {
+           foreach(Keys key in e.PriorState.GetPressedKeys())
+                if(e.NewState.IsKeyUp(key) && _Keybinds.ContainsKey(key))
+                    try
+                    {
+                        _Keybinds[key].Handler.DynamicInvoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        string[] parts = _Keybinds[key].Mod.Split('\n');
+                        Logger.Log($"The {parts[0]} mod failed handling the `{parts[1]}` keybind being triggered:\n{ex}", LogLevel.Error);
+                    }
+        }
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
@@ -219,6 +235,8 @@ namespace Entoarox.Framework.Core
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
             EnforceSerializer();
+            if (!Context.IsWorldReady)
+                return;
             if ((Game1.player.CurrentItem == null && prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(prevItem)))
             {
                 MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(prevItem, Game1.player.CurrentItem));
@@ -294,6 +312,87 @@ namespace Entoarox.Framework.Core
             ControlEvents.ControllerButtonReleased += ControlEvents_ControllerButtonReleased;
             ControlEvents.MouseChanged += ControlEvents_MouseChanged;
             GameEvents.UpdateTick += GameEvents_UpdateTick;
+        }
+        private void SetupHotkeys()
+        {
+            List<Keys> letters = new List<Keys>()
+            {
+                Keys.A,
+                Keys.B,
+                Keys.C,
+                Keys.D,
+                Keys.E,
+                Keys.F,
+                Keys.G,
+                Keys.H,
+                Keys.I,
+                Keys.J,
+                Keys.K,
+                Keys.L,
+                Keys.M,
+                Keys.N,
+                Keys.O,
+                Keys.P,
+                Keys.Q,
+                Keys.R,
+                Keys.S,
+                Keys.T,
+                Keys.U,
+                Keys.V,
+                Keys.W,
+                Keys.X,
+                Keys.Y,
+                Keys.Z,
+                Keys.D0,
+                Keys.D1,
+                Keys.D2,
+                Keys.D3,
+                Keys.D4,
+                Keys.D5,
+                Keys.D6,
+                Keys.D7,
+                Keys.D8,
+                Keys.D9,
+                Keys.OemPlus,
+                Keys.OemMinus
+            };
+            letters.RemoveAll(a => Game1.options.isKeyInUse(a));
+            _Keybinds = new Dictionary<Keys, (string Mod, Delegate Handler)>();
+            var keybinds = new List<(string mod, Keys key, Delegate handler)>(Keybinds);
+            Dictionary<string, Keys> memory = Helper.ReadJsonFile<Dictionary<string, Keys>>("keybinds.json");
+            foreach ((string mod, Keys key, Delegate handler) in new List<(string mod, Keys key, Delegate handler)>(keybinds))
+                if (memory.ContainsKey(mod) && letters.Contains(key))
+                {
+                    _Keybinds.Add(key, (mod, handler));
+                    keybinds.Remove((mod, key, handler));
+                    letters.Remove(key);
+                }
+            foreach ((string mod, Keys key, Delegate handler) in new List<(string mod, Keys key, Delegate handler)>(keybinds))
+                if (!_Keybinds.ContainsKey(key) && letters.Contains(key))
+                {
+                    _Keybinds.Add(key, (mod, handler));
+                    keybinds.Remove((mod, key, handler));
+                    letters.Remove(key);
+                }
+            foreach ((string mod, Keys key, Delegate handler) in keybinds)
+            {
+                if (letters.Count > 0)
+                {
+                    Keys letter = letters[0];
+                    letters.Remove(letter);
+                    _Keybinds.Add(letter, (mod, handler));
+                    Keybinds.Remove((mod, key, handler));
+                    keybinds.Add((mod, letter, handler));
+                }
+                else
+                {
+                    Keybinds.Remove((mod, key, handler));
+                    keybinds.Add((mod, Keys.None, handler));
+                    var split = mod.Split('\n');
+                    Monitor.Log($"Could not automatically provide a hotkey for the `{split[0]}` mod's `{split[1]}` key, you will need to manually assign one!", LogLevel.Error);
+                }
+            }
+            ControlEvents.KeyboardChanged += ControlEvents_KeyboardChanged;
         }
         #endregion
     }

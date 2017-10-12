@@ -5,7 +5,7 @@ using StardewValley.TerrainFeatures;
 
 using Harmony;
 
-namespace Entoarox.Framework.Injection
+namespace Entoarox.Framework.Core.Injection
 {
     [HarmonyPatch(typeof(HoeDirt), "canPlantThisSeedHere", new Type[] { typeof(int), typeof(int), typeof(int), typeof(bool)})]
     class HoeDirt_canPlantThisSeedHere

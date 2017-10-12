@@ -6,7 +6,7 @@ using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Menus;
 
-namespace MorePets
+namespace Entoarox.MorePetsAndAnimals
 {
     internal class AdoptQuestion
     {
@@ -19,26 +19,26 @@ namespace MorePets
             this.Cat = cat;
             this.Skin = skin;
 
-            var textures = this.Cat ? MorePetsMod.CatTextures : MorePetsMod.DogTextures;
-            this.Sprite = new AnimatedSprite(textures[this.Skin], 28, 32, 32);
+            var textures = this.Cat ? MoreAnimalsMod.Indexes["cat"] : MoreAnimalsMod.Indexes["dog"];
+            this.Sprite = new AnimatedSprite(MoreAnimalsMod.SHelper.Content.Load<Texture2D>($"skins\\{(cat ? "cat" : "dog")}_{skin}"), 28, 32, 32);
             this.Sprite.loop = true;
         }
         internal static void Show()
         {
-            Random rnd = MorePetsMod.random;
+            Random rnd = MoreAnimalsMod.random;
 
-            int catLimit = MorePetsMod.CatTextures.Length;
-            int dogLimit = MorePetsMod.DogTextures.Length;
+            int catLimit = MoreAnimalsMod.Indexes["cat"].Count;
+            int dogLimit = MoreAnimalsMod.Indexes["dog"].Count;
 
             bool cat = catLimit != 0 && (dogLimit == 0 || rnd.NextDouble() < 0.5);
             AdoptQuestion q = new AdoptQuestion(cat, rnd.Next(1, cat ? catLimit : dogLimit));
             GraphicsEvents.OnPostRenderHudEvent += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
-                "Oh dear, it looks like someone has abandoned a poor " + (cat ? "Cat" : "Dog") + " here! Perhaps you should pay Marnie " + MorePetsMod.Config.AdoptionPrice + " gold to give it a checkup so you can adopt it?",
-                Game1.player.money < MorePetsMod.Config.AdoptionPrice ?
+                "Oh dear, it looks like someone has abandoned a poor " + (cat ? "Cat" : "Dog") + " here! Perhaps you should pay Marnie " + MoreAnimalsMod.Config.AdoptionPrice + " gold to give it a checkup so you can adopt it?",
+                Game1.player.money < MoreAnimalsMod.Config.AdoptionPrice ?
                     new Response[] {
-                        new Response("n","Unfortunately I do not have the required "+MorePetsMod.Config.AdoptionPrice+" gold in order to do this.")
+                        new Response("n","Unfortunately I do not have the required "+MoreAnimalsMod.Config.AdoptionPrice+" gold in order to do this.")
                     } :
                     new Response[] {
                         new Response("y","Yes, I really should adopt the poor animal!"),
@@ -71,20 +71,20 @@ namespace MorePets
         internal void Namer(string petName)
         {
             NPC pet;
-            this.Who.Money -= MorePetsMod.Config.AdoptionPrice;
+            this.Who.Money -= MoreAnimalsMod.Config.AdoptionPrice;
             if (this.Cat)
             {
                 pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y);
-                pet.sprite = new AnimatedSprite(MorePetsMod.CatTextures[this.Skin], 0, 32, 32);
+                pet.sprite = new AnimatedSprite(MoreAnimalsMod.SHelper.Content.Load<Texture2D>($"skins\\cat_{this.Skin}"), 0, 32, 32);
             }
             else
             {
                 pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y);
-                pet.sprite = new AnimatedSprite(MorePetsMod.DogTextures[this.Skin], 0, 32, 32);
+                pet.sprite = new AnimatedSprite(MoreAnimalsMod.SHelper.Content.Load<Texture2D>($"skins\\dog_{this.Skin}"), 0, 32, 32);
             }
             pet.name = petName;
             pet.manners = this.Skin;
-            pet.age = Game1.year * 1000 + MorePetsMod.seasons.IndexOf(Game1.currentSeason) * 100 + Game1.dayOfMonth;
+            pet.age = Game1.year * 1000 + MoreAnimalsMod.seasons.IndexOf(Game1.currentSeason) * 100 + Game1.dayOfMonth;
             pet.position = Game1.player.position;
             Game1.currentLocation.addCharacter(pet);
             (pet as Pet).warpToFarmHouse(this.Who);

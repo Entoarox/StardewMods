@@ -1,8 +1,8 @@
 using System;
 
-namespace MorePets
+namespace Entoarox.MorePetsAndAnimals
 {
-    public class MorePetsConfig
+    public class ModConfig
     {
         private int _AdoptionPrice = 500;
         public int AdoptionPrice
@@ -30,6 +30,6 @@ namespace MorePets
         }
         public bool UseMaxAdoptionLimit = false;
         public int MaxAdoptionLimit = 10;
-        public bool DebugMode = false;
+        public bool AnimalsOnly = false;
     }
 }

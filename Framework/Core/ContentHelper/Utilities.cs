@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -36,6 +37,20 @@ namespace Entoarox.Framework.Core.ContentHelper
                 return _AssetEditors;
             }
         }
+        private static MethodInfo _InvalidateCache;
+        internal static void InvalidateCache(string asset)
+        {
+            if (_InvalidateCache == null)
+                SetupReflection();
+            _InvalidateCache.Invoke(ModEntry.SHelper.Content, new object[] { asset });
+        }
+        private static MethodInfo _InvalidateCacheGeneric;
+        internal static void InvalidateCache<T>()
+        {
+            if (_InvalidateCacheGeneric == null)
+                SetupReflection();
+            _InvalidateCacheGeneric.MakeGenericMethod(typeof(T)).Invoke(ModEntry.SHelper.Content, null);
+        }
         internal static void PerformSetup()
         {
             var TypeHandler = new DeferredAssetHandler();
@@ -46,11 +61,26 @@ namespace Entoarox.Framework.Core.ContentHelper
         }
         private static void SetupReflection()
         {
-            Type t = Game1.content.GetType();
-            var assetLoaders = t.GetProperty("Loaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            var assetEditors = t.GetProperty("Injectors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            _AssetLoaders = (IList<IAssetLoader>)assetLoaders.GetValue(ModEntry.SHelper.Content);
-            _AssetEditors = (IList<IAssetEditor>)assetEditors.GetValue(ModEntry.SHelper.Content);
+            try
+            {
+                Type t = typeof(IContentHelper).Assembly.GetType("StardewModdingAPI.Framework.ModHelpers.ContentHelper");
+                if (t == null)
+                    throw new InvalidOperationException("Unable to target `StardewModdingAPI.Framework.ModHelpers.ContentHelper`, type does not exist?");
+                var assetLoaders = t.GetProperty("AssetLoaders", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (assetLoaders == null)
+                    throw new InvalidOperationException("Unable to setup reflection, hooking SContentManager::Loaders returns null!");
+                var assetEditors = t.GetProperty("AssetEditors", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (assetEditors == null)
+                    throw new InvalidOperationException("Unable to setup reflection, hooking SContentManager::Injectors returns null!");
+                _InvalidateCache = t.GetMethod("InvalidateCache", new[] { typeof(string) });
+                _InvalidateCacheGeneric = t.GetMethods().Where(a => a.Name.Equals("InvalidateCache") && a.IsGenericMethod && a.GetGenericArguments().Length == 1 && a.GetParameters().Length == 0).First();
+                _AssetLoaders = (IList<IAssetLoader>)assetLoaders.GetValue(ModEntry.SHelper.Content);
+                _AssetEditors = (IList<IAssetEditor>)assetEditors.GetValue(ModEntry.SHelper.Content);
+            }
+            catch(Exception err)
+            {
+                ModEntry.Logger.ExitGameImmediately(err.ToString());
+            }
         }
         internal static void ReloadStaticReferences()
         {

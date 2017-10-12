@@ -7,8 +7,8 @@
     <ProjectGuid>{3710E6E1-296C-481D-B577-4BA6CCAF2E94}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Entoarox.MorePets</RootNamespace>
-    <AssemblyName>MorePets</AssemblyName>
+    <RootNamespace>Entoarox.MorePetsAndAnimals</RootNamespace>
+    <AssemblyName>MoreAnimals</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,8 +36,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdoptQuestion.cs" />
-    <Compile Include="Main.cs" />
-    <Compile Include="MorePetsConfig.cs" />
+    <Compile Include="MoreAnimalsMod.cs" />
+    <Compile Include="ModConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -51,70 +51,70 @@
     <None Include="..\VersionChecker\MorePets.json">
       <Link>MorePets.json</Link>
     </None>
+    <None Include="box.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json" />
     <None Include="packages.config" />
-    <None Include="pets\cat_1.xnb">
+    <None Include="skins\BabyDuck.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="skins\cat_1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_2.xnb">
+    <None Include="skins\cat_2.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_3.xnb">
+    <None Include="skins\cat_3.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_4.xnb">
+    <None Include="skins\cat_4.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_5.xnb">
+    <None Include="skins\cat_5.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_6.xnb">
+    <None Include="skins\cat_6.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_7.xnb">
+    <None Include="skins\cat_7.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_8.xnb">
+    <None Include="skins\cat_8.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\cat_9.xnb">
+    <None Include="skins\cat_9.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_1.xnb">
+    <None Include="skins\dog_1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_2.xnb">
+    <None Include="skins\dog_2.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_3.xnb">
+    <None Include="skins\dog_3.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_4.xnb">
+    <None Include="skins\dog_4.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_5.xnb">
+    <None Include="skins\dog_5.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_6.xnb">
+    <None Include="skins\dog_6.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_7.xnb">
+    <None Include="skins\dog_7.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_8.xnb">
+    <None Include="skins\dog_8.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="pets\dog_9.xnb">
+    <None Include="skins\dog_9.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="box.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="box_old.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="credits.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -14,7 +14,7 @@ using Entoarox.Framework.UI;
 */
 namespace Entoarox.ExtendedMinecart
 {
-    public class ExtendedMinecart : Mod
+    public class ExtendedMinecartMod : Mod
     {
         private static List<KeyValuePair<string, string>> DestinationData = new List<KeyValuePair<string, string>>()
         {
@@ -269,14 +269,12 @@ namespace Entoarox.ExtendedMinecart
         }
         private void MenuEvents_MenuChanged(object s, EventArgs e)
         {
-            if (Game1.activeClickableMenu == null || !(Game1.activeClickableMenu is DialogueBox) || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
+            if (Game1.activeClickableMenu == null || !(Game1.activeClickableMenu is DialogueBox) || !Context.IsWorldReady || Game1.player==null || Game1.currentLocation==null || Game1.currentLocation.lastQuestionKey==null || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
                 return;
             (Game1.activeClickableMenu as DialogueBox)?.closeDialogue();
-            if (Game1.currentLocation != null)
-                Game1.currentLocation.lastQuestionKey = null;
+            Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;
-            if (Game1.player != null)
-                Game1.player.CanMove = true;
+            Game1.player.CanMove = true;
             if (Config.RefuelingEnabled)
             {
                 if (CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && Rand.NextDouble() < 0.05)
@@ -294,6 +292,7 @@ namespace Entoarox.ExtendedMinecart
                         });
                     else
                         Game1.drawObjectDialogue("The minecart is out of fuel and requires 5 coal to be refueled.");
+                    return;
                 }
             }
             foreach (KeyValuePair<string, ButtonFormComponent> item in Destinations)
@@ -311,7 +310,7 @@ namespace Entoarox.ExtendedMinecart
         }
         private void AnswerResolver(string answer)
         {
-            Menu.ExitMenu();
+            Menu?.ExitMenu();
             CheckRefuel = true;
             switch (answer)
             {

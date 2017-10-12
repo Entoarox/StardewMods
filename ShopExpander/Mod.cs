@@ -58,7 +58,7 @@ namespace Entoarox.ShopExpander
             if (!affectedShops.Contains(owner))
                 affectedShops.Add(owner);
             obj.requirements = requirements;
-            Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.stackAmount}*{obj.maximumStackSize()},'{requirements}')",LogLevel.Trace);
+            //Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.stackAmount}*{obj.maximumStackSize()},'{requirements}')",LogLevel.Trace);
             if (AddedObjects.ContainsKey(obj.Name))
                 return;
             AddedObjects.Add(obj.Name, obj);

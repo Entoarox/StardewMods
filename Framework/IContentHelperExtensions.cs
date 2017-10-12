@@ -120,7 +120,10 @@ namespace Entoarox.Framework
             if (XnbLoader._Map.ContainsKey(assetName))
                 ModEntry.Logger.Log("[IContentHelper] The `" + Utilities.ModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset failed, as another mod has already done so.", LogLevel.Error);
             else
+            {
                 XnbLoader._Map.Add(assetName, (helper, replacementAssetName));
+                Utilities.InvalidateCache(assetName);
+            }
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the loading for one specific asset
@@ -134,7 +137,10 @@ namespace Entoarox.Framework
             if (DeferredAssetHandler._LoadMap.ContainsKey((typeof(T), assetName)))
                 ModEntry.Logger.Log("[IContentHelper] The `" + Utilities.ModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset of type `" + typeof(T).FullName + "` failed, as another mod has already done so.", LogLevel.Error);
             else
+            {
                 DeferredAssetHandler._LoadMap.Add((typeof(T), assetName), assetLoader);
+                Utilities.InvalidateCache(assetName);
+            }
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the injection for one specific asset
@@ -147,8 +153,8 @@ namespace Entoarox.Framework
         {
             if (!DeferredAssetHandler._EditMap.ContainsKey((typeof(T), assetName)))
                 DeferredAssetHandler._EditMap.Add((typeof(T), assetName), new List<Delegate>());
-            else
-                DeferredAssetHandler._EditMap[(typeof(T), assetName)].Add(assetInjector);
+            DeferredAssetHandler._EditMap[(typeof(T), assetName)].Add(assetInjector);
+            Utilities.InvalidateCache(assetName);
         }
         /// <summary>
         /// If none of the build in content handlers are sufficient, and making a custom one is overkill, this method lets you handle the injection for a specific type of asset
@@ -160,8 +166,8 @@ namespace Entoarox.Framework
         {
             if (DeferredTypeHandler._EditMap.ContainsKey(typeof(T)))
                 DeferredTypeHandler._EditMap.Add(typeof(T), new List<Delegate>());
-            else
-                DeferredTypeHandler._EditMap[typeof(T)].Add(assetInjector);
+            DeferredTypeHandler._EditMap[typeof(T)].Add(assetInjector);
+            Utilities.InvalidateCache<T>();
         }
         public static string GetPlatformRelativeContent(this IContentHelper helper)
         {

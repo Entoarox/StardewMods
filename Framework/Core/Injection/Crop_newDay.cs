@@ -8,7 +8,7 @@ using SObject = StardewValley.Object;
 
 using Harmony;
 
-namespace Entoarox.Framework.Injection
+namespace Entoarox.Framework.Core.Injection
 {
     [HarmonyPatch(typeof(Crop), "newDay", new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(GameLocation) })]
     class Crop_newDay

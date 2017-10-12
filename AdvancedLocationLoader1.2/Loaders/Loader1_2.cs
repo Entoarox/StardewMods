@@ -47,22 +47,33 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                             ModEntry.Logger.Log("Unable to merge child manifest, json cannot be parsed: " + childPath,LogLevel.Error,  err);
                             continue;
                         }
+                        string point="Unknown";
                         try
                         {
+                            point = "Conditionals";
                             conf.Conditionals.AddRange(secondary.Conditionals);
+                            point = "Locations";
                             conf.Locations.AddRange(secondary.Locations);
+                            point = "Overrides";
                             conf.Overrides.AddRange(secondary.Overrides);
+                            point = "Properties";
                             conf.Properties.AddRange(secondary.Properties);
+                            point = "Redirects";
                             conf.Redirects.AddRange(secondary.Redirects);
+                            point = "Shops";
                             conf.Shops.AddRange(secondary.Shops);
+                            point = "Teleporters";
                             conf.Teleporters.AddRange(secondary.Teleporters);
+                            point = "Tiles";
                             conf.Tiles.AddRange(secondary.Tiles);
+                            point = "Tilesheets";
                             conf.Tilesheets.AddRange(secondary.Tilesheets);
+                            point = "Warps";
                             conf.Warps.AddRange(secondary.Warps);
                         }
                         catch(Exception err)
                         {
-                            ModEntry.Logger.Log("Unable to merge child manifest, a unexpected error occured: " + childPath,LogLevel.Error,  err);
+                            ModEntry.Logger.Log("Unable to merge child manifest, a unexpected error occured trying to merge the `"+point+"` section: " + childPath,LogLevel.Error,  err);
                         }
                     }
             }
@@ -102,158 +113,172 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
             AffectedLocations.Add(name);
             return true;
         }
+        private static string GetRelativePath(string filepath)
+        {
+            Uri fromUri = new Uri(ModEntry.SHelper.DirectoryPath + Path.DirectorySeparatorChar);
+            Uri toUri = new Uri(filepath);
+            if (fromUri.Scheme != toUri.Scheme) { throw new InvalidOperationException("Unable to make path relative to the DLL: " + filepath); }
+            return Uri.UnescapeDataString(fromUri.MakeRelativeUri(toUri).ToString());
+        }
         public static void Parse(string filepath, MainLocationManifest1_2 config)
         {
-            // Print mod info into the log
-            ModEntry.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
-            // Parse locations
-            ModEntry.Logger.Log("Parsing the `Locations` section...",LogLevel.Trace);
-            if (config.Locations != null)
-                foreach (Location loc in config.Locations)
-                    if (LocationChecks(filepath, loc.FileName, loc.MapName))
-                    {
-                        if (!LocationTypes.Contains(loc.Type))
+            string stage = "Entry";
+            try
+            {
+                string relpath = GetRelativePath(filepath);
+                // Print mod info into the log
+                ModEntry.Logger.Log((config.About.ModName == null ? "Legacy Mod" : config.About.ModName) + ", version `" + config.About.Version + "` by " + config.About.Author, LogLevel.Info);
+                // Parse locations
+                stage = "Locations";
+                if (config.Locations != null)
+                    foreach (Location loc in config.Locations)
+                        if (LocationChecks(filepath, loc.FileName, loc.MapName))
                         {
-                            ModEntry.Logger.Log("Unknown location Type, using `Default` instead: " + loc.ToString(),LogLevel.Error);
-                            loc.Type = "Default";
+                            if (!LocationTypes.Contains(loc.Type))
+                            {
+                                ModEntry.Logger.Log("Unknown location Type, using `Default` instead: " + loc.ToString(), LogLevel.Error);
+                                loc.Type = "Default";
+                            }
+                            Compound.Locations.Add(loc);
+                            loc.FileName = Path.Combine(relpath, loc.FileName);
                         }
-                        loc.FileName = Path.Combine(filepath, loc.FileName);
-                        Compound.Locations.Add(loc);
-
-                    }
-            // Parse overrides
-            ModEntry.Logger.Log("Parsing the `Overrides` section...",LogLevel.Trace);
-            if (config.Overrides != null)
-                foreach (Override ovr in config.Overrides)
-                    if (LocationChecks(filepath, ovr.FileName, ovr.MapName))
-                    {
-                        ovr.FileName = Path.Combine(filepath, ovr.FileName);
-                        Compound.Overrides.Add(ovr);
-                    }
-            // Parse redirects
-            ModEntry.Logger.Log("Parsing the `Redirects` section...", LogLevel.Trace);
-            if (config.Redirects != null)
-                foreach (Redirect red in config.Redirects)
-                    if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
-                    {
-                        red.ToFile = Path.Combine(filepath, red.ToFile);
-                        Compound.Redirects.Add(red);
-                    }
-            // Parse tilesheets
-            ModEntry.Logger.Log("Parsing the `Tilesheets` section...", LogLevel.Trace);
-            if (config.Tilesheets != null)
-                foreach (Tilesheet sht in config.Tilesheets)
-                {
-                    if (sht.FileName != null)
-                    {
-                        if (sht.Seasonal)
+                // Parse overrides
+                stage = "Overrides";
+                if (config.Overrides != null)
+                    foreach (Override ovr in config.Overrides)
+                        if (LocationChecks(filepath, ovr.FileName, ovr.MapName))
                         {
-                            if (!FileCheck(filepath, sht.FileName + "_spring"))
-                                continue;
-                            if (!FileCheck(filepath, sht.FileName + "_summer"))
-                                continue;
-                            if (!FileCheck(filepath, sht.FileName + "_fall"))
-                                continue;
-                            if (!FileCheck(filepath, sht.FileName + "_winter"))
+                            ovr.FileName = Path.Combine(relpath, ovr.FileName);
+                            Compound.Overrides.Add(ovr);
+                        }
+                // Parse redirects
+                stage = "Redirects";
+                if (config.Redirects != null)
+                    foreach (Redirect red in config.Redirects)
+                        if (FileCheck(Game1.content.RootDirectory, red.FromFile) && FileCheck(filepath, red.ToFile))
+                        {
+                            red.ToFile = Path.Combine(relpath, red.ToFile);
+                            Compound.Redirects.Add(red);
+                        }
+                // Parse tilesheets
+                stage = "Tilesheets";
+                if (config.Tilesheets != null)
+                    foreach (Tilesheet sht in config.Tilesheets)
+                    {
+                        if (sht.FileName != null)
+                        {
+                            if (sht.Seasonal)
+                            {
+                                if (!FileCheck(filepath, sht.FileName + "_spring"))
+                                    continue;
+                                if (!FileCheck(filepath, sht.FileName + "_summer"))
+                                    continue;
+                                if (!FileCheck(filepath, sht.FileName + "_fall"))
+                                    continue;
+                                if (!FileCheck(filepath, sht.FileName + "_winter"))
+                                    continue;
+                            }
+                            else if (!FileCheck(filepath, sht.FileName))
                                 continue;
                         }
-                        else if (!FileCheck(filepath, sht.FileName))
-                            continue;
-                    }
-                    if(!TilesheetCache.ContainsKey(sht.MapName))
-                    TilesheetCache.Add(sht.MapName, new List<string>());
-                    TilesheetCache[sht.MapName].Add(sht.SheetId);
-                    if(sht.FileName!=null)
                         sht.FileName = Path.Combine(filepath, sht.FileName);
-                    Compound.Tilesheets.Add(sht);
-                }
-            // Parse tiles
-            ModEntry.Logger.Log("Parsing the `tiles` section...", LogLevel.Trace);
-            if (config.Tiles != null)
-                foreach (Tile til in config.Tiles)
-                {
-                    if (!Layers.Contains(til.LayerId))
-                        ModEntry.Logger.Log("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId,LogLevel.Error);
-                    else
-                        Compound.Tiles.Add(til);
-                }
-            // Parse properties
-            ModEntry.Logger.Log("Parsing the `Properties` section...", LogLevel.Trace);
-            if (config.Properties != null)
-                foreach (Property pro in config.Properties)
-                {
-                    if (!Layers.Contains(pro.LayerId))
-                        ModEntry.Logger.Log("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId,LogLevel.Error);
-                    else
-                        Compound.Properties.Add(pro);
-                }
-            // Parse warps
-            ModEntry.Logger.Log("Parsing the `Warps` section...", LogLevel.Trace);
-            if (config.Warps != null)
-                foreach (Warp war in config.Warps)
-                    Compound.Warps.Add(war);
-            // Parse conditionals
-            ModEntry.Logger.Log("Parsing the `Conditionals` section...", LogLevel.Trace);
-            if (config.Conditionals != null)
-                foreach (Conditional con in config.Conditionals)
-                    if (con.Item < -1)
-                        ModEntry.Logger.Log("Unable to parse conditional, it references a null item: " + con.ToString(), LogLevel.Error);
-                    else if (con.Amount < 1)
-                        ModEntry.Logger.Log("Unable to validate conditional, the item amount is less then 1: " + con.ToString(), LogLevel.Error);
-                    else if (Conditionals.Contains(con.Name))
-                        ModEntry.Logger.Log("Unable to validate conditional, another condition with this name already exists: " + con.ToString(), LogLevel.Error);
-                    else
-                    {
-                        Configs.Compound.Conditionals.Add(con);
-                        Conditionals.Add(con.Name);
+                        if (!TilesheetCache.ContainsKey(sht.MapName))
+                            TilesheetCache.Add(sht.MapName, new List<string>());
+                        TilesheetCache[sht.MapName].Add(sht.SheetId);
+                        Compound.Tilesheets.Add(sht);
                     }
-            // Parse minecarts
-            ModEntry.Logger.Log("Parsing the `Teleporters` section...",LogLevel.Trace);
-            if (config.Teleporters != null)
-                foreach (TeleporterList min in config.Teleporters)
-                {
-                    bool add = true;
-                    foreach (TeleporterList tes in Compound.Teleporters)
-                        if (tes.ListName == min.ListName)
-                        {
-                            add = false;
-                            foreach (TeleporterDestination dest in min.Destinations)
-                                if (tes.Destinations.TrueForAll(a => { return !a.Equals(dest); }))
-                                    tes.Destinations.Add(dest);
-                                else
-                                    ModEntry.Logger.Log("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString(), LogLevel.Error);
-                            ModEntry.Logger.Log("Teleporter updated: " + tes.ToString(), LogLevel.Trace);
-                            break;
-                        }
-                    if (add)
+                // Parse tiles
+                stage = "Tiles";
+                if (config.Tiles != null)
+                    foreach (Tile til in config.Tiles)
                     {
-                        Compound.Teleporters.Add(min);
-                        ModEntry.Logger.Log("Teleporter created: " + min.ToString(), LogLevel.Trace);
+                        if (!Layers.Contains(til.LayerId))
+                            ModEntry.Logger.Log("Cannot place tile `" + til.ToString() + "` on unknown layer: " + til.LayerId, LogLevel.Error);
+                        else
+                            Compound.Tiles.Add(til);
                     }
-                }
-            // Parse shops
-            ModEntry.Logger.Log("Parsing the `Shops` section...", LogLevel.Trace);
-            if (config.Shops != null)
-                foreach (string shop in config.Shops)
-                {
-                    string path = Path.Combine(filepath, shop + ".json");
-                    if (!File.Exists(path))
-                        ModEntry.Logger.Log("Unable to load shop, file does not exist: " + path, LogLevel.Error);
-                    else
+                // Parse properties
+                stage = "Properties";
+                if (config.Properties != null)
+                    foreach (Property pro in config.Properties)
                     {
-                        try
+                        if (!Layers.Contains(pro.LayerId))
+                            ModEntry.Logger.Log("Cannot apply property `" + pro.ToString() + "` to tile unknown layer: " + pro.LayerId, LogLevel.Error);
+                        else
+                            Compound.Properties.Add(pro);
+                    }
+                // Parse warps
+                stage = "Warps";
+                if (config.Warps != null)
+                    foreach (Warp war in config.Warps)
+                        Compound.Warps.Add(war);
+                // Parse conditionals
+                stage = "Conditionals";
+                if (config.Conditionals != null)
+                    foreach (Conditional con in config.Conditionals)
+                        if (con.Item < -1)
+                            ModEntry.Logger.Log("Unable to parse conditional, it references a null item: " + con.ToString(), LogLevel.Error);
+                        else if (con.Amount < 1)
+                            ModEntry.Logger.Log("Unable to validate conditional, the item amount is less then 1: " + con.ToString(), LogLevel.Error);
+                        else if (Conditionals.Contains(con.Name))
+                            ModEntry.Logger.Log("Unable to validate conditional, another condition with this name already exists: " + con.ToString(), LogLevel.Error);
+                        else
                         {
-                            ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
-                            cfg.Portrait = Path.Combine(filepath, cfg.Portrait);
-                            Configs.Compound.Shops.Add(shop, cfg);
+                            Configs.Compound.Conditionals.Add(con);
+                            Conditionals.Add(con.Name);
                         }
-                        catch(Exception err)
+                // Parse minecarts
+                stage = "Teleporters";
+                if (config.Teleporters != null)
+                    foreach (TeleporterList min in config.Teleporters)
+                    {
+                        bool add = true;
+                        foreach (TeleporterList tes in Compound.Teleporters)
+                            if (tes.ListName == min.ListName)
+                            {
+                                add = false;
+                                foreach (TeleporterDestination dest in min.Destinations)
+                                    if (tes.Destinations.TrueForAll(a => { return !a.Equals(dest); }))
+                                        tes.Destinations.Add(dest);
+                                    else
+                                        ModEntry.Logger.Log("Unable to add teleporter destination for the `" + min.ListName + "` teleporter, the destination already exists: `" + dest.ToString(), LogLevel.Error);
+                                ModEntry.Logger.Log("Teleporter updated: " + tes.ToString(), LogLevel.Trace);
+                                break;
+                            }
+                        if (add)
                         {
-                            ModEntry.Logger.Log("Could not load shop due to unexpected error: " + path,LogLevel.Error, err);
-                            continue;
+                            Compound.Teleporters.Add(min);
+                            ModEntry.Logger.Log("Teleporter created: " + min.ToString(), LogLevel.Trace);
                         }
                     }
-                }
+                // Parse shops
+                stage = "Shops";
+                if (config.Shops != null)
+                    foreach (string shop in config.Shops)
+                    {
+                        string path = Path.Combine(filepath, shop + ".json");
+                        if (!File.Exists(path))
+                            ModEntry.Logger.Log("Unable to load shop, file does not exist: " + path, LogLevel.Error);
+                        else
+                        {
+                            try
+                            {
+                                ShopConfig cfg = JsonConvert.DeserializeObject<ShopConfig>(File.ReadAllText(path));
+                                cfg.Portrait = Path.Combine(relpath, cfg.Portrait);
+                                Configs.Compound.Shops.Add(shop, cfg);
+                            }
+                            catch (Exception err)
+                            {
+                                ModEntry.Logger.Log("Could not load shop due to unexpected error: " + path, LogLevel.Error, err);
+                                continue;
+                            }
+                        }
+                    }
+            }
+            catch(Exception err)
+            {
+                ModEntry.Logger.Log("Unable to load manifest, a unexpected error occured at stage `"+stage+"`: " + filepath, LogLevel.Error, err);
+            }
         }
         internal static string CheckTileInfo(TileInfo info)
         {
@@ -302,7 +327,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     {
                         try
                         {
-                            xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
+                            xTile.Map map = ModEntry.SHelper.Content.Load<xTile.Map>(obj.FileName);
                             MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
                             MapCache.Add(obj.MapName, map);
                             AffectedLocations.Add(obj.MapName);
@@ -323,7 +348,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     {
                         try
                         {
-                            xTile.Map map = new LocalizedContentManager(Game1.content.ServiceProvider, Path.GetDirectoryName(obj.FileName)).Load<xTile.Map>(Path.GetFileName(obj.FileName));
+                            xTile.Map map = ModEntry.SHelper.Content.Load<xTile.Map>(obj.FileName);
                             MapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
                             trueCompound.Overrides.Add(obj);
                         }
@@ -357,7 +382,7 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                     else if (obj.SheetId != null && (!TilesheetCache.ContainsKey(obj.MapName) || !TilesheetCache[obj.MapName].Contains(obj.SheetId)))
                     {
                         xTile.Map map = MapCache.ContainsKey(obj.MapName) ? MapCache[obj.MapName] : Game1.getLocationFromName(obj.MapName).map;
-                        if (map.GetTileSheet(obj.SheetId) == null)
+                        if (map.GetTileSheet(obj.SheetId) == null && (!TilesheetCache.ContainsKey(map.Id) || !TilesheetCache[map.Id].Contains(obj.SheetId)))
                         {
                             ModEntry.Logger.Log("Unable to apply tile patch, tilesheet does not exist:" + obj.ToString(), LogLevel.Error);
                             continue;
@@ -402,8 +427,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                 foreach (Override obj in trueCompound.Overrides)
                     Processors.ApplyOverride(obj);
                 stage++; // 12
+                List<string> redirCache = new List<string>();
                 foreach (Redirect obj in trueCompound.Redirects)
-                    ModEntry.SHelper.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
+                    if (!redirCache.Contains(obj.ToFile))
+                    {
+                        ModEntry.SHelper.Content.RegisterXnbReplacement(obj.FromFile, obj.ToFile);
+                        redirCache.Add(obj.ToFile);
+                    }
+                redirCache = null;
                 stage++; // 13
                 foreach (Tilesheet obj in trueCompound.Tilesheets)
                 {

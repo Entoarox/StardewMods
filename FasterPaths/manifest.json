@@ -7,7 +7,7 @@
     "PatchVersion": 1,
     "Build": null
   },
-  "MinimumApiVersion": "1.15.2",
+  "MinimumApiVersion": "1.15.4-alpha.1",
   "Description": "Walk faster on paths, better paths faster movement!",
   "UniqueID": "Entoarox.FasterPaths",
   "EntryDll": "FasterPaths.dll",

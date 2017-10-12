@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using Entoarox.Framework;
 using StardewModdingAPI;
 
@@ -36,6 +37,7 @@ namespace Entoarox.XnbLoader
             @"TileSheets"
         };
 
+        private Dictionary<string, string> Cache = new Dictionary<string, string>();
 
         /*********
         ** Public methods
@@ -54,7 +56,8 @@ namespace Entoarox.XnbLoader
             // load files
             this.Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
             int overrides = this.LoadOverrides(contentPath, contentPath);
-            this.Monitor.Log($"Parsing complete, found and redirected {overrides} files", LogLevel.Info);
+            this.PatchFiles();
+            this.Monitor.Log($"Parsing complete, found and redirected [{overrides}] files", LogLevel.Info);
         }
 
 
@@ -72,7 +75,7 @@ namespace Entoarox.XnbLoader
             {
                 string pathSeparator = Path.DirectorySeparatorChar.ToString();
                 string relativePath = path.Replace(root + pathSeparator, pathSeparator).Replace(root, pathSeparator);
-                this.Monitor.Log($"Scanning for files and directories in {relativePath}", LogLevel.Trace);
+                this.Monitor.Log($"Looking for files and directories in {relativePath}", LogLevel.Trace);
             }
 
             // load subfolders
@@ -84,12 +87,18 @@ namespace Entoarox.XnbLoader
             {
                 string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
                 string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
-                this.Monitor.Log($"Redirecting: {from} ~> {filePath}.xnb", LogLevel.Trace);
-                Helper.Content.RegisterXnbReplacement(from, filePath);
+                Cache.Add(from, filePath);
                 files++;
             }
-
             return files;
+        }
+        private void PatchFiles()
+        {
+            this.Monitor.Log("Redirect list:",LogLevel.Trace);
+            foreach(KeyValuePair<string, string> entry in Cache)
+                this.Monitor.Log($"  {entry.Key} ~> {entry.Value}.xnb", LogLevel.Trace);
+            foreach (KeyValuePair<string, string> entry in Cache)
+                this.Helper.Content.RegisterXnbReplacement(entry.Key, entry.Value);
         }
     }
 }

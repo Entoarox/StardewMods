@@ -45,8 +45,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContentMode.cs" />
     <Compile Include="ContentPackManifest.cs" />
-    <Compile Include="Mod.cs" />
+    <Compile Include="SeasonalImmersionMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

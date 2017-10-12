@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -16,6 +17,7 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Processors
     {
+        private static List<string> _MappingCache = new List<string>();
         internal static void ApplyTile(Tile tile)
         {
             int stage = 0;
@@ -24,10 +26,7 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 stage++; // 1
                 if (!string.IsNullOrEmpty(tile.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(tile.Conditions))
-                {
-                    ModEntry.Logger.Log(tile.ToString() +" ~> false", LogLevel.Trace);
                     return;
-                }
                 stage++; // 2
                 GameLocation loc = Game1.getLocationFromName(tile.MapName);
                 if(loc==null)
@@ -73,7 +72,6 @@ namespace Entoarox.AdvancedLocationLoader
                     }
                 }
                 stage++; // 4
-                ModEntry.Logger.Log(tile.ToString() + " ~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
@@ -86,7 +84,6 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 if (string.IsNullOrEmpty(property.Conditions) || ModEntry.SHelper.Conditions().ValidateConditions(property.Conditions))
                 {
-                    ModEntry.Logger.Log(property.ToString()+" ~> true", LogLevel.Trace);
                     if (Game1.getLocationFromName(property.MapName).HasTile(property.TileX, property.TileY, property.LayerId))
                         Game1.getLocationFromName(property.MapName).SetTileProperty(property.TileX, property.TileY, property.LayerId, property.Key, property.Value);
                     else if (property.Optional)
@@ -94,8 +91,6 @@ namespace Entoarox.AdvancedLocationLoader
                     else
                         ModEntry.Logger.Log("Unable to patch required property, tile does not exist: " + property.ToString(), LogLevel.Error);
                 }
-                else
-                    ModEntry.Logger.Log(property.ToString() + " ~> false", LogLevel.Trace);
             }
             catch (Exception err)
             {
@@ -108,15 +103,11 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 if (!string.IsNullOrEmpty(warp.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(warp.Conditions))
-                {
-                    ModEntry.Logger.Log(warp.ToString() +"~> false", LogLevel.Trace);
                     return;
-                }
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
                 loc.warps.RemoveAll((a) => a.X == _warp.X && a.Y == _warp.Y);
                 loc.warps.Add(_warp);
-                ModEntry.Logger.Log(warp.ToString() + "~> true", LogLevel.Trace);
             }
             catch (Exception err)
             {
@@ -142,20 +133,22 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 3
-                    ModEntry.SHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                    if (!_MappingCache.Contains(tilesheet.FileName))
+                    {
+                        ModEntry.SHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                        _MappingCache.Add(tilesheet.FileName);
+                    }
                     stage++; // 4
                     if (location.map.GetTileSheet(tilesheet.SheetId) != null)
                     {
                         branch = 1;
                         location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
-                        ModEntry.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/override", LogLevel.Trace);
                     }
                     else
                     {
                         branch = 2;
                         Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
                         location.map.AddTileSheet(new xTile.Tiles.TileSheet(tilesheet.SheetId, location.map, fakepath, new xTile.Dimensions.Size((int)Math.Ceiling(sheet.Width / 16.0), (int)Math.Ceiling(sheet.Height / 16.0)), new xTile.Dimensions.Size(16, 16)));
-                        ModEntry.Logger.Log($"{tilesheet} ~> {(tilesheet.Seasonal ? "seasonal" : "normal")}/insert", LogLevel.Trace);
                     }
                 }
                 stage++; // 5 (skip 3)
@@ -174,7 +167,6 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void ApplyLocation(Location location)
         {
-            ModEntry.Logger.Log(location.ToString(),LogLevel.Trace);
             try
             {
                 GameLocation loc;
@@ -182,8 +174,10 @@ namespace Entoarox.AdvancedLocationLoader
                 switch (location.Type)
                 {
                     case "Cellar":
-                        loc = new StardewValley.Locations.Cellar(map, location.MapName);
-                        loc.objects = new SerializableDictionary<Microsoft.Xna.Framework.Vector2, StardewValley.Object>();
+                        loc = new StardewValley.Locations.Cellar(map, location.MapName)
+                        {
+                            objects = new SerializableDictionary<Microsoft.Xna.Framework.Vector2, StardewValley.Object>()
+                        };
                         break;
                     case "BathHousePool":
                         loc = new StardewValley.Locations.BathHousePool(map, location.MapName);
@@ -215,7 +209,6 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void ApplyOverride(Override obj)
         {
-            ModEntry.Logger.Log(obj.ToString(),LogLevel.Trace);
             try
             {
                 Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), ModEntry.SHelper.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
