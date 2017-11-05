@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,13 +25,25 @@ namespace Entoarox.DynamicDungeons
         private int Height;
         public DungeonBuilder()
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             this.Seed = _Random.Next();
             this.GenerateMap();
+            watch.Stop();
+            Report("Generation took: " + watch.ElapsedMilliseconds + "ms");
         }
         public DungeonBuilder(int seed)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             this.Seed = seed;
             this.GenerateMap();
+            watch.Stop();
+            Report("Generation took: " + watch.ElapsedMilliseconds + "ms");
+        }
+        private void Report(string message)
+        {
+            Console.WriteLine("[DD]: " + message);
         }
         private void ColorConvert()
         {
@@ -40,6 +54,7 @@ namespace Entoarox.DynamicDungeons
         }
         private void GenerateMap()
         {
+            Report("Generation started...");
             // Setup the seeder that this map will be using
             this.Seeder = new Random(this.Seed);
             // Define the width & height
@@ -48,20 +63,82 @@ namespace Entoarox.DynamicDungeons
             // Setup the map
             this.Map = new bool[this.Width, this.Height];
             // Seed the initial automaton state
+            Report("Creating seed map...");
             for (int x = 0; x < this.Width; x++)
                 for (int y = 0; y < this.Height; y++)
                     if(this.Seeder.NextDouble() < _ChanceToStartAlive)
                         this.Map[x, y] = true;
+            Report("Simulation part 1...");
             // Simulate the automaton to get a rough map
             for (int s = 0; s < _SimulationSteps; s++)
                 NextStep();
             // Clean up dangling single-tile walls
-            for (int s = 0; s < _SimulationSteps*2; s++)
+            Report("Simulation part 2...");
+            for (int s = 0; s < _SimulationSteps * 2; s++)
                 NextClean();
             // Convert the true/false map into a color-capable one
+            Report("Converting structure...");
             ColorConvert();
             // Perform flood filling to find & isolate a large dungeon region
+            Report("Trying to validate map...");
             FloodFill();
+            Report("Generation finished");
+        }
+        private void _GenerateMap()
+        {
+            Report("Generation started...");
+            // Setup the seeder that this map will be using
+            this.Seeder = new Random(this.Seed);
+            // Define the width & height
+            this.Width = this.Seeder.Next(56, 64);
+            this.Height = this.Seeder.Next(56, 64);
+            // Setup the map
+            this.Map = new bool[this.Width, this.Height];
+            // Calculate how many target points the map will have
+            int count = this.Seeder.Next(256, 384);
+            Report("Setting up seed points...");
+            Dictionary<Vector2, bool> points = new Dictionary<Vector2, bool>();
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 point = new Vector2(this.Seeder.Next(0, this.Width - 1), this.Seeder.Next(0, this.Height - 1));
+                if (!points.ContainsKey(point))
+                    points.Add(point, this.Seeder.NextDouble() < _ChanceToStartAlive);
+                else
+                    i--;
+            }
+            Report("Mapping pixels to seeds...");
+            for (int x=0;x<this.Width;x++)
+                for(int y=0;y<this.Height;y++)
+                {
+                    Vector2 owner=new Vector2(-1, -1);
+                    float distance = float.MaxValue;
+                    Vector2 pixel = new Vector2(x, y);
+                    foreach(Vector2 point in points.Keys)
+                    {
+                        float pdist = Vector2.Distance(pixel, point);
+                        if (pdist < distance)
+                        {
+                            distance = pdist;
+                            owner = point;
+                        }
+                    }
+                    this.Map[x, y] = this.Seeder.NextDouble() < 0.5 ? points[owner] : this.Seeder.NextDouble() < _ChanceToStartAlive;
+                }
+            Report("Simulation part 1...");
+            // Simulate the automaton to get a rough map
+            for (int s = 0; s < _SimulationSteps; s++)
+                NextStep();
+            // Clean up dangling single-tile walls
+            Report("Simulation part 2...");
+            for (int s = 0; s < _SimulationSteps * 2; s++)
+                NextClean();
+            // Convert the true/false map into a color-capable one
+            Report("Converting structure...");
+            ColorConvert();
+            // Perform flood filling to find & isolate a large dungeon region
+            Report("Trying to validate map...");
+            FloodFill();
+            Report("Generation finished");
         }
         private Color GetTileColor(int x, int y)
         {
