@@ -17,7 +17,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         public override void resetForPlayerEntry()
         {
             base.resetForPlayerEntry();
-            characters.Clear();
+            this.characters.Clear();
         }
     }
 }

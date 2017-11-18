@@ -18,15 +18,15 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Label;
+                return this._Label;
             }
             set
             {
-                _Label = value;
+                this._Label = value;
                 int labelWidth = GetStringWidth(value, Game1.smallFont);
-                int width = Math.Max(_Width, labelWidth + 4);
-                LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
-                Area.Width = width * Game1.pixelZoom;
+                int width = Math.Max(this._Width, labelWidth + 4);
+                this.LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
+                this.Area.Width = width * Game1.pixelZoom;
             }
         }
         protected int LabelOffset;
@@ -38,60 +38,60 @@ namespace Entoarox.Framework.UI
         }
         public ButtonFormComponent(Point position, int width, string label, ClickHandler handler =null)
         {
-            _Width = width;
+            this._Width = width;
             int labelWidth = GetStringWidth(label, Game1.smallFont);
             width = Math.Max(width,labelWidth+4);
-            LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
+            this.LabelOffset = (int)Math.Round((width - labelWidth) / 2D);
             SetScaledArea(new Rectangle(position.X, position.Y, width, 10));
-            _Label = label;
+            this._Label = label;
             if (handler!=null)
                 Handler += handler;
         }
         public override void LeftHeld(Point p, Point o)
         {
-            if(!Disabled)
-                Pressed = true;
+            if(!this.Disabled)
+                this.Pressed = true;
         }
         public override void LeftUp(Point p, Point o)
         {
-            if(!Disabled)
-                Pressed = false;
+            if(!this.Disabled)
+                this.Pressed = false;
         }
         public override void LeftClick(Point p, Point o)
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
             Game1.playSound("bigDeSelect");
-            Handler?.Invoke(this, Parent, Parent.GetAttachedMenu());
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
         public override void HoverIn(Point p, Point o)
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
             Game1.playSound("Cowboy_Footstep");
-            Hovered = true;
+            this.Hovered = true;
         }
         public override void HoverOut(Point p, Point o)
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
-            Hovered = false;
+            this.Hovered = false;
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            if (Pressed)
+            if (this.Pressed)
                 o.Y += Game1.pixelZoom / 2;
-            Rectangle r = Hovered && !Pressed ? ButtonHover : ButtonNormal;
+            Rectangle r = this.Hovered && !this.Pressed ? ButtonHover : ButtonNormal;
             // Begin
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White * (Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, zoom2, this.Area.Height), new Rectangle(r.X, r.Y, 2, r.Height), Color.White * (this.Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // End
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Area.Width-zoom2, Area.Y + o.Y, zoom2, Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White * (Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(this.Area.X + o.X + this.Area.Width-zoom2, this.Area.Y + o.Y, zoom2, this.Area.Height), new Rectangle(r.X+r.Width-2, r.Y, 2, r.Height), Color.White * (this.Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Center
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + zoom2, Area.Y + o.Y, Area.Width - zoom4, Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White *(Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
+            b.Draw(Game1.mouseCursors, new Rectangle(this.Area.X + o.X + zoom2, this.Area.Y + o.Y, this.Area.Width - zoom4, this.Area.Height), new Rectangle(r.X+2, r.Y, r.Width - 4, r.Height), Color.White *(this.Disabled ? 0.33f : 1), 0, Vector2.Zero, SpriteEffects.None, 1f);
             // Text
-            Utility.drawTextWithShadow(b, Label, Game1.smallFont, new Vector2(o.X + Area.X + LabelOffset*Game1.pixelZoom, o.Y + Area.Y + zoom2), Game1.textColor * (Disabled?0.33f:1));
+            Utility.drawTextWithShadow(b, this.Label, Game1.smallFont, new Vector2(o.X + this.Area.X + this.LabelOffset *Game1.pixelZoom, o.Y + this.Area.Y + zoom2), Game1.textColor * (this.Disabled ?0.33f:1));
         }
     }
 }

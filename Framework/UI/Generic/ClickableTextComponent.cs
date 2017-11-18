@@ -17,29 +17,29 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Scale;
+                return this._Scale;
             }
             set
             {
 
-                _Scale = value;
-                Vector2 size = Font.MeasureString(Label) * value;
-                Area.Width = (int)Math.Ceiling(size.X);
-                Area.Height = (int)Math.Ceiling(size.Y);
+                this._Scale = value;
+                Vector2 size = this.Font.MeasureString(this.Label) * value;
+                this.Area.Width = (int)Math.Ceiling(size.X);
+                this.Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
         public string Label
         {
             get
             {
-                return _Label;
+                return this._Label;
             }
             set
             {
-                _Label = value;
-                Vector2 size = Font.MeasureString(value) * Scale;
-                Area.Width = (int)Math.Ceiling(size.X);
-                Area.Height = (int)Math.Ceiling(size.Y);
+                this._Label = value;
+                Vector2 size = this.Font.MeasureString(value) * this.Scale;
+                this.Area.Width = (int)Math.Ceiling(size.X);
+                this.Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
         public Color Color;
@@ -54,38 +54,38 @@ namespace Entoarox.Framework.UI
                 font = Game1.smallFont;
             if (handler != null)
                 Handler += handler;
-            HoverEffect = hoverEffect;
-            Font = font;
-            Color = (Color)color;
-            Shadow = shadow;
-            _Scale = scale;
-            _Label = label;
-            Vector2 size = Font.MeasureString(label) / Game1.pixelZoom * scale;
+            this.HoverEffect = hoverEffect;
+            this.Font = font;
+            this.Color = (Color)color;
+            this.Shadow = shadow;
+            this._Scale = scale;
+            this._Label = label;
+            Vector2 size = this.Font.MeasureString(label) / Game1.pixelZoom * scale;
             SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
         }
         public override void HoverIn(Point p, Point o)
         {
             Game1.playSound("Cowboy_Footstep");
-            Hovered = true;
+            this.Hovered = true;
         }
         public override void HoverOut(Point p, Point o)
         {
-            Hovered = false;
+            this.Hovered = false;
         }
         public override void LeftClick(Point p, Point o)
         {
             Game1.playSound("bigDeSelect");
-            Handler?.Invoke(this, Parent, Parent.GetAttachedMenu());
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            Vector2 p = new Vector2(Area.X + o.X, Area.Y + o.Y);
-            if (Shadow)
-                Utility.drawTextWithShadow(b, Label, Font, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), Scale);
+            Vector2 p = new Vector2(this.Area.X + o.X, this.Area.Y + o.Y);
+            if (this.Shadow)
+                Utility.drawTextWithShadow(b, this.Label, this.Font, p, this.Color * (this.HoverEffect && !this.Hovered ? 0.8f : 1), this.Scale);
             else
-                b.DrawString(Font, Label, p, Color * (HoverEffect && !Hovered ? 0.8f : 1), 0, Vector2.Zero, Game1.pixelZoom * Scale, SpriteEffects.None, 1);
+                b.DrawString(this.Font, this.Label, p, this.Color * (this.HoverEffect && !this.Hovered ? 0.8f : 1), 0, Vector2.Zero, Game1.pixelZoom * this.Scale, SpriteEffects.None, 1);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Entoarox.Framework.Interface
 
         public virtual string Tooltip { get; set; }
 
-        public virtual bool InBounds(Point offset, Point position) => new Rectangle(OuterBounds.X + offset.X, OuterBounds.Y + offset.Y, OuterBounds.Width, OuterBounds.Height).Contains(position);
+        public virtual bool InBounds(Point offset, Point position) => new Rectangle(this.OuterBounds.X + offset.X, this.OuterBounds.Y + offset.Y, this.OuterBounds.Width, this.OuterBounds.Height).Contains(position);
 
         public virtual void FocusGained()
         {

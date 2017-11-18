@@ -60,16 +60,16 @@
     <Compile Include="Config\ConfigSliderAttribute.cs" />
     <Compile Include="Core\AssetHandlers\DeferredAssetHandler.cs" />
     <Compile Include="Core\AssetHandlers\DeferredTypeHandler.cs" />
-    <Compile Include="Core\ContentHelper\Utilities.cs" />
-    <Compile Include="Core\ContentHelper\WrappedHandler.cs" />
-    <Compile Include="Core\ContentHelper\WrappedLoader.cs" />
-    <Compile Include="Core\ContentHelper\WrappedInjector.cs" />
+    <Compile Include="Core\AssetHandlers\DictionaryInjector.cs" />
+    <Compile Include="Core\AssetHandlers\TextureInjector.cs" />
+    <Compile Include="Core\FakeManifest.cs" />
     <Compile Include="Core\InterModHelper.cs" />
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
-    <Compile Include="Core\KeybindsConfig.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
+    <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
+    <Compile Include="Core\Utilities\Globals.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
     <Compile Include="Delegates.cs" />
@@ -168,7 +168,6 @@
     <Compile Include="UI\Wrapper\ClickableConfirmComponent.cs" />
     <Compile Include="UI\Wrapper\ClickableObjectComponent.cs" />
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
-    <Compile Include="Core\WrappedManifest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="About\ConditionDocumentation.md" />

@@ -15,10 +15,10 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         }
         public override void DayUpdate(int dayOfMonth)
         {
-            string realName = name;
-            name = "Greenhouse";
+            string realName = this.name;
+            this.name = "Greenhouse";
             base.DayUpdate(dayOfMonth);
-            name = realName;
+            this.name = realName;
         }
     }
 }

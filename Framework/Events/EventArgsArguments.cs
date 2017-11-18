@@ -7,9 +7,9 @@ namespace Entoarox.Framework.Events
         public EventArgsArguments(object[] arguments = null)
         {
             if (arguments == null)
-                Arguments = new object[0];
+                this.Arguments = new object[0];
             else
-                Arguments = arguments;
+                this.Arguments = arguments;
         }
     }
 }

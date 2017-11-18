@@ -20,8 +20,8 @@ namespace Entoarox.Framework.UI
         protected IInteractiveMenuComponent FocusElement;
         protected bool Hold = false;
 
-        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
-        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
+        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(this._StaticComponents); } }
+        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(this._InteractiveComponents); } }
 
         protected bool Center = false;
 
@@ -34,7 +34,7 @@ namespace Entoarox.Framework.UI
             set
             {
                 base.Disabled = value;
-                foreach (IInteractiveMenuComponent c in _InteractiveComponents)
+                foreach (IInteractiveMenuComponent c in this._InteractiveComponents)
                     if (c is BaseFormComponent)
                         (c as BaseFormComponent).Disabled = value;
             }
@@ -52,7 +52,7 @@ namespace Entoarox.Framework.UI
         }
         public FormCollectionComponent(Point size, List<IMenuComponent> components = null) : this(components)
         {
-            Center = true;
+            this.Center = true;
             SetScaledArea(new Rectangle(0, 0, size.X, size.Y));
         }
         public FormCollectionComponent(Rectangle area, List<IMenuComponent> components = null) : this(components)
@@ -61,51 +61,51 @@ namespace Entoarox.Framework.UI
         }
         public override void OnAttach(IComponentContainer parent)
         {
-            if (!Center)
+            if (!this.Center)
                 return;
-            Area.X = (parent.EventRegion.Width - Area.Width) / 2;
-            Area.Y = (parent.EventRegion.Height - Area.Height) / 2;
+            this.Area.X = (parent.EventRegion.Width - this.Area.Width) / 2;
+            this.Area.Y = (parent.EventRegion.Height - this.Area.Height) / 2;
         }
         // IComponentCollection
         protected void UpdateDrawOrder()
         {
-            KeyValuePair<List<IInteractiveMenuComponent>, List<IMenuComponent>> sorted = FrameworkMenu.GetOrderedLists(_StaticComponents, _InteractiveComponents);
-            DrawOrder = sorted.Value;
-            EventOrder = sorted.Key;
+            KeyValuePair<List<IInteractiveMenuComponent>, List<IMenuComponent>> sorted = FrameworkMenu.GetOrderedLists(this._StaticComponents, this._InteractiveComponents);
+            this.DrawOrder = sorted.Value;
+            this.EventOrder = sorted.Key;
         }
         public FrameworkMenu GetAttachedMenu()
         {
-            return Parent.GetAttachedMenu();
+            return this.Parent.GetAttachedMenu();
         }
         public void ResetFocus()
         {
-            if (FocusElement == null)
+            if (this.FocusElement == null)
                 return;
-            FocusElement.FocusLost();
-            if (FocusElement is IKeyboardComponent)
+            this.FocusElement.FocusLost();
+            if (this.FocusElement is IKeyboardComponent)
             {
                 Game1.keyboardDispatcher.Subscriber.Selected = false;
                 Game1.keyboardDispatcher.Subscriber = null;
             }
-            FocusElement = null;
+            this.FocusElement = null;
         }
         public void GiveFocus(IInteractiveMenuComponent component)
         {
-            if (!_InteractiveComponents.Contains(component) || component == FocusElement)
+            if (!this._InteractiveComponents.Contains(component) || component == this.FocusElement)
                 return;
-            Parent.GiveFocus(this);
+            this.Parent.GiveFocus(this);
             ResetFocus();
-            FocusElement = component;
-            if (FocusElement is IKeyboardComponent)
-                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)FocusElement);
+            this.FocusElement = component;
+            if (this.FocusElement is IKeyboardComponent)
+                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)this.FocusElement);
             component.FocusGained();
         }
         public void AddComponent(IMenuComponent component)
         {
             if (component is IInteractiveMenuComponent)
-                _InteractiveComponents.Add(component as IInteractiveMenuComponent);
+                this._InteractiveComponents.Add(component as IInteractiveMenuComponent);
             else
-                _StaticComponents.Add(component);
+                this._StaticComponents.Add(component);
             component.Attach(this);
             UpdateDrawOrder();
         }
@@ -120,16 +120,16 @@ namespace Entoarox.Framework.UI
         }
         public void RemoveComponents(Predicate<IMenuComponent> filter)
         {
-            _InteractiveComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
-            _StaticComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
+            this._InteractiveComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
+            this._StaticComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
             UpdateDrawOrder();
         }
         public void ClearComponents()
         {
-            _InteractiveComponents.TrueForAll(a => { a.Detach(this); return true; });
-            _StaticComponents.TrueForAll(a => { a.Detach(this); return true; });
-            _InteractiveComponents.Clear();
-            _StaticComponents.Clear();
+            this._InteractiveComponents.TrueForAll(a => { a.Detach(this); return true; });
+            this._StaticComponents.TrueForAll(a => { a.Detach(this); return true; });
+            this._InteractiveComponents.Clear();
+            this._StaticComponents.Clear();
             UpdateDrawOrder();
         }
         public bool AcceptsComponent(IMenuComponent component)
@@ -138,11 +138,11 @@ namespace Entoarox.Framework.UI
         }
         public Rectangle EventRegion
         {
-            get { return Area; }
+            get { return this.Area; }
         }
         public Rectangle ZoomEventRegion
         {
-            get { return new Rectangle(Area.X / Game1.pixelZoom, Area.Y / Game1.pixelZoom, Area.Width / Game1.pixelZoom, Area.Height / Game1.pixelZoom); }
+            get { return new Rectangle(this.Area.X / Game1.pixelZoom, this.Area.Y / Game1.pixelZoom, this.Area.Width / Game1.pixelZoom, this.Area.Height / Game1.pixelZoom); }
         }
         // IInteractiveMenuComponent
         public override void FocusLost()
@@ -151,33 +151,33 @@ namespace Entoarox.Framework.UI
         }
         public override void LeftUp(Point p, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            if (HoverElement == null)
+            if (this.HoverElement == null)
                 return;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            HoverElement.LeftUp(p, o2);
-            Hold = false;
-            if (HoverElement.InBounds(p, o2))
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            this.HoverElement.LeftUp(p, o2);
+            this.Hold = false;
+            if (this.HoverElement.InBounds(p, o2))
                 return;
-            HoverElement.HoverOut(p, o2);
-            HoverElement = null;
+            this.HoverElement.HoverOut(p, o2);
+            this.HoverElement = null;
         }
         public override void LeftHeld(Point p, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            if (HoverElement == null)
+            if (this.HoverElement == null)
                 return;
-            Hold = true;
-            HoverElement.LeftHeld(p, new Point(Area.X + o.X, Area.Y + o.Y));
+            this.Hold = true;
+            this.HoverElement.LeftHeld(p, new Point(this.Area.X + o.X, this.Area.Y + o.Y));
         }
         public override void LeftClick(Point p, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o2))
                 {
@@ -190,15 +190,15 @@ namespace Entoarox.Framework.UI
         }
         public override void RightClick(Point p, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o2))
                 {
                     GiveFocus(el);
-                    FocusElement = el;
+                    this.FocusElement = el;
                     el.RightClick(p, o2);
                     return;
                 }
@@ -207,21 +207,21 @@ namespace Entoarox.Framework.UI
         }
         public override void HoverOver(Point p, Point o)
         {
-            if (!Visible || Hold)
+            if (!this.Visible || this.Hold)
                 return;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            if (HoverElement != null && !HoverElement.InBounds(p, o2))
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            if (this.HoverElement != null && !this.HoverElement.InBounds(p, o2))
             {
-                HoverElement.HoverOut(p, o2);
-                HoverElement = null;
+                this.HoverElement.HoverOut(p, o2);
+                this.HoverElement = null;
             }
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o2))
                 {
-                    if (HoverElement == null)
+                    if (this.HoverElement == null)
                     {
-                        HoverElement = el;
+                        this.HoverElement = el;
                         el.HoverIn(p, o2);
                     }
                     el.HoverOver(p, o2);
@@ -231,27 +231,27 @@ namespace Entoarox.Framework.UI
         }
         public override bool Scroll(int d, Point p, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return false;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
                 if (el.InBounds(p, o) && el.Scroll(d, p, o))
                     return true;
             return false;
         }
         public override void Update(GameTime t)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            foreach (IMenuComponent el in DrawOrder)
+            foreach (IMenuComponent el in this.DrawOrder)
                 el.Update(t);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            Point o2 = new Point(Area.X + o.X, Area.Y + o.Y);
-            foreach (IMenuComponent el in DrawOrder)
+            Point o2 = new Point(this.Area.X + o.X, this.Area.Y + o.Y);
+            foreach (IMenuComponent el in this.DrawOrder)
                 el.Draw(b, o2);
         }
     }

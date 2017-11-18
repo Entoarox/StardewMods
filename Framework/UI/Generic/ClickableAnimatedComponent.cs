@@ -14,42 +14,42 @@ namespace Entoarox.Framework.UI
         {
             if (handler != null)
                 Handler += handler;
-            ScaleOnHover = scaleOnHover;
-            Sprite = sprite;
+            this.ScaleOnHover = scaleOnHover;
+            this.Sprite = sprite;
             SetScaledArea(area);
         }
         public override void HoverIn(Point p, Point o)
         {
             Game1.playSound("Cowboy_Footstep");
-            if (!ScaleOnHover)
+            if (!this.ScaleOnHover)
                 return;
-            Area.X -= 2;
-            Area.Y -= 2;
-            Area.Width += 4;
-            Area.Height += 4;
+            this.Area.X -= 2;
+            this.Area.Y -= 2;
+            this.Area.Width += 4;
+            this.Area.Height += 4;
         }
         public override void HoverOut(Point p, Point o)
         {
-            if (!ScaleOnHover)
+            if (!this.ScaleOnHover)
                 return;
-            Area.X += 2;
-            Area.Y += 2;
-            Area.Width -= 4;
-            Area.Height -= 4;
+            this.Area.X += 2;
+            this.Area.Y += 2;
+            this.Area.Width -= 4;
+            this.Area.Height -= 4;
         }
         public override void LeftClick(Point p, Point o)
         {
             Game1.playSound("bigDeSelect");
-            Handler?.Invoke(this,Parent,Parent.GetAttachedMenu());
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
         public override void Update(GameTime t)
         {
-            Sprite.update(t);
+            this.Sprite.update(t);
         }
         public override void Draw(SpriteBatch b, Point offset)
         {
-            if (Visible)
-                Sprite.draw(b, false, offset.X+Area.X, offset.Y+Area.Y);
+            if (this.Visible)
+                this.Sprite.draw(b, false, offset.X+ this.Area.X, offset.Y+ this.Area.Y);
         }
     }
 }

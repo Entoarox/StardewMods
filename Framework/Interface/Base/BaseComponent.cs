@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,9 +11,9 @@ namespace Entoarox.Framework.Interface
     {
         protected BaseComponent(string name, Rectangle bounds, int layer)
         {
-            Name = name;
-            Layer = layer;
-            OuterBounds = bounds;
+            this.Name = name;
+            this.Layer = layer;
+            this.OuterBounds = bounds;
         }
         protected Rectangle GetDrawRectangle(Point offset, Rectangle rect) => new Rectangle((offset.X + rect.X) * Game1.pixelZoom, (offset.Y + rect.Y) * Game1.pixelZoom, rect.Width * Game1.pixelZoom, rect.Height * Game1.pixelZoom);
         protected Vector2 GetDrawVector(Point offset, Rectangle rect) => new Vector2((offset.X + rect.X) * Game1.pixelZoom, (offset.Y + rect.Y) * Game1.pixelZoom);
@@ -32,18 +32,18 @@ namespace Entoarox.Framework.Interface
 
         public virtual void Attach(IComponentCollection collection)
         {
-            if (IsAttached)
+            if (this.IsAttached)
                 throw new InvalidOperationException(Strings.ComponentAttached);
-            IsAttached = true;
-            _Owner = collection;
+            this.IsAttached = true;
+            this._Owner = collection;
         }
 
         public virtual void Detach(IComponentCollection collection)
         {
-            if (!IsAttached)
+            if (!this.IsAttached)
                 throw new ArgumentException(Strings.ComponentNotAttached);
-            IsAttached = false;
-            _Owner = null;
+            this.IsAttached = false;
+            this._Owner = null;
         }
 
         public abstract void Draw(Point offset, SpriteBatch batch);

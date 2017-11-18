@@ -15,17 +15,17 @@ namespace Entoarox.Framework.UI
         }
         public FrameComponent(Rectangle area)
         {
-            Chrome = true;
+            this.Chrome = true;
             SetScaledArea(area);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            if (Chrome)
-                FrameworkMenu.DrawMenuRect(b, Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height);
+            if (this.Chrome)
+                FrameworkMenu.DrawMenuRect(b, this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height);
             else
-                IClickableMenu.drawTextureBox(b, Texture, Crop, Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
+                IClickableMenu.drawTextureBox(b, this.Texture, this.Crop, this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height, Color.White, Game1.pixelZoom, false);
         }
     }
 }

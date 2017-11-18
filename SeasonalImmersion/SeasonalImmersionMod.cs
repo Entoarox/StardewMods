@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace Entoarox.SeasonalImmersion
 
             try
             {
-                Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
+                this.Monitor.Log("Loading Seasonal Immersion ContentPack...", LogLevel.Info);
                 LoadContent();
             }
             catch (Exception ex)
@@ -35,8 +35,7 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log("Could not load ContentPack" + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
             }
         }
-
-        private static bool ContentReady = false;
+        
         private static string FilePath;
         private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures;
         private static string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
@@ -76,7 +75,7 @@ namespace Entoarox.SeasonalImmersion
             }
             catch(Exception err)
             {
-                Monitor.Log("Failed to PreMultiply texture, alpha will not work properly" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Warn);
+                this.Monitor.Log("Failed to PreMultiply texture, alpha will not work properly" + Environment.NewLine + err.Message + Environment.NewLine + err.StackTrace, LogLevel.Warn);
                 return texture;
             }
         }
@@ -85,51 +84,51 @@ namespace Entoarox.SeasonalImmersion
         internal void LoadContent()
         {
             if(SeasonTextures!=null)
-                Monitor.Log("SeasonalImmersionMod::Entry has already been called previously, this shouldnt be happening!", LogLevel.Warn);
-            Monitor.Log("Attempting to resolve content pack...", LogLevel.Trace);
+                this.Monitor.Log("SeasonalImmersionMod::Entry has already been called previously, this shouldnt be happening!", LogLevel.Warn);
+            this.Monitor.Log("Attempting to resolve content pack...", LogLevel.Trace);
             if (Directory.Exists(Path.Combine(FilePath, "ContentPack")))
-                Mode = ContentMode.Directory;
+                this.Mode = ContentMode.Directory;
             else if (File.Exists(Path.Combine(FilePath, "ContentPack.zip")))
             {
                 try
                 {
-                    Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
-                    Mode = ContentMode.Zipped;
+                    this.Zip = new ZipFile(Path.Combine(FilePath, "ContentPack.zip"));
+                    this.Mode = ContentMode.Zipped;
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
-                    Mode = ContentMode.Internal;
+                    this.Monitor.Log("Was unable to reference ContentPack.zip file, using internal content pack as a fallback." + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
+                    this.Mode = ContentMode.Internal;
                 }
             }
             else
-                Mode = ContentMode.Internal;
+                this.Mode = ContentMode.Internal;
             Stream stream = GetStream("manifest.json");
             if (stream == null)
             {
-                switch (Mode)
+                switch (this.Mode)
                 {
                     case ContentMode.Directory:
-                        Monitor.Log("Found `ContentPack` directory but the `manifest.json` file is missing, falling back to internal.", LogLevel.Error);
-                        Mode = ContentMode.Internal;
+                        this.Monitor.Log("Found `ContentPack` directory but the `manifest.json` file is missing, falling back to internal.", LogLevel.Error);
+                        this.Mode = ContentMode.Internal;
                         stream = GetStream("manifest.json");
                         break;
                     case ContentMode.Zipped:
-                        Monitor.Log("Found `ContentPack.zip` file but the `manifest.json` file is missing, falling back to internal.", LogLevel.Error);
-                        Mode = ContentMode.Internal;
+                        this.Monitor.Log("Found `ContentPack.zip` file but the `manifest.json` file is missing, falling back to internal.", LogLevel.Error);
+                        this.Mode = ContentMode.Internal;
                         stream = GetStream("manifest.json");
                         break;
                 }
             }
-            if (stream == null && Mode==ContentMode.Internal)
+            if (stream == null && this.Mode ==ContentMode.Internal)
             {
-                Monitor.Log("Attempted to use internal ContentPack but could not resolve manifest, disabling mod.", LogLevel.Error);
+                this.Monitor.Log("Attempted to use internal ContentPack but could not resolve manifest, disabling mod.", LogLevel.Error);
                 return;
             }
-            Monitor.Log("Content pack resolved to mode: " + Enum.GetName(typeof(ContentMode), Mode), LogLevel.Trace);
+            this.Monitor.Log("Content pack resolved to mode: " + Enum.GetName(typeof(ContentMode), this.Mode), LogLevel.Trace);
             SeasonTextures = new Dictionary<string, Dictionary<string, Texture2D>>();
             ContentPackManifest manifest = JsonConvert.DeserializeObject<ContentPackManifest>(new StreamReader(stream).ReadToEnd(), new VersionConverter());
-            Monitor.Log("Using the `" + manifest.Name + "` content pack, version " + manifest.Version + " by " + manifest.Author, LogLevel.Info);
+            this.Monitor.Log("Using the `" + manifest.Name + "` content pack, version " + manifest.Version + " by " + manifest.Author, LogLevel.Info);
             // Resolve content dir cause CA messes all stuffs up...
             List<string> Files;
             if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources", Game1.content.RootDirectory, "XACT", "FarmerSounds.xgs")))
@@ -147,7 +146,7 @@ namespace Entoarox.SeasonalImmersion
             {
                 Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
                 string name = Path.GetFileNameWithoutExtension(file);
-                Monitor.Log("Checking if file is seasonal: " + name, LogLevel.Trace);
+                this.Monitor.Log("Checking if file is seasonal: " + name, LogLevel.Trace);
                 int count = 0;
                 foreach (string season in seasons)
                 {
@@ -160,57 +159,57 @@ namespace Entoarox.SeasonalImmersion
                 if (count != 4)
                 {
                     if (count > 0)
-                        Monitor.Log("Skipping file due to the textures being incomplete: " + file, LogLevel.Warn);
+                        this.Monitor.Log("Skipping file due to the textures being incomplete: " + file, LogLevel.Warn);
                     else
-                        Monitor.Log("Skipping file due to there being no textures for it found: " + file, LogLevel.Trace);
+                        this.Monitor.Log("Skipping file due to there being no textures for it found: " + file, LogLevel.Trace);
                     continue;
                 }
-                Monitor.Log("Making file seasonal: " + file, LogLevel.Trace);
+                this.Monitor.Log("Making file seasonal: " + file, LogLevel.Trace);
                 SeasonTextures.Add(name, textures);
             }
-            LocationEvents.CurrentLocationChanged += LocationEvents_CurrentLocationChanged;
-            TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
-            Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
+            LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
+            TimeEvents.AfterDayStarted += this.TimeEvents_AfterDayStarted;
+            this.Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
         }
         internal Stream GetStream(string file)
         {
             try
             {
-                switch (Mode)
+                switch (this.Mode)
                 {
                     case ContentMode.Directory:
                         if (!File.Exists(Path.Combine(FilePath, "ContentPack", file)))
                         {
-                            Monitor.Log("Skipping file due to being unable to find it in the ContentPack directory: " + file, LogLevel.Trace);
+                            this.Monitor.Log("Skipping file due to being unable to find it in the ContentPack directory: " + file, LogLevel.Trace);
                             return null;
                         }
                         return new FileStream(Path.Combine(FilePath, "ContentPack", file), FileMode.Open);
                     case ContentMode.Zipped:
-                        if (!Zip.ContainsEntry(file))
+                        if (!this.Zip.ContainsEntry(file))
                         {
-                            Monitor.Log("Skipping file due to being unable to find it in the ContentPack.zip: " + file, LogLevel.Trace);
+                            this.Monitor.Log("Skipping file due to being unable to find it in the ContentPack.zip: " + file, LogLevel.Trace);
                             return null;
                         }
                         MemoryStream memoryStream = new MemoryStream();
-                        Zip[file].Extract(memoryStream);
+                        this.Zip[file].Extract(memoryStream);
                         memoryStream.Seek(0, SeekOrigin.Begin);
                         return memoryStream;
                     case ContentMode.Internal:
                         Stream manifestStream=GetType().Assembly.GetManifestResourceStream("Entoarox.SeasonalImmersion.ContentPack." + file.Replace(Path.DirectorySeparatorChar, '.'));
                         if (manifestStream == null)
                         {
-                            Monitor.Log("Skipping file due to being unable to find it in the bundled resource pack: " + file, LogLevel.Trace);
+                            this.Monitor.Log("Skipping file due to being unable to find it in the bundled resource pack: " + file, LogLevel.Trace);
                             return null;
                         }
                         return manifestStream;
                     default:
-                        Monitor.Log("Skipping file due to the content pack location being unknown: " + file, LogLevel.Error);
+                        this.Monitor.Log("Skipping file due to the content pack location being unknown: " + file, LogLevel.Error);
                         return null;
                 }
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Skipping file due to a unknown error: {file}\n{ex}", LogLevel.Error);
+                this.Monitor.Log($"Skipping file due to a unknown error: {file}\n{ex}", LogLevel.Error);
                 return null;
             }
         }
@@ -225,7 +224,7 @@ namespace Entoarox.SeasonalImmersion
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Skipping texture due to a unknown error: {file}\n{ex}", LogLevel.Warn);
+                this.Monitor.Log($"Skipping texture due to a unknown error: {file}\n{ex}", LogLevel.Warn);
                 return null;
             }
         }
@@ -235,7 +234,7 @@ namespace Entoarox.SeasonalImmersion
                 return;
             try
             {
-                Monitor.Log("Attempting to update seasonal textures...", LogLevel.Debug);
+                this.Monitor.Log("Attempting to update seasonal textures...", LogLevel.Debug);
                 // Check houses/greenhouse
                 if (SeasonTextures.ContainsKey("houses"))
                     Game1.getFarm().houseTextures = SeasonTextures["houses"][Game1.currentSeason];
@@ -263,7 +262,7 @@ namespace Entoarox.SeasonalImmersion
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Failed to update seasonal textures\n{ex}", LogLevel.Error);
+                this.Monitor.Log($"Failed to update seasonal textures\n{ex}", LogLevel.Error);
             }
         }
         internal void TimeEvents_AfterDayStarted(object s, EventArgs e)

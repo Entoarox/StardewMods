@@ -10,15 +10,15 @@ namespace Entoarox.Framework.Interface
         protected bool Vertical;
         public GradientComponent(string name, Rectangle bounds, Color fromColor, Color toColor, bool vertical=false, int layer=0) : base(name, bounds, layer)
         {
-            FromColor = fromColor;
-            ToColor = toColor;
-            Vertical = vertical;
+            this.FromColor = fromColor;
+            this.ToColor = toColor;
+            this.Vertical = vertical;
         }
         public override void Draw(Point offset, SpriteBatch batch)
         {
-            Rectangle rect = GetDrawRectangle(offset, OuterBounds);
-            batch.Draw(StardewValley.Game1.staminaRect, rect, FromColor);
-            batch.Draw(Vertical ? Cache.GradientTextureVertical : Cache.GradientTextureHorizontal, rect, ToColor);
+            Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
+            batch.Draw(StardewValley.Game1.staminaRect, rect, this.FromColor);
+            batch.Draw(this.Vertical ? Cache.GradientTextureVertical : Cache.GradientTextureHorizontal, rect, this.ToColor);
         }
     }
 }

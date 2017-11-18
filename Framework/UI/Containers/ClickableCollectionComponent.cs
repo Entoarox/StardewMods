@@ -27,7 +27,7 @@ namespace Entoarox.Framework.UI
         }
         public override void LeftClick(Point p, Point o)
         {
-            Handler?.Invoke(this, Parent, Parent.GetAttachedMenu());
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
         public override void RightClick(Point p, Point o)
         {

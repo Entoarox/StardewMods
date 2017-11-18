@@ -26,21 +26,21 @@ namespace Entoarox.Framework.Experimental.BinObject
         }
 
         // IList<T> Methods
-        public int IndexOf(BinObject item) => Value.IndexOf(item);
-        public void Insert(int index, BinObject item) => Value.Insert(index, item);
-        public void RemoveAt(int index) => Value.RemoveAt(index);
+        public int IndexOf(BinObject item) => this.Value.IndexOf(item);
+        public void Insert(int index, BinObject item) => this.Value.Insert(index, item);
+        public void RemoveAt(int index) => this.Value.RemoveAt(index);
 
         // ICollection<T> Methods
-        public void Add(BinObject item) => Value.Add(item);
-        public void Clear() => Value.Clear();
-        public bool Contains(BinObject item) => Value.Contains(item);
-        public void CopyTo(BinObject[] array, int arrayIndex) => Value.CopyTo(array, arrayIndex);
-        public bool Remove(BinObject item) => Value.Remove(item);
+        public void Add(BinObject item) => this.Value.Add(item);
+        public void Clear() => this.Value.Clear();
+        public bool Contains(BinObject item) => this.Value.Contains(item);
+        public void CopyTo(BinObject[] array, int arrayIndex) => this.Value.CopyTo(array, arrayIndex);
+        public bool Remove(BinObject item) => this.Value.Remove(item);
 
         // IEnumerable<T> Methods
-        public IEnumerator<BinObject> GetEnumerator() => Value.GetEnumerator();
+        public IEnumerator<BinObject> GetEnumerator() => this.Value.GetEnumerator();
 
         // IEnumerable Methods
-        IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.Value.GetEnumerator();
     }
 }

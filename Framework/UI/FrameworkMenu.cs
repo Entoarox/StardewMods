@@ -31,8 +31,8 @@ namespace Entoarox.Framework.UI
 
         public Rectangle Area;
 
-        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(_StaticComponents); } }
-        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(_InteractiveComponents); } }
+        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(this._StaticComponents); } }
+        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(this._InteractiveComponents); } }
         protected readonly static Rectangle tl = new Rectangle(0, 0, 64, 64);
         protected readonly static Rectangle tc = new Rectangle(128, 0, 64, 64);
         protected readonly static Rectangle tr = new Rectangle(192, 0, 64, 64);
@@ -72,23 +72,23 @@ namespace Entoarox.Framework.UI
         }
         public FrameworkMenu(Rectangle area, bool showCloseButton = true, bool drawChrome = true)
         {
-            DrawChrome = drawChrome;
-            Area = new Rectangle(area.X * Game1.pixelZoom, area.Y * Game1.pixelZoom, area.Width * Game1.pixelZoom, area.Height * Game1.pixelZoom);
-            initialize(Area.X, Area.Y, Area.Width, Area.Height, showCloseButton);
+            this.DrawChrome = drawChrome;
+            this.Area = new Rectangle(area.X * Game1.pixelZoom, area.Y * Game1.pixelZoom, area.Width * Game1.pixelZoom, area.Height * Game1.pixelZoom);
+            initialize(this.Area.X, this.Area.Y, this.Area.Width, this.Area.Height, showCloseButton);
         }
         public FrameworkMenu(Point size, bool showCloseButton = true, bool drawChrome = true)
         {
-            DrawChrome = drawChrome;
-            Centered = true;
+            this.DrawChrome = drawChrome;
+            this.Centered = true;
             Vector2 pos = Utility.getTopLeftPositionForCenteringOnScreen(size.X * Game1.pixelZoom, size.Y * Game1.pixelZoom, 0, 0);
-            Area = new Rectangle((int)pos.X, (int)pos.Y, size.X * Game1.pixelZoom, size.Y * Game1.pixelZoom);
-            initialize(Area.X, Area.Y, Area.Width, Area.Height, showCloseButton);
+            this.Area = new Rectangle((int)pos.X, (int)pos.Y, size.X * Game1.pixelZoom, size.Y * Game1.pixelZoom);
+            initialize(this.Area.X, this.Area.Y, this.Area.Width, this.Area.Height, showCloseButton);
         }
         protected virtual void UpdateDrawOrder()
         {
-            KeyValuePair<List<IInteractiveMenuComponent>, List<IMenuComponent>> sorted = GetOrderedLists(_StaticComponents, _InteractiveComponents);
-            DrawOrder = sorted.Value;
-            EventOrder = sorted.Key;
+            KeyValuePair<List<IInteractiveMenuComponent>, List<IMenuComponent>> sorted = GetOrderedLists(this._StaticComponents, this._InteractiveComponents);
+            this.DrawOrder = sorted.Value;
+            this.EventOrder = sorted.Key;
         }
         public virtual FrameworkMenu GetAttachedMenu()
         {
@@ -96,32 +96,32 @@ namespace Entoarox.Framework.UI
         }
         public virtual void ResetFocus()
         {
-            if (FocusElement == null)
+            if (this.FocusElement == null)
                 return;
-            FocusElement.FocusLost();
-            if(FocusElement is IKeyboardComponent && Game1.keyboardDispatcher.Subscriber!=null)
+            this.FocusElement.FocusLost();
+            if(this.FocusElement is IKeyboardComponent && Game1.keyboardDispatcher.Subscriber!=null)
             {
                 Game1.keyboardDispatcher.Subscriber.Selected = false;
                 Game1.keyboardDispatcher.Subscriber = null;
             }
-            FocusElement = null;
-            if (FloatingComponent != null)
+            this.FocusElement = null;
+            if (this.FloatingComponent != null)
             {
-                FloatingComponent.Detach(this);
-                FloatingComponent = null;
+                this.FloatingComponent.Detach(this);
+                this.FloatingComponent = null;
             }
         }
         public virtual void GiveFocus(IInteractiveMenuComponent component)
         {
-            if (component == FocusElement)
+            if (component == this.FocusElement)
                 return;
             ResetFocus();
-            FocusElement = component;
-            if(FocusElement is IKeyboardComponent)
-                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)FocusElement);
-            if (!_InteractiveComponents.Contains(component))
+            this.FocusElement = component;
+            if(this.FocusElement is IKeyboardComponent)
+                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)this.FocusElement);
+            if (!this._InteractiveComponents.Contains(component))
             {
-                FloatingComponent = component;
+                this.FloatingComponent = component;
                 component.Attach(this);
             }
             component.FocusGained();
@@ -129,9 +129,9 @@ namespace Entoarox.Framework.UI
         public virtual void AddComponent(IMenuComponent component)
         {
             if (component is IInteractiveMenuComponent)
-                _InteractiveComponents.Add(component as IInteractiveMenuComponent);
+                this._InteractiveComponents.Add(component as IInteractiveMenuComponent);
             else
-                _StaticComponents.Add(component);
+                this._StaticComponents.Add(component);
             component.Attach(this);
             UpdateDrawOrder();
         }
@@ -146,16 +146,16 @@ namespace Entoarox.Framework.UI
         }
         public virtual void RemoveComponents(Predicate<IMenuComponent> filter)
         {
-            _InteractiveComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
-            _StaticComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
+            this._InteractiveComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
+            this._StaticComponents.RemoveAll(a => { bool b = filter(a); if (b) a.Detach(this); return b; });
             UpdateDrawOrder();
         }
         public virtual void ClearComponents()
         {
-            _InteractiveComponents.TrueForAll(a => { a.Detach(this); return true; });
-            _StaticComponents.TrueForAll(a => { a.Detach(this); return true; });
-            _InteractiveComponents.Clear();
-            _StaticComponents.Clear();
+            this._InteractiveComponents.TrueForAll(a => { a.Detach(this); return true; });
+            this._StaticComponents.TrueForAll(a => { a.Detach(this); return true; });
+            this._InteractiveComponents.Clear();
+            this._StaticComponents.Clear();
             UpdateDrawOrder();
         }
         public virtual bool AcceptsComponent(IMenuComponent component)
@@ -164,50 +164,50 @@ namespace Entoarox.Framework.UI
         }
         public virtual Rectangle EventRegion
         {
-            get { return new Rectangle(Area.X + zoom10, Area.Y + zoom10, Area.Width - zoom20, Area.Height - zoom20); }
+            get { return new Rectangle(this.Area.X + zoom10, this.Area.Y + zoom10, this.Area.Width - zoom20, this.Area.Height - zoom20); }
         }
         public virtual Rectangle ZoomEventRegion
         {
-            get { return new Rectangle((Area.X + zoom10)/Game1.pixelZoom,(Area.Y + zoom10)/Game1.pixelZoom,(Area.Width - zoom20)/Game1.pixelZoom,(Area.Height - zoom20)/Game1.pixelZoom); }
+            get { return new Rectangle((this.Area.X + zoom10)/Game1.pixelZoom,(this.Area.Y + zoom10)/Game1.pixelZoom,(this.Area.Width - zoom20)/Game1.pixelZoom,(this.Area.Height - zoom20)/Game1.pixelZoom); }
         }
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
-            if (!Centered)
+            if (!this.Centered)
                 return;
-            Vector2 pos = Utility.getTopLeftPositionForCenteringOnScreen(Area.Width, Area.Height, 0, 0);
-            Area = new Rectangle((int)pos.X, (int)pos.Y, Area.Width, Area.Height);
+            Vector2 pos = Utility.getTopLeftPositionForCenteringOnScreen(this.Area.Width, this.Area.Height, 0, 0);
+            this.Area = new Rectangle((int)pos.X, (int)pos.Y, this.Area.Width, this.Area.Height);
         }
         public override void releaseLeftClick(int x, int y)
         {
-            if (HoverInElement == null)
+            if (this.HoverInElement == null)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            HoverInElement.LeftUp(p, o);
-            Hold = false;
-            if (HoverInElement.InBounds(p, o))
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            this.HoverInElement.LeftUp(p, o);
+            this.Hold = false;
+            if (this.HoverInElement.InBounds(p, o))
                 return;
-            HoverInElement.HoverOut(p, o);
-            HoverInElement = null;
+            this.HoverInElement.HoverOut(p, o);
+            this.HoverInElement = null;
         }
         public override void leftClickHeld(int x, int y)
         {
-            if (HoverInElement == null)
+            if (this.HoverInElement == null)
                 return;
-            Hold = true;
-            HoverInElement.LeftHeld(new Point(x, y), new Point(Area.X + zoom10, Area.Y + zoom10));
+            this.Hold = true;
+            this.HoverInElement.LeftHeld(new Point(x, y), new Point(this.Area.X + zoom10, this.Area.Y + zoom10));
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             base.receiveLeftClick(x, y, playSound);
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            if(FloatingComponent != null && FloatingComponent.InBounds(p,o))
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            if(this.FloatingComponent != null && this.FloatingComponent.InBounds(p,o))
             {
-                FloatingComponent.LeftClick(p, o);
+                this.FloatingComponent.LeftClick(p, o);
                 return;
             }
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o))
                 {
@@ -225,18 +225,18 @@ namespace Entoarox.Framework.UI
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            if (FloatingComponent != null && FloatingComponent.InBounds(p, o))
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            if (this.FloatingComponent != null && this.FloatingComponent.InBounds(p, o))
             {
-                FloatingComponent.RightClick(p, o);
+                this.FloatingComponent.RightClick(p, o);
                 return;
             }
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o))
                 {
                     GiveFocus(el);
-                    FocusElement = el;
+                    this.FocusElement = el;
                     el.RightClick(p, o);
                     return;
                 }
@@ -246,27 +246,27 @@ namespace Entoarox.Framework.UI
         public override void performHoverAction(int x, int y)
         {
             base.performHoverAction(x, y);
-            if (!Area.Contains(x, y) || Hold)
+            if (!this.Area.Contains(x, y) || this.Hold)
                 return;
             Point p = new Point(x, y);
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            if (HoverInElement != null && !HoverInElement.InBounds(p, o))
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            if (this.HoverInElement != null && !this.HoverInElement.InBounds(p, o))
             {
-                HoverInElement.HoverOut(p, o);
-                HoverInElement = null;
+                this.HoverInElement.HoverOut(p, o);
+                this.HoverInElement = null;
             }
-            if (FloatingComponent!=null && FloatingComponent.InBounds(p, o))
+            if (this.FloatingComponent !=null && this.FloatingComponent.InBounds(p, o))
             {
-                FloatingComponent.HoverOver(p, o);
+                this.FloatingComponent.HoverOver(p, o);
                 return;
             }
-            foreach (IInteractiveMenuComponent el in EventOrder)
+            foreach (IInteractiveMenuComponent el in this.EventOrder)
             {
                 if (el.InBounds(p, o))
                 {
-                    if (HoverInElement == null)
+                    if (this.HoverInElement == null)
                     {
-                        HoverInElement = el;
+                        this.HoverInElement = el;
                         el.HoverIn(p, o);
                     }
                     el.HoverOver(p, o);
@@ -278,11 +278,11 @@ namespace Entoarox.Framework.UI
         {
             base.receiveScrollWheelAction(direction);
             Point p = Game1.getMousePosition();
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            if (FloatingComponent != null)
-                FloatingComponent.Scroll(direction, p, o);
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            if (this.FloatingComponent != null)
+                this.FloatingComponent.Scroll(direction, p, o);
             else
-                foreach (IInteractiveMenuComponent el in EventOrder)
+                foreach (IInteractiveMenuComponent el in this.EventOrder)
                     if (el.InBounds(p, o) && el.Scroll(direction, p, o))
                         return;
         }
@@ -294,20 +294,20 @@ namespace Entoarox.Framework.UI
         public override void update(GameTime time)
         {
             base.update(time);
-            if (FloatingComponent != null)
-                FloatingComponent.Update(time);
-            foreach (IMenuComponent el in DrawOrder)
+            if (this.FloatingComponent != null)
+                this.FloatingComponent.Update(time);
+            foreach (IMenuComponent el in this.DrawOrder)
                 el.Update(time);
         }
         public override void draw(SpriteBatch b)
         {
-            if (DrawChrome)
-                DrawMenuRect(b, Area.X, Area.Y, Area.Width, Area.Height);
-            Point o = new Point(Area.X + zoom10, Area.Y + zoom10);
-            foreach (IMenuComponent el in DrawOrder)
+            if (this.DrawChrome)
+                DrawMenuRect(b, this.Area.X, this.Area.Y, this.Area.Width, this.Area.Height);
+            Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
+            foreach (IMenuComponent el in this.DrawOrder)
                 el.Draw(b, o);
-            if (FloatingComponent != null)
-                FloatingComponent.Draw(b, o);
+            if (this.FloatingComponent != null)
+                this.FloatingComponent.Draw(b, o);
             base.draw(b);
             drawMouse(b);
         }

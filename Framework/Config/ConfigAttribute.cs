@@ -47,8 +47,8 @@ namespace Entoarox.Framework.Config
         /// <param name="description">The description to show when the label for this config option is hovered over, should explain what the option does</param>
         public ConfigAttribute(string label, string description)
         {
-            Label = label;
-            Description = description;
+            this.Label = label;
+            this.Description = description;
         }
     }
 }

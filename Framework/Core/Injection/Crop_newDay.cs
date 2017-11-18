@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 
@@ -15,7 +15,7 @@ namespace Entoarox.Framework.Core.Injection
     {
         static bool Prefix(Crop __instance, int state, int fertilizer, int xTile, int yTile, GameLocation environment)
         {
-            if (Core.ModEntry.Config.GreenhouseEverywhere || (environment is IAugmentedLocation && (environment as IAugmentedLocation).IsGreenhouse))
+            if (ModEntry.Config.GreenhouseEverywhere || (environment is IAugmentedLocation && (environment as IAugmentedLocation).IsGreenhouse))
             {
                 if (state == 1)
                 {

@@ -14,7 +14,7 @@ namespace Entoarox.Framework.Interface
         protected BaseComponentContainer(string name, Rectangle bounds, int layer) : base(name, bounds, layer)
         {
         }
-        public InterfaceMenu Menu => Owner != null ? Owner.Menu : throw new NullReferenceException(Strings.ContainerNotAttached);
+        public InterfaceMenu Menu => this.Owner != null ? this.Owner.Menu : throw new NullReferenceException(Strings.ContainerNotAttached);
         public virtual Rectangle InnerBounds { get => OuterBounds; set => OuterBounds = value; }
         public abstract bool TabNext();
         public abstract void TabAccess(TabType type);

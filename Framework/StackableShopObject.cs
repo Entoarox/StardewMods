@@ -14,46 +14,46 @@ namespace Entoarox.Framework
         public int MaxStackSize;
         public StackableShopObject(StardewValley.Object item, int stack)
         {
-            Item = item;
-            stackAmount = stack;
-            parentSheetIndex = item.parentSheetIndex;
-            price = salePrice() * stack;
-            MaxStackSize = (int)Math.Floor(999d / stack);
-            name = Item.Name;
+            this.Item = item;
+            this.stackAmount = stack;
+            this.parentSheetIndex = item.parentSheetIndex;
+            this.price = salePrice() * stack;
+            this.MaxStackSize = (int)Math.Floor(999d / stack);
+            this.name = this.Item.Name;
         }
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
         {
-            Item.drawInMenu(spriteBatch, location, scaleSize, transparency, layerDepth, false);
+            this.Item.drawInMenu(spriteBatch, location, scaleSize, transparency, layerDepth, false);
             var _scale = 0.5f + scaleSize;
             Game1.drawWithBorder(getStackNumber().ToString(), Color.Black, Color.White, location + new Vector2(Game1.tileSize - Game1.tinyFont.MeasureString(getStackNumber().ToString()).X * _scale, Game1.tileSize - (float)((double)Game1.tinyFont.MeasureString(getStackNumber().ToString()).Y * 3.0f / 4.0f) * _scale), 0.0f, _scale, 1f, true);
         }
         public override int salePrice()
         {
-            return Item.salePrice() * stackAmount;
+            return this.Item.salePrice() * this.stackAmount;
         }
         public int getStackNumber()
         {
-            return (stack * stackAmount);
+            return (this.stack * this.stackAmount);
         }
         public override int maximumStackSize()
         {
-            return MaxStackSize;
+            return this.MaxStackSize;
         }
         public new bool canStackWith(Item obj)
         {
-            return obj.canStackWith(this) && obj is StackableShopObject && (Stack + obj.Stack) < maximumStackSize();
+            return obj.canStackWith(this) && obj is StackableShopObject && (this.Stack + obj.Stack) < maximumStackSize();
         }
         public override string getDescription()
         {
-            return Item.getDescription();
+            return this.Item.getDescription();
         }
         public override Color getCategoryColor()
         {
-            return Item.getCategoryColor();
+            return this.Item.getCategoryColor();
         }
         public override string getCategoryName()
         {
-            return Item.getCategoryName();
+            return this.Item.getCategoryName();
         }
         public override bool isPlaceable()
         {
@@ -65,7 +65,7 @@ namespace Entoarox.Framework
         }
         public StackableShopObject Clone()
         {
-            return new StackableShopObject(Item, stackAmount);
+            return new StackableShopObject(this.Item, this.stackAmount);
         }
         public override Item getOne()
         {
@@ -73,7 +73,7 @@ namespace Entoarox.Framework
         }
         public StardewValley.Object Revert()
         {
-            return new StardewValley.Object(Item.parentSheetIndex, stackAmount * stack);
+            return new StardewValley.Object(this.Item.parentSheetIndex, this.stackAmount * this.stack);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Entoarox.Framework.Config
         /// <param name="options">The list of dropdown options to make available</param>
         public ConfigSliderAttribute(string label, string description, string[] options) : base(label, description)
         {
-            Numeric = false;
-            OptionsString = options;
+            this.Numeric = false;
+            this.OptionsString = options;
         }
         /// <summary>
         /// Configs that can be accessed using <see cref="IModHelperExtensions.RegisterDynamicConfig{T}(IModHelper, T, Action{T})"/> must use this attribute or the parent <see cref="ConfigAttribute"/> attribute on properties they wish to be dynamic.
@@ -29,8 +29,8 @@ namespace Entoarox.Framework.Config
         /// <param name="options">The list of slider options to make available</param>
         public ConfigSliderAttribute(string label, string description, int[] options) : base(label, description)
         {
-            Numeric = true;
-            OptionsInt = options;
+            this.Numeric = true;
+            this.OptionsInt = options;
         }
     }
 }

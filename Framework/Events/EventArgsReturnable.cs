@@ -8,12 +8,12 @@
         {
             set
             {
-                ReturnSet = true;
-                _Value = value;
+                this.ReturnSet = true;
+                this._Value = value;
             }
             get
             {
-                return _Value;
+                return this._Value;
             }
         }
         public EventArgsReturnable(object[] arguments = null) : base(arguments)

@@ -11,11 +11,11 @@ namespace Entoarox.Framework.UI
         public ColoredRectangleComponent(Rectangle area, Color color)
         {
             SetScaledArea(area);
-            Color = color;
+            this.Color = color;
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            b.Draw(Game1.staminaRect, new Rectangle(Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height), Color);
+            b.Draw(Game1.staminaRect, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height), this.Color);
         }
     }
 }

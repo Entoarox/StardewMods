@@ -13,9 +13,9 @@ namespace Entoarox.Framework.Core
         {
             get
             {
-                if (_Modifiers == null)
-                    _Modifiers = new PlayerModifierHelper();
-                return _Modifiers;
+                if (this._Modifiers == null)
+                    this._Modifiers = new PlayerModifierHelper();
+                return this._Modifiers;
             }
         }
         public void MoveTo(int x, int y)

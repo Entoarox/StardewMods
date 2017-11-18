@@ -38,7 +38,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string Conditions;
         public override string ToString()
         {
-            return "ShopItem(" + Id + ":" + (BigCraftable ? "craftable" : "object") + "){Price=" + Price.ToString() + ",Stack=" + Stack.ToString() + ",Stock=" + Stock.ToString() + ",Conditions=" + Conditions + "}";
+            return "ShopItem(" + this.Id + ":" + (this.BigCraftable ? "craftable" : "object") + "){Price=" + this.Price.ToString() + ",Stack=" + this.Stack.ToString() + ",Stock=" + this.Stock.ToString() + ",Conditions=" + this.Conditions + "}";
         }
     }
     // LocationConfig1_2
@@ -64,7 +64,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string Type;
         public override string ToString()
         {
-            return "Location(" + MapName + "," + FileName + "){Outdoor=" + Outdoor + ",Farmable=" + Farmable + ",Type=" + Type + "}";
+            return "Location(" + this.MapName + "," + this.FileName + "){Outdoor=" + this.Outdoor + ",Farmable=" + this.Farmable + ",Type=" + this.Type + "}";
         }
     }
     public class Override : MapFileLink
@@ -72,7 +72,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         //public bool? Partial;
         public override string ToString()
         {
-            return "Override(" + MapName + "," + FileName + ")";
+            return "Override(" + this.MapName + "," + this.FileName + ")";
         }
     }
     public class Redirect
@@ -81,7 +81,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string ToFile;
         public override string ToString()
         {
-            return "Redirect(" + FromFile + " => " + ToFile + ')';
+            return "Redirect(" + this.FromFile + " => " + this.ToFile + ')';
         }
     }
     public class TeleporterDestination
@@ -98,7 +98,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
             if (a is TeleporterDestination)
             {
                 TeleporterDestination b = (TeleporterDestination)a;
-                return b.MapName == MapName && b.TileX == TileX && b.TileY == TileY;
+                return b.MapName == this.MapName && b.TileX == this.TileX && b.TileY == this.TileY;
             }
             return false;
         }
@@ -108,7 +108,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         }
         public override string ToString()
         {
-            return MapName + "@[" + TileX + "," + TileY + "]:" + Direction;
+            return this.MapName + "@[" + this.TileX + "," + this.TileY + "]:" + this.Direction;
         }
     }
     public class TeleporterList
@@ -118,7 +118,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public List<TeleporterDestination> Destinations;
         public override string ToString()
         {
-            return "TeleporterList(" + ListName + ") => {" + string.Join(",", Destinations) + '}';
+            return "TeleporterList(" + this.ListName + ") => {" + string.Join(",", this.Destinations) + '}';
         }
     }
     public class Tilesheet : MapFileLink
@@ -130,7 +130,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
         public override string ToString()
         {
-            return "Tilesheet(" + MapName + ":" + SheetId + "," + (FileName == null ? "null" : FileName) + "){Seasonal=" + Seasonal + "}";
+            return "Tilesheet(" + this.MapName + ":" + this.SheetId + "," + (this.FileName == null ? "null" : this.FileName) + "){Seasonal=" + this.Seasonal + "}";
         }
     }
     public class Tile : TileInfo
@@ -142,16 +142,16 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public int? Interval;
         public override string ToString()
         {
-            if(TileIndex!=null)
-                if (SheetId != null)
-                    return "Tile(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " = `" + SheetId + ":" + TileIndex + "`)";
+            if(this.TileIndex !=null)
+                if (this.SheetId != null)
+                    return "Tile(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "]:" + this.LayerId + " = `" + this.SheetId + ":" + this.TileIndex + "`)";
                 else
-                    return "Tile(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " = `" + TileIndex + "`)";
+                    return "Tile(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "]:" + this.LayerId + " = `" + this.TileIndex + "`)";
             else
-                if (SheetId != null)
-                    return "Tile(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " = `" + SheetId + ":" + string.Join(",", TileIndexes) + "`)";
+                if (this.SheetId != null)
+                    return "Tile(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "]:" + this.LayerId + " = `" + this.SheetId + ":" + string.Join(",", this.TileIndexes) + "`)";
                 else
-                    return "Tile(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " = `" + string.Join(",", TileIndexes) + "`)";
+                    return "Tile(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "]:" + this.LayerId + " = `" + string.Join(",", this.TileIndexes) + "`)";
         }
     }
     public class Property : TileInfo
@@ -161,7 +161,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string LayerId;
         public override string ToString()
         {
-            return "Property(" + MapName + "@[" + TileX + ',' + TileY + "]:" + LayerId + " => `" + Key + "` = " + Value + ')';
+            return "Property(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "]:" + this.LayerId + " => `" + this.Key + "` = " + this.Value + ')';
         }
     }
     public class Warp : TileInfo
@@ -173,7 +173,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public new bool Optional;
         public override string ToString()
         {
-            return "Warp(" + MapName + "@[" + TileX + ',' + TileY + "] => " + TargetName + "@[" + TargetX + ',' + TargetY + "])";
+            return "Warp(" + this.MapName + "@[" + this.TileX + ',' + this.TileY + "] => " + this.TargetName + "@[" + this.TargetX + ',' + this.TargetY + "])";
         }
     }
     public class Conditional
@@ -187,7 +187,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public string Success;
         public override string ToString()
         {
-            return "Conditional(" + Name + "[" + Item + ':' + Amount + "] = `" + Question + "`)";
+            return "Conditional(" + this.Name + "[" + this.Item + ':' + this.Amount + "] = `" + this.Question + "`)";
         }
     }
 }

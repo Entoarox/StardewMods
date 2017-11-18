@@ -17,7 +17,7 @@ namespace Entoarox.Framework.UI
         }
         public virtual bool InBounds(Point p, Point o)
         {
-            return Visible ? new Rectangle(Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height).Contains(p) : false;
+            return this.Visible ? new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height).Contains(p) : false;
         }
         public virtual void RightClick(Point p, Point o)
         {

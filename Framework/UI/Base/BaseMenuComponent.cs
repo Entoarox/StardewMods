@@ -36,13 +36,13 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                if (_Parent == null)
+                if (this._Parent == null)
                     throw new NullReferenceException("Component attempted to reference its parent while not attached");
-                return _Parent;
+                return this._Parent;
             }
             private set
             {
-                _Parent = value;
+                this._Parent = value;
             }
         }
         private IComponentContainer _Parent=null;
@@ -50,7 +50,7 @@ namespace Entoarox.Framework.UI
         public int Layer { get; set; } = 0;
         protected void SetScaledArea(Rectangle area)
         {
-            Area = new Rectangle(area.X * Game1.pixelZoom, area.Y * Game1.pixelZoom, area.Width * Game1.pixelZoom, area.Height * Game1.pixelZoom);
+            this.Area = new Rectangle(area.X * Game1.pixelZoom, area.Y * Game1.pixelZoom, area.Width * Game1.pixelZoom, area.Height * Game1.pixelZoom);
         }
         protected int GetStringWidth(string text, SpriteFont font, float scale = 1f)
         {
@@ -64,23 +64,23 @@ namespace Entoarox.Framework.UI
         {
             if (crop == null)
                 crop = new Rectangle(0, 0, texture.Width, texture.Height);
-            Texture = texture;
-            Crop = (Rectangle)crop;
+            this.Texture = texture;
+            this.Crop = (Rectangle)crop;
             SetScaledArea(area);
         }
         public void Attach(IComponentContainer collection)
         {
-            if (_Parent!=null)
+            if (this._Parent !=null)
                 throw new Exception("Component is already attached and must be detached first before it can be attached again");
             OnAttach(collection);
-            _Parent = collection;
+            this._Parent = collection;
         }
         public void Detach(IComponentContainer collection)
         {
-            if (_Parent==null)
+            if (this._Parent ==null)
                 throw new Exception("Component is not attached and must be attached first before it can be detached");
-            OnDetach(Parent);
-            _Parent = null;
+            OnDetach(this.Parent);
+            this._Parent = null;
         }
         public virtual void OnAttach(IComponentContainer parent)
         {
@@ -92,11 +92,11 @@ namespace Entoarox.Framework.UI
         }
         public virtual Point GetPosition()
         {
-            return new Point(Area.X, Area.Y);
+            return new Point(this.Area.X, this.Area.Y);
         }
         public virtual Rectangle GetRegion()
         {
-            return Area;
+            return this.Area;
         }
         public virtual void Update(GameTime t)
         {
@@ -104,8 +104,8 @@ namespace Entoarox.Framework.UI
         }
         public virtual void Draw(SpriteBatch b, Point o)
         {
-            if (Visible)
-                b.Draw(Texture, new Rectangle(Area.X + o.X, Area.Y + o.Y,Area.Width,Area.Height), Crop, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
+            if (this.Visible)
+                b.Draw(this.Texture, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height), this.Crop, Color.White, 0, Vector2.Zero, SpriteEffects.None, 1f);
         }
     }
 }

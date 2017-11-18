@@ -78,30 +78,30 @@ namespace Entoarox.MorePetsAndAnimals
             foreach (KeyValuePair<string, List<int>> pair in Indexes)
                 if(pair.Value.Count>0)
                     partial.Add($"{Environment.NewLine}    {pair.Key.PadRight(20)}: {pair.Value.Count} skins");
-            Monitor.Log(string.Join("", partial), LogLevel.Trace);
+            this.Monitor.Log(string.Join("", partial), LogLevel.Trace);
             helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using this mod, you monster", this.CommandFired_KillPets);
             if (Config.AnimalsOnly)
                 replaceBus = false;
             if (replaceBus && !Indexes["dog"].Any() && !Indexes["cat"].Any())
             {
                 replaceBus = false;
-                Monitor.Log("The `AnimalsOnly` config option is set to `false`, yet no dog or cat skins have been found!", LogLevel.Error);
+                this.Monitor.Log("The `AnimalsOnly` config option is set to `false`, yet no dog or cat skins have been found!", LogLevel.Error);
             }
             // hook events
-            GameEvents.UpdateTick += GameEvents_UpdateTick;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             if(replaceBus)
             {
-                ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
-                ControlEvents.MouseChanged += ControlEvents_MouseChanged;
+                ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
+                ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
             }
             // check version
-            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/MorePets/update.json");
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/MorePets/update.json");
         }
 
         private void LoadPetSkins()
         {
             List<string> skins = new List<string>();
-            foreach (FileInfo file in new DirectoryInfo(Path.Combine(Helper.DirectoryPath, "skins")).EnumerateFiles("*.xnb"))
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "skins")).EnumerateFiles("*.xnb"))
             {
                 if (file.Name.Contains("_"))
                 {
@@ -113,12 +113,12 @@ namespace Entoarox.MorePetsAndAnimals
                         Indexes[split[0]].Add(Convert.ToInt32(split[1]));
                     }
                     else
-                        Monitor.Log("Found unexpected file `"+file.Name+"`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
+                        this.Monitor.Log("Found unexpected file `"+file.Name+"`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
                 }
                 else if(!file.Name.Equals("BabyDuck.xnb"))
-                    Monitor.Log("Found file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
+                    this.Monitor.Log("Found file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
             }
-            Monitor.Log("Skins found: " + string.Join(", ", skins), LogLevel.Trace);
+            this.Monitor.Log("Skins found: " + string.Join(", ", skins), LogLevel.Trace);
         }
         private List<Pet> GetAllPets()
         {
@@ -131,9 +131,9 @@ namespace Entoarox.MorePetsAndAnimals
 
             if (replaceBus && Game1.getLocationFromName("BusStop") != null)
             {
-                Monitor.Log("Patching bus stop...", LogLevel.Trace);
+                this.Monitor.Log("Patching bus stop...", LogLevel.Trace);
                 GameLocation bus = Game1.getLocationFromName("BusStop");
-                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, Helper.Content.GetActualAssetKey("box"), new xTile.Dimensions.Size(2, 2), new xTile.Dimensions.Size(16, 16)));
+                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, this.Helper.Content.GetActualAssetKey("box"), new xTile.Dimensions.Size(2, 2), new xTile.Dimensions.Size(16, 16)));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
                 bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");
@@ -148,11 +148,11 @@ namespace Entoarox.MorePetsAndAnimals
                     try
                     {
                         var type = npc is Dog ? "dog" : "cat";
-                        npc.sprite = new AnimatedSprite(Helper.Content.Load<Texture2D>($"skins/{type}_{npc.manners}"), 0, 32, 32);
+                        npc.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>($"skins/{type}_{npc.manners}"), 0, 32, 32);
                     }
                     catch
                     {
-                        Monitor.Log("Pet with unknown skin number found, using default: " + npc.manners.ToString(), LogLevel.Error);
+                        this.Monitor.Log("Pet with unknown skin number found, using default: " + npc.manners.ToString(), LogLevel.Error);
                     }
                     npc.updatedDialogueYet = true;
                 }
@@ -170,11 +170,11 @@ namespace Entoarox.MorePetsAndAnimals
                     if (animal.meatIndex > 999)
                         try
                         {
-                            animal.sprite = new AnimatedSprite(Helper.Content.Load<Texture2D>("skins/" + str + "_" + (animal.meatIndex-999).ToString()), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                            animal.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>("skins/" + str + "_" + (animal.meatIndex-999).ToString()), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                         }
                         catch
                         {
-                            Monitor.Log("Animal with unknown skin number found, using default instead: " + (animal.meatIndex-999).ToString(), LogLevel.Error);
+                            this.Monitor.Log("Animal with unknown skin number found, using default instead: " + (animal.meatIndex-999).ToString(), LogLevel.Error);
                             if (str=="BabyDuck")
                                 str = "BabyWhite Chicken";
                             animal.sprite = new AnimatedSprite(Game1.content.Load<Texture2D>("Animals\\" + str), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
@@ -184,11 +184,11 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        animal.sprite = new AnimatedSprite(Helper.Content.Load<Texture2D>("skins/BabyDuck"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        animal.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>("skins/BabyDuck"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
-                        Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
+                        this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
                         animal.sprite = new AnimatedSprite(Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                 }
@@ -204,7 +204,7 @@ namespace Entoarox.MorePetsAndAnimals
                         farm.characters.Remove(pet);
                     else
                         house.characters.Remove(pet);
-            Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
+            this.Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
         }
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
@@ -213,20 +213,20 @@ namespace Entoarox.MorePetsAndAnimals
         }
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
-            if (_TriggerAction && e.ButtonReleased == Buttons.A)
+            if (this._TriggerAction && e.ButtonReleased == Buttons.A)
             {
                 DoAction();
-                _TriggerAction = false;
+                this._TriggerAction = false;
             }
         }
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
-            if (_TriggerAction && e.NewState.RightButton == ButtonState.Released)
+            if (this._TriggerAction && e.NewState.RightButton == ButtonState.Released)
             {
                 DoAction();
-                _TriggerAction = false;
+                this._TriggerAction = false;
             }
         }
         internal static List<string> seasons = new List<string>() { "spring", "summer", "fall", "winter" };
@@ -245,7 +245,7 @@ namespace Entoarox.MorePetsAndAnimals
                     tile.Properties.TryGetValue("Action", out propertyValue);
                 if (propertyValue != null && "MorePetsAdoption".Equals(propertyValue))
                 {
-                    _TriggerAction = true;
+                    this._TriggerAction = true;
                 }
             }
         }

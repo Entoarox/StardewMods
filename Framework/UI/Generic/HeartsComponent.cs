@@ -15,11 +15,11 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Value;
+                return this._Value;
             }
             set
             {
-                _Value = Math.Min(Math.Max(0, value), MaxValue);
+                this._Value = Math.Min(Math.Max(0, value), this.MaxValue);
             }
         }
         protected int _Value;
@@ -29,17 +29,17 @@ namespace Entoarox.Framework.UI
             if (maxValue % 2 != 0)
                 maxValue++;
             SetScaledArea(new Rectangle(position.X, position.Y, 8 * (maxValue / 2), HeartEmpty.Height));
-            MaxValue = maxValue;
-            Value = value;
+            this.MaxValue = maxValue;
+            this.Value = value;
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
-            for (int c = 0; c < MaxValue / 2; c++)
-                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * zoom8, o.Y + Area.Y), new Rectangle(HeartEmpty.X, HeartEmpty.Y, 7, 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
-            for (int c = 0; c < Value; c++)
-                b.Draw(Game1.mouseCursors, new Vector2(o.X + Area.X + Game1.pixelZoom + c * zoom4, o.Y + Area.Y), new Rectangle(HeartFull.X + (c % 2 == 0 ? 0 : 4), HeartFull.Y, (c % 2 == 0 ? 4 : 3), 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
+            for (int c = 0; c < this.MaxValue / 2; c++)
+                b.Draw(Game1.mouseCursors, new Vector2(o.X + this.Area.X + Game1.pixelZoom + c * zoom8, o.Y + this.Area.Y), new Rectangle(HeartEmpty.X, HeartEmpty.Y, 7, 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
+            for (int c = 0; c < this.Value; c++)
+                b.Draw(Game1.mouseCursors, new Vector2(o.X + this.Area.X + Game1.pixelZoom + c * zoom4, o.Y + this.Area.Y), new Rectangle(HeartFull.X + (c % 2 == 0 ? 0 : 4), HeartFull.Y, (c % 2 == 0 ? 4 : 3), 6), Color.White, 0, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1f);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -16,11 +16,13 @@ using StardewValley.TerrainFeatures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
+using xTile.Tiles;
+using xTile.ObjectModel;
+
 namespace Entoarox.Framework.Core
 {
     using Events;
-    using xTile.Tiles;
-    using xTile.ObjectModel;
+    using Core.AssetHandlers;
 
     internal class ModEntry : Mod
     {
@@ -42,21 +44,26 @@ namespace Entoarox.Framework.Core
         #region Mod
         public override void Entry(IModHelper helper)
         {
-            SHelper = Helper;
-            Logger = Monitor;
-            Config = Helper.ReadConfig<FrameworkConfig>();
-            Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", Commands);
+            var TypeHandler = new DeferredAssetHandler();
+            helper.Content.AssetEditors.Add(TypeHandler);
+            helper.Content.AssetEditors.Add(TypeHandler);
+            helper.Content.AssetEditors.Add(new DeferredTypeHandler());
+            helper.Content.AssetLoaders.Add(new XnbLoader());
+            helper.Content.AssetEditors.Add(new TextureInjector());
+            helper.Content.AssetEditors.Add(new DictionaryInjector());
+            SHelper = this.Helper;
+            Logger = this.Monitor;
+            Config = this.Helper.ReadConfig<FrameworkConfig>();
+            this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
             if (Config.TrainerCommands)
                 helper.ConsoleCommands
-                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", Farms), Commands)
-                    .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", Commands)
+                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", Farms), this.Commands)
+                    .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", this.Commands)
 
-                    .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", Commands)
+                    .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands)
                 ;
-            GameEvents.UpdateTick += GameEvents_FirstUpdateTick;
-            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
-            // Setup content manager
-            ContentHelper.Utilities.PerformSetup();
+            GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
         }
         #endregion
         #region Events
@@ -81,27 +88,27 @@ namespace Entoarox.Framework.Core
         }
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
-            if (ActionInfo != null && e.ButtonReleased == Buttons.A)
+            if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
             {
-                MoreEvents.FireActionTriggered(ActionInfo);
-                ActionInfo = null;
+                MoreEvents.FireActionTriggered(this.ActionInfo);
+                this.ActionInfo = null;
             }
         }
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
-            if (ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
+            if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
             {
-                MoreEvents.FireActionTriggered(ActionInfo);
-                ActionInfo = null;
+                MoreEvents.FireActionTriggered(this.ActionInfo);
+                this.ActionInfo = null;
             }
         }
         private void CheckForAction()
         {
             if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
-                ActionInfo = null;
+                this.ActionInfo = null;
                 Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
                     grabTile = Game1.player.GetGrabTile();
@@ -114,7 +121,7 @@ namespace Entoarox.Framework.Core
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
+                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
                 }
             }
         }
@@ -164,7 +171,7 @@ namespace Entoarox.Framework.Core
                     break;
                 case "farm_settype":
                     if (args.Length == 0)
-                        Monitor.Log("Please provide the type you wish to change your farm to.", LogLevel.Error);
+                        this.Monitor.Log("Please provide the type you wish to change your farm to.", LogLevel.Error);
                     else if (Farms.Contains(args[0]))
                     {
                         Game1.whichFarm = Farms.IndexOf(args[0]);
@@ -199,48 +206,48 @@ namespace Entoarox.Framework.Core
                         int x = Convert.ToInt32(args[1]);
                         int y = Convert.ToInt32(args[2]);
                         Game1.warpFarmer(args[0], x, y, false);
-                        Monitor.Log("Player warped.", LogLevel.Alert);
+                        this.Monitor.Log("Player warped.", LogLevel.Alert);
                     }
                     catch (Exception err)
                     {
-                        Monitor.Log("A error occured trying to warp: ", LogLevel.Error, err);
+                        this.Monitor.Log("A error occured trying to warp: ", LogLevel.Error, err);
                     }
                     break;
             }
         }
         private void GameEvents_FirstUpdateTick(object s, EventArgs e)
         {
-            GameEvents.UpdateTick -= GameEvents_FirstUpdateTick;
+            GameEvents.UpdateTick -= this.GameEvents_FirstUpdateTick;
             if (Config.SkipCredits || SkipCredits)
             {
                 if (CreditsDone || !(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
                     return;
                 Game1.playSound("bigDeSelect");
-                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
-                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
+                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
+                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
                 Game1.delayedActions.Clear();
-                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
-                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
-                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
-                Helper.Reflection.GetPrivateField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
-                Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
-                Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
+                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
+                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
+                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
+                this.Helper.Reflection.GetPrivateField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
+                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
+                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
                 Game1.changeMusicTrack("MainTheme");
                 CreditsDone = true;
             }
             SetupSerializer();
             Core.UpdateHandler.DoUpdateChecks();
-            GameEvents.UpdateTick += GameEvents_UpdateTick;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
         }
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
             EnforceSerializer();
             if (!Context.IsWorldReady)
                 return;
-            if ((Game1.player.CurrentItem == null && prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(prevItem)))
+            if ((Game1.player.CurrentItem == null && this.prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.prevItem)))
             {
-                MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(prevItem, Game1.player.CurrentItem));
-                prevItem = Game1.player.CurrentItem;
+                MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
+                this.prevItem = Game1.player.CurrentItem;
             }
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
             if (LastTouchAction!=playerPos)
@@ -252,8 +259,8 @@ namespace Entoarox.Framework.Core
                     string[] split = (text).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
-                    MoreEvents.FireTouchActionTriggered(ActionInfo);
+                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
+                    MoreEvents.FireTouchActionTriggered(this.ActionInfo);
                 }
             }
         }
@@ -292,26 +299,26 @@ namespace Entoarox.Framework.Core
         };
         private void SetupSerializer()
         {
-            MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
-            FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
-            LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
+            this.MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
+            this.FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
+            this.LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
             SerializerInjected = true;
             EnforceSerializer();
         }
         private void EnforceSerializer()
         {
-            SaveGame.serializer = MainSerializer;
-            SaveGame.farmerSerializer = FarmerSerializer;
-            SaveGame.locationSerializer = LocationSerializer;
+            SaveGame.serializer = this.MainSerializer;
+            SaveGame.farmerSerializer = this.FarmerSerializer;
+            SaveGame.locationSerializer = this.LocationSerializer;
         }
         #endregion
         #region Misc
         private void PrepareCustomEvents()
         {
-            ControlEvents.ControllerButtonPressed += ControlEvents_ControllerButtonPressed;
-            ControlEvents.ControllerButtonReleased += ControlEvents_ControllerButtonReleased;
-            ControlEvents.MouseChanged += ControlEvents_MouseChanged;
-            GameEvents.UpdateTick += GameEvents_UpdateTick;
+            ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
+            ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
+            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
         }
         private void SetupHotkeys()
         {
@@ -359,7 +366,7 @@ namespace Entoarox.Framework.Core
             letters.RemoveAll(a => Game1.options.isKeyInUse(a));
             _Keybinds = new Dictionary<Keys, (string Mod, Delegate Handler)>();
             var keybinds = new List<(string mod, Keys key, Delegate handler)>(Keybinds);
-            Dictionary<string, Keys> memory = Helper.ReadJsonFile<Dictionary<string, Keys>>("keybinds.json");
+            Dictionary<string, Keys> memory = this.Helper.ReadJsonFile<Dictionary<string, Keys>>("keybinds.json");
             foreach ((string mod, Keys key, Delegate handler) in new List<(string mod, Keys key, Delegate handler)>(keybinds))
                 if (memory.ContainsKey(mod) && letters.Contains(key))
                 {
@@ -389,10 +396,10 @@ namespace Entoarox.Framework.Core
                     Keybinds.Remove((mod, key, handler));
                     keybinds.Add((mod, Keys.None, handler));
                     var split = mod.Split('\n');
-                    Monitor.Log($"Could not automatically provide a hotkey for the `{split[0]}` mod's `{split[1]}` key, you will need to manually assign one!", LogLevel.Error);
+                    this.Monitor.Log($"Could not automatically provide a hotkey for the `{split[0]}` mod's `{split[1]}` key, you will need to manually assign one!", LogLevel.Error);
                 }
             }
-            ControlEvents.KeyboardChanged += ControlEvents_KeyboardChanged;
+            ControlEvents.KeyboardChanged += this.ControlEvents_KeyboardChanged;
         }
         #endregion
     }

@@ -18,8 +18,8 @@ namespace Entoarox.Framework.Config
         /// <param name="arguments">The arguments to give to the constructor of the custom component</param>
         public ConfigCustomAttribute(string label, string description, Type component, object[] arguments) : base(label, description)
         {
-            Component = component;
-            Arguments = arguments;
+            this.Component = component;
+            this.Arguments = arguments;
         }
     }
 }

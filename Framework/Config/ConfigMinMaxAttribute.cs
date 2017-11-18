@@ -18,8 +18,8 @@ namespace Entoarox.Framework.Config
         /// <param name="max">the maximum value that is allowed</param>
         public ConfigMinMaxAttribute(string label, string description, int min, int max) : base(label, description)
         {
-            Min = min;
-            Max = max;
+            this.Min = min;
+            this.Max = max;
         }
     }
 }

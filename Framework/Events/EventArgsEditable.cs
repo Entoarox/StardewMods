@@ -5,7 +5,7 @@
         public TReturn Value;
         public EventArgsEditable(TReturn value, object[] arguments=null) : base(arguments)
         {
-            Value = value;
+            this.Value = value;
         }
     }
 }

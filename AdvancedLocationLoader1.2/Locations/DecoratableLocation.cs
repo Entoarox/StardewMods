@@ -15,10 +15,10 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         {
             public FakeWallpaper(Wallpaper item)
             {
-                isFloor = item.isFloor;
-                parentSheetIndex = item.parentSheetIndex;
-                name = isFloor ? "Flooring" : "Wallpaper";
-                price = 100;
+                this.isFloor = item.isFloor;
+                this.parentSheetIndex = item.parentSheetIndex;
+                this.name = this.isFloor ? "Flooring" : "Wallpaper";
+                this.price = 100;
             }
             public override bool canBePlacedHere(GameLocation l, Vector2 tile)
             {
@@ -30,7 +30,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
             }
             public Wallpaper Restore()
             {
-                return new Wallpaper(parentSheetIndex, isFloor);
+                return new Wallpaper(this.parentSheetIndex, this.isFloor);
             }
         }
         private static MethodInfo reset = typeof(GameLocation).GetMethod("resetForPlayerEntry", BindingFlags.Instance | BindingFlags.Public);
@@ -45,7 +45,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         public override void resetForPlayerEntry()
         {
             reset.Invoke(this, null);
-            foreach (Furniture furniture in furniture)
+            foreach (Furniture furniture in this.furniture)
                 furniture.resetOnPlayerEntry(this);
             for (int c=0;c<Game1.player.items.Count;c++)
             {

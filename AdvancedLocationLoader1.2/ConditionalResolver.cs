@@ -27,7 +27,7 @@ namespace Entoarox.AdvancedLocationLoader
         internal void Init()
         {
             Response[] answers = new Response[2];
-            answers[0] = new Response("y", ModEntry.Strings.Get("yesCost", new { amount = Conditional.Amount, itemName = GetItemName() }));
+            answers[0] = new Response("y", ModEntry.Strings.Get("yesCost", new { amount = this.Conditional.Amount, itemName = GetItemName() }));
             answers[1] = new Response("n", ModEntry.Strings.Get("no"));
             Game1.currentLocation.lastQuestionKey = "CompleteConditionalQuestion";
             Game1.currentLocation.createQuestionDialogue(this.Conditional.Question, answers, this.Resolver, null);

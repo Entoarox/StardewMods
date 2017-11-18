@@ -19,15 +19,15 @@ namespace Entoarox.FurnitureAnywhere
     {
         public override void Entry(IModHelper helper)
         {
-            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
-            MoreEvents.ActiveItemChanged += MoreEvents_ActiveItemChanged;
-            LocationEvents.CurrentLocationChanged += TriggerItemChangedEvent;
-            MenuEvents.MenuChanged += TriggerItemChangedEvent;
-            MenuEvents.MenuClosed += TriggerItemChangedEvent;
-            SaveEvents.BeforeSave += SaveEvents_BeforeSave;
-            SaveEvents.AfterSave += SaveEvents_AfterSave_AfterLoad;
-            SaveEvents.AfterLoad += SaveEvents_AfterSave_AfterLoad;
-            Helper.Content.RegisterSerializerType<AnywhereFurniture>();
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
+            MoreEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
+            LocationEvents.CurrentLocationChanged += this.TriggerItemChangedEvent;
+            MenuEvents.MenuChanged += this.TriggerItemChangedEvent;
+            MenuEvents.MenuClosed += this.TriggerItemChangedEvent;
+            SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
+            SaveEvents.AfterSave += this.SaveEvents_AfterSave_AfterLoad;
+            SaveEvents.AfterLoad += this.SaveEvents_AfterSave_AfterLoad;
+            this.Helper.Content.RegisterSerializerType<AnywhereFurniture>();
         }
         private void RestoreVanillaObjects()
         {
@@ -52,7 +52,7 @@ namespace Entoarox.FurnitureAnywhere
             }
             catch(Exception err)
             {
-                Monitor.Log("Failed to run logic check due to unexpected error",LogLevel.Error, err);
+                this.Monitor.Log("Failed to run logic check due to unexpected error",LogLevel.Error, err);
             }
         }
         internal void TriggerItemChangedEvent(object s, EventArgs e)
@@ -61,13 +61,13 @@ namespace Entoarox.FurnitureAnywhere
         }
         internal void SaveEvents_BeforeSave(object s, EventArgs e)
         {
-            Monitor.Log("Packaging furniture...");
-            IterateFurniture(SleepFurniture);
+            this.Monitor.Log("Packaging furniture...");
+            IterateFurniture(this.SleepFurniture);
         }
         internal void SaveEvents_AfterSave_AfterLoad(object s, EventArgs e)
         {
-            Monitor.Log("Restoring furniture...");
-            IterateFurniture(WakeupFurniture);
+            this.Monitor.Log("Restoring furniture...");
+            IterateFurniture(this.WakeupFurniture);
         }
         internal void IterateFurniture(Action<GameLocation> handler)
         {

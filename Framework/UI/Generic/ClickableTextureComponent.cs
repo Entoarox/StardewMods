@@ -13,31 +13,31 @@ namespace Entoarox.Framework.UI
         {
             if (handler != null)
                 Handler += handler;
-            ScaleOnHover = scaleOnHover;
+            this.ScaleOnHover = scaleOnHover;
         }
         public override void HoverIn(Point p, Point o)
         {
             Game1.playSound("Cowboy_Footstep");
-            if (!ScaleOnHover)
+            if (!this.ScaleOnHover)
                 return;
-            Area.X -= 2;
-            Area.Y -= 2;
-            Area.Width += 4;
-            Area.Height += 4;
+            this.Area.X -= 2;
+            this.Area.Y -= 2;
+            this.Area.Width += 4;
+            this.Area.Height += 4;
         }
         public override void HoverOut(Point p, Point o)
         {
-            if (!ScaleOnHover)
+            if (!this.ScaleOnHover)
                 return;
-            Area.X += 2;
-            Area.Y += 2;
-            Area.Width -= 4;
-            Area.Height -= 4;
+            this.Area.X += 2;
+            this.Area.Y += 2;
+            this.Area.Width -= 4;
+            this.Area.Height -= 4;
         }
         public override void LeftClick(Point p, Point o)
         {
             Game1.playSound("bigDeSelect");
-            Handler?.Invoke(this, Parent, Parent.GetAttachedMenu());
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
     }
 }

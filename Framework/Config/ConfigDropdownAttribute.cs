@@ -15,7 +15,7 @@ namespace Entoarox.Framework.Config
         /// <param name="options">The list of dropdown options to display</param>
         public ConfigDropdownAttribute(string label, string description, string[] options) : base(label, description)
         {
-            Options = options;
+            this.Options = options;
         }
     }
 }

@@ -16,11 +16,11 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Value;
+                return this._Value;
             }
             set
             {
-                _Value = Math.Max(0, Math.Min(MaxValue, value));
+                this._Value = Math.Max(0, Math.Min(this.MaxValue, value));
             }
         }
         protected int _Value;
@@ -28,26 +28,26 @@ namespace Entoarox.Framework.UI
         protected int OffsetValue;
         public ProgressbarComponent(Point position, int value, int maxValue)
         {
-            MaxValue = maxValue;
-            Value = value;
-            OffsetValue = Value * Game1.pixelZoom;
-            SetScaledArea(new Rectangle(position.X, position.Y, MaxValue + 2, 6));
+            this.MaxValue = maxValue;
+            this.Value = value;
+            this.OffsetValue = this.Value * Game1.pixelZoom;
+            SetScaledArea(new Rectangle(position.X, position.Y, this.MaxValue + 2, 6));
         }
         protected int GetDiff()
         {
-            int v = _Value * Game1.pixelZoom;
-            if (OffsetValue == v)
+            int v = this._Value * Game1.pixelZoom;
+            if (this.OffsetValue == v)
                 return 0;
-            if (OffsetValue > v)
-                return -((int)Math.Floor((OffsetValue - v) / 10D + 1));
-            return (int)Math.Floor((v - OffsetValue) / 10D + 1);
+            if (this.OffsetValue > v)
+                return -((int)Math.Floor((this.OffsetValue - v) / 10D + 1));
+            return (int)Math.Floor((v - this.OffsetValue) / 10D + 1);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
             if (DateTime.Now.Millisecond % 5 == 0)
-                OffsetValue += GetDiff();
-            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, Area.X + o.X, Area.Y + o.Y, Area.Width, Area.Height, Color.White, Game1.pixelZoom, false);
-            b.Draw(Game1.mouseCursors, new Rectangle(Area.X + o.X + Game1.pixelZoom, Area.Y + o.Y + Game1.pixelZoom, OffsetValue, zoom4), Filler, Color.White);
+                this.OffsetValue += GetDiff();
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height, Color.White, Game1.pixelZoom, false);
+            b.Draw(Game1.mouseCursors, new Rectangle(this.Area.X + o.X + Game1.pixelZoom, this.Area.Y + o.Y + Game1.pixelZoom, this.OffsetValue, zoom4), Filler, Color.White);
         }
     }
 }

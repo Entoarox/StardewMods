@@ -13,11 +13,11 @@ namespace Entoarox.Framework.Interface
             get => _Scaled;
             set
             {
-                _Scaled = value;
-                if (!_Scaled)
+                this._Scaled = value;
+                if (!this._Scaled)
                     UpdateBounds();
                 else
-                    OuterBounds = _Subrect;
+                    this.OuterBounds = this._Subrect;
             }
         }
         private Rectangle _Subrect;
@@ -26,37 +26,37 @@ namespace Entoarox.Framework.Interface
             get => _Subrect;
             set
             {
-                _Subrect = value;
-                if(!_Scaled)
+                this._Subrect = value;
+                if(!this._Scaled)
                     UpdateBounds();
             }
         }
 
         public TextureComponent(string name, Point position, Texture2D texture, Rectangle? subrect=null, Color? color=null, int layer=0) : base(name, new Rectangle(position.X,position.Y,0,0),layer)
         {
-            Texture = texture;
-            _Subrect = subrect ?? texture.Bounds;
-            _Scaled = false;
-            Color = color ?? Color.White;
+            this.Texture = texture;
+            this._Subrect = subrect ?? texture.Bounds;
+            this._Scaled = false;
+            this.Color = color ?? Color.White;
             UpdateBounds();
         }
         public TextureComponent(string name, Rectangle bounds, Texture2D texture, Rectangle? subrect = null, Color? color = null, int layer = 0) : base(name, bounds, layer)
         {
-            Texture = texture;
-            _Subrect = subrect ?? texture.Bounds;
-            Color = color ?? Color.White;
-            _Scaled = true;
+            this.Texture = texture;
+            this._Subrect = subrect ?? texture.Bounds;
+            this.Color = color ?? Color.White;
+            this._Scaled = true;
         }
 
         private void UpdateBounds()
         {
-            OuterBounds = new Rectangle(OuterBounds.X, OuterBounds.Y, _Subrect.Width, _Subrect.Height);
+            this.OuterBounds = new Rectangle(this.OuterBounds.X, this.OuterBounds.Y, this._Subrect.Width, this._Subrect.Height);
         }
 
         public override void Draw(Point offset, SpriteBatch batch)
         {
-            Rectangle rect = GetDrawRectangle(offset, OuterBounds);
-            batch.Draw(Texture, rect, _Subrect, Color);
+            Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
+            batch.Draw(this.Texture, rect, this._Subrect, this.Color);
         }
     }
 }

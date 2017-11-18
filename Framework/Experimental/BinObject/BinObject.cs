@@ -9,7 +9,7 @@ namespace Entoarox.Framework.Experimental.BinObject
         public BinType Type { get; private set; }
         internal BinObject(BinType type)
         {
-            Type = type;
+            this.Type = type;
         }
         public static implicit operator BinObject(Dictionary<string, BinObject> value) => value == null ? (BinObject)new BinNull() : new BinMap(value);
 
@@ -82,7 +82,7 @@ namespace Entoarox.Framework.Experimental.BinObject
         protected T Value;
         internal BinObject(BinType type, T value) : base(type)
         {
-            Value = value;
+            this.Value = value;
         }
         public static implicit operator T(BinObject<T> value)
         {

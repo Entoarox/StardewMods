@@ -18,45 +18,45 @@ namespace Entoarox.ShopExpander
         private byte skippedTick = 0;
         public override void Entry(IModHelper helper)
         {
-            GameEvents.UpdateTick += Event_UpdateTick;
+            GameEvents.UpdateTick += this.Event_UpdateTick;
         }
         private void Event_UpdateTick(object s, EventArgs e)
         {
-            if (skippedTick > 1)
+            if (this.skippedTick > 1)
             {
-                MenuEvents.MenuChanged += Event_MenuChanged;
-                Config = Helper.ReadConfig<ShopExpanderConfig>();
-                GameEvents.UpdateTick -= Event_UpdateTick;
-                foreach (Reference obj in Config.objects)
+                MenuEvents.MenuChanged += this.Event_MenuChanged;
+                this.Config = this.Helper.ReadConfig<ShopExpanderConfig>();
+                GameEvents.UpdateTick -= this.Event_UpdateTick;
+                foreach (Reference obj in this.Config.objects)
                     try
                     {
                         generateObject(obj.Owner, obj.Item, obj.Amount, obj.Conditions);
                     }
                     catch (Exception err)
                     {
-                        Monitor.Log("Object failed to generate: " + obj.ToString(), LogLevel.Error,err);
+                        this.Monitor.Log("Object failed to generate: " + obj.ToString(), LogLevel.Error,err);
                     }
             }
             else
-                skippedTick++;
+                this.skippedTick++;
         }
         private void generateObject(string owner, int replacement, int stackAmount, string requirements)
         {
             if (owner == "???")
             {
-                Monitor.Log("Attempt to add a object to a shop owned by `???`, this cant be done because `???` means the owner is unknown!", LogLevel.Error);
+                this.Monitor.Log("Attempt to add a object to a shop owned by `???`, this cant be done because `???` means the owner is unknown!", LogLevel.Error);
                 return;
             }
             StardewValley.Object stack = new StardewValley.Object(replacement, stackAmount);
             if(stack.salePrice()==0)
             {
-                Monitor.Log("Unable to add item to shop, it has no value: "+replacement, LogLevel.Error);
+                this.Monitor.Log("Unable to add item to shop, it has no value: "+replacement, LogLevel.Error);
                 return;
             }
             SObject obj = new SObject(stack, stackAmount);
             obj.targetedShop = owner;
-            if (!affectedShops.Contains(owner))
-                affectedShops.Add(owner);
+            if (!this.affectedShops.Contains(owner))
+                this.affectedShops.Add(owner);
             obj.requirements = requirements;
             //Monitor.Log($"RegisterObject({obj.Name}:{replacement}@{owner},{obj.stackAmount}*{obj.maximumStackSize()},'{requirements}')",LogLevel.Trace);
             if (AddedObjects.ContainsKey(obj.Name))
@@ -74,7 +74,7 @@ namespace Entoarox.ShopExpander
                 if (Game1.player.Items[c] is SObject)
                 {
                     SObject obj = (SObject)Game1.player.Items[c];
-                    Monitor.Log("Reverting object: " + obj.Name+':'+obj.Stack, LogLevel.Trace);
+                    this.Monitor.Log("Reverting object: " + obj.Name+':'+obj.Stack, LogLevel.Trace);
                     Game1.player.Items[c] = obj.Revert();
                 }
             }
@@ -82,10 +82,10 @@ namespace Entoarox.ShopExpander
         // When the menu closes, remove the hook for the inventory changed event
         private void Event_MenuClosed(object send, EventArgsClickableMenuClosed e)
         {
-            if (e.PriorMenu is ShopMenu && eventsActive)
+            if (e.PriorMenu is ShopMenu && this.eventsActive)
             {
-                PlayerEvents.InventoryChanged -= Event_InventoryChanged;
-                MenuEvents.MenuClosed -= Event_MenuClosed;
+                PlayerEvents.InventoryChanged -= this.Event_InventoryChanged;
+                MenuEvents.MenuClosed -= this.Event_MenuClosed;
             }
         }
         // Add a modified "stack" item to the shop
@@ -94,26 +94,26 @@ namespace Entoarox.ShopExpander
             // Check that makes sure only the items that the current shop is supposed to sell are added
             if (location != item.targetedShop)
             {
-                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false}", LogLevel.Trace);
+                this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=false}", LogLevel.Trace);
                 return;
             }
-            if (!string.IsNullOrEmpty(item.requirements) && !Helper.Conditions().ValidateConditions(item.requirements))
+            if (!string.IsNullOrEmpty(item.requirements) && !this.Helper.Conditions().ValidateConditions(item.requirements))
             {
-                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=false}", LogLevel.Trace);
+                this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=false}", LogLevel.Trace);
                 return;
             }
             if(item.stackAmount==1)
             {
-                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=false}", LogLevel.Trace);
+                this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=false}", LogLevel.Trace);
                 Item reverted = item.Revert();
-                forSale.Add(reverted);
-                itemPriceAndStock.Add(reverted, new int[2] { reverted.salePrice(), int.MaxValue });
+                this.forSale.Add(reverted);
+                this.itemPriceAndStock.Add(reverted, new int[2] { reverted.salePrice(), int.MaxValue });
             }
             else
             {
-                Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=true}", LogLevel.Trace);
-                forSale.Add(item);
-                itemPriceAndStock.Add(item, new int[2] { item.salePrice(), int.MaxValue });
+                this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=true}", LogLevel.Trace);
+                this.forSale.Add(item);
+                this.itemPriceAndStock.Add(item, new int[2] { item.salePrice(), int.MaxValue });
             }
         }
         private Dictionary<Item, int[]> itemPriceAndStock;
@@ -127,7 +127,7 @@ namespace Entoarox.ShopExpander
             if (Game1.activeClickableMenu is ShopMenu)
             {
                 // When it is a shop menu, I need to perform some logic to identify the HatMouse, Traveler or ClintUpgrade shops as I cannot simply use their owner for that
-                Monitor.Log("Shop Menu active, checking for expansion", LogLevel.Trace);
+                this.Monitor.Log("Shop Menu active, checking for expansion", LogLevel.Trace);
                 ShopMenu menu = (ShopMenu) Game1.activeClickableMenu;
                 string shopOwner = "???";
                 // There are by default two shops in the forest, and neither has a owner, so we need to manually resolve the shop owner
@@ -171,29 +171,29 @@ namespace Entoarox.ShopExpander
                             break;
                     }
                 }
-                if (affectedShops.Contains(shopOwner))
+                if (this.affectedShops.Contains(shopOwner))
                 {
-                    Monitor.Log("Shop owned by `"+shopOwner+"` gets modified, doing so now",LogLevel.Trace);
+                    this.Monitor.Log("Shop owned by `"+shopOwner+"` gets modified, doing so now",LogLevel.Trace);
                     // Register to inventory changes so we can immediately replace bought stacks
-                    eventsActive = true;
-                    MenuEvents.MenuClosed += Event_MenuClosed;
-                    PlayerEvents.InventoryChanged += Event_InventoryChanged;
+                    this.eventsActive = true;
+                    MenuEvents.MenuClosed += this.Event_MenuClosed;
+                    PlayerEvents.InventoryChanged += this.Event_InventoryChanged;
                     // Reflect the required fields to be able to edit a shops stock
-                    itemPriceAndStock = (Dictionary<Item, int[]>)Stock.GetValue(Game1.activeClickableMenu);
-                    forSale = (List<Item>)Sale.GetValue(Game1.activeClickableMenu);
+                    this.itemPriceAndStock = (Dictionary<Item, int[]>)this.Stock.GetValue(Game1.activeClickableMenu);
+                    this.forSale = (List<Item>)this.Sale.GetValue(Game1.activeClickableMenu);
                     // Add our custom items to the shop
                     foreach (string key in AddedObjects.Keys)
                         AddItem(AddedObjects[key], shopOwner);
                     // Use reflection to set the changed values
-                    Stock.SetValue(Game1.activeClickableMenu, itemPriceAndStock);
-                    Sale.SetValue(Game1.activeClickableMenu, forSale);
+                    this.Stock.SetValue(Game1.activeClickableMenu, this.itemPriceAndStock);
+                    this.Sale.SetValue(Game1.activeClickableMenu, this.forSale);
                 }
                 else
                 {
                     if(shopOwner.Equals("???"))
-                        Monitor.Log("The shop owner could not be resolved, skipping shop", LogLevel.Trace);
+                        this.Monitor.Log("The shop owner could not be resolved, skipping shop", LogLevel.Trace);
                     else
-                        Monitor.Log("The shop owned by `" + shopOwner + "` is not on the list, ignoring it");
+                        this.Monitor.Log("The shop owned by `" + shopOwner + "` is not on the list, ignoring it");
                 }
             }
         }

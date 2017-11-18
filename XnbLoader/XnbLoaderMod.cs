@@ -46,7 +46,7 @@ namespace Entoarox.XnbLoader
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/XnbLoader/update.json");
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/XnbLoader/update.json");
 
             // prepare directory structure
             string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
@@ -87,7 +87,7 @@ namespace Entoarox.XnbLoader
             {
                 string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
                 string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
-                Cache.Add(from, filePath);
+                this.Cache.Add(from, filePath);
                 files++;
             }
             return files;
@@ -95,9 +95,9 @@ namespace Entoarox.XnbLoader
         private void PatchFiles()
         {
             this.Monitor.Log("Redirect list:",LogLevel.Trace);
-            foreach(KeyValuePair<string, string> entry in Cache)
+            foreach(KeyValuePair<string, string> entry in this.Cache)
                 this.Monitor.Log($"  {entry.Key} ~> {entry.Value}.xnb", LogLevel.Trace);
-            foreach (KeyValuePair<string, string> entry in Cache)
+            foreach (KeyValuePair<string, string> entry in this.Cache)
                 this.Helper.Content.RegisterXnbReplacement(entry.Key, entry.Value);
         }
     }

@@ -20,21 +20,21 @@ namespace Entoarox.AdvancedLocationLoader
         internal static IModHelper SHelper;
         public override void Entry(IModHelper helper)
         {
-            Logger = Monitor;
+            Logger = this.Monitor;
             ModPath = helper.DirectoryPath;
             SHelper = helper;
             Strings = helper.Translation;
-            Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/version.json");
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/version.json");
 
             Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             GameEvents.UpdateTick+=Events.GameEvents_UpdateTick;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
-            Helper.Content.RegisterSerializerType<Locations.Greenhouse>();
-            Helper.Content.RegisterSerializerType<Locations.Sewer>();
-            Helper.Content.RegisterSerializerType<Locations.Desert>();
-            Helper.Content.RegisterSerializerType<Locations.DecoratableLocation>();
+            this.Helper.Content.RegisterSerializerType<Locations.Greenhouse>();
+            this.Helper.Content.RegisterSerializerType<Locations.Sewer>();
+            this.Helper.Content.RegisterSerializerType<Locations.Desert>();
+            this.Helper.Content.RegisterSerializerType<Locations.DecoratableLocation>();
         }
         internal static void UpdateConditionalEdits()
         {

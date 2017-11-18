@@ -26,28 +26,28 @@ namespace Entoarox.Framework.UI
             protected Rectangle Self;
             protected int GetCursorIndex(Point p, Point o)
             {
-                int index = (int)Math.Floor(((p.Y - Area.Y) / Game1.pixelZoom) / 7D) + ScrollOffset;
+                int index = (int)Math.Floor(((p.Y - this.Area.Y) / Game1.pixelZoom) / 7D) + this.ScrollOffset;
                 if (index < 0)
                     index = 0;
-                if (index >= Owner.Values.Count)
-                    index = Owner.Values.Count - 1;
+                if (index >= this.Owner.Values.Count)
+                    index = this.Owner.Values.Count - 1;
                 return index;
             }
             public DropdownSelect(Point position, int width, Rectangle self, DropdownFormComponent owner, IComponentContainer collection)
             {
-                MaxScroll = Math.Max(0, owner.Values.Count - 10);
-                Size = Math.Min(10, owner.Values.Count);
-                Value = owner.Value;
-                Owner = owner;
-                Collection = collection;
-                Self = self;
-                Area = new Rectangle(position.X, position.Y, width, zoom2 + Game1.pixelZoom * Math.Min(7 * owner.Values.Count, 70));
+                this.MaxScroll = Math.Max(0, owner.Values.Count - 10);
+                this.Size = Math.Min(10, owner.Values.Count);
+                this.Value = owner.Value;
+                this.Owner = owner;
+                this.Collection = collection;
+                this.Self = self;
+                this.Area = new Rectangle(position.X, position.Y, width, zoom2 + Game1.pixelZoom * Math.Min(7 * owner.Values.Count, 70));
                 collection.GetAttachedMenu().GiveFocus(this);
-                if (Area.Y+Area.Height > Game1.viewport.Height)
-                    Area.Y -= Area.Height + zoom9;
-                int index = owner.Values.IndexOf(Value);
-                ScrollOffset = Math.Max(0,index - 9);
-                KeyboardOffset = index;
+                if (this.Area.Y+ this.Area.Height > Game1.viewport.Height)
+                    this.Area.Y -= this.Area.Height + zoom9;
+                int index = owner.Values.IndexOf(this.Value);
+                this.ScrollOffset = Math.Max(0,index - 9);
+                this.KeyboardOffset = index;
             }
             public override bool InBounds(Point p, Point o)
             {
@@ -55,26 +55,26 @@ namespace Entoarox.Framework.UI
             }
             public override void FocusGained()
             {
-                Selected = true;
+                this.Selected = true;
             }
             public override void FocusLost()
             {
-                if (Value == Owner.Value)
+                if (this.Value == this.Owner.Value)
                     return;
-                Owner.Value = Value;
-                Owner.Handler?.Invoke(Owner, Collection, Parent.GetAttachedMenu(), Owner.Value);
+                this.Owner.Value = this.Value;
+                this.Owner.Handler?.Invoke(this.Owner, this.Collection, this.Parent.GetAttachedMenu(), this.Owner.Value);
             }
             public override void LeftClick(Point p, Point o)
             {
-                Value = Owner.Values[GetCursorIndex(p, o)];
-                Parent.ResetFocus();
+                this.Value = this.Owner.Values[GetCursorIndex(p, o)];
+                this.Parent.ResetFocus();
             }
             public override bool Scroll(int d, Point p, Point o)
             {
                 int change = d / 120;
-                int oldOffset = ScrollOffset;
-                ScrollOffset = Math.Max(0, Math.Min(ScrollOffset - change, MaxScroll));
-                if (oldOffset != ScrollOffset)
+                int oldOffset = this.ScrollOffset;
+                this.ScrollOffset = Math.Max(0, Math.Min(this.ScrollOffset - change, this.MaxScroll));
+                if (oldOffset != this.ScrollOffset)
                 {
                     Game1.playSound("drumkit6");
                     return true;
@@ -83,60 +83,60 @@ namespace Entoarox.Framework.UI
             }
             public override void HoverIn(Point p, Point o)
             {
-                ShowHover = true;
+                this.ShowHover = true;
             }
             public override void HoverOver(Point p, Point o)
             {
-                HoverOffset = GetCursorIndex(p, o);
+                this.HoverOffset = GetCursorIndex(p, o);
             }
             public override void HoverOut(Point p, Point o)
             {
-                ShowHover = false;
+                this.ShowHover = false;
             }
             public override void Draw(SpriteBatch b, Point o)
             {
-                if (!Visible)
+                if (!this.Visible)
                     return;
                 o = new Point(0, 0);
                 Color col = Color.Black * 0.25f;
                 // Background
-                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + Area.X, o.Y + Area.Y - Game1.pixelZoom, Area.Width - zoom2, Area.Height, Color.White, Game1.pixelZoom, false);
-                for (int c = 0; c < Size; c++)
+                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X + this.Area.X, o.Y + this.Area.Y - Game1.pixelZoom, this.Area.Width - zoom2, this.Area.Height, Color.White, Game1.pixelZoom, false);
+                for (int c = 0; c < this.Size; c++)
                 {
                     // Selected
-                    if (Owner.Values[ScrollOffset + c] == Value)
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Game1.pixelZoom, o.Y + Area.Y + zoom7 * c, Area.Width - zoom4, zoom7), new Rectangle(0, 0, 1, 1), Color.Wheat*0.5f);
-                    if (Selected && KeyboardOffset == ScrollOffset + c)
+                    if (this.Owner.Values[this.ScrollOffset + c] == this.Value)
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + Game1.pixelZoom, o.Y + this.Area.Y + zoom7 * c, this.Area.Width - zoom4, zoom7), new Rectangle(0, 0, 1, 1), Color.Wheat*0.5f);
+                    if (this.Selected && this.KeyboardOffset == this.ScrollOffset + c)
                     {
                         // Top
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Game1.pixelZoom, o.Y + Area.Y + zoom7 * c, Area.Width - zoom4, zoom05), new Rectangle(0, 0, 1, 1), col);
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + Game1.pixelZoom, o.Y + this.Area.Y + zoom7 * c, this.Area.Width - zoom4, zoom05), new Rectangle(0, 0, 1, 1), col);
                         // Bottom
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Game1.pixelZoom, o.Y + Area.Y + zoom7 * c + zoom6 + zoom05, Area.Width - zoom4, zoom05), new Rectangle(0, 0, 1, 1), col);
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + Game1.pixelZoom, o.Y + this.Area.Y + zoom7 * c + zoom6 + zoom05, this.Area.Width - zoom4, zoom05), new Rectangle(0, 0, 1, 1), col);
                         // Left
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Game1.pixelZoom, o.Y + Area.Y + zoom7 * c + zoom05, zoom05, zoom6), new Rectangle(0, 0, 1, 1), col);
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + Game1.pixelZoom, o.Y + this.Area.Y + zoom7 * c + zoom05, zoom05, zoom6), new Rectangle(0, 0, 1, 1), col);
                         // Right
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Area.Width - zoom3 - zoom05, o.Y + Area.Y + zoom7 * c + zoom05, zoom05, zoom6), new Rectangle(0, 0, 1, 1), col);
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + this.Area.Width - zoom3 - zoom05, o.Y + this.Area.Y + zoom7 * c + zoom05, zoom05, zoom6), new Rectangle(0, 0, 1, 1), col);
                     }
                     // Hover
-                    if (ShowHover && HoverOffset==ScrollOffset+c)
-                        b.Draw(Game1.staminaRect, new Rectangle(o.X + Area.X + Game1.pixelZoom + zoom05, o.Y + Area.Y + zoom05 + zoom7 * c, Area.Width - zoom5, zoom6), new Rectangle(0, 0, 1, 1), Color.Wheat*0.75f);
+                    if (this.ShowHover && this.HoverOffset == this.ScrollOffset +c)
+                        b.Draw(Game1.staminaRect, new Rectangle(o.X + this.Area.X + Game1.pixelZoom + zoom05, o.Y + this.Area.Y + zoom05 + zoom7 * c, this.Area.Width - zoom5, zoom6), new Rectangle(0, 0, 1, 1), Color.Wheat*0.75f);
                     // Text
-                    Utility.drawTextWithShadow(b, Owner.Values[ScrollOffset + c], Game1.smallFont, new Vector2(o.X + Area.X + zoom2, o.Y + Area.Y + zoom7 * c + Game1.pixelZoom), Game1.textColor * (Disabled ? 0.33f : 1f));
+                    Utility.drawTextWithShadow(b, this.Owner.Values[this.ScrollOffset + c], Game1.smallFont, new Vector2(o.X + this.Area.X + zoom2, o.Y + this.Area.Y + zoom7 * c + Game1.pixelZoom), Game1.textColor * (this.Disabled ? 0.33f : 1f));
                 }
                 // ScrollUp
-                if (ScrollOffset > 0)
-                    b.Draw(Game1.mouseCursors, new Rectangle(o.X + Area.X + Area.Width - zoom2, o.Y + Area.Y, zoom7, zoom7), UpScroll, Color.White);
+                if (this.ScrollOffset > 0)
+                    b.Draw(Game1.mouseCursors, new Rectangle(o.X + this.Area.X + this.Area.Width - zoom2, o.Y + this.Area.Y, zoom7, zoom7), UpScroll, Color.White);
                 // ScrollDown
-                if (ScrollOffset < MaxScroll)
-                    b.Draw(Game1.mouseCursors, new Rectangle(o.X + Area.X + Area.Width - zoom2, o.Y + Area.Y + Area.Height - zoom9, zoom7, zoom7), DownScroll, Color.White);
+                if (this.ScrollOffset < this.MaxScroll)
+                    b.Draw(Game1.mouseCursors, new Rectangle(o.X + this.Area.X + this.Area.Width - zoom2, o.Y + this.Area.Y + this.Area.Height - zoom9, zoom7, zoom7), DownScroll, Color.White);
             }
             public override void CommandReceived(char cmd)
             {
                 switch ((int)cmd)
                 {
                     case 13:
-                        Value = Owner.Values[KeyboardOffset];
-                        Parent.ResetFocus();
+                        this.Value = this.Owner.Values[this.KeyboardOffset];
+                        this.Parent.ResetFocus();
                         break;
                 }
             }
@@ -145,16 +145,16 @@ namespace Entoarox.Framework.UI
                 switch (key)
                 {
                     case Keys.Down:
-                        if (KeyboardOffset < Owner.Values.Count - 1)
-                            KeyboardOffset++;
-                        if (KeyboardOffset - ScrollOffset > 9 && ScrollOffset < MaxScroll)
-                            ScrollOffset++;
+                        if (this.KeyboardOffset < this.Owner.Values.Count - 1)
+                            this.KeyboardOffset++;
+                        if (this.KeyboardOffset - this.ScrollOffset > 9 && this.ScrollOffset < this.MaxScroll)
+                            this.ScrollOffset++;
                         break;
                     case Keys.Up:
-                        if (KeyboardOffset > 0)
-                            KeyboardOffset--;
-                        if (KeyboardOffset - ScrollOffset < 0 && ScrollOffset > 0)
-                            ScrollOffset--;
+                        if (this.KeyboardOffset > 0)
+                            this.KeyboardOffset--;
+                        if (this.KeyboardOffset - this.ScrollOffset < 0 && this.ScrollOffset > 0)
+                            this.ScrollOffset--;
                         break;
                 }
             }
@@ -168,12 +168,12 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Value;
+                return this._Value;
             }
             set
             {
-                if(Values.Contains(value))
-                    _Value = value;
+                if(this.Values.Contains(value))
+                    this._Value = value;
             }
         }
         protected string _Value;
@@ -185,27 +185,27 @@ namespace Entoarox.Framework.UI
         public DropdownFormComponent(Point position, int width, List<string> values, ValueChanged<string> handler=null)
         {
             SetScaledArea(new Rectangle(position.X, position.Y, width, 11));
-            Values = values;
-            Value = Values[0];
+            this.Values = values;
+            this.Value = this.Values[0];
             if(handler!=null)
                 Handler += handler;
         }
         public override void LeftClick(Point p, Point o)
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
-            new DropdownSelect(new Point(o.X + Area.X, o.Y + Area.Y + Area.Height), Area.Width, new Rectangle(o.X + Area.X, o.Y + Area.Y, Area.Width, Area.Height), this, Parent);
+            new DropdownSelect(new Point(o.X + this.Area.X, o.Y + this.Area.Y + this.Area.Height), this.Area.Width, new Rectangle(o.X + this.Area.X, o.Y + this.Area.Y, this.Area.Width, this.Area.Height), this, this.Parent);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
             // Selected background
-            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X+Area.X, o.Y+Area.Y, Area.Width-Game1.pixelZoom*(Button.Width), zoom11, Color.White * (Disabled ? 0.33f : 1f), Game1.pixelZoom, false);
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, Background, o.X+ this.Area.X, o.Y+ this.Area.Y, this.Area.Width-Game1.pixelZoom*(Button.Width), zoom11, Color.White * (this.Disabled ? 0.33f : 1f), Game1.pixelZoom, false);
             // Selected label
-            Utility.drawTextWithShadow(b, Value, Game1.smallFont, new Vector2(o.X + Area.X + zoom2, o.Y + Area.Y + zoom3), Game1.textColor * (Disabled ? 0.33f : 1f));
+            Utility.drawTextWithShadow(b, this.Value, Game1.smallFont, new Vector2(o.X + this.Area.X + zoom2, o.Y + this.Area.Y + zoom3), Game1.textColor * (this.Disabled ? 0.33f : 1f));
             // Selector button
-            b.Draw(Game1.mouseCursors, new Vector2(o.X+Area.X + Area.Width - Game1.pixelZoom * Button.Width, o.Y + Area.Y), Button, Color.White * (Disabled ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.88f);
+            b.Draw(Game1.mouseCursors, new Vector2(o.X+ this.Area.X + this.Area.Width - Game1.pixelZoom * Button.Width, o.Y + this.Area.Y), Button, Color.White * (this.Disabled ? 0.33f : 1f), 0.0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 0.88f);
         }
     }
 }

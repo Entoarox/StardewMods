@@ -11,16 +11,16 @@ namespace Entoarox.Framework.UI
         public AnimatedComponent(Point position, TemporaryAnimatedSprite sprite)
         {
             SetScaledArea(new Rectangle(position.X,position.Y,sprite.sourceRect.Width,sprite.sourceRect.Height));
-            Sprite = sprite;
+            this.Sprite = sprite;
         }
         public override void Update(GameTime t)
         {
-            Sprite.update(t);
+            this.Sprite.update(t);
         }
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (Visible)
-                Sprite.draw(b, false, o.X+Area.X, o.Y+Area.Y);
+            if (this.Visible)
+                this.Sprite.draw(b, false, o.X+ this.Area.X, o.Y+ this.Area.Y);
         }
     }
 }

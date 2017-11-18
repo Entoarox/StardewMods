@@ -24,13 +24,13 @@ namespace Entoarox.Framework.Core
         }
         public void Subscribe(ReceiveMessage handler)
         {
-            Subscribe(ModID, handler);
+            Subscribe(this.ModID, handler);
         }
         public void Publish(string channel, string message)
         {
             if (_Map.ContainsKey(channel))
                 foreach (ReceiveMessage handler in _Map[channel])
-                    handler(ModID, channel, message, false);
+                    handler(this.ModID, channel, message, false);
         }
     }
 }

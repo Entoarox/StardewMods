@@ -14,11 +14,11 @@ namespace Entoarox.Framework.UI
         {
             get
             {
-                return _Value;
+                return this._Value;
             }
             set
             {
-                _Value = value;
+                this._Value = value;
             }
         }
         public event ValueChanged<string> Handler;
@@ -45,82 +45,82 @@ namespace Entoarox.Framework.UI
                 Box=Game1.content.Load<Texture2D>("LooseSprites\\textBox");
             SetScaledArea(new Rectangle(position.X, position.Y, width, Box.Height/Game1.pixelZoom));
             if (validator != null)
-                Validator = validator;
+                this.Validator = validator;
             if (handler != null)
                 Handler += handler;
-            Value = "";
-            OldValue = Value;
+            this.Value = "";
+            this.OldValue = this.Value;
         }
         public override void FocusLost()
         {
-            if (Disabled || OldValue.Equals(Value))
+            if (this.Disabled || this.OldValue.Equals(this.Value))
                 return;
-            OldValue = Value;
-            Handler?.Invoke(this, Parent, Parent.GetAttachedMenu(), Value);
+            this.OldValue = this.Value;
+            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu(), this.Value);
         }
         public override void FocusGained()
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
-            Selected = true;
+            this.Selected = true;
         }
         protected int CaretSize = (int)Game1.smallFont.MeasureString("|").Y;
         public override void Draw(SpriteBatch b, Point o)
         {
-            if (!Visible)
+            if (!this.Visible)
                 return;
             bool flag = DateTime.Now.Millisecond % 1000 >= 500;
-            string text = Value;
-            b.Draw(Box, new Rectangle(Area.X + o.X, Area.Y + o.Y, zoom4, Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
-            b.Draw(Box, new Rectangle(Area.X+o.X + zoom4, Area.Y+o.Y, Area.Width - zoom8, Area.Height), new Rectangle(zoom4, 0, 4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
-            b.Draw(Box, new Rectangle(Area.X+o.X + Area.Width - zoom4, Area.Y+o.Y, zoom4, Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, Area.Height), Color.White * (Disabled ? 0.33f : 1));
+            string text = this.Value;
+            b.Draw(Box, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, zoom4, this.Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
+            b.Draw(Box, new Rectangle(this.Area.X+o.X + zoom4, this.Area.Y+o.Y, this.Area.Width - zoom8, this.Area.Height), new Rectangle(zoom4, 0, 4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
+            b.Draw(Box, new Rectangle(this.Area.X+o.X + this.Area.Width - zoom4, this.Area.Y+o.Y, zoom4, this.Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
             Vector2 v;
-            for (v = Game1.smallFont.MeasureString(text); v.X > Area.Width - Game1.pixelZoom*5; v = Game1.smallFont.MeasureString(text))
+            for (v = Game1.smallFont.MeasureString(text); v.X > this.Area.Width - Game1.pixelZoom*5; v = Game1.smallFont.MeasureString(text))
                 text = text.Substring(1);
-            if (flag && Selected)
-                b.Draw(Game1.staminaRect, new Rectangle(Area.X+o.X + zoom3 + zoom05 + (int)v.X, Area.Y+o.Y + 8, zoom05, CaretSize), Game1.textColor);
-            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(Area.X+o.X + zoom4, Area.Y+o.Y+zoom3), Game1.textColor * (Disabled ? 0.33f : 1));
+            if (flag && this.Selected)
+                b.Draw(Game1.staminaRect, new Rectangle(this.Area.X+o.X + zoom3 + zoom05 + (int)v.X, this.Area.Y+o.Y + 8, zoom05, this.CaretSize), Game1.textColor);
+            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(this.Area.X+o.X + zoom4, this.Area.Y+o.Y+zoom3), Game1.textColor * (this.Disabled ? 0.33f : 1));
         }
         public override void TextReceived(char chr)
         {
-            if (Disabled || !Game1.smallFont.Characters.Contains(chr) || !Validator(chr.ToString()))
+            if (this.Disabled || !Game1.smallFont.Characters.Contains(chr) || !this.Validator(chr.ToString()))
                 return;
             Game1.playSound("cowboy_monsterhit");
-            Value =Value +chr.ToString();
+            this.Value = this.Value +chr.ToString();
         }
         public override void TextReceived(string str)
         {
             foreach(char c in str)
                 if (!Game1.smallFont.Characters.Contains(c))
                     return;
-            if (Disabled || !Validator(str))
+            if (this.Disabled || !this.Validator(str))
                 return;
             Game1.playSound("coin");
-            Value = Value + str;
+            this.Value = this.Value + str;
         }
         public override void CommandReceived(char cmd)
         {
-            if (Disabled)
+            if (this.Disabled)
                 return;
             switch((int)cmd)
             {
                 case 8:
-                    if (Value.Length <= 0)
+                    if (this.Value.Length <= 0)
                         return;
-                    Value = Value.Substring(0, Value.Length - 1);
+                    this.Value = this.Value.Substring(0, this.Value.Length - 1);
                     Game1.playSound("tinyWhip");
                     return;
                 case 9:
-                    if (TabPressed != null)
+                    if (this.TabPressed != null)
                     {
-                        Value = TabPressed(this, Parent.GetAttachedMenu(), Value);
+                        this.Value = this.TabPressed(this, this.Parent.GetAttachedMenu(), this.Value);
                         return;
                     }
-                    if (!(Parent is IComponentCollection))
+                    if (!(this.Parent is IComponentCollection))
                         return;
                     bool Next = false;
                     IInteractiveMenuComponent first=null;
-                    foreach(IInteractiveMenuComponent imc in (Parent as IComponentCollection).InteractiveComponents)
+                    foreach(IInteractiveMenuComponent imc in (this.Parent as IComponentCollection).InteractiveComponents)
                     {
                         if (first == null && imc is TextboxFormComponent)
                             first = imc;
@@ -131,17 +131,17 @@ namespace Entoarox.Framework.UI
                         }
                         if (Next && imc is TextboxFormComponent)
                         {
-                            Parent.GiveFocus(imc);
+                            this.Parent.GiveFocus(imc);
                             return;
                         }
                     }
-                    Parent.GiveFocus(first);
+                    this.Parent.GiveFocus(first);
                     return;
                 case 13:
-                    if (EnterPressed != null)
-                        Value = EnterPressed(this, Parent.GetAttachedMenu(), Value);
+                    if (this.EnterPressed != null)
+                        this.Value = this.EnterPressed(this, this.Parent.GetAttachedMenu(), this.Value);
                     else
-                        Parent.ResetFocus();
+                        this.Parent.ResetFocus();
                     return;
             }
         }

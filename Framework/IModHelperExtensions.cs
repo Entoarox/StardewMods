@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using StardewModdingAPI;
 
@@ -45,7 +45,7 @@ namespace Entoarox.Framework
         /// <param name="uri">The url to retrieve the json file to parse from</param>
         public static void RequestUpdateCheck(this IModHelper helper, string name, SemanticVersion version, string uri)
         {
-            IManifest manifest = new WrappedManifest(name, version);
+            IManifest manifest = new FakeManifest(name, version);
             if (!UpdateHandler.Map.ContainsKey(manifest))
                 UpdateHandler.Map.Add(manifest, uri);
         }
