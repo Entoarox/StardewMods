@@ -1,0 +1,15 @@
+Extra non-vanilla tiles have been created for me by community members over on the SDV discord.
+My thanks to the following people, for their work!
+
+Prismuth:
+- The ore boulder
+- The extra minecart tracks
+
+ChefRude:
+- The offer statue
+- Eye animation on the dwarven vendor
+
+Eiri:
+- The stalagmites
+- The caved-in skeleton
+- Creating the dwarven vendor sprite
