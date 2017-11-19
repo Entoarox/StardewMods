@@ -17,16 +17,13 @@ namespace PlayGround
         private const double MineDepthPenalty = 0.1;
         // The extra "distance" added for every warp that has to be used
         private const double DistancePenalty = 1;
+        // The name of the "leyline" map property to pay attention to
+        private const string LeylineProperty = "AlchemyLeyline";
         // List of locations currently involved in a distance check
         private static List<string> _Active = new List<string>();
-        public static double GetPathDistance(GameLocation location, double dist=0)
+        public static double GetPathDistance(GameLocation startLocation)
         {
-            // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
-            if (_Active.Contains(location.Name))
-                return double.MaxValue;
-            // We only calculate path distance if we havent done so already for this location
-            // We recalculate for the mineshaft at all times because it is a leveled location
-            if (!_Cache.ContainsKey(location.Name))
+            double RecursionMethod(GameLocation location, double dist)
             {
                 // We set ourselves as active to prevent infinite recursion
                 _Active.Add(location.Name);
@@ -35,22 +32,22 @@ namespace PlayGround
                 {
                     var shaft = location as MineShaft;
                     if (shaft.mineLevel > 120) // SkullCave
-                        return GetPathDistance(Game1.getLocationFromName("SkullCave"), dist + DistancePenalty + (shaft.mineLevel * SkullDepthPenalty));
+                        return RecursionMethod(Game1.getLocationFromName("SkullCave"), dist + DistancePenalty + (shaft.mineLevel * SkullDepthPenalty));
                     else // Mines
-                        return GetPathDistance(Game1.getLocationFromName("Mine"), dist + DistancePenalty + (shaft.mineLevel * MineDepthPenalty));
+                        return RecursionMethod(Game1.getLocationFromName("Mine"), dist + DistancePenalty + (shaft.mineLevel * MineDepthPenalty));
                 }
                 // We assume to begin with that we are insanely far away (No real situation should ever have -this- high a value, so it also makes it possible to detect a location that is not connected at all)
                 double mdist = double.MaxValue;
                 // AlchemyOffset, used to create path distance end points that can have a default penalty or have it as 0 for no default penalty
-                if (location.map.Properties.ContainsKey("AlchemyOffset"))
-                    mdist = Convert.ToDouble((string)location.map.Properties["AlchemyOffet"]);
+                if (location.map.Properties.ContainsKey(LeylineProperty))
+                    mdist = Convert.ToDouble((string)location.map.Properties[LeylineProperty]);
                 else // The hard offset of a alchemyOffset point overrides any distance based cost
                 {
                     // Check through all warps in the location
                     foreach (Warp warp in location.warps)
                     {
                         // We get the path distance for the found warp, if it hasnt gotten one calculated yet then we will also be doing so
-                        double vdist0 = GetPathDistance(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty);
+                        double vdist0 = RecursionMethod(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty);
                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                         if (vdist0 < mdist)
                             mdist = vdist0;
@@ -71,7 +68,7 @@ namespace PlayGround
                                 case "WarpGreenhouse":
                                     string targetName = prop.Substring(4);
                                     // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                    double vdist1 = GetPathDistance(Game1.getLocationFromName(targetName), dist + DistancePenalty);
+                                    double vdist1 = RecursionMethod(Game1.getLocationFromName(targetName), dist + DistancePenalty);
                                     // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                     if (vdist1 < mdist)
                                         mdist = vdist1;
@@ -82,7 +79,7 @@ namespace PlayGround
                                     if ((props[0].Equals("Warp") || props[0].Equals("LockedDoorWarp")) && Game1.getLocationFromName(props[3]) != null)
                                     {
                                         // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                        double vdist2 = GetPathDistance(Game1.getLocationFromName(props[3]), dist + DistancePenalty);
+                                        double vdist2 = RecursionMethod(Game1.getLocationFromName(props[3]), dist + DistancePenalty);
                                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                         if (vdist2 < mdist)
                                             mdist = vdist2;
@@ -95,11 +92,22 @@ namespace PlayGround
                 // We remove ourselves from the active list so future queries will work properly again
                 _Active.Remove(location.Name);
                 // We add the result for this location to the cache only if its parent distance is 0 (This is the location being checked)
-                if(dist==0)
+                if (dist == 0)
+                {
                     _Cache.Add(location.Name, mdist);
+                    return mdist;
+                }
+                else
+                    return double.MaxValue;
             }
+            // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
+            if (_Active.Contains(startLocation.Name))
+                return double.MaxValue;
+            // We only calculate path distance if we havent done so already for this location (Unless it is leveled, then we always recalculate)
+            if (!_Cache.ContainsKey(startLocation.Name))
+                return RecursionMethod(startLocation, 0);
             // We return the offset (Distance of the parent) to our own, and return it
-            return dist + _Cache[location.Name];
+            return _Cache[startLocation.Name];
         }
     }
 }
