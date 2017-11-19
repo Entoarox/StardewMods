@@ -96,12 +96,8 @@ namespace PlayGround
                 _Active.Remove(location.Name);
                 // We add the result for this location to the cache only if its parent distance is 0 (This is the location being checked)
                 if (dist == 0)
-                {
                     _Cache.Add(location.Name, mdist);
-                    return mdist;
-                }
-                else
-                    return double.MaxValue;
+                return mdist;
             }
             // We only calculate path distance if we havent done so already for this location (Unless it is leveled, then we always recalculate)
             if (!_Cache.ContainsKey(startLocation.Name))
