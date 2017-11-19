@@ -25,27 +25,37 @@ namespace PlayGround
         {
             double RecursionMethod(GameLocation location, double dist)
             {
+                Console.WriteLine(location.Name+" ~ Validating check...");
                 // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
                 if (_Active.Contains(startLocation.Name))
+                {
+                    Console.WriteLine(location.Name + " ~ Check invalid, preventing infinite loop...");
                     return double.MaxValue;
+                }
+                Console.WriteLine(location.Name + " ~ Check valid, starting...");
                 // We set ourselves as active to prevent infinite recursion
                 _Active.Add(location.Name);
                 // Check if this is a leveled location
                 if (location is MineShaft)
                 {
+                    Console.WriteLine(location.Name + " ~ Leveled location, overriding cache...");
                     var shaft = location as MineShaft;
+                    _Active.Remove(location.Name);
                     if (shaft.mineLevel > 120) // SkullCave
                         return RecursionMethod(Game1.getLocationFromName("SkullCave"), dist + DistancePenalty + (shaft.mineLevel * SkullDepthPenalty));
                     else // Mines
                         return RecursionMethod(Game1.getLocationFromName("Mine"), dist + DistancePenalty + (shaft.mineLevel * MineDepthPenalty));
                 }
+                Console.WriteLine(location.Name + " ~ Assuming max distance...");
                 // We assume to begin with that we are insanely far away (No real situation should ever have -this- high a value, so it also makes it possible to detect a location that is not connected at all)
                 double mdist = double.MaxValue;
+                Console.WriteLine(location.Name + " ~ Checking for map property...");
                 // AlchemyOffset, used to create path distance end points that can have a default penalty or have it as 0 for no default penalty
                 if (location.map.Properties.ContainsKey(LeylineProperty))
                     mdist = Convert.ToDouble((string)location.map.Properties[LeylineProperty]);
                 else // The hard offset of a alchemyOffset point overrides any distance based cost
                 {
+                    Console.WriteLine(location.Name + " ~ Map property not found, looking for source node...");
                     // Check through all warps in the location
                     foreach (Warp warp in location.warps)
                     {
@@ -55,6 +65,7 @@ namespace PlayGround
                         if (vdist0 < mdist)
                             mdist = vdist0;
                     }
+                    Console.WriteLine(location.Name + " ~ Warps checked, current distance value: "+mdist);
                     // We loop through all Buildings tiles on the map to look for certain tile actions
                     for (int x = 0; x < location.map.Layers[0].TileSize.Width; x++)
                         for (int y = 0; y < location.map.Layers[0].TileSize.Height; y++)
@@ -92,6 +103,7 @@ namespace PlayGround
 
                         }
                 }
+                Console.WriteLine(location.Name + " ~ Actions checked, current distance value: " + mdist);
                 // We remove ourselves from the active list so future queries will work properly again
                 _Active.Remove(location.Name);
                 // We add the result for this location to the cache only if its parent distance is 0 (This is the location being checked)
