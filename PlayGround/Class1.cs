@@ -77,6 +77,14 @@ namespace PlayGround
                                     if (!maps.Contains(targetName) && !_Active.Contains(targetName))
                                         maps.Add(targetName);
                                     break;
+                                case "EnterSewer":
+                                    if (!maps.Contains("Sewer") && !_Active.Contains("Sewer"))
+                                        maps.Add("Sewer");
+                                    break;
+                                case "WizardHatch":
+                                    if (!maps.Contains("WizardHouseBasement") && !_Active.Contains("WizardHouseBasement"))
+                                        maps.Add("WizardHouseBasement");
+                                    break;
                                 default:
                                     // Locations that are normal or locked-door warps are handled here
                                     var props = prop.Split(' ');
