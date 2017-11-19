@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="DungeonBuilder.cs" />
     <Compile Include="DynamicDungeonsMod.cs" />
+    <Compile Include="LootHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +80,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="sheet_tracks.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sheet_walls.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

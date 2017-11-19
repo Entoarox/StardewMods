@@ -8,6 +8,7 @@ Prismuth:
 ChefRude:
 - The offer statue
 - Eye animation on the dwarven vendor
+- The ore-vein walls
 
 Eiri:
 - The stalagmites

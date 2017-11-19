@@ -76,14 +76,17 @@ namespace Entoarox.DynamicDungeons
         private int Width;
         private int Height;
         private int Floor;
-        public DungeonBuilder(int floor)
+        private double Difficulty;
+        public DungeonBuilder(double difficulty, int floor)
         {
+            this.Difficulty = difficulty;
             this.Floor = floor;
             this.Seed = _Random.Next();
             this.GenerateMap();
         }
-        public DungeonBuilder(int floor, int seed)
+        public DungeonBuilder(double difficulty, int floor, int seed)
         {
+            this.Difficulty = difficulty;
             this.Floor = floor;
             this.Seed = seed;
             this.GenerateMap();
@@ -979,6 +982,8 @@ namespace Entoarox.DynamicDungeons
             map.AddTileSheet(s2sheet);
             var vsheet = new TileSheet(map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_dwarfvendor.png"), new Size(8, 3), new Size(16, 16));
             map.AddTileSheet(vsheet);
+            var sWalls = new TileSheet(map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_walls.png"), new Size(9, 24), new Size(16, 16));
+            map.AddTileSheet(sWalls);
             var rsheet = new TileSheet(map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_tracks.png"), new Size(10, 3), new Size(16, 16));
             rsheet.TileIndexProperties[3].Add("Passable", "T");
             rsheet.TileIndexProperties[4].Add("Passable", "T");
@@ -1036,19 +1041,79 @@ namespace Entoarox.DynamicDungeons
                                 case 0b111_11_101:
                                     if (this.Seeder.NextDouble() < 0.1)
                                     {
-                                        if ((x+y) % 5 == 0)
+                                            if ((x + y) % 5 == 0)
+                                            {
+                                                front.Tiles[x, y - 3] = new StaticTile(wall, sheet, BlendMode.Additive, 73 + (x % 3));
+                                                front.Tiles[x, y - 2] = new StaticTile(wall, sheet, BlendMode.Additive, 98);
+                                                front.Tiles[x, y - 1] = new StaticTile(wall, sheet, BlendMode.Additive, 114);
+                                                wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 121 + (x % 3));
+                                            }
+                                            else
+                                            {
+                                                front.Tiles[x, y - 3] = new StaticTile(wall, sheet, BlendMode.Additive, 7 + (x % 2));
+                                                front.Tiles[x, y - 2] = new StaticTile(wall, sheet, BlendMode.Additive, 23 + (x % 2));
+                                                front.Tiles[x, y - 1] = new StaticTile(wall, sheet, BlendMode.Additive, 39 + (x % 2));
+                                                wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 55 + (x % 2));
+                                            }
+                                    }
+                                    else if(this.Seeder.NextDouble()<0.3)
+                                    {
+
+                                        if (this.Seeder.NextDouble() < this.Difficulty/25)
                                         {
-                                            front.Tiles[x, y - 3] = new StaticTile(wall, sheet, BlendMode.Additive, 73 + (x % 3));
-                                            front.Tiles[x, y - 2] = new StaticTile(wall, sheet, BlendMode.Additive, 98);
-                                            front.Tiles[x, y - 1] = new StaticTile(wall, sheet, BlendMode.Additive, 114);
-                                            wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 121 + (x % 3));
+                                            front.Tiles[x, y - 3] = new AnimatedTile(wall, new StaticTile[]{
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 108 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 144 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 180 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 144 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 108 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 108 + (x % 9))
+                                                }, 250); ;
+                                            front.Tiles[x, y - 2] = new AnimatedTile(wall, new StaticTile[]{
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 117 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 153 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 189 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 153 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 117 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 117 + (x % 9))
+                                                }, 250); ;
+                                            front.Tiles[x, y - 1] = new AnimatedTile(wall, new StaticTile[]{
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 126 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 162 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 198 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 162 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 126 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 126 + (x % 9))
+                                                }, 250); ;
+                                            wall.Tiles[x, y] = new AnimatedTile(wall, new StaticTile[]{
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 135 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 171 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 207 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 171 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 135 + (x % 9)),
+                                                    new StaticTile(wall, sWalls, BlendMode.Additive, 135 + (x % 9))
+                                                }, 250); ;
+                                        }
+                                        else if (this.Seeder.NextDouble() < Math.Min(0.6, 0.05 + (this.Difficulty / 18)))
+                                        {
+                                            front.Tiles[x, y - 3] = new StaticTile(wall, sWalls, BlendMode.Additive, 72 + (x % 9));
+                                            front.Tiles[x, y - 2] = new StaticTile(wall, sWalls, BlendMode.Additive, 81 + (x % 9));
+                                            front.Tiles[x, y - 1] = new StaticTile(wall, sWalls, BlendMode.Additive, 90 + (x % 9));
+                                            wall.Tiles[x, y] = new StaticTile(wall, sWalls, BlendMode.Additive, 99 + (x % 9));
+                                        }
+                                        else if (this.Seeder.NextDouble() < Math.Min(0.8, 0.1 + (this.Difficulty / 14)))
+                                        {
+                                            front.Tiles[x, y - 3] = new StaticTile(wall, sWalls, BlendMode.Additive, 36 + (x % 9));
+                                            front.Tiles[x, y - 2] = new StaticTile(wall, sWalls, BlendMode.Additive, 45 + (x % 9));
+                                            front.Tiles[x, y - 1] = new StaticTile(wall, sWalls, BlendMode.Additive, 54 + (x % 9));
+                                            wall.Tiles[x, y] = new StaticTile(wall, sWalls, BlendMode.Additive, 63 + (x % 9));
                                         }
                                         else
                                         {
-                                            front.Tiles[x, y - 3] = new StaticTile(wall, sheet, BlendMode.Additive, 7 + (x % 2));
-                                            front.Tiles[x, y - 2] = new StaticTile(wall, sheet, BlendMode.Additive, 23 + (x % 2));
-                                            front.Tiles[x, y - 1] = new StaticTile(wall, sheet, BlendMode.Additive, 39 + (x % 2));
-                                            wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 55 + (x % 2));
+                                            front.Tiles[x, y - 3] = new StaticTile(wall, sWalls, BlendMode.Additive, 0 + (x % 9));
+                                            front.Tiles[x, y - 2] = new StaticTile(wall, sWalls, BlendMode.Additive, 9 + (x % 9));
+                                            front.Tiles[x, y - 1] = new StaticTile(wall, sWalls, BlendMode.Additive, 18 + (x % 9));
+                                            wall.Tiles[x, y] = new StaticTile(wall, sWalls, BlendMode.Additive, 27 + (x % 9));
                                         }
                                     }
                                     else
@@ -1318,7 +1383,7 @@ namespace Entoarox.DynamicDungeons
                         new STile(2, 2, floor, sheet, 274),
                         new STile(1, 1, wall, sheet, 237)
                     });
-                    wall.Tiles[point1.X + 1, point1.Y + 1].Properties.Add("Action", "Message LootChest");
+                    wall.Tiles[point1.X + 1, point1.Y + 1].Properties.Add("Action", "DDLoot General 3 true 0.3 Mimic");
                 }
                 else
                     Report("Spawn attempt failed: LootChest");
@@ -1330,8 +1395,8 @@ namespace Entoarox.DynamicDungeons
                     wall.Tiles[point5.X + 2, point5.Y + 1] = new StaticTile(wall, csheet, BlendMode.Additive, 1);
                     wall.Tiles[point5.X + 1, point5.Y + 2] = new StaticTile(wall, csheet, BlendMode.Additive, 2);
                     wall.Tiles[point5.X + 2, point5.Y + 2] = new StaticTile(wall, csheet, BlendMode.Additive, 3);
-                    wall.Tiles[point5.X + 1, point5.Y + 2].Properties.Add("Action", "Message CavedSkeleton");
-                    wall.Tiles[point5.X + 2, point5.Y + 2].Properties.Add("Action", "Message CavedSkeleton");
+                    wall.Tiles[point5.X + 1, point5.Y + 2].Properties.Add("Action", "DDLoot Supplies 2 0.1 Skeleton");
+                    wall.Tiles[point5.X + 2, point5.Y + 2].Properties.Add("Action", "DDLoot Supplies 2 0.1 Skeleton");
                 }
                 else
                     Report("Spawn attempt failed: CavedSkeleton");
@@ -1350,16 +1415,16 @@ namespace Entoarox.DynamicDungeons
                 wall.Tiles[x + 1, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 12), new StaticTile(wall, bsheet, BlendMode.Additive, 15) }, 500);
                 wall.Tiles[x + 2, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 13), new StaticTile(wall, bsheet, BlendMode.Additive, 16) }, 500);
                 wall.Tiles[x + 3, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 14), new StaticTile(wall, bsheet, BlendMode.Additive, 17) }, 500);
-                wall.Tiles[x + 1, y + 2].Properties.Add("Action", "Message GemRock");
-                wall.Tiles[x + 2, y + 2].Properties.Add("Action", "Message GemRock");
-                wall.Tiles[x + 3, y + 2].Properties.Add("Action", "Message GemRock");
+                wall.Tiles[x + 1, y + 2].Properties.Add("Action", "DDLoot Gems 1");
+                wall.Tiles[x + 2, y + 2].Properties.Add("Action", "DDLoot Gems 1");
+                wall.Tiles[x + 3, y + 2].Properties.Add("Action", "DDLoot Gems 1");
             }
             else
                 Report("Spawn attempt failed: GemRock");
             if (FindRegionOfSize(ref map, 4, 3, 50, out var point6))
             {
                 Report("Structure spawned: DwarfVendor");
-                this.BuildStructure(point6.X, point6.Y, new ITile[]
+                this.BuildStructure(point6.X, point6.Y + 1, new ITile[]
                 {
                     new ATile(0, -2, afront, new STile[]{
                         new STile(0,0,afront,vsheet,0),
@@ -1390,6 +1455,8 @@ namespace Entoarox.DynamicDungeons
                     new STile(0,0,wall,vsheet,16),
                     new STile(1,0,wall,vsheet,17)
                 });
+                wall.Tiles[point6.X, point6.Y + 1].Properties.Add("Action", "DDShop DwarfVendor");
+                wall.Tiles[point6.X + 1, point6.Y + 1].Properties.Add("Action", "DDShop DwarfVendor");
             }
             else
                 Report("Spawn attempt failed: DwarfVendor");

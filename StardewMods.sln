@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{CDFE013F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicDungeons", "DynamicDungeons\DynamicDungeons.csproj", "{AE355745-73FE-45C6-BA17-DE56744BB3D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayGround", "PlayGround\PlayGround.csproj", "{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{AE355745-73FE-45C6-BA17-DE56744BB3D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE355745-73FE-45C6-BA17-DE56744BB3D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE355745-73FE-45C6-BA17-DE56744BB3D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
