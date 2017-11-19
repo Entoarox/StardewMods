@@ -17,14 +17,19 @@ namespace PlayGround
         private const double MineDepthPenalty = 0.1;
         // The extra "distance" added for every warp that has to be used
         private const double DistancePenalty = 1;
-        public static double GetPathDistance(GameLocation location, double dist=0, string start=null)
+        // List of locations currently involved in a distance check
+        private static List<string> _Active = new List<string>();
+        public static double GetPathDistance(GameLocation location, double dist=0)
         {
-            if (location.Name.Equals(start))
+            // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
+            if (_Active.Contains(location.Name))
                 return double.MaxValue;
             // We only calculate path distance if we havent done so already for this location
             // We recalculate for the mineshaft at all times because it is a leveled location
             if (!_Cache.ContainsKey(location.Name))
             {
+                // We set ourselves as active to prevent infinite recursion
+                _Active.Add(location.Name);
                 // Check if this is a leveled location
                 if (location is MineShaft)
                 {
@@ -45,7 +50,7 @@ namespace PlayGround
                     foreach (Warp warp in location.warps)
                     {
                         // We get the path distance for the found warp, if it hasnt gotten one calculated yet then we will also be doing so
-                        double vdist0 = GetPathDistance(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty, location.Name);
+                        double vdist0 = GetPathDistance(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty);
                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                         if (vdist0 < mdist)
                             mdist = vdist0;
@@ -66,7 +71,7 @@ namespace PlayGround
                                 case "WarpGreenhouse":
                                     string targetName = prop.Substring(4);
                                     // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                    double vdist1 = GetPathDistance(Game1.getLocationFromName(targetName), dist + DistancePenalty, location.Name);
+                                    double vdist1 = GetPathDistance(Game1.getLocationFromName(targetName), dist + DistancePenalty);
                                     // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                     if (vdist1 < mdist)
                                         mdist = vdist1;
@@ -77,7 +82,7 @@ namespace PlayGround
                                     if ((props[0].Equals("Warp") || props[0].Equals("LockedDoorWarp")) && Game1.getLocationFromName(props[3]) != null)
                                     {
                                         // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                        double vdist2 = GetPathDistance(Game1.getLocationFromName(props[3]), dist + DistancePenalty, location.Name);
+                                        double vdist2 = GetPathDistance(Game1.getLocationFromName(props[3]), dist + DistancePenalty);
                                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                         if (vdist2 < mdist)
                                             mdist = vdist2;
@@ -87,6 +92,8 @@ namespace PlayGround
 
                         }
                 }
+                // We remove ourselves from the active list so future queries will work properly again
+                _Active.Remove(location.Name);
                 // We add the result for this location to the cache only if its parent distance is 0 (This is the location being checked)
                 if(dist==0)
                     _Cache.Add(location.Name, mdist);
