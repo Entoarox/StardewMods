@@ -17,8 +17,10 @@ namespace PlayGround
         private const double MineDepthPenalty = 0.1;
         // The extra "distance" added for every warp that has to be used
         private const double DistancePenalty = 1;
-        public static double GetPathDistance(GameLocation location, double dist=0)
+        public static double GetPathDistance(GameLocation location, double dist=0, string start=null)
         {
+            if (location.Name.Equals(start))
+                return double.MaxValue;
             // We only calculate path distance if we havent done so already for this location
             // We recalculate for the mineshaft at all times because it is a leveled location
             if (!_Cache.ContainsKey(location.Name))
@@ -43,7 +45,7 @@ namespace PlayGround
                     foreach (Warp warp in location.warps)
                     {
                         // We get the path distance for the found warp, if it hasnt gotten one calculated yet then we will also be doing so
-                        double vdist0 = GetPathDistance(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty);
+                        double vdist0 = GetPathDistance(Game1.getLocationFromName(warp.TargetName), dist + DistancePenalty, location.Name);
                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                         if (vdist0 < mdist)
                             mdist = vdist0;
@@ -64,7 +66,7 @@ namespace PlayGround
                                 case "WarpGreenhouse":
                                     string targetName = prop.Substring(4);
                                     // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                    double vdist1 = GetPathDistance(Game1.getLocationFromName(targetName), dist + DistancePenalty);
+                                    double vdist1 = GetPathDistance(Game1.getLocationFromName(targetName), dist + DistancePenalty, location.Name);
                                     // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                     if (vdist1 < mdist)
                                         mdist = vdist1;
@@ -75,7 +77,7 @@ namespace PlayGround
                                     if ((props[0].Equals("Warp") || props[0].Equals("LockedDoorWarp")) && Game1.getLocationFromName(props[3]) != null)
                                     {
                                         // We get the path distance for the found Action warp, if it hasnt gotten one calculated yet then we will also be doing so
-                                        double vdist2 = GetPathDistance(Game1.getLocationFromName(props[3]), dist + DistancePenalty);
+                                        double vdist2 = GetPathDistance(Game1.getLocationFromName(props[3]), dist + DistancePenalty, location.Name);
                                         // We check if the path distance for this location is less then the one we currently have, and if so, hold onto it
                                         if (vdist2 < mdist)
                                             mdist = vdist2;
