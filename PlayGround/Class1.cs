@@ -25,6 +25,9 @@ namespace PlayGround
         {
             double RecursionMethod(GameLocation location, double dist)
             {
+                // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
+                if (_Active.Contains(startLocation.Name))
+                    return double.MaxValue;
                 // We set ourselves as active to prevent infinite recursion
                 _Active.Add(location.Name);
                 // Check if this is a leveled location
@@ -100,9 +103,6 @@ namespace PlayGround
                 else
                     return double.MaxValue;
             }
-            // We check if this location is already actively being pathed through in the active query, and return double.MaxValue if that is the case
-            if (_Active.Contains(startLocation.Name))
-                return double.MaxValue;
             // We only calculate path distance if we havent done so already for this location (Unless it is leveled, then we always recalculate)
             if (!_Cache.ContainsKey(startLocation.Name))
                 return RecursionMethod(startLocation, 0);
