@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 
 using StardewValley;
@@ -28,38 +27,41 @@ namespace PlayGround
         {
             double RecursionMethod(GameLocation location, double dist)
             {
-                Console.WriteLine(location.Name + " ~ Trying to find source...");
                 if (dist > MaxSearchRange)
-                    return dist;
+                    return DistancePenalty * dist;
                 // Check if this is a leveled location
                 if (location is MineShaft)
                 {
-                    Console.WriteLine(location.Name + " ~ Leveled location, overriding cache...");
-                    var shaft = location as MineShaft;
+                        var shaft = location as MineShaft;
+                    // Detect the DynamicDungeon, it uses SkullCave logic, but it starts with lvl 1, so we gotta fix that
+                    if (Game1.currentLocation.Name.Equals("DynamicDungeon"))
+                        return GetPathDistance(Game1.getLocationFromName("WizardHouse")) + DistancePenalty * 2 + ((shaft.mineLevel + 120) * SkullDepthPenalty);
                     _Active.Remove(location.Name);
                     if (shaft.mineLevel > 120) // SkullCave
                         return GetPathDistance(Game1.getLocationFromName("SkullCave")) + DistancePenalty + (shaft.mineLevel * SkullDepthPenalty);
                     else // Mines
                         return GetPathDistance(Game1.getLocationFromName("Mine")) + DistancePenalty + (shaft.mineLevel * MineDepthPenalty);
                 }
-                Console.WriteLine(location.Name + " ~ Assuming max distance...");
+                // List if maps this map is connected to
+                List<string> maps = new List<string>();
+                void Whitelist(string mapName)
+                {
+                    if (!_Active.Contains(mapName))
+                    {
+                        maps.Add(mapName);
+                        _Active.Add(mapName);
+                    }
+                }
                 // We assume to begin with that we are insanely far away (No real situation should ever have -this- high a value, so it also makes it possible to detect a location that is not connected at all)
                 double mdist = double.MaxValue;
-                Console.WriteLine(location.Name + " ~ Checking for map property...");
                 // AlchemyOffset, used to create path distance end points that can have a default penalty or have it as 0 for no default penalty
                 if (location.map.Properties.ContainsKey(LeylineProperty))
                     mdist = Convert.ToDouble((string)location.map.Properties[LeylineProperty]) - DistancePenalty;
                 else // The hard offset of a alchemyOffset point overrides any distance based cost
                 {
-                    Console.WriteLine(location.Name + " ~ Map property not found, looking for source node...");
-                    // List if maps this map is connected to
-                    List<string> maps = new List<string>();
                     // Check through all warps in the location
                     foreach (Warp warp in location.warps)
-                    {
-                        if (!maps.Contains(warp.TargetName) && !_Active.Contains(warp.TargetName))
-                            maps.Add(warp.TargetName);
-                    }
+                        Whitelist(warp.TargetName);
                     // We loop through all Buildings tiles on the map to look for certain tile actions
                     for (int x = 0; x < location.map.Layers[0].LayerWidth; x++)
                         for (int y = 0; y < location.map.Layers[0].LayerHeight; y++)
@@ -74,48 +76,44 @@ namespace PlayGround
                                 // Locations with special warps are handled here
                                 case "WarpCommunityCenter":
                                 case "WarpGreenhouse":
-                                    string targetName = prop.Substring(4);
-                                    if (!maps.Contains(targetName) && !_Active.Contains(targetName))
-                                        maps.Add(targetName);
+                                    Whitelist(prop.Substring(4));
                                     break;
                                 case "EnterSewer":
-                                    if (!maps.Contains("Sewer") && !_Active.Contains("Sewer"))
-                                        maps.Add("Sewer");
+                                    Whitelist("Sewer");
                                     break;
                                 case "WizardHatch":
-                                    if (!maps.Contains("WizardHouseBasement") && !_Active.Contains("WizardHouseBasement"))
-                                        maps.Add("WizardHouseBasement");
+                                    Whitelist("WizardHouseBasement");
                                     break;
                                 default:
                                     // Locations that are normal or locked-door warps are handled here
                                     var props = prop.Split(' ');
-                                    if ((props[0].Equals("Warp") || props[0].Equals("LockedDoorWarp") || props[0].Equals("WarpWomensLocker") || props[0].Equals("WarpMensLocker")) && Game1.getLocationFromName(props[3]) != null)
+                                    switch (props[0])
                                     {
-                                        if (!maps.Contains(props[3]) && !_Active.Contains(props[3]))
-                                            maps.Add(props[3]);
-                                    }
-                                    if(props[0].Equals("MagicWarp") && Game1.getLocationFromName(props[1]) != null)
-                                    {
-                                        if (!maps.Contains(props[1]) && !_Active.Contains(props[1]))
-                                            maps.Add(props[1]);
+                                        case "Warp":
+                                        case "LockedDoorWarp":
+                                        case "WarpWomensLocker":
+                                        case "WarpMensLocker":
+                                            if(Game1.getLocationFromName(props[3]) != null)
+                                                Whitelist(props[3]);
+                                            break;
+                                        case "MagicWarp":
+                                            if (Game1.getLocationFromName(props[1]) != null)
+                                                Whitelist(props[1]);
+                                            break;
                                     }
                                     break;
                             }
 
                         }
-                    if (maps.Count > 0)
+                    if (maps.Count == 0)
+                        return mdist;
+                    foreach (string map in maps)
                     {
-                        Console.WriteLine(location.Name + " ~ Unchecked connections found, scanning...");
-                        _Active.AddRange(maps);
-                        foreach (string map in maps)
-                        {
-                            double vdist = RecursionMethod(Game1.getLocationFromName(map), dist + DistancePenalty);
-                            if (vdist < mdist)
-                                mdist = vdist;
-                        }
+                        double vdist = RecursionMethod(Game1.getLocationFromName(map), dist + 1);
+                        if (vdist < mdist)
+                            mdist = vdist;
                     }
                 }
-                Console.WriteLine(location.Name + " ~ Checks complete, current distance value: " + mdist);
                 // We remove ourselves from the active list so future queries will work properly again
                 // We add the result for this location to the cache only if its parent distance is 0 (This is the location being checked)
                 if (dist == 0)
