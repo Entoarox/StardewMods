@@ -8,6 +8,7 @@ namespace DynamicDungeons
 {
     class LootHandler
     {
+        internal static Dictionary<string, LootHandler> LootTables = new Dictionary<string, LootHandler>();
         private Dictionary<double, List<object>> _LootTable = new Dictionary<double, List<object>>();
         private Random _Random;
         public LootHandler(int seed, Dictionary<double, List<object>> lootTable = null)
@@ -27,14 +28,14 @@ namespace DynamicDungeons
                 this._LootTable.Add(chancePercentage, new List<object>() { itemLootCallback });
             this._LootTable = this._LootTable.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value);
         }
-        public SObject[] GetDrops(int count, double chanceModifier)
+        public SObject[] GetDrops(int seed, int count, double chanceModifier)
         {
             var drops = new SObject[count];
             for (int c = 0; c < count; c++)
                 drops[c] = this.GetDrop(chanceModifier);
             return drops;
         }
-        public SObject GetDrop(double chanceModifier)
+        public SObject GetDrop(int seed, double chanceModifier)
         {
             foreach(var option in this._LootTable)
             {

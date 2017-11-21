@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "Framework\Framework.csproj", "{174275E7-3AE4-41A6-9884-9E08A07D1101}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedLocationLoader1.2", "AdvancedLocationLoader1.2\AdvancedLocationLoader1.2.csproj", "{9EA06249-2096-43E0-B616-DDD3FE731147}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedLocationLoader", "AdvancedLocationLoader1.2\AdvancedLocationLoader.csproj", "{9EA06249-2096-43E0-B616-DDD3FE731147}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FurnitureAnywhere", "FurnitureAnywhere\FurnitureAnywhere.csproj", "{753CFB03-2CC1-478E-AA3D-9F42CD724709}"
 EndProject
@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{CDFE013F-220E-4430-B50A-92AE7DD51D59}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicDungeons", "DynamicDungeons\DynamicDungeons.csproj", "{AE355745-73FE-45C6-BA17-DE56744BB3D6}"

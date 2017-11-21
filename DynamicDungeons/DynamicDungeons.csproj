@@ -46,10 +46,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ATile.cs" />
     <Compile Include="DungeonBuilder.cs" />
+    <Compile Include="DynamicDungeonsAPI.cs" />
     <Compile Include="DynamicDungeonsMod.cs" />
+    <Compile Include="ITile.cs" />
     <Compile Include="LootHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PTile.cs" />
+    <Compile Include="STile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json">
