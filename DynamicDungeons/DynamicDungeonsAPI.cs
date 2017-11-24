@@ -8,7 +8,7 @@ using SObject = StardewValley.Object;
 
 using Microsoft.Xna.Framework;
 
-namespace DynamicDungeons
+namespace Entoarox.DynamicDungeons
 {
     public static class DynamicDungeonsAPI
     {

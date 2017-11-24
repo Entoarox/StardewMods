@@ -20,6 +20,7 @@ namespace Entoarox.Framework
         /// <param name="key">The preferred default key, if already taken a random unused letter will be selected</param>
         /// <param name="menuIcon">The `springobjects` item index to use as a icon in the feature-select menu</param>
         /// <param name="handler">The method to invoke when the key is pressed</param>
+        [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RequestHotkey(this IModHelper helper, string label, Keys key, int menuIcon, Delegate handler)
         {
 

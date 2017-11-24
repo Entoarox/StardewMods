@@ -4,7 +4,7 @@ using xTile.Layers;
 using xTile.Tiles;
 
 
-namespace DynamicDungeons
+namespace Entoarox.DynamicDungeons
 {
     public struct ATile : ITile
     {

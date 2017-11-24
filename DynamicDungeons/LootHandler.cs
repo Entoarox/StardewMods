@@ -4,17 +4,22 @@ using System.Linq;
 
 using SObject = StardewValley.Object;
 
-namespace DynamicDungeons
+namespace Entoarox.DynamicDungeons
 {
     class LootHandler
     {
         internal static Dictionary<string, LootHandler> LootTables = new Dictionary<string, LootHandler>();
         private Dictionary<double, List<object>> _LootTable = new Dictionary<double, List<object>>();
-        private Random _Random;
+        private Dictionary<int, Random> _Randoms = new Dictionary<int, Random>();
         public LootHandler(int seed, Dictionary<double, List<object>> lootTable = null)
         {
-            this._Random = new Random(seed);
             this._LootTable = lootTable?.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value) ?? new Dictionary<double, List<object>>();
+        }
+        private Random GetRandom(int seed)
+        {
+            if (!this._Randoms.ContainsKey(seed))
+                this._Randoms.Add(seed, new Random(seed));
+            return this._Randoms[seed];
         }
         public void Add(double chancePercentage, SObject itemLoot)
         {
@@ -32,7 +37,7 @@ namespace DynamicDungeons
         {
             var drops = new SObject[count];
             for (int c = 0; c < count; c++)
-                drops[c] = this.GetDrop(chanceModifier);
+                drops[c] = this.GetDrop(seed, chanceModifier);
             return drops;
         }
         public SObject GetDrop(int seed, double chanceModifier)
@@ -41,8 +46,8 @@ namespace DynamicDungeons
             {
                 double chance = chanceModifier + option.Key;
                 foreach (object item in option.Value)
-                    if (this._Random.NextDouble() < chance)
-                        return (item as SObject) ?? (item as Func<SObject>)() ?? GetDrop(chanceModifier);
+                    if (this.GetRandom(seed).NextDouble() < chance)
+                        return (item as SObject) ?? (item as Func<SObject>)() ?? GetDrop(seed, chanceModifier);
             }
             return new SObject(93, 1);
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework.Input;
 
@@ -7,6 +7,7 @@ using StardewModdingAPI;
 namespace Entoarox.Framework.Config
 {
     [AttributeUsage(AttributeTargets.Field|AttributeTargets.Property)]
+    [Obsolete("The config system is still in development, it should not be used at this time")]
     public class ConfigAttribute : Attribute
     {
         internal string Label;
