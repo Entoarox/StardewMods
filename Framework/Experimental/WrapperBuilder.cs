@@ -60,6 +60,7 @@ namespace Entoarox.Framework.Experimental
          * interface IDDWrapper
          * {
          *     void RegisterLootEntry(string table, double chance, StardewValley.Object item);
+         *     void RegisterLootEntry(string table, double chance, Func<StardewValley.Object> callback);
          * }
          * IDDWrapper wrapper=new WrapperBuilder("MyMod.WrapperTypes").Wrap<IDDWrapper>("Entoarox.DynamicDungeons.DynamicDungeonsAPI");
          * wrapper?.RegisterLootEntry("Default",0.3,new StardewValley.Object());
