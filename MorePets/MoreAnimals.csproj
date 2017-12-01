@@ -54,7 +54,9 @@
     <None Include="box.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="manifest.json" />
+    <None Include="manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="skins\BabyDuck.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

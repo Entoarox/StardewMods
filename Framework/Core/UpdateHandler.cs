@@ -52,6 +52,7 @@ namespace Entoarox.Framework.Core
         }
         internal static void DoUpdateChecks()
         {
+            return;
             try
             {
                 string version = typeof(Game1).Assembly.GetName().Version.ToString(2);

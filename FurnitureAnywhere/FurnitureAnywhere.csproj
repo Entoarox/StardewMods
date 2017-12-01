@@ -55,7 +55,9 @@
     <None Include="..\VersionChecker\FurnitureAnywhere.json">
       <Link>FurnitureAnywhere.json</Link>
     </None>
-    <None Include="manifest.json" />
+    <None Include="manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="update.json" />
   </ItemGroup>

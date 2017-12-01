@@ -49,7 +49,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="manifest.json" />
+    <None Include="manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

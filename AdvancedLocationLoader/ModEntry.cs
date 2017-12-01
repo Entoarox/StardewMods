@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -24,7 +24,7 @@ namespace Entoarox.AdvancedLocationLoader
             ModPath = helper.DirectoryPath;
             SHelper = helper;
             Strings = helper.Translation;
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/version.json");
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/update.json");
 
             Events.GameEvents_LoadContent(null,null);
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;

@@ -69,7 +69,9 @@
     </None>
     <None Include="Docs\Actions.md" />
     <None Include="i18n\default.json" />
-    <None Include="manifest.json" />
+    <None Include="manifest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="About\update.json" />
   </ItemGroup>
