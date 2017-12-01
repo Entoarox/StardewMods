@@ -71,7 +71,7 @@
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="packages.config" />
-    <None Include="update.json" />
+    <None Include="About\update.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">

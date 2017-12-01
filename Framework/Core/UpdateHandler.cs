@@ -93,17 +93,17 @@ namespace Entoarox.Framework.Core
                                         else if (Data.ContainsKey("Default"))
                                             info = Data["Default"];
                                         else
-                                            ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod does not support the current version of SDV.");
+                                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod is not marked as compatible with this version of SDV, use at your own risk.", LogLevel.Warn);
                                         if (info != null)
                                         {
                                             SemanticVersion min = new SemanticVersion(info.Minimum);
                                             SemanticVersion rec = new SemanticVersion(info.Recommended);
                                             SemanticVersion max = new SemanticVersion(info.Latest);
                                             if (min.IsNewerThan(modVersion))
-                                                ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod is too old, a newer version is required.");
-                                            if (rec.IsNewerThan(modVersion))
+                                                ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The `{pair.Key.Name}` mod is too old, a newer version is required. Expected {min}, found {modVersion}.");
+                                            else if (rec.IsNewerThan(modVersion))
                                                 ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available, it is recommended you update now.", LogLevel.Alert);
-                                            if (modVersion.IsBetween(rec, max))
+                                            else if (modVersion.IsBetween(rec, max))
                                                 ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available.", LogLevel.Info);
                                         }
                                     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using StardewValley;
 using StardewValley.TerrainFeatures;
@@ -20,7 +20,7 @@ namespace Entoarox.FasterPaths
         private PlayerModifier CurrentBoost;
         public override void Entry(IModHelper helper)
         {
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/Stardew-SMAPI-mods/master/Projects/FasterPaths/update.json");
+            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FasterPaths/update.json");
             this.cfg = this.Helper.ReadConfig<ConfigFP>();
             GameEvents.UpdateTick += this.UpdateTick;
             helper.ConsoleCommands.Add("fp_info", "Gives info about the path you are currently standing on", this.CommandInfo);
