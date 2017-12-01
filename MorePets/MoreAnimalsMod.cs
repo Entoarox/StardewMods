@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -53,8 +53,7 @@ namespace Entoarox.MorePetsAndAnimals
             ["Void Chicken"] = new List<int>(),
             ["White Chicken"] = new List<int>(),
             ["White Cow"] = new List<int>(),
-            // Special: MorePets separates baby ducks from baby white chickens
-            // If a BabyDuck_0 is found, that is used instead of the `BabyWhite Chicken` for "vanilla skin" baby ducks
+            // Special: MorePets separates baby ducks from baby white chickens (BabyDuck.xnb as a copy of BabyWhite Chicken.xnb is bundled because of this)
             ["BabyDuck"] = new List<int>(),
         };
         public override void Entry(IModHelper helper)
@@ -147,7 +146,7 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        var type = npc is Dog ? "dog" : "cat";
+                        string type = npc is Dog ? "dog" : "cat";
                         npc.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>($"skins/{type}_{npc.manners}"), 0, 32, 32);
                     }
                     catch

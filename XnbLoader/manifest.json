@@ -1,13 +1,13 @@
-﻿{
+{
   "Name": "Xnb Loader",
   "Author": "Entoarox",
   "Version": {
     "MajorVersion": 1,
-    "MinorVersion": 1,
+    "MinorVersion": 2,
     "PatchVersion": 0,
     "Build": null
   },
-  "MinimumApiVersion": "1.15.4-alpha.1",
+  "MinimumApiVersion": "2.1",
   "Description": "Safely load custom xnb files without touching your Content directory!",
   "UniqueID": "Entoarox.XnbLoader",
   "EntryDll": "XnbLoader.dll",

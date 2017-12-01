@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Reflection;
 using System.Collections.Generic;
 
 using StardewModdingAPI;
@@ -10,6 +11,7 @@ using StardewValley.Objects;
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
 
+using Harmony;
 
 using Microsoft.Xna.Framework;
 
@@ -19,6 +21,8 @@ namespace Entoarox.FurnitureAnywhere
     {
         public override void Entry(IModHelper helper)
         {
+            var harmony = HarmonyInstance.Create("Entoarox.FurnitureAnywhere");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
             MoreEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
             LocationEvents.CurrentLocationChanged += this.TriggerItemChangedEvent;
@@ -71,8 +75,9 @@ namespace Entoarox.FurnitureAnywhere
         }
         internal void IterateFurniture(Action<GameLocation> handler)
         {
-            foreach (GameLocation loc in Game1.locations)
+            for (int c= 0;c<Game1.locations.Count;c++)
             {
+                var loc = Game1.locations[c];
                 handler(loc);
                 if (loc is StardewValley.Locations.BuildableGameLocation)
                     foreach (StardewValley.Buildings.Building build in (loc as StardewValley.Locations.BuildableGameLocation).buildings)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,16 +19,7 @@ namespace Entoarox.Framework.Interface
                 CalculateBounds();
             }
         }
-        private Color _Color;
-        public Color Color
-        {
-            get => _Color;
-            set
-            {
-                this._Color = value;
-                CalculateBounds();
-            }
-        }
+        public Color Color;
         private SpriteFont _Font;
         public SpriteFont Font
         {
@@ -54,7 +45,7 @@ namespace Entoarox.Framework.Interface
         {
             this._Font = font ?? Game1.dialogueFont;
             this._Label = label;
-            this._Color = color;
+            this.Color = color;
             this._Scale = scale;
             this.Shadow = shadow;
         }
@@ -70,7 +61,7 @@ namespace Entoarox.Framework.Interface
             Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
             if (this.Shadow)
                 batch.DrawString(this._Font, this._Label, new Vector2(rect.X + Game1.pixelZoom, rect.Y + Game1.pixelZoom), new Color(0, 0, 0, 0.33f), 0f, Vector2.Zero, this._Scale, SpriteEffects.None, 0);
-            batch.DrawString(this._Font, this._Label, new Vector2(rect.X, rect.Y), this._Color, 0f, Vector2.Zero, this._Scale, SpriteEffects.None, 0);
+            batch.DrawString(this._Font, this._Label, new Vector2(rect.X, rect.Y), this.Color, 0f, Vector2.Zero, this._Scale, SpriteEffects.None, 0);
         }
     }
 }

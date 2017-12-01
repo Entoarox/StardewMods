@@ -113,6 +113,7 @@
     <None Include="skins\dog_9.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="update.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="credits.txt">

@@ -4,10 +4,10 @@
   "Version": {
     "MajorVersion": 2,
     "MinorVersion": 0,
-    "PatchVersion": 0,
-    "Build": "beta.13"
+    "PatchVersion": 1,
+    "Build": null
   },
-  "MinimumApiVersion": "1.15.4-alpha.1",
+  "MinimumApiVersion": "2.1",
   "Description": "A collection of API's to make modding easier",
   "UniqueID": "Entoarox.EntoaroxFramework",
   "EntryDll": "EntoaroxFramework.dll"

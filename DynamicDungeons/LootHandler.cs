@@ -9,9 +9,24 @@ namespace Entoarox.DynamicDungeons
     class LootHandler
     {
         internal static Dictionary<string, LootHandler> LootTables = new Dictionary<string, LootHandler>();
+        static LootHandler()
+        {
+            // Setup vanilla loot tables
+            LootTables.Add("General", new LootHandler());
+            LootTables.Add("Supplies", new LootHandler());
+            LootTables.Add("Gems", new LootHandler());
+            LootTables.Add("Fishing", new LootHandler());
+            LootTables.Add("Digging", new LootHandler());
+            // Setup vanilla loot drops
+            LootTables["General"].Add(1, new SObject(93, 1));
+            LootTables["Supplies"].Add(1, new SObject(93, 1));
+            LootTables["Gems"].Add(1, new SObject(80, 1));
+            LootTables["Fishing"].Add(1, new SObject(168, 1));
+            LootTables["Digging"].Add(1, new SObject(330, 1));
+        }
         private Dictionary<double, List<object>> _LootTable = new Dictionary<double, List<object>>();
         private Dictionary<int, Random> _Randoms = new Dictionary<int, Random>();
-        public LootHandler(int seed, Dictionary<double, List<object>> lootTable = null)
+        public LootHandler(Dictionary<double, List<object>> lootTable = null)
         {
             this._LootTable = lootTable?.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value) ?? new Dictionary<double, List<object>>();
         }

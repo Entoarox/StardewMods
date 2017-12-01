@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="ATile.cs" />
     <Compile Include="DungeonBuilder.cs" />
+    <Compile Include="DynamicDungeon.cs" />
     <Compile Include="DynamicDungeonsAPI.cs" />
     <Compile Include="DynamicDungeonsMod.cs" />
     <Compile Include="ITile.cs" />

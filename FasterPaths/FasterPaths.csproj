@@ -53,6 +53,7 @@
     </None>
     <None Include="manifest.json" />
     <None Include="packages.config" />
+    <None Include="update.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\common.targets" />

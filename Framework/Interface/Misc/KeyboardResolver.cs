@@ -139,8 +139,7 @@ namespace Entoarox.Framework.Interface
                 Arr[0x10] = 0x80;
             if (Caps)
                 Arr[0x14] = 0x80;
-            uint Out;
-            ToAscii(Post, Post, Arr, out Out, 0);
+            ToAscii(Post, Post, Arr, out uint Out, 0);
             return (char)Out;
         }
         [DllImport("user32.dll")]

@@ -128,7 +128,7 @@ namespace Entoarox.Framework.Interface
         {
             component = null;
             floating = false;
-            if (this._FocusComponent is IFloatComponent && (this._FocusComponent as IFloatComponent).FloatComponent != null && (this._FocusComponent as IFloatComponent).FloatComponent.InBounds(offset, position))
+            if ((this._FocusComponent as IFloatComponent)?.FloatComponent?.InBounds(offset, position)==true)
             {
                 floating = true;
                 component = (this._FocusComponent as IFloatComponent).FloatComponent;
@@ -148,11 +148,15 @@ namespace Entoarox.Framework.Interface
         private void ReceiveInput(char input)
         {
             if ((this._FocusComponent as IInputComponent).Selected)
-                (this._FocusComponent as IInputComponent)?.ReceiveInput(input);
+                (this._FocusComponent as IInputComponent).ReceiveInput(input);
         }
 
         // IClickableMenu implementations
-        public override bool areGamePadControlsImplemented() => false;
+        public override bool areGamePadControlsImplemented()
+        {
+            return false;
+        }
+
         public override void clickAway()
         {
             this._FocusComponent?.FocusLost();
@@ -214,20 +218,20 @@ namespace Entoarox.Framework.Interface
         }
         public override void receiveKeyPress(Keys key)
         {
-            if (!(this._FocusComponent is IInputComponent) && !(this._FocusComponent is IHotkeyComponent && (this._FocusComponent as IHotkeyComponent).ReceiveHotkey(key)))
-                if (key == Keys.Escape && this._FocusComponent != null)
-                    UpdateFocus(null);
-                else if (key == Keys.Tab)
-                    TabNext();
-                else if(key==Keys.Enter)
-                {
-                    if (this._FocusComponent == null)
-                        return;
-                    if (this._FocusComponent is IComponentContainer)
-                        (this._FocusComponent as IComponentContainer).TabAccess(TabType.LeftClick);
-                }
-                else
-                    base.receiveKeyPress(key);
+            if (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true)
+                return;
+            if (key == Keys.Escape && this._FocusComponent != null)
+                UpdateFocus(null);
+            else if (key == Keys.Tab)
+                TabNext();
+            else if (key == Keys.Enter)
+            {
+                if (this._FocusComponent == null)
+                    return;
+                (this._FocusComponent as IComponentContainer)?.TabAccess(TabType.LeftClick);
+            }
+            else
+                base.receiveKeyPress(key);
         }
         public override void receiveScrollWheelAction(int direction)
         {
@@ -238,22 +242,22 @@ namespace Entoarox.Framework.Interface
         }
         public override void releaseLeftClick(int x, int y)
         {
-            this._FocusComponent?.LeftUp(new Point(this.InnerBounds.X, this.InnerBounds.Y), new Point(x / Game1.pixelZoom, y / Game1.pixelZoom));
+            Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(x / Game1.pixelZoom, y / Game1.pixelZoom);
+            if (GetTarget(offset, position, out IDynamicComponent component, out bool floating))
+                (floating ? component : this._FocusComponent)?.LeftUp(offset, position);
         }
         public override void update(GameTime time)
         {
             foreach (IComponent component in this._DrawComponents)
                 component.Update(time);
-            if (this._FocusComponent is IFloatComponent)
-                (this._FocusComponent as IFloatComponent).FloatComponent.Update(time);
+            (this._FocusComponent as IFloatComponent)?.FloatComponent?.Update(time);
         }
         public override void draw(SpriteBatch b)
         {
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y);
             foreach (IComponent component in this._DrawComponents)
                 component.Draw(offset, b);
-            if (this._FocusComponent is IFloatComponent)
-                (this._FocusComponent as IFloatComponent).FloatComponent.Draw(new Point(0, 0), b);
+            (this._FocusComponent as IFloatComponent)?.FloatComponent?.Draw(new Point(0, 0), b);
         }
     }
 }

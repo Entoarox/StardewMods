@@ -9,7 +9,7 @@ namespace Entoarox.Framework.Experimental
     /// <summary>
     /// Allows for soft-dependencies using interfaces to define accessible methods
     ///
-    /// Be warned that this *is* a experimental feature, thus it might cause crashes or other issues, and might potentially be removed from the framework
+    /// Be warned that this is a experimental feature, thus it might cause crashes or other issues, and might potentially be removed from the framework
     /// Should at any time this feature stop being experimental, it will be moved to a more correct namespace
     /// </summary>
     [Obsolete("This feature is still experimental, it may not work properly and could be removed at any time!")]
