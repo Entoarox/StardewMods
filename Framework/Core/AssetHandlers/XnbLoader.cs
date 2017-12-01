@@ -10,6 +10,6 @@ namespace Entoarox.Framework.Core.AssetHandlers
     {
         internal static Dictionary<string, (IContentHelper, string)> _Map = new Dictionary<string, (IContentHelper, string)>();
         public bool CanLoad<T>(IAssetInfo asset) => _Map.ContainsKey(asset.AssetName);
-        public T Load<T>(IAssetInfo asset) => _Map[asset.AssetName].Item1.Load<T>(_Map[asset.AssetName].Item1.GetActualAssetKey(_Map[asset.AssetName].Item2,ContentSource.GameContent));
+        public T Load<T>(IAssetInfo asset) => _Map[asset.AssetName].Item1.Load<T>(_Map[asset.AssetName].Item1.GetActualAssetKey(_Map[asset.AssetName].Item2).Replace(Path.Combine("..", "Mods"), ""));
     }
 }

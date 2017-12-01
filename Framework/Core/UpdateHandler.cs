@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -55,6 +55,7 @@ namespace Entoarox.Framework.Core
             try
             {
                 string version = typeof(Game1).Assembly.GetName().Version.ToString(2);
+                Console.WriteLine("Stardew version:" + version);
                 bool Connected;
                 try
                 {
