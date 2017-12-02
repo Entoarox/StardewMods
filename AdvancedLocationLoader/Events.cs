@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 using Newtonsoft.Json.Linq;
@@ -84,12 +84,15 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void GameEvents_UpdateTick(object s, EventArgs e)
         {
-            if (!Context.IsWorldReady)
-                return;
-            GameEvents.UpdateTick -= GameEvents_UpdateTick;
-            Loaders.Loader1_2.ApplyPatches();
-            if(Configs.Compound.DynamicTiles.Count>0 || Configs.Compound.DynamicProperties.Count>0 || Configs.Compound.DynamicWarps.Count>0)
-                TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
+            if (!Game1.hasLoadedGame)
+                Game1.eveningColor = Microsoft.Xna.Framework.Color.Black;
+            else if (Game1.eveningColor!= Microsoft.Xna.Framework.Color.Black)
+            {
+                GameEvents.UpdateTick -= GameEvents_UpdateTick;
+                Loaders.Loader1_2.ApplyPatches();
+                if (Configs.Compound.DynamicTiles.Count > 0 || Configs.Compound.DynamicProperties.Count > 0 || Configs.Compound.DynamicWarps.Count > 0)
+                    TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
+            }
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {
