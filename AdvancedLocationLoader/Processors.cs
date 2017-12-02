@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -128,8 +128,9 @@ namespace Entoarox.AdvancedLocationLoader
                     skip = 1;
                 else
                 {
+                    tilesheet.FileName = tilesheet.FileName.Replace(ModEntry.SHelper.DirectoryPath + Path.DirectorySeparatorChar, "");
                     skip = 2;
-                    string fakepath = Path.Combine(Path.GetDirectoryName(tilesheet.FileName), "all_sheet_paths_objects", tilesheet.SheetId, Path.GetFileName(tilesheet.FileName));
+                    string fakepath = Path.Combine("AdvancedLocationLoader/FakePath_paths_objects", tilesheet.FileName);
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 3

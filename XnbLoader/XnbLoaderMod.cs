@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using Entoarox.Framework;
@@ -87,7 +87,7 @@ namespace Entoarox.XnbLoader
             {
                 string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
                 string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
-                this.Cache.Add(from, filePath);
+                this.Cache.Add(from, Path.Combine("ModContent",from));
                 files++;
             }
             return files;

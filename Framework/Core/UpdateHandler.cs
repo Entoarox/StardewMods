@@ -94,7 +94,7 @@ namespace Entoarox.Framework.Core
                                         else if (Data.ContainsKey("Default"))
                                             info = Data["Default"];
                                         else
-                                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod is not marked as compatible with this version of SDV, use at your own risk.", LogLevel.Warn);
+                                            ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod is not compatible with this version of SDV");
                                         if (info != null)
                                         {
                                             SemanticVersion min = new SemanticVersion(info.Minimum);
