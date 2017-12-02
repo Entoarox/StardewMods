@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -81,63 +81,49 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.drawObjectDialogue(ModEntry.Strings.Get("sparkle"));
             }
         }
-        internal static StardewValley.Farmer _who;
-        internal static string[] _arguments;
-        internal static Vector2 _tile;
         internal static void Shop(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
-            _who = who;
-            _arguments = arguments;
-            _tile = tile;
-            ControlEvents.MouseChanged += RealShop;
-        }
-        internal static void RealShop(object s, EventArgsMouseStateChanged e)
-        {
-            if (e.NewState.RightButton != ButtonState.Pressed)
+            try
             {
-                ControlEvents.MouseChanged -= RealShop;
-                try
+                if (!Configs.Compound.Shops.ContainsKey(arguments[0]))
                 {
-                    if (!Configs.Compound.Shops.ContainsKey(_arguments[0]))
+                    Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
+                    ModEntry.Logger.Log("Unable to open shop, shop not found: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                }
+                else
+                {
+                    Configs.ShopConfig shop = Configs.Compound.Shops[arguments[0]];
+                    List<Item> stock = new List<Item>();
+                    NPC portrait = new NPC();
+                    portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);
+                    portrait.name = shop.Owner;
+                    foreach (Configs.ShopItem item in shop.Items)
                     {
-                        Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                        ModEntry.Logger.Log("Unable to open shop, shop not found: " + _arguments[0], StardewModdingAPI.LogLevel.Error);
-                    }
-                    else
-                    {
-                        Configs.ShopConfig shop = Configs.Compound.Shops[_arguments[0]];
-                        List<Item> stock = new List<Item>();
-                        NPC portrait = new NPC();
-                        portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);
-                        portrait.name = shop.Owner;
-                        foreach (Configs.ShopItem item in shop.Items)
+                        if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(item.Conditions))
+                            continue;
+                        StardewValley.Object result;
+                        if (item.Price != null)
+                            result = new StardewValley.Object(item.Id, item.Stock, false, (int)item.Price);
+                        else
+                            result = new StardewValley.Object(item.Id, item.Stock, false, -1);
+                        if (item.Stack > 1)
                         {
-                            if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(item.Conditions))
-                                continue;
-                            StardewValley.Object result;
-                            if (item.Price != null)
-                                result = new StardewValley.Object(item.Id, item.Stock, false, (int)item.Price);
-                            else
-                                result = new StardewValley.Object(item.Id, item.Stock, false, -1);
-                            if (item.Stack > 1)
-                            {
-                                stock.Add(new StackableShopObject(result, item.Stack));
-                            }
-                            else
-                                stock.Add(result);
+                            stock.Add(new StackableShopObject(result, item.Stack));
                         }
-                        if (stock.Count == 0)
-                            ModEntry.Logger.Log("No stock: " + _arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
-                        ShopMenu menu = new ShopMenu(stock);
-                        menu.portraitPerson = portrait;
-                        menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
-                        Game1.activeClickableMenu = menu;
+                        else
+                            stock.Add(result);
                     }
+                    if (stock.Count == 0)
+                        ModEntry.Logger.Log("No stock: " + arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
+                    ShopMenu menu = new ShopMenu(stock);
+                    menu.portraitPerson = portrait;
+                    menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
+                    Game1.activeClickableMenu = menu;
                 }
-                catch (Exception err)
-                {
-                    ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", StardewModdingAPI.LogLevel.Error, err);
-                }
+            }
+            catch (Exception err)
+            {
+                ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", StardewModdingAPI.LogLevel.Error, err);
             }
         }
     }

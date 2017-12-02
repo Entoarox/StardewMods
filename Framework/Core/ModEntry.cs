@@ -54,6 +54,7 @@ namespace Entoarox.Framework.Core
             SHelper = this.Helper;
             Logger = this.Monitor;
             Config = this.Helper.ReadConfig<FrameworkConfig>();
+            this.PrepareCustomEvents();
             this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
             if (Config.TrainerCommands)
                 helper.ConsoleCommands
@@ -121,6 +122,7 @@ namespace Entoarox.Framework.Core
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
+                    this.Monitor.Log("EF.ME.ActionTriggered(" + split[0] + ")");
                     this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
                 }
             }
@@ -249,6 +251,7 @@ namespace Entoarox.Framework.Core
                 MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
                 this.prevItem = Game1.player.CurrentItem;
             }
+            PlayerModifierHelper._UpdateModifiers();
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
             if (LastTouchAction!=playerPos)
             {

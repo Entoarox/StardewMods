@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -494,9 +494,14 @@ namespace Entoarox.AdvancedLocationLoader.Loaders
                                 ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is treated as seasonal but does not have proper seasonal formatting, this will cause bugs!");
                             foreach (string season in seasons)
                             {
-                                string file = Path.Combine(ModEntry.SHelper.Content.GetPlatformRelativeContent(), "Maps", season + "_" + path[1] + ".xnb");
-                                if (!File.Exists(file))
+                                try
+                                {
+                                    Game1.content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>(Path.Combine("Maps", season + "_" + path[1]));
+                                }
+                                catch
+                                {
                                     ModEntry.Logger.ExitGameImmediately("The `" + sheet.Id + "` TileSheet in the `" + loc.Name + "` location is seasonal but ALL cant find the tilesheet for the `" + season + "` season, this will cause bugs!");
+                                }
                             }
                         }
             }

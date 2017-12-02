@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -101,7 +101,7 @@ namespace Entoarox.Framework.Core
             Game1.player.addedSpeed = 0;
             _HealthOverflow = 0;
         }
-        private void _ApplyModifiers()
+        internal void _ApplyModifiers()
         {
             if (!Context.IsWorldReady)
                 return;
