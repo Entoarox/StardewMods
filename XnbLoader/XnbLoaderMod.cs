@@ -85,13 +85,19 @@ namespace Entoarox.XnbLoader
             // load files
             foreach (string file in Directory.EnumerateFiles(path))
             {
-                string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
-                string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
-                if (!this.Cache.ContainsKey(from))
+                if (Path.GetExtension(file).Equals(".xnb"))
                 {
-                    this.Cache.Add(from, Path.Combine("ModContent", from));
-                    files++;
+                    string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                    string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
+                    if (!this.Cache.ContainsKey(from))
+                    {
+                        this.Cache.Add(from, Path.Combine("ModContent", from));
+                        files++;
+                    }
                 }
+                else
+                    this.Monitor.Log($"Encountered non-xnb file in ModContent, this shouldnt be here: {file}", LogLevel.Warn);
+
             }
             return files;
         }

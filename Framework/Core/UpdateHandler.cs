@@ -114,7 +114,7 @@ namespace Entoarox.Framework.Core
                                                 ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The `{pair.Key.Name}` mod is too old, a newer version is required. Expected {min}, found {modVersion}.");
                                             else if (rec.IsNewerThan(modVersion))
                                                 ModEntry.Logger.Log($"[UpdateChecker] Version {rec} of the `{pair.Key.Name}` mod is available, it is recommended you update now.", LogLevel.Alert);
-                                            else if (modVersion.IsBetween(rec, max))
+                                            else if (max.IsNewerThan(modVersion))
                                                 ModEntry.Logger.Log($"[UpdateChecker] Version {max} of the `{pair.Key.Name}` mod is available.", LogLevel.Info);
                                         }
                                     }

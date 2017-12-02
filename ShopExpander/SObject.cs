@@ -15,7 +15,7 @@ namespace Entoarox.ShopExpander
         public SObject(StardewValley.Object item, int stack)
         {
             this.Item = item;
-            this.stackAmount = stack;
+            this.stackAmount = stack; 
             this.parentSheetIndex = item.parentSheetIndex;
             this.price = this.salePrice() * stack;
             this.MaxStackSize = (int)Math.Floor(999d / stack);
@@ -41,7 +41,7 @@ namespace Entoarox.ShopExpander
             double num8 = layerDepth - 9.99999974737875E-05;
             spriteBatch1.Draw(texture, position, sourceRectangle, color, (float)num5, origin, (float)num6, (SpriteEffects)num7, (float)num8);
             spriteBatch.Draw(Game1.objectSpriteSheet, location + new Vector2((int)((Game1.tileSize / 2) * (double)scaleSize), (int)((Game1.tileSize / 2) * scaleSize)), new Microsoft.Xna.Framework.Rectangle?(Game1.getSourceRectForStandardTileSheet(Game1.objectSpriteSheet, this.parentSheetIndex, 16, 16)), Color.White * transparency, 0.0f, new Vector2(8f, 8f) * scaleSize, Game1.pixelZoom * scaleSize, SpriteEffects.None, layerDepth);
-            var _scale = 0.5f + scaleSize;
+            float _scale = 0.5f + scaleSize;
             Game1.drawWithBorder(this.getStackNumber().ToString(), Color.Black, Color.White, location + new Vector2(Game1.tileSize - Game1.tinyFont.MeasureString(this.getStackNumber().ToString()).X * _scale, Game1.tileSize - (float)((double)Game1.tinyFont.MeasureString(this.getStackNumber().ToString()).Y * 3.0f / 4.0f) * _scale), 0.0f, _scale, 1f, true);
         }
         public override int salePrice()

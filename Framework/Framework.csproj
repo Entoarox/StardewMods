@@ -77,6 +77,7 @@
     <Compile Include="Events\EventArgsArguments.cs" />
     <Compile Include="Events\EventArgsEditable.cs" />
     <Compile Include="Events\EventArgsReturnable.cs" />
+    <Compile Include="Experimental\PathFinder.cs" />
     <Compile Include="Experimental\WrapperBuilder.cs" />
     <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />
