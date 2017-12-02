@@ -87,8 +87,11 @@ namespace Entoarox.XnbLoader
             {
                 string filePath = Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
                 string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
-                this.Cache.Add(from, Path.Combine("ModContent",from));
-                files++;
+                if (!this.Cache.ContainsKey(from))
+                {
+                    this.Cache.Add(from, Path.Combine("ModContent", from));
+                    files++;
+                }
             }
             return files;
         }
