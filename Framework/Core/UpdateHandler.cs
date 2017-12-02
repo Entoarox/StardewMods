@@ -43,7 +43,18 @@ namespace Entoarox.Framework.Core
                     break;
                 case WebExceptionStatus.ProtocolError:
                     HttpWebResponse response = (HttpWebResponse)err.Response;
-                    ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
+                    switch(response.StatusCode)
+                    {
+                        case HttpStatusCode.NotFound:
+                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, The update url provided by the mod does not exist", LogLevel.Warn);
+                            break;
+                        case HttpStatusCode.RequestTimeout:
+                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Connection timed out", LogLevel.Warn);
+                            break;
+                        default:
+                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
+                            break;
+                    }
                     break;
                 default:
                     ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, a unknown error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
@@ -94,7 +105,7 @@ namespace Entoarox.Framework.Core
                                         else if (Data.ContainsKey("Default"))
                                             info = Data["Default"];
                                         else
-                                            ModEntry.Logger.ExitGameImmediately("[UpdateChecker] The `" + pair.Key.Name + "` mod is not compatible with this version of SDV");
+                                            ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The {modVersion} version of the `{pair.Key.Name}` mod is not compatible with version {version} of Stardew Valley.");
                                         if (info != null)
                                         {
                                             SemanticVersion min = new SemanticVersion(info.Minimum);
@@ -103,9 +114,9 @@ namespace Entoarox.Framework.Core
                                             if (min.IsNewerThan(modVersion))
                                                 ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The `{pair.Key.Name}` mod is too old, a newer version is required. Expected {min}, found {modVersion}.");
                                             else if (rec.IsNewerThan(modVersion))
-                                                ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available, it is recommended you update now.", LogLevel.Alert);
+                                                ModEntry.Logger.Log($"[UpdateChecker] Version {rec} of the `{pair.Key.Name}` mod is available, it is recommended you update now.", LogLevel.Alert);
                                             else if (modVersion.IsBetween(rec, max))
-                                                ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod has a new version available.", LogLevel.Info);
+                                                ModEntry.Logger.Log($"[UpdateChecker] Version {max} of the `{pair.Key.Name}` mod is available.", LogLevel.Info);
                                         }
                                     }
                                     catch (WebException err)
