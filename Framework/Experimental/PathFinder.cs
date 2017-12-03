@@ -12,7 +12,7 @@ namespace Entoarox.Framework.Experimental
 {
     static class PathFinderExtension
     {
-        private class Node
+        public class Node
         {
             public Node Parent;
             public int X;
@@ -34,7 +34,7 @@ namespace Entoarox.Framework.Experimental
                 return this.X << 8 | this.Y;
             }
         }
-        public static List<Point> FindPath(this GameLocation location, Point start, Point end)
+        public static List<Node> FindPath(this GameLocation location, Point start, Point end)
         {
             var layer = location.map.GetLayer("Back");
             List<Node> nodes = new List<Node>();
@@ -67,14 +67,14 @@ namespace Entoarox.Framework.Experimental
                 }
             }
             LookNext(new Node(start.X, start.Y));
-            List<Point> points = new List<Point>();
+            List<Node> points = new List<Node>();
             if (finish == null)
                 return null;
-            points.Add(new Point(finish.X, finish.Y));
+            points.Add(finish);
             while(finish.Parent!=null)
             {
                 finish = finish.Parent;
-                points.Add(new Point(finish.X, finish.Y));
+                points.Add(finish);
             }
             return points;
         }

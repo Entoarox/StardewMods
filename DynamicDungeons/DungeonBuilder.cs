@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -188,8 +189,8 @@ namespace Entoarox.DynamicDungeons
         private void NextStep()
         {
             bool[,] updated = new bool[this.Width, this.Height];
-            for (int x = 0; x < this.Width; x++)
-                for (int y = 0; y < this.Height; y++)
+            Parallel.For(0, this.Width, (x) =>{
+                Parallel.For(0, this.Height, (y) =>
                 {
                     int count = this.GetNeighborCount(x, y);
                     if (this.Map[x, y])
@@ -204,22 +205,30 @@ namespace Entoarox.DynamicDungeons
                         if (count > _BirthLimit)
                             updated[x, y] = true;
                         else
-                            updated[x, y] = false; 
+                            updated[x, y] = false;
                     }
+                });
+            });
+            /*
+            for (int x = 0; x < this.Width; x++)
+                for (int y = 0; y < this.Height; y++)
+                {
                 }
+            */
             this.Map = updated;
         }
         private void NextClean()
         {
             bool[,] updated = new bool[this.Width, this.Height];
-            for (int x = 0; x < this.Width; x++)
-                for (int y = 0; y < this.Height; y++)
+            Parallel.For(0, this.Width, (x) =>
+            {
+                Parallel.For(0, this.Height, (y) =>
                 {
                     if (this.Map[x, y])
                     {
                         int xc = this.GetNeighborCountX(x, y);
                         int yc = this.GetNeighborCountY(x, y);
-                        if (xc+yc < 3 && (xc == 0 || yc == 0))
+                        if (xc + yc < 3 && (xc == 0 || yc == 0))
                             updated[x, y] = false;
                         else
                             updated[x, y] = true;
@@ -228,7 +237,8 @@ namespace Entoarox.DynamicDungeons
                     {
                         updated[x, y] = false;
                     }
-                }
+                });
+            });
             this.Map = updated;
         }
         private bool FloodFill()
@@ -262,12 +272,16 @@ namespace Entoarox.DynamicDungeons
         {
             Color outColor = replacement ?? Color.Black;
             Color[,] updated = new Color[this.Width, this.Height];
-            for (int x = 0; x < this.Width; x++)
-                for (int y = 0; y < this.Height; y++)
+            Parallel.For(0, this.Width, (x) =>
+            {
+                Parallel.For(0, this.Height, (y) =>
+                {
                     if (this.CMap[x, y] == color)
                         updated[x, y] = outColor;
                     else
                         updated[x, y] = this.CMap[x, y];
+                });
+            });
             this.CMap = updated;
         }
         private int Flood(int x, int y)
@@ -287,12 +301,20 @@ namespace Entoarox.DynamicDungeons
         private void Encapsulate()
         {
             Color[,] updated = new Color[this.Width+8, this.Height+8];
-            for (int x = 0; x < this.Width + 8; x++)
-                for (int y = 0; y < this.Height + 8; y++)
+            Parallel.For(0, this.Width + 8, (x) =>
+            {
+                Parallel.For(0, this.Height + 8, (y) =>
+                {
                     updated[x, y] = Color.Black;
-            for (int x = 0; x < this.Width; x++)
-                for (int y = 0; y < this.Height; y++)
+                });
+            });
+            Parallel.For(0, this.Width, (x) =>
+            {
+                Parallel.For(0, this.Height, (y) =>
+                {
                     updated[x + 4, y + 4] = this.CMap[x, y];
+                });
+            });
             this.Width += 8;
             this.Height += 8;
             this.CMap = updated;
@@ -300,22 +322,28 @@ namespace Entoarox.DynamicDungeons
         private void WipeBounds()
         {
             Color[,] updated = new Color[this.Width, this.Height];
-            for (int x = 0; x < this.Width; x++)
-                for (int y = 0; y < this.Height; y++)
+            Parallel.For(0, this.Width, (x) =>
+            {
+                Parallel.For(0, this.Height, (y) =>
                 {
-                    if (this.CMap[x, y]!=Color.White && this.GetNeighborCountColor(x, y) == 8)
+                    if (this.CMap[x, y] != Color.White && this.GetNeighborCountColor(x, y) == 8)
                         updated[x, y] = Color.Transparent;
                     else
                         updated[x, y] = this.CMap[x, y];
-                }
+                });
+            });
             this.CMap = updated;
         }
         private void Upscale()
         {
             Color[,] updated = new Color[this.Width*2, this.Height*2];
-            for (int x = 0; x < this.Width*2; x++)
-                for (int y = 0; y < this.Height*2; y++)
-                    updated[x, y] = this.CMap[(int)Math.Floor(x / 2f), (int)Math.Floor(y/2f)];
+            Parallel.For(0, this.Width * 2, (x) =>
+            {
+                Parallel.For(0, this.Height * 2, (y) =>
+                {
+                    updated[x, y] = this.CMap[(int)Math.Floor(x / 2f), (int)Math.Floor(y / 2f)];
+                });
+            });
             this.Height *= 2;
             this.Width *= 2;
             this.CMap = updated;
