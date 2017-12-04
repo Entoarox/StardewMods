@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomBathhouse.cs" />
     <Compile Include="DistanceCalculator.cs" />
     <Compile Include="EF 2.1\IProfession.cs" />
     <Compile Include="EF 2.1\ISkill.cs" />

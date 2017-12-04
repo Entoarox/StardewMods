@@ -80,12 +80,12 @@ namespace Entoarox.DynamicDungeons
             base.drawAboveAlwaysFrontLayer(b);
             string floor = this.Floor.ToString();
             Vector2 size = Game1.smallFont.MeasureString(floor);
-            if (size.X < 40)
-                size.X = 40;
+            size.X += 26;
             if (size.X > 150)
             {
                 floor = "?????";
                 size = Game1.smallFont.MeasureString(floor);
+                size.X += 26;
             }
             // Background boxes
             IClickableMenu.drawTextureBox(Game1.spriteBatch, 158, 4, 125, 40, Color.White);
@@ -183,11 +183,8 @@ namespace Entoarox.DynamicDungeons
 
         public override bool checkAction(Location tileLocation, xTileRectangle viewport, SFarmer who)
         {
-            Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(tileLocation, viewport.Size);
-            PropertyValue propertyValue = null;
-            if (tile != null)
-                tile.Properties.TryGetValue("Action", out propertyValue);
-            if (propertyValue != null)
+            Tile tile = Game1.currentLocation.map.GetLayer("Buildings").Tiles[tileLocation.X, tileLocation.Y];
+            if (tile != null && tile.Properties.TryGetValue("Action", out var propertyValue))
             {
                 string[] split = ((string)propertyValue).Split(' ');
                 string[] args = new string[split.Length - 1];

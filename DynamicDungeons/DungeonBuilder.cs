@@ -379,31 +379,40 @@ namespace Entoarox.DynamicDungeons
             Point? origin = null;
             Layer floor = map.GetLayer("Back");
             Layer wall = map.GetLayer("Buildings");
-            for (float t = 0; t<= weight; t++)
+            for (float t = 0; t <= weight; t++)
             {
                 origin = GetRandomGroundPoint(ref floor, ref wall);
                 if (origin != null)
+                    return FindRegionOfSize(ref map, width, height, weight, (Point)origin, out point);
+            }
+            return false;
+        }
+        private bool FindRegionOfSize(ref Map map, int width, int height, int weight, Point start, out Point point)
+        {
+            point = default(Point);
+            Layer floor = map.GetLayer("Back");
+            Layer wall = map.GetLayer("Buildings");
+            bool invalid = false;
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
                 {
-                    Point start = (Point)origin;
-                    bool invalid = false;
-                    for (int i = 0; i < width; i++)
-                        for (int j = 0; j < height; j++)
-                        {
-                            if (floor.Tiles[start.X + i, start.Y + j] == null || floor.Tiles[start.X + i, start.Y + j].TileIndex != 138 || wall.Tiles[start.X + i, start.Y + j] != null)
-                                invalid = true;
-                            if (invalid)
-                                break;
-                        }
-                    if (!invalid)
-                    {
-                        point = start;
-                        return true;
-                    }
+                    if (floor.Tiles[start.X + i, start.Y + j] == null || floor.Tiles[start.X + i, start.Y + j].TileIndex != 138 || wall.Tiles[start.X + i, start.Y + j] != null)
+                        invalid = true;
+                    if (invalid)
+                        break;
                 }
+            if (!invalid)
+            {
+                point = start;
+                return true;
             }
             return false;
         }
         private void BuildStructure(ref Map map, string name, int width, int height, int weight, int minSpawn, int maxSpawn, ITile[] tiles)
+        {
+            BuildStructure(ref map, name, width, height, weight, minSpawn, maxSpawn, () => tiles);
+        }
+        private void BuildStructure(ref Map map, string name, int width, int height, int weight, int minSpawn, int maxSpawn, Func<ITile[]> tiles)
         {
             if (minSpawn != maxSpawn)
                 minSpawn = this.Seeder.Next(0, minSpawn);
@@ -413,11 +422,16 @@ namespace Entoarox.DynamicDungeons
                 if (FindRegionOfSize(ref map, width, height, weight, out var point))
                 {
                     Report("Structure spawned: "+name);
-                    foreach (var tile in tiles)
+                    var mytiles = tiles();
+                    Parallel.ForEach(mytiles, tile => {
                         if (tile is PTile)
+                            return;
+                        tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y] = tile.Get();
+                    });
+                    Parallel.ForEach(mytiles, tile => {
+                        if(tile is PTile)
                             tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y].Properties.Add(((PTile)tile).Key, ((PTile)tile).Value);
-                        else
-                            tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y] = tile.Get();
+                    });
                 }
                 else
                     Report("Spawn attempt failed: " + name);
@@ -934,6 +948,104 @@ namespace Entoarox.DynamicDungeons
                 }
             return tiles.ToArray();
         }
+        private void GenerateTrack(Map map, TileSheet sheet)
+        {
+            Color GetNeighbor(ref Color[,] area, int x, int y)
+            {
+                if (x < 0 || y < 0 || x >= area.GetLength(0) || y >= area.GetLength(1))
+                    return Color.Black;
+                else
+                    return area[x, y];
+            }
+            byte GetSurroundingWalls(ref Color[,] area, int x, int y)
+            {
+                byte count = 0;
+                byte add = 128;
+                for (int j = -1; j < 2; j++)
+                    for (int i = -1; i < 2; i++)
+                    {
+                        if (i == 0 && j == 0)
+                            continue;
+                        if (GetNeighbor(ref area, x + i, y + j) != Color.White)
+                            count += add;
+                        add /= 2;
+                    }
+                return count;
+            }
+            if (FindRegionOfSize(ref map, 1, 1, 500, out var start) && FindRegionOfSize(ref map, 1, 1, 500, new Point(start.X+this.Seeder.Next(-25,25),start.Y+this.Seeder.Next(-25,25)), out var end))
+            {
+                var backLayer = map.GetLayer("Back");
+                var buildingsLayer = map.GetLayer("Buildings");
+                List<Point> nodes=null;
+                Color[,] mapping = new Color[backLayer.LayerWidth, backLayer.LayerHeight];
+                var task = Task.Run(() => nodes = PathFinder.FindPath(map, start, end));
+                Parallel.For(0, backLayer.LayerWidth, x =>
+                {
+                    Parallel.For(0, backLayer.LayerHeight, y => {
+                        mapping[x, y] = Color.White;
+                    });
+                });
+                task.Wait();
+                if(nodes==null)
+                {
+                    Report("Spawn attempt failed: DynamicTrack (Path not found)");
+                    return;
+                }
+                if(nodes.Count>50)
+                {
+                    Report("Spawn attempt failed: DynamicTrack (Path too long)");
+                    return;
+                }
+                Report($"Structure spawned: DynamicTrack (from [{start.X},{start.Y}] to [{end.X},{end.Y}] over {nodes.Count} tiles)");
+                Parallel.ForEach(nodes, node =>
+                {
+                    mapping[node.X, node.Y] = Color.Black;
+                });
+                Parallel.For(0, backLayer.LayerWidth, x =>
+                {
+                    Parallel.For(0, backLayer.LayerHeight, y => {
+                        if(mapping[x,y]==Color.Black)
+                        {
+                            byte info = GetSurroundingWalls(ref mapping, x, y);
+                            // Horizontal
+                            if((info & 0b00_1_1_000) == 0b00_1_1_000)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 21 : 1);
+                            // Vertical
+                            else if ((info & 0b010_0_0_010) == 0b010_0_0_010)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 12 : 10);
+                            // Top-left corner
+                            else if ((info & 0b000_0_1_010) == 0b000_0_1_010)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, 0);
+                            // Bottom-left corner
+                            else if ((info & 0b010_0_1_000) == 0b010_0_1_000)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, 20);
+                            // Top-right corner
+                            else if ((info & 0b000_1_0_010) == 0b000_1_0_010)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, 2);
+                            // Bottom-right corner
+                            else if ((info & 0b010_1_0_000) == 0b010_1_0_000)
+                                backLayer.Tiles[x, y] = new StaticTile(backLayer, sheet, BlendMode.Additive, 22);
+                            // Bottom ending
+                            else if ((info & 0b010_0_0_000) == 0b010_0_0_000)
+                                buildingsLayer.Tiles[x, y] = new StaticTile(buildingsLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 6 : 16);
+                            // Top ending
+                            else if ((info & 0b000_0_0_010) == 0b000_0_0_010)
+                                buildingsLayer.Tiles[x, y] = new StaticTile(buildingsLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 4 : 14);
+                            // Left ending
+                            else if ((info & 0b000_0_1_000) == 0b000_0_1_000)
+                                buildingsLayer.Tiles[x, y] = new StaticTile(buildingsLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 3 : 13);
+                            // Right ending
+                            else if ((info & 0b000_1_0_000) == 0b000_1_0_000)
+                                buildingsLayer.Tiles[x, y] = new StaticTile(buildingsLayer, sheet, BlendMode.Additive, (x + y) % 4 == 0 ? 5 : 15);
+                            else
+                                backLayer.Tiles[x, y] = null;
+                        }
+                    });
+                });
+            }
+            else
+                Report("Spawn attempt failed: DynamicTrack");
+        }
         public Texture2D GetMiniMap()
         {
             Color[] mapping = new Color[this.Width * this.Height];
@@ -1212,10 +1324,10 @@ namespace Entoarox.DynamicDungeons
                     }
             Report("Spawning in structures....");
             // Try to spawn structures
-            this.BuildStructure(ref map, "DirtPatch", 9, 9, 50, 2, 4,this.GetRandomDirt(ref floor, ref wall, ref sheet));
-            this.BuildStructure(ref map, "WaterPatch", 9, 9, 50, 1,2, this.GetRandomWater(ref floor, ref wall, ref sheet));
-            this.BuildStructure(ref map, "WoodPatch", 7, 7, 50, 1, 2, this.GetRandomWood(ref floor, ref wall, ref sheet));
-            this.BuildStructure(ref map, "CobblePatch", 7, 7, 50, 1, 2, this.GetRandomCobble(ref floor, ref wall, ref sheet));
+            this.BuildStructure(ref map, "DirtPatch", 9, 9, 50, 2, 4,() => this.GetRandomDirt(ref floor, ref wall, ref sheet));
+            this.BuildStructure(ref map, "WaterPatch", 9, 9, 50, 1,2, () => this.GetRandomWater(ref floor, ref wall, ref sheet));
+            this.BuildStructure(ref map, "WoodPatch", 7, 7, 50, 1, 2, () => this.GetRandomWood(ref floor, ref wall, ref sheet));
+            this.BuildStructure(ref map, "CobblePatch", 7, 7, 50, 1, 2, () => this.GetRandomCobble(ref floor, ref wall, ref sheet));
             this.BuildStructure(ref map, "CoalCart", 7, 7, 8, 2, 3, new ITile[] {
                 new STile(2,0,front, sheet, 205),
                 new STile(3,0,front,sheet,215),
@@ -1259,6 +1371,7 @@ namespace Entoarox.DynamicDungeons
                 new STile(1,2,wall,sheet,278),
                 new STile(2,2,wall,sheet,280)
             });
+            /*
             for (int t = this.Seeder.Next(0, 2); t < 4; t++)
                 if (FindRegionOfSize(ref map, 7, 2, 10, out var point5))
                 {
@@ -1274,6 +1387,7 @@ namespace Entoarox.DynamicDungeons
                 }
                 else
                     Report("Spawn attempt failed: HRail1");
+                    */
             for (int t = this.Seeder.Next(0, 4); t < 8; t++)
                 if (FindRegionOfSize(ref map, 3, 3, 10, out var point5))
                 {
@@ -1296,6 +1410,7 @@ namespace Entoarox.DynamicDungeons
                 }
                 else
                     Report("Spawn attempt failed: LargeStalagmite");
+            /*
             for (int t = this.Seeder.Next(0, 2); t < 4; t++)
                 if (FindRegionOfSize(ref map, 4, 5, 10, out var point5))
                 {
@@ -1317,6 +1432,7 @@ namespace Entoarox.DynamicDungeons
                 }
                 else
                     Report("Spawn attempt failed: StalagRail");
+                    */
             this.BuildStructure(ref map, "LootChest", 3, 3, 5, 1, 2, new ITile[]{
                         new STile(0, 0, floor, sheet, 240),
                         new STile(1, 0, floor, sheet, 241),
@@ -1364,7 +1480,7 @@ namespace Entoarox.DynamicDungeons
             }
             else
                 Report("Spawn attempt failed: GemRock");
-            if(this.Floor%3==0)
+            if (this.Floor % 3 == 0)
                 this.BuildStructure(ref map, "DwardVendor", 4, 3, 50, 1, 1, new ITile[]
                 {
                     new ATile(0, -1, afront, new STile[]{
@@ -1398,6 +1514,8 @@ namespace Entoarox.DynamicDungeons
                     new PTile(0,1,wall,"Action","DDShop DwarfVendor"),
                     new PTile(1,1,wall,"Action","DDShop DwarfVendor")
                 });
+            for (int c = 0; c < this.Seeder.Next(3, 7); c++)
+                GenerateTrack(map, rsheet);
             // Randomise floor
             for (int x = 0; x < this.Width; x++)
                 for (int y = 0; y < this.Height; y++)

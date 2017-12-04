@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
+using Microsoft.Xna.Framework.Graphics;
+
+using xTile;
+
 using StardewValley;
 
 namespace PlayGround
@@ -15,16 +19,27 @@ namespace PlayGround
     {
         public override void Entry(IModHelper helper)
         {
-            this.Helper.ConsoleCommands.Add("epg_findley", "Debug command, should not be used by players", (a, b) =>
-             {
-                 GameLocation loc1 = Game1.getLocationFromName("WizardHouse");
-                 if (!loc1.map.Properties.ContainsKey(DistanceCalculator.LeylineProperty))
-                     loc1.map.Properties.Add(DistanceCalculator.LeylineProperty, 0);
-                 GameLocation loc2 = Game1.getLocationFromName("WitchHut");
-                 if (!loc2.map.Properties.ContainsKey(DistanceCalculator.LeylineProperty))
-                     loc2.map.Properties.Add(DistanceCalculator.LeylineProperty, 0);
-                 this.Monitor.Log("Path distance for current location: " + DistanceCalculator.GetPathDistance(Game1.currentLocation));
-             });
+            this.Helper.ConsoleCommands.Add("pg_debug", "pg_debug <action>", (cmd, args) =>
+            {
+                switch (args[0])
+                {
+                    case "pooltest":
+                        var map = this.Helper.Content.Load<Map>("map.tbin");
+                        map.RemoveLayer(map.GetLayer("AlwaysFront"));
+                        Texture2D texture = null;
+                        try
+                        {
+                            texture = this.Helper.Content.Load<Texture2D>("steam.png");
+                        }
+                        catch
+                        {
+                            texture = null;
+                        }
+                        Game1.locations.Add(new CustomBathhouse(map, "CustomBathhouse", texture));
+                        Game1.warpFarmer("CustomBathhouse", 15, 5, false);
+                        break;
+                }
+            });
         }
     }
 }
