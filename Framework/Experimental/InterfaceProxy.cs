@@ -22,22 +22,22 @@ namespace Entoarox.Framework.Experimental
                 throw new ArgumentException("Type is not a interface.", nameof(T));
             if(!Cache.ContainsKey(typeof(T)))
             {
-                var tBuilder = MBuilder.DefineType(instance.GetType().FullName.Replace(".", "") + "_AS_" + typeof(T).FullName.Replace(".", ""), TypeAttributes.Class, typeof(object), new[] { typeof(T) });
-                var t = typeof(T);
-                var p = instance.GetType();
-                foreach (var method in t.GetMethods())
+                var tBuilder = MBuilder.DefineType(instance.GetType().Name + "<as>" + typeof(T).Name, TypeAttributes.Class, typeof(object), new[] { typeof(T) });
+                var iType = typeof(T);
+                var pType = instance.GetType();
+                foreach (var method in iType.GetMethods())
                 {
-                    var r = p.GetMethod(method.Name, method.GetParameters().Select(a => a.ParameterType).ToArray());
-                    if (r == null)
+                    var parent = pType.GetMethod(method.Name, method.GetParameters().Select(a => a.ParameterType).ToArray());
+                    if (parent == null)
                         throw new ArgumentException("Interface defines a method that is not implemented by the API class.", method.Name);
-                    ProxyMethod(method, r, tBuilder);
+                    ProxyMethod(method, parent, tBuilder);
                 }
-                foreach (var property in t.GetProperties())
+                foreach (var property in iType.GetProperties())
                 {
-                    var r = p.GetProperty(property.Name, property.PropertyType, property.GetIndexParameters().Select(a => a.ParameterType).ToArray());
-                    if (r == null)
-                        throw new ArgumentException("Interface defines a method that is not implemented by the API class.", property.Name);
-                    ProxyProperty(property, r, tBuilder);
+                    var parent = pType.GetProperty(property.Name, property.PropertyType, property.GetIndexParameters().Select(a => a.ParameterType).ToArray());
+                    if (parent == null)
+                        throw new ArgumentException("Interface defines a property that is not implemented by the API class.", property.Name);
+                    ProxyProperty(property, parent, tBuilder);
                 }
                 Cache.Add(typeof(T), tBuilder.CreateType());
             }
@@ -45,7 +45,7 @@ namespace Entoarox.Framework.Experimental
         }
         private static void ProxyMethod(MethodInfo method, MethodInfo parent, TypeBuilder tBuilder)
         {
-            var args = method.GetParameters().Select(a => a.ParameterType).ToArray();
+            var args = parent.GetParameters().Select(a => a.ParameterType).ToArray();
             var mBuilder = tBuilder.DefineMethod(parent.Name, parent.Attributes, parent.CallingConvention, parent.ReturnType, args);
             var il = mBuilder.GetILGenerator();
             for (int c = 1; c <= args.Length; c++)
