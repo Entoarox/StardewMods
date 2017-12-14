@@ -52,6 +52,7 @@ namespace Entoarox.Framework.Experimental
                 il.Emit(OpCodes.Ldarg, c);
             il.Emit(OpCodes.Call, parent);
             il.Emit(OpCodes.Ret);
+            tBuilder.DefineMethodOverride(method, mBuilder);
         }
         private static void ProxyProperty(PropertyInfo property, PropertyInfo parent, TypeBuilder tBuilder)
         {
