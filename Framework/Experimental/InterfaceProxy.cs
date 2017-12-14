@@ -46,13 +46,12 @@ namespace Entoarox.Framework.Experimental
         private static void ProxyMethod(MethodInfo method, MethodInfo parent, TypeBuilder tBuilder)
         {
             var args = parent.GetParameters().Select(a => a.ParameterType).ToArray();
-            var mBuilder = tBuilder.DefineMethod(parent.Name, parent.Attributes, parent.CallingConvention, parent.ReturnType, args);
+            var mBuilder = tBuilder.DefineMethod(parent.Name, parent.Attributes | MethodAttributes.Virtual, method.CallingConvention, parent.ReturnType, args);
             var il = mBuilder.GetILGenerator();
             for (int c = 1; c <= args.Length; c++)
                 il.Emit(OpCodes.Ldarg, c);
-            il.Emit(OpCodes.Call, parent);
+            il.Emit(OpCodes.Callvirt, parent);
             il.Emit(OpCodes.Ret);
-            tBuilder.DefineMethodOverride(method, mBuilder);
         }
         private static void ProxyProperty(PropertyInfo property, PropertyInfo parent, TypeBuilder tBuilder)
         {
@@ -65,7 +64,7 @@ namespace Entoarox.Framework.Experimental
                 var il = mBuilder.GetILGenerator();
                 for (int c = 1; c <= args.Length; c++)
                     il.Emit(OpCodes.Ldarg, c);
-                il.Emit(OpCodes.Call, pMethod);
+                il.Emit(OpCodes.Callvirt, pMethod);
                 il.Emit(OpCodes.Ret);
                 pBuilder.SetGetMethod(mBuilder);
             }
@@ -77,7 +76,7 @@ namespace Entoarox.Framework.Experimental
                 var il = mBuilder.GetILGenerator();
                 for (int c = 1; c <= args.Length; c++)
                     il.Emit(OpCodes.Ldarg, c);
-                il.Emit(OpCodes.Call, pMethod);
+                il.Emit(OpCodes.Callvirt, pMethod);
                 il.Emit(OpCodes.Ret);
                 pBuilder.SetSetMethod(mBuilder);
             }
