@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.Interface
 {
@@ -27,10 +27,11 @@ namespace Entoarox.Framework.Interface
         /// <returns>If further tabbing inside this container is possible</returns>
         bool TabNext();
         /// <summary>
-        /// Used to allow controller mapping on focussed components within nested containers
+        /// Attempt to switch Focus to the previous element in the container
+        /// If false is returned, then the parent should switch its focus instead
         /// </summary>
-        /// <param name="type">What should be mapped</param>
-        void TabAccess(TabType type);
+        /// <returns>If further tabbing inside this container is possible</returns>
+        bool TabBack();
         /// <summary>
         /// If the given component has focus, returns false for components that are not owned by this container
         /// </summary>

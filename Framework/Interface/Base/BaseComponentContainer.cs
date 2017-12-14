@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,8 +15,9 @@ namespace Entoarox.Framework.Interface
         {
         }
         public InterfaceMenu Menu => this.Owner != null ? this.Owner.Menu : throw new NullReferenceException(Strings.ContainerNotAttached);
-        public virtual Rectangle InnerBounds { get => OuterBounds; set => OuterBounds = value; }
+        public virtual Rectangle InnerBounds { get => this.OuterBounds; set => this.OuterBounds = value; }
         public abstract bool TabNext();
+        public abstract bool TabBack();
         public abstract void TabAccess(TabType type);
         public abstract bool HasFocus(IComponent component);
     }

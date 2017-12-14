@@ -20,8 +20,15 @@ namespace Entoarox.Framework.Interface
 
         }
 
-        public bool AcceptsComponent<T>() where T : IComponent => true;
-        public bool AcceptsComponent(IComponent component) => true;
+        public bool AcceptsComponent<T>() where T : IComponent
+        {
+            return true;
+        }
+
+        public bool AcceptsComponent(IComponent component)
+        {
+            return true;
+        }
 
         public void AddComponent(IComponent component)
         {
@@ -34,19 +41,36 @@ namespace Entoarox.Framework.Interface
             UpdateSorting();
         }
 
-        public bool RemoveComponent(IComponent component) => RemoveComponent(component.Name);
+        public bool RemoveComponent(IComponent component)
+        {
+            if (!ContainsComponent(component))
+                throw new KeyNotFoundException(Strings.KeyNotFound);
+            return RemoveComponent(component.Name);
+        }
+
         public bool RemoveComponent(string name)
         {
-            if (!this._Components.ContainsKey(name))
+            if (!ContainsComponent(name))
                 throw new KeyNotFoundException(Strings.KeyNotFound);
             bool result = this._Components.Remove(name);
             UpdateSorting();
             return result;
         }
-        public bool ContainsComponent(IComponent component) => ContainsComponent(component.Name);
-        public bool ContainsComponent(string name) => this._Components.ContainsKey(name);
+        public bool ContainsComponent(IComponent component)
+        {
+            return ContainsComponent(component.Name) && this._Components[component.Name] == component;
+        }
 
-        public void RemoveComponents<T>() where T : IComponent => RemoveComponents(a => a is T);
+        public bool ContainsComponent(string name)
+        {
+            return this._Components.ContainsKey(name);
+        }
+
+        public void RemoveComponents<T>() where T : IComponent
+        {
+            RemoveComponents(a => a is T);
+        }
+
         public void RemoveComponents(Predicate<IComponent> predicate)
         {
             foreach (var a in this._Components.Where(a => predicate(a.Value)))
@@ -82,20 +106,42 @@ namespace Entoarox.Framework.Interface
             }
             return true;
         }
-        public void TabAccess(TabType type)
+
+        public bool TabBack()
         {
-            //TODO: Implement proper controller mapping for the menu, since currently there is no mapping
-            throw new NotImplementedException(Strings.InvalidClassMethod);
+            if (this._FocusComponent == null)
+            {
+                if (this._EventComponents.Count == 0)
+                    return false;
+                this._FocusComponent = this._EventComponents[0];
+            }
+            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabBack())
+            {
+                int index = this._EventComponents.IndexOf(this._FocusComponent) - 1;
+                if (index < 0)
+                    index = this._EventComponents.Count-1;
+                this._FocusComponent = this._EventComponents[index];
+            }
+            return true;
         }
-        public bool HasFocus(IComponent component) => this._FocusComponent == component;
-        public IComponent this[string name] { get => _Components.ContainsKey(name) ? _Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound); }
+
+
+        public bool HasFocus(IComponent component)
+        {
+            return this._FocusComponent == component;
+        }
+
+        public IComponent this[string name] => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound);
 
         public IEnumerator<IComponent> GetEnumerator()
         {
             foreach (var component in this._Components.Values)
                 yield return component;
         }
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         // Internals
         private Dictionary<string, IComponent> _Components = new Dictionary<string, IComponent>();
@@ -103,6 +149,7 @@ namespace Entoarox.Framework.Interface
         private List<IDynamicComponent> _EventComponents = new List<IDynamicComponent>();
         private IDynamicComponent _FocusComponent;
         private IDynamicComponent _HoverComponent;
+        private int RepeatCounter = 0;
 
         private void UpdateSorting()
         {
@@ -156,6 +203,51 @@ namespace Entoarox.Framework.Interface
         {
             return false;
         }
+        public override void gamePadButtonHeld(Buttons b)
+        {
+            if (b == Buttons.Start)
+                this.receiveKeyPress(Keys.Escape);
+            else if ((this._FocusComponent as IControllerComponent)?.ReceiveController(b) != true)
+            {
+                switch (b)
+                {
+                    case Buttons.A:
+                        this.receiveKeyPress(Keys.Enter);
+                        break;
+                    case Buttons.B:
+                        this.receiveKeyPress(Keys.Escape);
+                        break;
+                    case Buttons.LeftShoulder:
+                    case Buttons.LeftTrigger:
+                        this.TabNext();
+                        break;
+                    case Buttons.RightShoulder:
+                    case Buttons.RightTrigger:
+                        this.TabBack();
+                        break;
+                    case Buttons.LeftThumbstickUp:
+                    case Buttons.DPadUp:
+                        this.receiveKeyPress(Keys.Up);
+                        break;
+                    case Buttons.LeftThumbstickDown:
+                    case Buttons.DPadDown:
+                        this.receiveKeyPress(Keys.Down);
+                        break;
+                    case Buttons.LeftThumbstickLeft:
+                    case Buttons.DPadLeft:
+                        this.receiveKeyPress(Keys.Left);
+                        break;
+                    case Buttons.LeftThumbstickRight:
+                    case Buttons.DPadRight:
+                        this.receiveKeyPress(Keys.Right);
+                        break;
+                }
+            }
+        }
+        public override void receiveGamePadButton(Buttons b)
+        {
+            this.gamePadButtonHeld(b);
+        }
 
         public override void clickAway()
         {
@@ -180,9 +272,14 @@ namespace Entoarox.Framework.Interface
         }
         public override void leftClickHeld(int x, int y)
         {
-            Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(x / Game1.pixelZoom, y / Game1.pixelZoom);
-            if (GetTarget(offset, position, out IDynamicComponent component, out bool floating))
-                (floating? component : this._FocusComponent)?.LeftHeld(offset, position);
+            this.RepeatCounter++;
+            if(this.RepeatCounter>45)
+            {
+                this.RepeatCounter = 0;
+                Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(x / Game1.pixelZoom, y / Game1.pixelZoom);
+                if (GetTarget(offset, position, out IDynamicComponent component, out bool floating))
+                    (floating ? component : this._FocusComponent)?.LeftHeld(offset, position);
+            }
         }
         public override void performHoverAction(int x, int y)
         {
@@ -206,6 +303,7 @@ namespace Entoarox.Framework.Interface
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
+            this.RepeatCounter = 0;
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(x / Game1.pixelZoom, y / Game1.pixelZoom);
             if (GetTarget(offset, position, out IDynamicComponent component, out bool floating))
             {
@@ -218,18 +316,12 @@ namespace Entoarox.Framework.Interface
         }
         public override void receiveKeyPress(Keys key)
         {
-            if (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true)
+            if (key!=Keys.Escape && (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true))
                 return;
             if (key == Keys.Escape && this._FocusComponent != null)
                 UpdateFocus(null);
             else if (key == Keys.Tab)
                 TabNext();
-            else if (key == Keys.Enter)
-            {
-                if (this._FocusComponent == null)
-                    return;
-                (this._FocusComponent as IComponentContainer)?.TabAccess(TabType.LeftClick);
-            }
             else
                 base.receiveKeyPress(key);
         }
@@ -249,14 +341,16 @@ namespace Entoarox.Framework.Interface
         public override void update(GameTime time)
         {
             foreach (IComponent component in this._DrawComponents)
-                component.Update(time);
+                if (component.Visible && (!(component is IDynamicComponent) || (component as IDynamicComponent).Enabled))
+                    component.Update(time);
             (this._FocusComponent as IFloatComponent)?.FloatComponent?.Update(time);
         }
         public override void draw(SpriteBatch b)
         {
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y);
             foreach (IComponent component in this._DrawComponents)
-                component.Draw(offset, b);
+                if(component.Visible)
+                    component.Draw(offset, b);
             (this._FocusComponent as IFloatComponent)?.FloatComponent?.Draw(new Point(0, 0), b);
         }
     }

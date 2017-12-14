@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -169,7 +169,7 @@ namespace Entoarox.Framework.Interface
         }
         public bool Selected
         {
-            get => _FocusComponent != null && _FocusComponent is IInputComponent && (_FocusComponent as IInputComponent).Selected;
+            get => this._FocusComponent != null && this._FocusComponent is IInputComponent && (this._FocusComponent as IInputComponent).Selected;
             set
             {
                 if (this._FocusComponent != null && this._FocusComponent is IInputComponent)
@@ -186,20 +186,31 @@ namespace Entoarox.Framework.Interface
             }
             else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabNext())
             {
-                var index = this._EventComponents.IndexOf(this._FocusComponent) + 1;
+                int index = this._EventComponents.IndexOf(this._FocusComponent) + 1;
                 if (index >= this._EventComponents.Count)
-                    index = 0;
-                this._FocusComponent = this._EventComponents[index];
+                    return false;
             }
             return true;
         }
-        public override void TabAccess(TabType type)
+        public override bool TabBack()
         {
-            //TODO: Implement controller mapping for collections, since that can be done
+            if (this._FocusComponent == null)
+            {
+                if (this._EventComponents.Count == 0)
+                    return false;
+                this._FocusComponent = this._EventComponents[this._EventComponents.Count - 1];
+            }
+            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabNext())
+            {
+                int index = this._EventComponents.IndexOf(this._FocusComponent) - 1;
+                if (index < 0)
+                    return false;
+            }
+            return true;
         }
         public override bool HasFocus(IComponent component) => this._FocusComponent == component;
 
-        public IComponent this[string name] { get => _Components.ContainsKey(name) ? _Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound); }
+        public IComponent this[string name] { get => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound); }
 
         public IEnumerator<IComponent> GetEnumerator()
         {

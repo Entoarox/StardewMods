@@ -110,7 +110,12 @@
     <Compile Include="Interface\Base\BaseComponentCollection.cs" />
     <Compile Include="Interface\Base\BaseComponent.cs" />
     <Compile Include="Interface\Base\BaseDynamicComponent.cs" />
+    <Compile Include="Interface\Containers\GenericComponentCollection.cs" />
+    <Compile Include="Interface\ControllerMapping.cs" />
+    <Compile Include="Interface\IControllerComponent.cs" />
+    <Compile Include="Interface\Interfaces\IVisibilityObserver.cs" />
     <Compile Include="Interface\Misc\Cache.cs" />
+    <Compile Include="Interface\Containers\ScrollableComponentCollection.cs" />
     <Compile Include="Interface\Static\GradientComponent.cs" />
     <Compile Include="Interface\Interfaces\IFloatComponent.cs" />
     <Compile Include="Interface\Interfaces\IHotkeyComponent.cs" />
@@ -189,6 +194,7 @@
   <ItemGroup>
     <Content Include="About\Changelog.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\common.targets" />
   <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.1.7.1\build\Pathoschild.Stardew.ModBuildConfig.targets')" />

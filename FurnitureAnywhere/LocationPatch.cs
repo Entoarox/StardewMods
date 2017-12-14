@@ -1,25 +1,46 @@
-using System;
-using System.Linq;
 using StardewValley;
+
+using Microsoft.Xna.Framework;
 
 using Harmony;
 
+using StardewValley.Locations;
+using StardewValley.Objects;
+
 namespace Entoarox.FurnitureAnywhere
 {
-    [HarmonyPatch(typeof(GameLocation))]
-    [HarmonyPatch("isCollidingPosition")]
-    [HarmonyPatch(new Type[] { typeof(Microsoft.Xna.Framework.Rectangle), typeof(xTile.Dimensions.Rectangle), typeof(bool), typeof(int), typeof(bool), typeof(Character), typeof(bool), typeof(bool), typeof(bool) })]
-    static class LocationPatch
+
+    [HarmonyPatch(typeof(GameLocation), "isCollidingPosition", new[] { typeof(Rectangle), typeof(xTile.Dimensions.Rectangle), typeof(bool), typeof(int), typeof(bool), typeof(Character) })]
+    public class LocationPatch
     {
-        public static bool Prefix(ref bool __return, GameLocation __instance, Microsoft.Xna.Framework.Rectangle position)
+        internal static void Prefix(GameLocation __instance, Rectangle position)
         {
-            foreach (AnywhereFurniture current in __instance.objects.Values.Select(a => a as AnywhereFurniture))
-                if (current.furniture_type != 12 && current.getBoundingBox(current.tileLocation).Intersects(position))
-                {
-                    __return = true;
-                    return true;
-                }
-            return false;
+            SerializableDictionary<Vector2, Object> objects = __instance.objects;
+            Vector2 key = new Vector2((position.Left / Game1.tileSize), (position.Top / Game1.tileSize));
+
+            if (__instance is DecoratableLocation || objects.ContainsKey(key))
+                return;
+
+            foreach (Vector2 k in objects.Keys)
+                if (objects[k] is Furniture)
+                    if (objects[k].boundingBox.Intersects(position))
+                    {
+                        Chest chest = new Chest(true)
+                        {
+                            name = "collider"
+                        };
+                        objects.Add(key, chest);
+                        return;
+                    }
+        }
+
+        internal static void Postfix(GameLocation __instance, Rectangle position)
+        {
+            SerializableDictionary<Vector2, Object> objects = __instance.objects;
+            Vector2 key = new Vector2((position.Left / Game1.tileSize), (position.Top / Game1.tileSize));
+
+            if (objects.ContainsKey(key) && objects[key] is Chest chest && chest.name.Equals("collider"))
+                objects.Remove(key);
         }
     }
 }

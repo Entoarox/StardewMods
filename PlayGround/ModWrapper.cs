@@ -10,6 +10,8 @@ using StardewModdingAPI.Events;
 using Microsoft.Xna.Framework.Graphics;
 
 using xTile;
+using xTile.Layers;
+using xTile.Tiles;
 
 using StardewValley;
 
