@@ -46,7 +46,7 @@ namespace Entoarox.Framework.Experimental
         private static void ProxyMethod(MethodInfo method, MethodInfo parent, TypeBuilder tBuilder)
         {
             var args = method.GetParameters().Select(a => a.ParameterType).ToArray();
-            var mBuilder = tBuilder.DefineMethod(method.Name, method.Attributes, method.CallingConvention, method.ReturnType, args);
+            var mBuilder = tBuilder.DefineMethod(parent.Name, parent.Attributes, parent.CallingConvention, parent.ReturnType, args);
             var il = mBuilder.GetILGenerator();
             for (int c = 1; c <= args.Length; c++)
                 il.Emit(OpCodes.Ldarg, c);
@@ -55,7 +55,7 @@ namespace Entoarox.Framework.Experimental
         }
         private static void ProxyProperty(PropertyInfo property, PropertyInfo parent, TypeBuilder tBuilder)
         {
-            var pBuilder = tBuilder.DefineProperty(property.Name, property.Attributes, property.PropertyType, property.GetIndexParameters().Select(a => a.ParameterType).ToArray());
+            var pBuilder = tBuilder.DefineProperty(parent.Name, parent.Attributes, parent.PropertyType, parent.GetIndexParameters().Select(a => a.ParameterType).ToArray());
             if(property.CanRead)
             {
                 var pMethod = parent.GetGetMethod();
