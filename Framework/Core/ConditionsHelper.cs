@@ -21,6 +21,14 @@ namespace Entoarox.Framework.Core
             RegisterConditionResolver("date", (args, resolver) => resolver(args[0], Game1.dayOfMonth.ToString()));
             RegisterConditionResolver("month", (args, resolver) => resolver(args[0], Game1.currentSeason));
             RegisterConditionResolver("year", (args, resolver) => resolver(args[0], Game1.year.ToString()));
+            RegisterConditionResolver("special", (args, resolver) =>
+            {
+                if (Game1.weatherIcon == 0)
+                    return resolver(args[0], "wedding");
+                if (Game1.weatherIcon == 1)
+                    return resolver(args[0], "festival");
+                return false;
+            });
             RegisterConditionResolver("flag", (args, resolver) => resolver(args[0], Game1.player.mailReceived.ToArray()));
             RegisterConditionResolver("completed", (args, resolver) => {
                 List<string> opts = new List<string>();
