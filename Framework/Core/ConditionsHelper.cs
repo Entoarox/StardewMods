@@ -21,8 +21,7 @@ namespace Entoarox.Framework.Core
             RegisterConditionResolver("date", (args, resolver) => resolver(args[0], Game1.dayOfMonth.ToString()));
             RegisterConditionResolver("month", (args, resolver) => resolver(args[0], Game1.currentSeason));
             RegisterConditionResolver("year", (args, resolver) => resolver(args[0], Game1.year.ToString()));
-            RegisterConditionResolver("special", (args, resolver) =>
-            {
+            RegisterConditionResolver("special", (args, resolver) => {
                 if (Game1.weatherIcon == 0)
                     return resolver(args[0], "wedding");
                 if (Game1.weatherIcon == 1)
@@ -65,13 +64,13 @@ namespace Entoarox.Framework.Core
             });
             RegisterConditionResolver("engaged", (args, resolver) => {
                 if (string.IsNullOrEmpty(Game1.player.spouse) || !Game1.player.spouse.Contains("engaged"))
-                    return resolver(args[0], "false");
+                    return false;
                 return resolver(args[0], Game1.player.spouse.Substring(7), "true");
             });
             RegisterConditionResolver("divorced", (args, resolver) => {
                 var matches = Utility.getAllCharacters().Where(a => a.divorcedFromFarmer);
                 if (!matches.Any())
-                    return resolver(args[0], "false");
+                    return false;
                 var list = matches.Select(a => a.name).ToList();
                 list.Add("true");
                 return resolver(args[0], list.ToArray());
