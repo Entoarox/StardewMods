@@ -32,7 +32,7 @@ namespace Entoarox.Framework.Core
                     opts.Add("beach");
                 return resolver(args[0], opts.ToArray());
             });
-            RegisterConditionResolver("wallet",(args, resolver) => {
+            RegisterConditionResolver("wallet", (args, resolver) => {
                 List<string> opts = new List<string>();
                 if (Game1.player.canUnderstandDwarves)
                     opts.Add("dwarfscroll");
@@ -50,7 +50,7 @@ namespace Entoarox.Framework.Core
                     opts.Add("specialcharm");
                 return resolver(args[0], opts.ToArray());
             });
-            RegisterConditionResolver("married",(args, resolver) => {
+            RegisterConditionResolver("married", (args, resolver) => {
                 if (string.IsNullOrEmpty(Game1.player.spouse) || Game1.player.spouse.Contains("engaged"))
                     return resolver(args[0], "false");
                 return resolver(args[0], Game1.player.spouse, "true");
@@ -68,8 +68,41 @@ namespace Entoarox.Framework.Core
                 list.Add("true");
                 return resolver(args[0], list.ToArray());
             });
-            //TODO RegisterConditionResolver("house");
-            //TODO RegisterConditionResolver("farm");
+            RegisterConditionResolver("house", (args, resolver) => {
+                return resolver(args[0], Game1.player.houseUpgradeLevel.ToString());
+            });
+            RegisterConditionResolver("farm", (args, resolver) => {
+                return resolver(args[0], FarmMap[Math.Min(5, Game1.whichFarm)]);
+            });
+            RegisterConditionResolver("event", (args, resolver) => {
+                return resolver(args[0], Game1.player.eventsSeen.Select(a => a.ToString()).ToArray());
+            });
+            RegisterConditionResolver("money", (args, resolver) => {
+                return resolver(args[0], Game1.player.money.ToString());
+            });
+            RegisterConditionResolver("carries", (args, resolver) => {
+                var matches= Game1.player.items.Where(a => a.Name == args[0]);
+                if (!matches.Any())
+                    return false;
+                int c = 0;
+                foreach (var match in matches)
+                    c += match.Stack;
+                return resolver(args[1], c.ToString());
+            });
+            /*TODO RegisterConditionResolver("shipped", (args, resolver) => {
+                var matches = Game1.player.ship.Where(a => a.Name == args[0]);
+                if (!matches.Any())
+                    return false;
+                int c = 0;
+                foreach (var match in matches)
+                    c += match.Stack;
+                return resolver(args[1], c.ToString());
+            });
+            */
+            //TODO RegisterConditionResolver("skill");
+            RegisterConditionResolver("friendship", (args, resolver) => {
+                return resolver(args[1], Game1.player.getFriendshipHeartLevelForNPC(args[0]).ToString());
+            });
         }
         #endregion
         #region Public API
@@ -105,8 +138,8 @@ namespace Entoarox.Framework.Core
         #region Internal Mechanics
         private Dictionary<string, ConditionResolver> Cache = new Dictionary<string, ConditionResolver>();
         private static string[] WeatherMap = new string[] { "sun", "sun", "sun", "pinkleaves", "rain", "storm", "brownleaves", "snow" };
-        //private static string[] WeatherTypes = new string[] { "weatherWedding", "weatherFestival", "weatherSun", "weatherSummerDebris", "weatherRain", "weatherStorm", "weatherFallDebris", "weatherSnow" };
         private static string[] DayMap = new string[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
+        private static string[] FarmMap = new string[] { "default", "fishing", "forest", "hilltop", "wilderness", "other" };
         private static Regex OpAny = new Regex(@"^\((?:.*?)\|(?:.*?)\)$");
         private static Regex OpSet = new Regex(@"^([\d]+)~([\d]+)$");
         private static Regex OpMin = new Regex(@"^([\d]+)>$");
