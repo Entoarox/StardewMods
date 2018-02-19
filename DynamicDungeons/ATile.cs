@@ -21,7 +21,7 @@ namespace Entoarox.DynamicDungeons
             this.Frames = frames;
             this.Interval = interval;
         }
-        public Tile Get()
+        public xTile.Tiles.Tile Get()
         {
             return new AnimatedTile(this.Layer, this.Frames.Select((tile) => (StaticTile)tile.Get()).ToArray(), this.Interval);
         }

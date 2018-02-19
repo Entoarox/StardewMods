@@ -12,7 +12,7 @@ namespace Entoarox.Framework.Core.Injection
     {
         static bool Prefix(HoeDirt __instance, bool __return, int objectIndex, int tileX, int tileY, bool isFertilizer)
         {
-            return (isFertilizer || __instance.crop != null || !(Core.ModEntry.Config.GreenhouseEverywhere || (Game1.currentLocation is IAugmentedLocation && (Game1.currentLocation as IAugmentedLocation).IsGreenhouse)));
+            return (isFertilizer || __instance.crop != null || !(Core.EntoaroxFrameworkMod.Config.GreenhouseEverywhere || (Game1.currentLocation is IAugmentedLocation && (Game1.currentLocation as IAugmentedLocation).IsGreenhouse)));
         }
         static void Postfix(HoeDirt __instance, bool __return, int objectIndex, int tileX, int tileY, bool isFertilizer)
         {

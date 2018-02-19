@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -47,25 +49,67 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ATile.cs" />
+    <Compile Include="BookMenu.cs" />
     <Compile Include="DungeonBuilder.cs" />
     <Compile Include="DynamicDungeon.cs" />
     <Compile Include="DynamicDungeonsAPI.cs" />
     <Compile Include="DynamicDungeonsMod.cs" />
+    <Compile Include="DynamicDungeonsSavefile.cs" />
+    <Compile Include="ImagePage.cs" />
     <Compile Include="ITile.cs" />
     <Compile Include="LootHandler.cs" />
+    <Compile Include="Page.cs" />
     <Compile Include="PathFinder.cs" />
+    <Compile Include="PaymentPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PTile.cs" />
     <Compile Include="STile.cs" />
+    <Compile Include="TextPage.cs" />
+    <Compile Include="Tile.cs" />
+    <Compile Include="TitlePage.cs" />
+    <Compile Include="TupleMagic.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DynamicDungeonsEntrance.tbin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="i18n\default.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="book.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\book.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\door.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\entrance.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="credits.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\dungeon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\book\doodle1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\book\doodle2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="content\book\doodle3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="door.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="sheet_boulder.png">
@@ -75,6 +119,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="sheet_dwarfvendor.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sheet_info.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="sheet_stalagmite1.png">
@@ -90,6 +137,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="sheet_walls.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="zDynamicDungeonsEntrance_tiles.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

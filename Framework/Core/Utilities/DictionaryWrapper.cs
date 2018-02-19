@@ -32,7 +32,7 @@ namespace Entoarox.Framework.Core.Utilities
                     if (!merge.ContainsKey(pair.Key))
                         merge.Add(pair.Key, pair.Value);
                     else if(!merge[pair.Key].Equals(pair.Value))
-                        ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(patch.Item1) + "` mod tried to modify the `" + data.AssetName + "` dictionary by setting the `" + pair.Key + "` key, but another mod has already set it", LogLevel.Warn);
+                        EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(patch.Item1) + "` mod tried to modify the `" + data.AssetName + "` dictionary by setting the `" + pair.Key + "` key, but another mod has already set it", LogLevel.Warn);
                 }
             foreach(var pair in merge)
             {

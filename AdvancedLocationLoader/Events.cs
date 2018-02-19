@@ -90,8 +90,11 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 GameEvents.UpdateTick -= GameEvents_UpdateTick;
                 Loaders.Loader1_2.ApplyPatches();
-                if (Configs.Compound.DynamicTiles.Count > 0 || Configs.Compound.DynamicProperties.Count > 0 || Configs.Compound.DynamicWarps.Count > 0)
+                if (Configs.Compound.DynamicTiles.Count > 0 || Configs.Compound.DynamicProperties.Count > 0 || Configs.Compound.DynamicWarps.Count > 0 || Configs.Compound.SeasonalTilesheets.Count > 0)
+                {
+                    ModEntry.Logger.Log("Dynamic content detected, preparing dynamic update logic...",LogLevel.Info);
                     TimeEvents.AfterDayStarted += TimeEvents_AfterDayStarted;
+                }
             }
         }
         internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)

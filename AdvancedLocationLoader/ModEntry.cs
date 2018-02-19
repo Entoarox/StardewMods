@@ -47,6 +47,7 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void UpdateTilesheets()
         {
+            Logger.Log("Month changed, updating custom seasonal tilesheets...", LogLevel.Trace);
             List<string> locations=new List<string>();
             foreach (Tilesheet t in Compound.SeasonalTilesheets)
             {

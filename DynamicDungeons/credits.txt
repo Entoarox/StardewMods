@@ -4,13 +4,17 @@ My thanks to the following people, for their work!
 Prismuth:
 - The ore boulder
 - The extra minecart tracks
+- The background texture used for the book menu
+- The custom tiles for the dungeon entrance
 
 ChefRude:
 - The offer statue
 - Eye animation on the dwarven vendor
 - The ore-vein walls
+- The dripping water walls
 
 Eiri:
 - The stalagmites
 - The caved-in skeleton
 - Creating the dwarven vendor sprite
+- Pufferchick NPC

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 
 using StardewModdingAPI;
 
 namespace Entoarox.Framework.Events
 {
-    using Core;
+    using Core.Utilities;
     public static class MoreEvents
     {
         /// <summary>
@@ -17,35 +17,24 @@ namespace Entoarox.Framework.Events
         public static event EventHandler<EventArgsActionTriggered> TouchActionTriggered;
         /// <summary>
         /// This event is fired whenever the item currently held by the player is changed
+        /// MoreEvents.ActiveItemChanged been rendered obsolete with the addition of the <see cref="ItemEvents"/> class and its own ActiveItemChanged event.
         /// </summary>
+        [Obsolete("This event has been moved into the ItemEvents class", true)]
         public static event EventHandler<EventArgsActiveItemChanged> ActiveItemChanged;
 
 
-        private static void FireEventSafely<TArgs>(string name, Delegate evt, TArgs args) where TArgs : EventArgs
-        {
-            if (evt == null)
-                return;
-            foreach (EventHandler<TArgs> handler in evt.GetInvocationList())
-                try
-                {
-                    handler.Invoke(null, args);
-                }
-                catch (Exception ex)
-                {
-                    ModEntry.Logger.Log($"A mod failed handling the {name} event:\n{ex}", LogLevel.Error);
-                }
-        }
+
         internal static void FireActionTriggered(EventArgsActionTriggered eventArgs)
         {
-            FireEventSafely("ActionTriggered", ActionTriggered, eventArgs);
+            Events.FireEventSafely("ActionTriggered", ActionTriggered, eventArgs);
         }
         internal static void FireTouchActionTriggered(EventArgsActionTriggered eventArgs)
         {
-            FireEventSafely("TouchActionTriggered", TouchActionTriggered, eventArgs);
+            Events.FireEventSafely("TouchActionTriggered", TouchActionTriggered, eventArgs);
         }
         internal static void FireActiveItemChanged(EventArgsActiveItemChanged eventArgs)
         {
-            FireEventSafely("ActiveItemChanged", ActiveItemChanged, eventArgs);
+            Events.FireEventSafely("ActiveItemChanged", ActiveItemChanged, eventArgs, true);
         }
     }
 }

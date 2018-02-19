@@ -15,7 +15,7 @@ namespace Entoarox.Framework.Core.Injection
     {
         static bool Prefix(Crop __instance, int state, int fertilizer, int xTile, int yTile, GameLocation environment)
         {
-            if (ModEntry.Config.GreenhouseEverywhere || (environment is IAugmentedLocation && (environment as IAugmentedLocation).IsGreenhouse))
+            if (EntoaroxFrameworkMod.Config.GreenhouseEverywhere || (environment is IAugmentedLocation && (environment as IAugmentedLocation).IsGreenhouse))
             {
                 if (state == 1)
                 {

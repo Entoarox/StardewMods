@@ -50,6 +50,7 @@
     <Compile Include="ContentPackManifest.cs" />
     <Compile Include="SeasonalImmersionMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SeasonalTextureLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ContentPack\manifest.json" />

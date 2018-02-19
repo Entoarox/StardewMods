@@ -27,37 +27,37 @@ namespace Entoarox.Framework.Core
             switch (err.Status)
             {
                 case WebExceptionStatus.ConnectFailure:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, connection failed.", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, connection failed.", LogLevel.Error);
                     break;
                 case WebExceptionStatus.NameResolutionFailure:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, DNS resolution failed", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, DNS resolution failed", LogLevel.Error);
                     break;
                 case WebExceptionStatus.SecureChannelFailure:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL handshake failed", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL handshake failed", LogLevel.Error);
                     break;
                 case WebExceptionStatus.Timeout:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, Connection timed out", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, Connection timed out", LogLevel.Error);
                     break;
                 case WebExceptionStatus.TrustFailure:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL certificate cannot be validated", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, SSL certificate cannot be validated", LogLevel.Error);
                     break;
                 case WebExceptionStatus.ProtocolError:
                     HttpWebResponse response = (HttpWebResponse)err.Response;
                     switch(response.StatusCode)
                     {
                         case HttpStatusCode.NotFound:
-                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, The update url provided by the mod does not exist", LogLevel.Warn);
+                            EntoaroxFrameworkMod.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, The update url provided by the mod does not exist", LogLevel.Warn);
                             break;
                         case HttpStatusCode.RequestTimeout:
-                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Connection timed out", LogLevel.Warn);
+                            EntoaroxFrameworkMod.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Connection timed out", LogLevel.Warn);
                             break;
                         default:
-                            ModEntry.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
+                            EntoaroxFrameworkMod.Logger.Log($"[UpdateChecker] The `{name}` mod failed to check for updates, Server protocol error.\n\t[{response.StatusCode}]: {response.StatusDescription}", LogLevel.Error);
                             break;
                     }
                     break;
                 default:
-                    ModEntry.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, a unknown error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + name + "` mod failed to check for updates, a unknown error occured." + Environment.NewLine + err.ToString(), LogLevel.Error);
                     break;
             }
         }
@@ -104,18 +104,18 @@ namespace Entoarox.Framework.Core
                                         else if (Data.ContainsKey("Default"))
                                             info = Data["Default"];
                                         else
-                                            ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The {modVersion} version of the `{pair.Key.Name}` mod is not compatible with version {version} of Stardew Valley.");
+                                            EntoaroxFrameworkMod.Logger.ExitGameImmediately($"[UpdateChecker] The {modVersion} version of the `{pair.Key.Name}` mod is not compatible with version {version} of Stardew Valley.");
                                         if (info != null)
                                         {
                                             SemanticVersion min = new SemanticVersion(info.Minimum);
                                             SemanticVersion rec = new SemanticVersion(info.Recommended);
                                             SemanticVersion max = new SemanticVersion(info.Latest);
                                             if (min.IsNewerThan(modVersion))
-                                                ModEntry.Logger.ExitGameImmediately($"[UpdateChecker] The `{pair.Key.Name}` mod is too old, a newer version is required. Expected {min}, found {modVersion}.");
+                                                EntoaroxFrameworkMod.Logger.ExitGameImmediately($"[UpdateChecker] The `{pair.Key.Name}` mod is too old, a newer version is required. Expected {min}, found {modVersion}.");
                                             else if (rec.IsNewerThan(modVersion))
-                                                ModEntry.Logger.Log($"[UpdateChecker] Version {rec} of the `{pair.Key.Name}` mod is available, it is recommended you update now.", LogLevel.Alert);
+                                                EntoaroxFrameworkMod.Logger.Log($"[UpdateChecker] Version {rec} of the `{pair.Key.Name}` mod is available, it is recommended you update now.", LogLevel.Alert);
                                             else if (max.IsNewerThan(modVersion))
-                                                ModEntry.Logger.Log($"[UpdateChecker] Version {max} of the `{pair.Key.Name}` mod is available.", LogLevel.Info);
+                                                EntoaroxFrameworkMod.Logger.Log($"[UpdateChecker] Version {max} of the `{pair.Key.Name}` mod is available.", LogLevel.Info);
                                         }
                                     }
                                     catch (WebException err)
@@ -124,7 +124,7 @@ namespace Entoarox.Framework.Core
                                     }
                                     catch (Exception err)
                                     {
-                                        ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured while reading result, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                                        EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured while reading result, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
                                     }
                                 };
                                 Client.DownloadStringAsync(uri);
@@ -136,15 +136,15 @@ namespace Entoarox.Framework.Core
                         }
                         catch(Exception err)
                         {
-                            ModEntry.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
+                            EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] The `" + pair.Key.Name + "` mod failed to check for updates, unexpected error occured, error message follows." + Environment.NewLine + err.ToString(), LogLevel.Error);
                         }
                     });
                 else
-                    ModEntry.Logger.Log("[UpdateChecker] No internet connection, skipping update checks.", LogLevel.Debug);
+                    EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] No internet connection, skipping update checks.", LogLevel.Debug);
             }
             catch(Exception err)
             {
-                ModEntry.Logger.Log("[UpdateChecker] Unexpected failure, unexpected error occured, error message follows."+Environment.NewLine+err.ToString(), LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("[UpdateChecker] Unexpected failure, unexpected error occured, error message follows."+Environment.NewLine+err.ToString(), LogLevel.Error);
             }
         }
     }

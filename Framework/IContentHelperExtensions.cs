@@ -23,12 +23,12 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
         public static void RegisterSerializerType<T>(this IContentHelper helper)
         {
-            if (ModEntry.SerializerInjected)
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod failed to augment the serializer, serializer has already been created.", LogLevel.Error);
-            else if (!ModEntry.SerializerTypes.Contains(typeof(T)))
-                ModEntry.SerializerTypes.Add(typeof(T));
+            if (EntoaroxFrameworkMod.SerializerInjected)
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod failed to augment the serializer, serializer has already been created.", LogLevel.Error);
+            else if (!EntoaroxFrameworkMod.SerializerTypes.Contains(typeof(T)))
+                EntoaroxFrameworkMod.SerializerTypes.Add(typeof(T));
             else
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod failed to augment the serializer, the `"+typeof(T).FullName+"` type has already been injected before.", LogLevel.Warn);
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod failed to augment the serializer, the `"+typeof(T).FullName+"` type has already been injected before.", LogLevel.Warn);
         }
         /// <summary>
         /// Lets you replace a region of pixels in one texture with the contents of another texture
@@ -77,7 +77,7 @@ namespace Entoarox.Framework
             }
             catch
             {
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to inject data into the `" + assetName + "` asset failed, as the TKey and TValue given do not match those of the data to inject", LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to inject data into the `" + assetName + "` asset failed, as the TKey and TValue given do not match those of the data to inject", LogLevel.Error);
             }
         }
         /// <summary>
@@ -102,7 +102,7 @@ namespace Entoarox.Framework
             }
             catch
             {
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to inject data into the `" + assetName + "` asset failed, as the TKey and TValue of the injected asset do not match the original.", LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to inject data into the `" + assetName + "` asset failed, as the TKey and TValue of the injected asset do not match the original.", LogLevel.Error);
             }
         }
         /// <summary>
@@ -116,7 +116,7 @@ namespace Entoarox.Framework
             assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
             replacementAssetName = helper.GetActualAssetKey(replacementAssetName, ContentSource.GameContent);
             if (XnbLoader._Map.ContainsKey(assetName))
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset failed, as another mod has already done so.", LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset failed, as another mod has already done so.", LogLevel.Error);
             else
             {
                 XnbLoader._Map.Add(assetName, (helper, replacementAssetName));
@@ -137,7 +137,7 @@ namespace Entoarox.Framework
                 string replacement = helper.GetActualAssetKey(pair.Value, ContentSource.GameContent);
                 if (XnbLoader._Map.ContainsKey(asset))
                 {
-                    ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + pair.Key + "` asset failed, as another mod has already done so.", LogLevel.Error);
+                    EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + pair.Key + "` asset failed, as another mod has already done so.", LogLevel.Error);
                 }
                 else
                 {
@@ -158,7 +158,7 @@ namespace Entoarox.Framework
         {
             assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
             if (DeferredAssetHandler._LoadMap.ContainsKey((typeof(T), assetName)))
-                ModEntry.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset of type `" + typeof(T).FullName + "` failed, as another mod has already done so.", LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset of type `" + typeof(T).FullName + "` failed, as another mod has already done so.", LogLevel.Error);
             else
             {
                 DeferredAssetHandler._LoadMap.Add((typeof(T), assetName), assetLoader);

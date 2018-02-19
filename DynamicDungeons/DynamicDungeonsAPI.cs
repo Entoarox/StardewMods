@@ -19,6 +19,7 @@ namespace Entoarox.DynamicDungeons
                 LootHandler.LootTables.Add(table, new LootHandler());
             LootHandler.LootTables[table].Add(dropChance, itemLootCallback);
         }
+        public double CurrentDifficulty => DynamicDungeonsMod.Location?.Difficulty ?? 0;
         public int CurrentFloorLevel => DynamicDungeonsMod.Location?.Floor ?? 0;
         public bool InDungeon => Game1.currentLocation != null && Game1.currentLocation is DynamicDungeon;
     }

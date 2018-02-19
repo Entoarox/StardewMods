@@ -3,21 +3,14 @@ using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using XnaRectangle = Microsoft.Xna.Framework.Rectangle;
-
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
 
 using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
-using StardewValley.Locations;
 using SFarmer = StardewValley.Farmer;
 
-using xTile.ObjectModel;
-using xTile.Tiles;
 using Location = xTile.Dimensions.Location;
 using xTileRectangle = xTile.Dimensions.Rectangle;
 
@@ -33,11 +26,12 @@ namespace Entoarox.DynamicDungeons
 
         public int Floor;
         public Point EntryPoint;
+        public bool DrawInfo = false;
         private double _Difficulty;
         public double Difficulty
         {
-            get => _Difficulty;
-            set => _Difficulty = Math.Max(0, Math.Min(10, value));
+            get => this._Difficulty;
+            set => this._Difficulty = Math.Max(0, Math.Min(10, value));
         }
         public List<ResourceClump> ResourceClumps = new List<ResourceClump>();
         public DynamicDungeon(double difficulty=0, int? seed = null)
@@ -70,6 +64,10 @@ namespace Entoarox.DynamicDungeons
         }
         public override void drawAboveAlwaysFrontLayer(SpriteBatch b)
         {
+            if(this.DrawInfo)
+            {
+                this.Map.GetLayer("MapInfo").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
+            }
             foreach (NPC current in this.characters)
             {
                 if (current is Monster)
@@ -78,6 +76,7 @@ namespace Entoarox.DynamicDungeons
                 }
             }
             base.drawAboveAlwaysFrontLayer(b);
+            // Floor
             string floor = this.Floor.ToString();
             Vector2 size = Game1.smallFont.MeasureString(floor);
             size.X += 26;
@@ -87,13 +86,33 @@ namespace Entoarox.DynamicDungeons
                 size = Game1.smallFont.MeasureString(floor);
                 size.X += 26;
             }
-            // Background boxes
-            IClickableMenu.drawTextureBox(Game1.spriteBatch, 158, 4, 125, 40, Color.White);
             IClickableMenu.drawTextureBox(Game1.spriteBatch, 158, 48, (int)Math.Ceiling(size.X), 52, Color.White);
+            Utility.drawTextWithShadow(Game1.spriteBatch, floor, Game1.smallFont, new Vector2(158 + 12, 48 + 12), Game1.textColor);
+            // Difficulty
+            IClickableMenu.drawTextureBox(Game1.spriteBatch, 158, 4, 125, 40, Color.White);
+            if (this.Difficulty >= 1)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13, 17, 9, 14), Color.Green);
+            if (this.Difficulty >= 2)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 10, 17, 9, 14), Color.Green);
+            if (this.Difficulty >= 3)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 20, 17, 9, 14), Color.Green);
+            if (this.Difficulty >= 4)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 30, 17, 9, 14), Color.Green);
+            if (this.Difficulty >= 5)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 40, 17, 9, 14), Color.DarkOrange);
+            if (this.Difficulty >= 6)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 50, 17, 9, 14), Color.DarkOrange);
+            if (this.Difficulty >= 7)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 60, 17, 9, 14), Color.DarkOrange);
+            if (this.Difficulty >= 8)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 70, 17, 9, 14), Color.Red);
+            if (this.Difficulty >= 9)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 80, 17, 9, 14), Color.Red);
+            if (this.Difficulty == 10)
+                Game1.spriteBatch.Draw(Game1.staminaRect, new XnaRectangle(158 + 13 + 90, 17, 9, 14), Color.DarkRed);
+            // Minimap
             IClickableMenu.drawTextureBox(Game1.spriteBatch, 4, 4, 150, 150, Color.White);
-            // Minimap image
             Game1.spriteBatch.Draw(this._Minimap, new Vector2(20, 20), Color.White);
-            // Player dot
             Point p = Game1.player.getTileLocationPoint();
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 19, p.Y + 19, 1, 1), Color.Red * 0.33f);
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 19, p.Y + 21, 1, 1), Color.Red * 0.33f);
@@ -104,28 +123,6 @@ namespace Entoarox.DynamicDungeons
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 21, p.Y + 20, 1, 1), Color.Red * 0.66f);
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 20, p.Y + 21, 1, 1), Color.Red * 0.66f);
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 20, p.Y + 20, 1, 1), Color.Red * 0.99f);
-            // Depth level
-            Utility.drawTextWithShadow(Game1.spriteBatch, this.Floor.ToString(), Game1.smallFont, new Vector2(158 + 12, 48 + 12), Game1.textColor);
-            if (this.Difficulty >= 1)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13, 17, 9, 14), Color.Green);
-            if (this.Difficulty >= 2)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 10, 17, 9, 14), Color.Green);
-            if (this.Difficulty >= 3)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 20, 17, 9, 14), Color.Green);
-            if (this.Difficulty >= 4)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 30, 17, 9, 14), Color.Green);
-            if (this.Difficulty >= 5)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 40, 17, 9, 14), Color.DarkOrange);
-            if (this.Difficulty >= 6)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 50, 17, 9, 14), Color.DarkOrange);
-            if (this.Difficulty >= 7)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 60, 17, 9, 14), Color.DarkOrange);
-            if (this.Difficulty >= 8)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 70, 17, 9, 14), Color.Red);
-            if (this.Difficulty >= 9)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 80, 17, 9, 14), Color.Red);
-            if (this.Difficulty == 10)
-                Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(158 + 13 + 90, 17, 9, 14), Color.DarkRed);
         }
         public override void resetForPlayerEntry()
         {
@@ -181,32 +178,49 @@ namespace Entoarox.DynamicDungeons
             return this.EntryPoint.Equals(new Point((int)tileLocation.X,(int)tileLocation.Y)) || base.isTileOccupied(tileLocation, characterToIgnore);
         }
 
-        public override bool checkAction(Location tileLocation, xTileRectangle viewport, SFarmer who)
+        public new bool performAction(string propertyValue, SFarmer who, Location tileLocation)
         {
-            Tile tile = Game1.currentLocation.map.GetLayer("Buildings").Tiles[tileLocation.X, tileLocation.Y];
-            if (tile != null && tile.Properties.TryGetValue("Action", out var propertyValue))
+            string[] split = propertyValue.Split(' ');
+            string[] args = new string[split.Length - 1];
+            Array.Copy(split, 1, args, 0, args.Length);
+            string action = string.IsInterned(split[0]) ?? split[0];
+            if (action == "DDLoot") // DDLoot <string:table> <int:dropcount> [bool:deleteTile] [<float:enemySpawnChance> <string:spawnedEnemy>]
             {
-                string[] split = ((string)propertyValue).Split(' ');
-                string[] args = new string[split.Length - 1];
-                Array.Copy(split, 1, args, 0, args.Length);
-                string action = split[0];
-                if (action.Equals("DDLoot")) // DDLoot <string:table> <int:dropcount> [bool:deleteTile] [<float:enemySpawnChance> <string:spawnedEnemy>]
-                {
-                    Game1.drawObjectDialogue($"TODO: Trigger the \"{args[0]}\" loot table and drop ({args[1]}) items");
-                    return true;
-                }
-                else if (action.Equals("DDShop")) // DDShop <vendorID> [Currently only DwarfVendor]
-                {
-                    Game1.drawObjectDialogue($"TODO: Open the \"{args[0]}\" shop menu here");
-                    return true;
-                }
-                else if (action.Equals("DDLooted")) // DDLooted
-                {
-                    Game1.drawObjectDialogue("TODO: Localize `You search thoroughly but cant find anything of value.`");
-                    return true;
-                }
+                Game1.drawObjectDialogue($"TODO: Trigger the \"{args[0]}\" loot table and drop ({args[1]}) items");
+                return true;
+            }
+            else if (action == "DDShop") // DDShop <vendorID> [Currently only DwarfVendor]
+            {
+                Game1.drawObjectDialogue($"TODO: Open the \"{args[0]}\" shop menu here");
+                return true;
+            }
+            else if (action == "DDLooted") // DDLooted
+            {
+                Game1.drawObjectDialogue(DynamicDungeonsMod.SHelper.Translation.Get("AlreadyLooted"));
+                return true;
+            }
+            else if (action == "DDExit")
+            {
+                this.createQuestionDialogue(DynamicDungeonsMod.SHelper.Translation.Get("LeaveDungeon"), new Response[] {
+                        new Response("yes",DynamicDungeonsMod.SHelper.Translation.Get("LeaveDungeon_Yes")),
+                        new Response("no",DynamicDungeonsMod.SHelper.Translation.Get("LeaveDungeon_No"))
+                    }, this.ExitResolver);
             }
             return false;
+        }
+        public override bool checkAction(Location tileLocation, xTileRectangle viewport, SFarmer who)
+        {
+            Vector2 vector = new Vector2(tileLocation.X, tileLocation.Y);
+            var tile = this.map.GetLayer("Buildings").PickTile(new Location(tileLocation.X * Game1.tileSize, tileLocation.Y * Game1.tileSize), viewport.Size) ?? this.map.GetLayer("Buildings").PickTile(new Location(tileLocation.X * Game1.tileSize, (tileLocation.Y + 1) * Game1.tileSize), viewport.Size);
+            if (tile != null && tile.Properties.TryGetValue("Action", out var propertyValue) && propertyValue != null)
+                return (this.currentEvent != null || this.isCharacterAtTile(vector + new Vector2(0f, 1f)) == null) && this.performAction(propertyValue, who, tileLocation);
+            return base.checkAction(tileLocation, viewport, who);
+        }
+        private void ExitResolver(SFarmer player, string answer)
+        {
+            answer = string.IsInterned(answer) ?? answer;
+            if (answer == "yes")
+                Game1.warpFarmer("DynamicDungeonEntrance", 5, 7, false);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
@@ -30,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicDungeons", "DynamicDungeons\DynamicDungeons.csproj", "{AE355745-73FE-45C6-BA17-DE56744BB3D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayGround", "PlayGround\PlayGround.csproj", "{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomBooks", "CustomBooks\CustomBooks.csproj", "{AE56920C-7F17-4E17-B703-6586B190EF04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE56920C-7F17-4E17-B703-6586B190EF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE56920C-7F17-4E17-B703-6586B190EF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE56920C-7F17-4E17-B703-6586B190EF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE56920C-7F17-4E17-B703-6586B190EF04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

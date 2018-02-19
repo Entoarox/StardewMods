@@ -75,8 +75,8 @@ namespace Entoarox.MorePetsAndAnimals
                 "  Skins:"
             };
             foreach (KeyValuePair<string, List<int>> pair in Indexes)
-                if(pair.Value.Count>0)
-                    partial.Add($"{Environment.NewLine}    {pair.Key.PadRight(20)}: {pair.Value.Count} skins");
+                if (pair.Value.Count > 1)
+                    partial.Add($"{Environment.NewLine}    {pair.Key.PadRight(20)}: {pair.Value.Count - 1} skins");
             this.Monitor.Log(string.Join("", partial), LogLevel.Trace);
             helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using this mod, you monster", this.CommandFired_KillPets);
             if (Config.AnimalsOnly)
@@ -120,7 +120,7 @@ namespace Entoarox.MorePetsAndAnimals
                 else if(!file.Name.Equals("BabyDuck.xnb"))
                     this.Monitor.Log("Found file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
             }
-            this.Monitor.Log("Skins found: " + string.Join(", ", skins), LogLevel.Trace);
+            this.Monitor.Log("Skin files found: " + string.Join(", ", skins), LogLevel.Trace);
         }
         private List<Pet> GetAllPets()
         {

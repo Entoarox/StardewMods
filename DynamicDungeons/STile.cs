@@ -18,7 +18,7 @@ namespace Entoarox.DynamicDungeons
             this.Sheet = sheet;
             this.Index = index;
         }
-        public Tile Get()
+        public xTile.Tiles.Tile Get()
         {
             return new StaticTile(this.Layer, this.Sheet, BlendMode.Additive, this.Index);
         }

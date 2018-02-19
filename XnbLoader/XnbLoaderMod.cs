@@ -91,12 +91,16 @@ namespace Entoarox.XnbLoader
                     string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
                     if (!this.Cache.ContainsKey(from))
                     {
+                        if (!File.Exists(Path.Combine(StardewValley.Game1.content.RootDirectory, from) + ".xnb"))
+                            this.Monitor.Log($"Found a file that does not exist in the vanilla content, if this is intentional you can ignore this warning: {from}.xnb", LogLevel.Warn);
                         this.Cache.Add(from, Path.Combine("ModContent", from));
                         files++;
                     }
+                    else
+                        this.Monitor.Log($"Encountered duplicate file in ModContent, this shouldnt be here: {from}.xnb", LogLevel.Warn);
                 }
                 else
-                    this.Monitor.Log($"Encountered non-xnb file in ModContent, this shouldnt be here: {file}", LogLevel.Warn);
+                    this.Monitor.Log($"Encountered non-xnb file in ModContent, this shouldnt be here: {Path.Combine(path, Path.GetDirectoryName(file), Path.GetFileName(file))}", LogLevel.Warn);
 
             }
             return files;

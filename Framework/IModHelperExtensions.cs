@@ -56,7 +56,7 @@ namespace Entoarox.Framework
         /// <param name="helper">The <see cref="IModHelper"/> of the mod calling this method</param>
         public static void RequestCreditsSkip(this IModHelper helper)
         {
-            ModEntry.SkipCredits = true;
+            EntoaroxFrameworkMod.SkipCredits = true;
         }
         /// <summary>
         /// This registers the given instance as a dynamic config.

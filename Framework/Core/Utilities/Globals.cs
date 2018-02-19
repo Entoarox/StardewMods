@@ -6,7 +6,7 @@ namespace Entoarox.Framework.Core.Utilities
     {
         public static string GetModName(IModLinked mod)
         {
-            return ModEntry.SHelper.ModRegistry.Get(mod.ModID).Name;
+            return EntoaroxFrameworkMod.SHelper.ModRegistry.Get(mod.ModID).Name;
         }
     }
 }

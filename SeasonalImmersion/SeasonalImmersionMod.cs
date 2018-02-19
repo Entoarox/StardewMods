@@ -34,10 +34,11 @@ namespace Entoarox.SeasonalImmersion
             {
                 this.Monitor.Log("Could not load ContentPack" + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Error);
             }
+            helper.Content.AssetLoaders.Add(new SeasonalTextureLoader());
         }
         
         private static string FilePath;
-        private static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures;
+        internal static Dictionary<string, Dictionary<string, Texture2D>> SeasonTextures;
         private static string[] seasons = new string[] { "spring", "summer", "fall", "winter" };
         private static BlendState blendColor = new BlendState
         {
@@ -234,7 +235,7 @@ namespace Entoarox.SeasonalImmersion
                 return;
             try
             {
-                this.Monitor.Log("Attempting to update seasonal textures...", LogLevel.Debug);
+                this.Monitor.Log("Attempting to update seasonal textures...", LogLevel.Trace);
                 // Check houses/greenhouse
                 if (SeasonTextures.ContainsKey("houses"))
                     Game1.getFarm().houseTextures = SeasonTextures["houses"][Game1.currentSeason];
@@ -244,17 +245,24 @@ namespace Entoarox.SeasonalImmersion
                 // Check furniture
                 if (SeasonTextures.ContainsKey("furniture"))
                     StardewValley.Objects.Furniture.furnitureTexture = SeasonTextures["furniture"][Game1.currentSeason];
-                // Reset big craftables
-                if (!SeasonTextures.ContainsKey("Craftables"))
-                    Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
-                else
-                    Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables"][Game1.currentSeason];
                 // Check outdoor craftables
                 if (Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_outdoor"))
-                    Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables_outdoor"][Game1.currentSeason];
+                {
+                    this.Helper.Content.InvalidateCache("TileSheets\\Craftables_outdoor");
+                    Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables_outdoor");
+                }
                 // Check indoor craftables
-                if (!Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_indoor"))
-                    Game1.bigCraftableSpriteSheet = SeasonTextures["Craftables_indoor"][Game1.currentSeason];
+                else if (!Game1.currentLocation.IsOutdoors && SeasonTextures.ContainsKey("Craftables_indoor"))
+                {
+                    this.Helper.Content.InvalidateCache("TileSheets\\Craftables_indoor");
+                    Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables_indoor");
+                }
+                // Reset big craftables
+                else
+                {
+                    this.Helper.Content.InvalidateCache("TileSheets\\Craftables");
+                    Game1.bigCraftableSpriteSheet = Game1.content.Load<Texture2D>("TileSheets\\Craftables");
+                }
                 // Loop buildings
                 foreach (Building building in Game1.getFarm().buildings)
                     if (SeasonTextures.ContainsKey(building.buildingType))

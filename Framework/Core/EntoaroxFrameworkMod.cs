@@ -12,6 +12,7 @@ using StardewValley.Monsters;
 using StardewValley.Quests;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
+using SObject = StardewValley.Object;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -23,8 +24,9 @@ namespace Entoarox.Framework.Core
 {
     using Events;
     using Core.AssetHandlers;
+    using Extensions;
 
-    internal class ModEntry : Mod
+    internal class EntoaroxFrameworkMod : Mod
     {
         #region References
         internal static FrameworkConfig Config;
@@ -64,6 +66,8 @@ namespace Entoarox.Framework.Core
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands)
                 ;
             GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
+            SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
+            SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
         }
         #endregion
@@ -122,7 +126,6 @@ namespace Entoarox.Framework.Core
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    this.Monitor.Log("EF.ME.ActionTriggered(" + split[0] + ")");
                     this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
                 }
             }
@@ -266,6 +269,106 @@ namespace Entoarox.Framework.Core
                     MoreEvents.FireTouchActionTriggered(this.ActionInfo);
                 }
             }
+        }
+        private void SaveEvents_BeforeSave(object s, EventArgs e)
+        {
+            ItemEvents.FireBeforeSerialize();
+            foreach(GameLocation loc in Game1.locations)
+            {
+                foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                {
+                    chest.items = Serialize(chest.items);
+                }
+            }
+            ItemEvents.FireAfterSerialize();
+        }
+        private void SaveEvents_AfterSave(object s, EventArgs e)
+        {
+            ItemEvents.FireBeforeDeserialize();
+            foreach (GameLocation loc in Game1.locations)
+            {
+                foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                {
+                    chest.items = Deserialize(chest.items);
+                }
+            }
+            ItemEvents.FireAfterDeserialize();
+        }
+        #endregion
+        #region Functions
+        private List<Item> Serialize(List<Item> items)
+        {
+            List<Item> output = new List<Item>();
+            foreach(SObject item in items.Where(a => a is SObject))
+            {
+                if (item is ICustomItem)
+                {
+                    SObject obj = new SObject
+                    {
+                        parentSheetIndex = 0,
+                        type = $"{(item.GetType().AssemblyQualifiedName.Base64Encode())}@{(item as ICustomItem).Sleep().Base64Encode()}",
+                        name = "[Entoarox.Framework.ICustomItem]",
+                        price = item.price
+                    };
+                    output.Add(obj);
+                    output.Add(obj);
+                }
+                else
+                    output.Add(item);
+            }
+            return output;
+        }
+        private List<Item> Deserialize(List<Item> items)
+        {
+            List<Item> output = new List<Item>();
+            foreach (SObject item in items.Where(a => a is SObject))
+            {
+                if (item.name.Equals("[Entoarox.Framework.ICustomItem]"))
+                {
+                    SObject obj;
+                    string[] split = item.type.Split('@');
+                    if (split.Length != 2)
+                        obj = item;
+                    else
+                    {
+                        string cls = split[0].Base64Decode();
+                        string data = split[1].Base64Decode();
+                        try
+                        {
+                            Type type = Type.GetType(cls, true);
+                            if (!typeof(SObject).IsAssignableFrom(type))
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item, item class is not a Stardew Object: " + cls, LogLevel.Error);
+                                obj = item;
+                            }
+                            else if(!type.GetInterfaces().Contains(typeof(ICustomItem)))
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
+                                obj = item;
+                            }
+                            else
+                            {
+                                obj = (SObject)Activator.CreateInstance(type);
+                                (obj as ICustomItem).Wakeup(data);
+                            }
+                        }
+                        catch(TypeLoadException)
+                        {
+                            this.Monitor.Log("Unable to deserialize custom item, item class was not found: " + cls, LogLevel.Error);
+                            obj = item;
+                        }
+                        catch(Exception err)
+                        {
+                            this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
+                            obj = item;
+                        }
+                    }
+                    output.Add(obj);
+                }
+                else
+                    output.Add(item);
+            }
+            return output;
         }
         #endregion
         #region Serializer

@@ -1,7 +1,6 @@
 using System;
 
 using xTile.Layers;
-using xTile.Tiles;
 
 namespace Entoarox.DynamicDungeons
 {
@@ -20,7 +19,7 @@ namespace Entoarox.DynamicDungeons
             this.Key = key;
             this.Value = value;
         }
-        public Tile Get()
+        public xTile.Tiles.Tile Get()
         {
             throw new NotImplementedException();
         }

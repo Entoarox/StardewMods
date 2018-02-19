@@ -375,7 +375,7 @@ namespace Entoarox.DynamicDungeons
         }
         private bool FindRegionOfSize(ref Map map, int width, int height, int weight, out Point point)
         {
-            point = default(Point);
+            point = default;
             Point? origin = null;
             Layer floor = map.GetLayer("Back");
             Layer wall = map.GetLayer("Buildings");
@@ -389,7 +389,7 @@ namespace Entoarox.DynamicDungeons
         }
         private bool FindRegionOfSize(ref Map map, int width, int height, int weight, Point start, out Point point)
         {
-            point = default(Point);
+            point = default;
             Layer floor = map.GetLayer("Back");
             Layer wall = map.GetLayer("Buildings");
             bool invalid = false;
@@ -408,12 +408,26 @@ namespace Entoarox.DynamicDungeons
             }
             return false;
         }
+        private void BuildStructure(Map map, string name, int width, int height, int weight, int minSpawn, int maxSpawn, Tile[] tiles)
+        {
+            for (int c = minSpawn; c < maxSpawn; c++)
+                if (FindRegionOfSize(ref map, width, height, weight, out var point))
+                {
+                    Report("Structure spawned: " + name);
+                    foreach (var tile in tiles)
+                        tile.Apply(point.X, point.Y, map);
+                }
+                else
+                    Report("Spawn attempt failed: " + name);
+        }
         private void BuildStructure(ref Map map, string name, int width, int height, int weight, int minSpawn, int maxSpawn, ITile[] tiles)
         {
             BuildStructure(ref map, name, width, height, weight, minSpawn, maxSpawn, () => tiles);
         }
         private void BuildStructure(ref Map map, string name, int width, int height, int weight, int minSpawn, int maxSpawn, Func<ITile[]> tiles)
         {
+            var info = map.GetLayer("MapInfo");
+            var isheet = map.GetTileSheet("InfoSheet");
             if (minSpawn != maxSpawn)
                 minSpawn = this.Seeder.Next(0, minSpawn);
             else
@@ -426,11 +440,28 @@ namespace Entoarox.DynamicDungeons
                     Parallel.ForEach(mytiles, tile => {
                         if (tile is PTile)
                             return;
-                        tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y] = tile.Get();
+                        var data= tile.Get();
+                        tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y] = data;
+                        if(info.Tiles[point.X + tile.X, point.Y + tile.Y]==null && data.TileIndexProperties.ContainsKey("Diggable"))
+                            info.Tiles[point.X + tile.X, point.Y + tile.Y] = new StaticTile(info, isheet, BlendMode.Additive, 3);
+                        else if (info.Tiles[point.X + tile.X, point.Y + tile.Y]==null && data.TileIndexProperties.ContainsKey("Water"))
+                            info.Tiles[point.X + tile.X, point.Y + tile.Y] = new StaticTile(info, isheet, BlendMode.Additive, 2);
+                        else if (info.Tiles[point.X + tile.X, point.Y + tile.Y]==null && (tile.Layer.Id.Equals("Back") || (tile.Layer.Id.Equals("Buildings") && data.TileIndexProperties.ContainsKey("Passable"))))
+                            info.Tiles[point.X + tile.X, point.Y + tile.Y] = new StaticTile(info, isheet, BlendMode.Additive, 7);
+                        else if (tile.Layer.Id.Equals("Buildings"))
+                            info.Tiles[point.X + tile.X, point.Y + tile.Y] = new StaticTile(info, isheet, BlendMode.Additive, 0);
                     });
                     Parallel.ForEach(mytiles, tile => {
-                        if(tile is PTile)
-                            tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y].Properties.Add(((PTile)tile).Key, ((PTile)tile).Value);
+                        if(tile is PTile data)
+                        {
+                            if (data.Key.Equals("InfoTile"))
+                            {
+                                if (data.Value.Equals("Wood"))
+                                    info.Tiles[point.X + tile.X, point.Y + tile.Y] = new StaticTile(info, isheet, BlendMode.Additive, 5);
+                            }
+                            else
+                                tile.Layer.Tiles[point.X + tile.X, point.Y + tile.Y].Properties.Add(data.Key, data.Value);
+                        }
                     });
                 }
                 else
@@ -664,21 +695,23 @@ namespace Entoarox.DynamicDungeons
                 {
                     if (mapping[x, y] == Color.Transparent)
                         continue;
-                    if(mapping[x,y]==Color.White)
+                    if (mapping[x, y] == Color.White)
+                    {
                         if (this.Seeder.NextDouble() < 0.2f)
                             tiles.Add(new STile(x, y, back, sheet, 165 + ((x + y) % 2) * 16));
                         else
                             tiles.Add(new STile(x, y, back, sheet, 183));
-                    else if(mapping[x,y]==Color.Black)
+                    }
+                    else if (mapping[x, y] == Color.Black)
                     {
-                        switch(GetSurroundingWalls(ref mapping, x, y))
+                        switch (GetSurroundingWalls(ref mapping, x, y))
                         {
                             // Top-center wall
                             case 0b111_1_1_000:
                             case 0b111_1_1_100:
                             case 0b111_1_1_101:
                             case 0b111_1_1_001:
-                                    tiles.Add(new STile(x, y, back, sheet, 167));
+                                tiles.Add(new STile(x, y, back, sheet, 167));
                                 break;
                             // Bottom-center wall
                             case 0b000_1_1_111:
@@ -778,7 +811,10 @@ namespace Entoarox.DynamicDungeons
                     if (mapping[x, y] == Color.Transparent)
                         continue;
                     if (mapping[x, y] == Color.White)
-                            tiles.Add(new STile(x, y, back, sheet, 257));
+                    {
+                        tiles.Add(new STile(x, y, back, sheet, 257));
+                        tiles.Add(new PTile(x, y, null, "InfoTile", "Wood"));
+                    }
                     else if (mapping[x, y] == Color.Black)
                     {
                         switch (GetSurroundingWalls(ref mapping, x, y))
@@ -879,7 +915,9 @@ namespace Entoarox.DynamicDungeons
                     if (mapping[x, y] == Color.Transparent)
                         continue;
                     if (mapping[x, y] == Color.White)
+                    {
                         tiles.Add(new STile(x, y, back, sheet, 18));
+                    }
                     else if (mapping[x, y] == Color.Black)
                     {
                         switch (GetSurroundingWalls(ref mapping, x, y))
@@ -976,6 +1014,8 @@ namespace Entoarox.DynamicDungeons
             {
                 var backLayer = map.GetLayer("Back");
                 var buildingsLayer = map.GetLayer("Buildings");
+                var infoLayer = map.GetLayer("MapInfo");
+                var infoSheet = map.GetTileSheet("InfoSheet");
                 List<Point> nodes=null;
                 Color[,] mapping = new Color[backLayer.LayerWidth, backLayer.LayerHeight];
                 var task = Task.Run(() => nodes = PathFinder.FindPath(map, start, end));
@@ -1006,6 +1046,7 @@ namespace Entoarox.DynamicDungeons
                     Parallel.For(0, backLayer.LayerHeight, y => {
                         if(mapping[x,y]==Color.Black)
                         {
+                            infoLayer.Tiles[x, y] = new StaticTile(infoLayer, infoSheet, BlendMode.Additive, 7);
                             byte info = GetSurroundingWalls(ref mapping, x, y);
                             // Horizontal
                             if((info & 0b00_1_1_000) == 0b00_1_1_000)
@@ -1044,7 +1085,7 @@ namespace Entoarox.DynamicDungeons
                 });
             }
             else
-                Report("Spawn attempt failed: DynamicTrack");
+                Report("Spawn attempt failed: DynamicTrack (Cant find both start & end point)");
         }
         public Texture2D GetMiniMap()
         {
@@ -1070,15 +1111,33 @@ namespace Entoarox.DynamicDungeons
             Map map = new Map("DynamicDungeons_" + this.Seed.ToString("X8"));
             map.Properties.Add("ViewportFollowPlayer", "True");
             map.Properties.Add("Outdoors", "True");
-            TileSheet sheet = new TileSheet(map, "Mines\\mine", new Size(16, 18), new Size(16, 16));
+            TileSheet sheet = new TileSheet("VanillaSheet", map, "Mines\\mine", new Size(16, 18), new Size(16, 16));
             sheet.TileIndexProperties[165].Add("Diggable", "T");
             sheet.TileIndexProperties[181].Add("Diggable", "T");
             sheet.TileIndexProperties[183].Add("Diggable", "T");
+            sheet.TileIndexProperties[165].Add("Type", "Dirt");
+            sheet.TileIndexProperties[181].Add("Type", "Dirt");
+            sheet.TileIndexProperties[183].Add("Type", "Dirt");
             sheet.TileIndexProperties[275].Add("Water", "T");
             sheet.TileIndexProperties[276].Add("Water", "T");
             sheet.TileIndexProperties[277].Add("Water", "T");
             sheet.TileIndexProperties[260].Add("Water", "T");
+            sheet.TileIndexProperties[240].Add("Type", "Wood");
+            sheet.TileIndexProperties[241].Add("Type", "Wood");
+            sheet.TileIndexProperties[242].Add("Type", "Wood");
+            sheet.TileIndexProperties[256].Add("Type", "Wood");
+            sheet.TileIndexProperties[257].Add("Type", "Wood");
+            sheet.TileIndexProperties[258].Add("Type", "Wood");
+            sheet.TileIndexProperties[272].Add("Type", "Wood");
+            sheet.TileIndexProperties[273].Add("Type", "Wood");
+            sheet.TileIndexProperties[274].Add("Type", "Wood");
             map.AddTileSheet(sheet);
+            // Overlay tilesheet
+            var isheet = new TileSheet("InfoSheet", map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_info.png"), new Size(8, 1), new Size(16, 16));
+            map.AddTileSheet(isheet);
+            // Custom tilesheet
+            //var mysheet = new TileSheet("CustomSheet", map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_info.png"), new Size(8, 1), new Size(16, 16));
+            //map.AddTileSheet(isheet);
             var bsheet = new TileSheet(map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_boulder.png"), new Size(6, 3), new Size(16, 16));
             map.AddTileSheet(bsheet);
             var csheet = new TileSheet(map, DynamicDungeonsMod.SHelper.Content.GetActualAssetKey("sheet_cavein.png"), new Size(2, 2), new Size(16, 16));
@@ -1118,6 +1177,8 @@ namespace Entoarox.DynamicDungeons
             map.AddLayer(front);
             Layer afront = new Layer("AlwaysFront", map, new Size(this.Width, this.Height), new Size(64, 64));
             map.AddLayer(afront);
+            Layer info = new Layer("MapInfo", map, new Size(this.Width, this.Height), new Size(64, 64));
+            map.AddLayer(info);
             Report("Filling in floors and walls...");
             for (int x = 0; x < this.Width; x++)
                 for (int y = 0; y < this.Height; y++)
@@ -1129,6 +1190,7 @@ namespace Entoarox.DynamicDungeons
                         // If a wall tile
                         if (this.CMap[x, y] == Color.Black)
                         {
+                            info.Tiles[x, y] = new StaticTile(info, isheet, BlendMode.Additive, 0);
                             byte wallState = GetSurroundingWalls(x, y);
                             switch (wallState)
                             {
@@ -1232,6 +1294,7 @@ namespace Entoarox.DynamicDungeons
                                     }
                                     floor.Tiles[x, y] = new StaticTile(floor, sheet, BlendMode.Additive, 218);
                                     floor.Tiles[x, y + 1] = new StaticTile(floor, sheet, BlendMode.Additive, 234);
+                                    info.Tiles[x, y + 1] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Top-left outer corner wall
                                 case 0b111_11_110:
@@ -1241,6 +1304,7 @@ namespace Entoarox.DynamicDungeons
                                     wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 116);
                                     floor.Tiles[x, y] = new StaticTile(floor, sheet, BlendMode.Additive, 218);
                                     floor.Tiles[x, y + 1] = new StaticTile(floor, sheet, BlendMode.Additive, 234);
+                                    info.Tiles[x, y + 1] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Top-right outer corner wall
                                 case 0b111_11_011:
@@ -1257,8 +1321,9 @@ namespace Entoarox.DynamicDungeons
                                     wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 175 + (16 * (y % 4)));
                                     floor.Tiles[x, y] = new StaticTile(floor, sheet, BlendMode.Additive, 218);
                                     floor.Tiles[x - 1, y] = new StaticTile(floor, sheet, BlendMode.Additive, 217);
-                                    if (wallState==0b111_01_011)
+                                    if (wallState == 0b111_01_011)
                                         floor.Tiles[x - 1, y] = new StaticTile(floor, sheet, BlendMode.Additive, 185);
+                                    info.Tiles[x - 1, y] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Left straight wall
                                 case 0b110_10_110:
@@ -1276,6 +1341,7 @@ namespace Entoarox.DynamicDungeons
                                     wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 119);
                                     floor.Tiles[x, y] = new StaticTile(floor, sheet, BlendMode.Additive, 219);
                                     floor.Tiles[x, y + 1] = new StaticTile(floor, sheet, BlendMode.Additive, 235);
+                                    info.Tiles[x, y + 1] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Bottom-left inner corner wall
                                 case 0b011_0_1_000:
@@ -1288,6 +1354,9 @@ namespace Entoarox.DynamicDungeons
                                     floor.Tiles[x - 1, y] = new StaticTile(floor, sheet, BlendMode.Additive, 217);
                                     floor.Tiles[x - 1, y + 1] = new StaticTile(floor, sheet, BlendMode.Additive, 233);
                                     floor.Tiles[x, y + 1] = new StaticTile(floor, sheet, BlendMode.Additive, 234);
+                                    info.Tiles[x, y + 1] = new StaticTile(info, isheet, BlendMode.Additive, 4);
+                                    info.Tiles[x - 1, y + 1] = new StaticTile(info, isheet, BlendMode.Additive, 4);
+                                    info.Tiles[x - 1, y] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Top-left inner corner wall
                                 case 0b000_0_1_011:
@@ -1296,6 +1365,7 @@ namespace Entoarox.DynamicDungeons
                                     wall.Tiles[x, y] = new StaticTile(wall, sheet, BlendMode.Additive, 236);
                                     floor.Tiles[x - 1, y] = new StaticTile(floor, sheet, BlendMode.Additive, 201);
                                     floor.Tiles[x, y] = new StaticTile(floor, sheet, BlendMode.Additive, 202);
+                                    info.Tiles[x - 1, y] = new StaticTile(info, isheet, BlendMode.Additive, 4);
                                     break;
                                 // Top-right inner corner wall
                                 case 0b000_1_0_110:
@@ -1321,6 +1391,10 @@ namespace Entoarox.DynamicDungeons
                                     break;
                             }
                         }
+                    }
+                    else
+                    {
+                        info.Tiles[x, y] = new StaticTile(info, isheet, BlendMode.Additive, 6);
                     }
             Report("Spawning in structures....");
             // Try to spawn structures
@@ -1371,115 +1445,89 @@ namespace Entoarox.DynamicDungeons
                 new STile(1,2,wall,sheet,278),
                 new STile(2,2,wall,sheet,280)
             });
-            /*
-            for (int t = this.Seeder.Next(0, 2); t < 4; t++)
-                if (FindRegionOfSize(ref map, 7, 2, 10, out var point5))
-                {
-                    Report("Structure spawned: HRail1");
-                    wall.Tiles[point5.X, point5.Y] = new StaticTile(wall, rsheet, BlendMode.Additive, 3);
-                    floor.Tiles[point5.X + 1, point5.Y] = new StaticTile(floor, rsheet, BlendMode.Additive, 2);
-                    floor.Tiles[point5.X + 1, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 20);
-                    floor.Tiles[point5.X + 2, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 1);
-                    floor.Tiles[point5.X + 3, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 21);
-                    floor.Tiles[point5.X + 4, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 1);
-                    floor.Tiles[point5.X + 5, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 1);
-                    wall.Tiles[point5.X + 6, point5.Y + 1] = new StaticTile(wall, rsheet, BlendMode.Additive, 5);
-                }
-                else
-                    Report("Spawn attempt failed: HRail1");
-                    */
-            for (int t = this.Seeder.Next(0, 4); t < 8; t++)
-                if (FindRegionOfSize(ref map, 3, 3, 10, out var point5))
-                {
-                    Report("Structure spawned: SmallStalagmite");
-                    front.Tiles[point5.X + 1, point5.Y] = new StaticTile(front, s1sheet, BlendMode.Additive, 0);
-                    wall.Tiles[point5.X + 1, point5.Y + 1] = new StaticTile(wall, s1sheet, BlendMode.Additive, 1);
-                }
-                else
-                    Report("Spawn attempt failed: SmallStalagmite");
-            for (int t = this.Seeder.Next(0, 3); t < 6; t++)
-                if (FindRegionOfSize(ref map, 4, 3, 10, out var point5))
-                {
-                    Report("Structure spawned: LargeStalagmite");
-                    afront.Tiles[point5.X + 1, point5.Y - 1] = new StaticTile(afront, s2sheet, BlendMode.Additive, 0);
-                    afront.Tiles[point5.X + 2, point5.Y - 1] = new StaticTile(afront, s2sheet, BlendMode.Additive, 1);
-                    front.Tiles[point5.X + 1, point5.Y] = new StaticTile(front, s2sheet, BlendMode.Additive, 2);
-                    front.Tiles[point5.X + 2, point5.Y] = new StaticTile(front, s2sheet, BlendMode.Additive, 3);
-                    wall.Tiles[point5.X + 1, point5.Y + 1] = new StaticTile(wall, s2sheet, BlendMode.Additive, 4);
-                    wall.Tiles[point5.X + 2, point5.Y + 1] = new StaticTile(wall, s2sheet, BlendMode.Additive, 5);
-                }
-                else
-                    Report("Spawn attempt failed: LargeStalagmite");
-            /*
-            for (int t = this.Seeder.Next(0, 2); t < 4; t++)
-                if (FindRegionOfSize(ref map, 4, 5, 10, out var point5))
-                {
-                    Report("Structure spawned: StalagRail");
-                    afront.Tiles[point5.X + 1, point5.Y - 1] = new StaticTile(afront, s2sheet, BlendMode.Additive, 0);
-                    afront.Tiles[point5.X + 2, point5.Y - 1] = new StaticTile(afront, s2sheet, BlendMode.Additive, 1);
-                    front.Tiles[point5.X + 1, point5.Y] = new StaticTile(front, s2sheet, BlendMode.Additive, 2);
-                    front.Tiles[point5.X + 2, point5.Y] = new StaticTile(front, s2sheet, BlendMode.Additive, 3);
-                    wall.Tiles[point5.X + 1, point5.Y + 1] = new StaticTile(wall, s2sheet, BlendMode.Additive, 4);
-                    wall.Tiles[point5.X + 2, point5.Y + 1] = new StaticTile(wall, s2sheet, BlendMode.Additive, 5);
-                    wall.Tiles[point5.X, point5.Y] = new StaticTile(wall, rsheet, BlendMode.Additive, 3);
-                    floor.Tiles[point5.X + 1, point5.Y] = new StaticTile(floor, rsheet, BlendMode.Additive, 21);
-                    floor.Tiles[point5.X + 2, point5.Y] = new StaticTile(floor, rsheet, BlendMode.Additive, 1);
-                    floor.Tiles[point5.X + 3, point5.Y] = new StaticTile(floor, rsheet, BlendMode.Additive, 2);
-                    floor.Tiles[point5.X + 3, point5.Y + 1] = new StaticTile(floor, rsheet, BlendMode.Additive, 10);
-                    floor.Tiles[point5.X + 3, point5.Y + 2] = new StaticTile(floor, rsheet, BlendMode.Additive, 22);
-                    floor.Tiles[point5.X + 2, point5.Y + 2] = new StaticTile(floor, rsheet, BlendMode.Additive, 0);
-                    wall.Tiles[point5.X+2, point5.Y+3] = new StaticTile(wall, rsheet, BlendMode.Additive, 6);
-                }
-                else
-                    Report("Spawn attempt failed: StalagRail");
-                    */
+            this.BuildStructure(ref map, "SmallStalagmite", 3, 3, 10, 4, 8, new ITile[]{
+                new STile(1,0,front,s1sheet,0),
+                new STile(1,1,wall,s1sheet,1)
+            });
+            this.BuildStructure(ref map, "LargeStalagmite", 4, 3, 10, 3, 6, new ITile[]{
+                new STile(1,-1,afront,s2sheet,0),
+                new STile(2,-1,afront,s2sheet,1),
+                new STile(1,0,front,s2sheet,2),
+                new STile(2,0,front,s2sheet,3),
+                new STile(1,1,wall,s2sheet,4),
+                new STile(2,1,wall,s2sheet,5)
+            });
             this.BuildStructure(ref map, "LootChest", 3, 3, 5, 1, 2, new ITile[]{
-                        new STile(0, 0, floor, sheet, 240),
-                        new STile(1, 0, floor, sheet, 241),
-                        new STile(2, 0, floor, sheet, 242),
-                        new STile(0, 1, floor, sheet, 256),
-                        new STile(1, 1, floor, sheet, 257),
-                        new STile(2, 1, floor, sheet, 258),
-                        new STile(0, 2, floor, sheet, 272),
-                        new STile(1, 2, floor, sheet, 273),
-                        new STile(2, 2, floor, sheet, 274),
-                        new STile(1, 1, wall, sheet, 237),
-                        new PTile(1,1,wall,"Action","DDLoot General 3 true 0.3 Mimic")
-                    });
-            for (int t = this.Seeder.Next(0, 1); t < 2; t++)
-                if (FindRegionOfSize(ref map, 4, 4, 5, out var point5))
+                new STile(0, 0, floor, sheet, 240),
+                new STile(1, 0, floor, sheet, 241),
+                new STile(2, 0, floor, sheet, 242),
+                new STile(0, 1, floor, sheet, 256),
+                new STile(1, 1, floor, sheet, 257),
+                new STile(2, 1, floor, sheet, 258),
+                new STile(0, 2, floor, sheet, 272),
+                new STile(1, 2, floor, sheet, 273),
+                new STile(2, 2, floor, sheet, 274),
+                new STile(1, 1, wall, sheet, 237),
+                new PTile(1,1,wall,"Action","DDLoot General 3 true 0.3 Mimic"),
+            });
+            this.BuildStructure(ref map, "CavedSkeleton", 4, 4, 5, 1, 2, new ITile[]{
+                new STile(1,1,wall,csheet,0),
+                new STile(2,1,wall,csheet,1),
+                new STile(1,2,wall,csheet,2),
+                new STile(2,2,wall,csheet,3),
+                new PTile(1,2,wall,"Action","DDLoot Supplies 2 0.1 Skeleton"),
+                new PTile(2,2,wall,"Action","DDLoot Supplies 2 0.1 Skeleton")
+            });
+            this.BuildStructure(ref map, "GemRock", 5, 4, 3, 0, 1, new ITile[]{
+                new ATile(1,0,front,new STile[]
                 {
-                    Report("Structure spawned: CavedSkeleton");
-                    wall.Tiles[point5.X + 1, point5.Y + 1] = new StaticTile(wall, csheet, BlendMode.Additive, 0);
-                    wall.Tiles[point5.X + 2, point5.Y + 1] = new StaticTile(wall, csheet, BlendMode.Additive, 1);
-                    wall.Tiles[point5.X + 1, point5.Y + 2] = new StaticTile(wall, csheet, BlendMode.Additive, 2);
-                    wall.Tiles[point5.X + 2, point5.Y + 2] = new StaticTile(wall, csheet, BlendMode.Additive, 3);
-                    wall.Tiles[point5.X + 1, point5.Y + 2].Properties.Add("Action", "DDLoot Supplies 2 0.1 Skeleton");
-                    wall.Tiles[point5.X + 2, point5.Y + 2].Properties.Add("Action", "DDLoot Supplies 2 0.1 Skeleton");
-                }
-                else
-                    Report("Spawn attempt failed: CavedSkeleton");
-            if (FindRegionOfSize(ref map, 5, 4, 3, out var point2))
-            {
-                Report("Structure spawned: GemRock");
-                // Gem Rock
-                int x = point2.X;
-                int y = point2.Y;
-                front.Tiles[x + 1, y] = new AnimatedTile(front, new StaticTile[] { new StaticTile(front, bsheet, BlendMode.Additive, 0), new StaticTile(front, bsheet, BlendMode.Additive, 3) }, 500);
-                front.Tiles[x + 2, y] = new AnimatedTile(front, new StaticTile[] { new StaticTile(front, bsheet, BlendMode.Additive, 1), new StaticTile(front, bsheet, BlendMode.Additive, 4) }, 500);
-                front.Tiles[x + 3, y] = new AnimatedTile(front, new StaticTile[] { new StaticTile(front, bsheet, BlendMode.Additive, 2), new StaticTile(front, bsheet, BlendMode.Additive, 5) }, 500);
-                wall.Tiles[x + 1, y + 1] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 6), new StaticTile(wall, bsheet, BlendMode.Additive, 9) }, 500);
-                wall.Tiles[x + 2, y + 1] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 7), new StaticTile(wall, bsheet, BlendMode.Additive, 10) }, 500);
-                wall.Tiles[x + 3, y + 1] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 8), new StaticTile(wall, bsheet, BlendMode.Additive, 11) }, 500);
-                wall.Tiles[x + 1, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 12), new StaticTile(wall, bsheet, BlendMode.Additive, 15) }, 500);
-                wall.Tiles[x + 2, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 13), new StaticTile(wall, bsheet, BlendMode.Additive, 16) }, 500);
-                wall.Tiles[x + 3, y + 2] = new AnimatedTile(wall, new StaticTile[] { new StaticTile(wall, bsheet, BlendMode.Additive, 14), new StaticTile(wall, bsheet, BlendMode.Additive, 17) }, 500);
-                wall.Tiles[x + 1, y + 2].Properties.Add("Action", "DDLoot Gems 1");
-                wall.Tiles[x + 2, y + 2].Properties.Add("Action", "DDLoot Gems 1");
-                wall.Tiles[x + 3, y + 2].Properties.Add("Action", "DDLoot Gems 1");
-            }
-            else
-                Report("Spawn attempt failed: GemRock");
+                    new STile(0,0,front,bsheet,0),
+                    new STile(0,0,front,bsheet,3)
+                }, 500),
+                new ATile(2,0,front,new STile[]
+                {
+                    new STile(0,0,front,bsheet,1),
+                    new STile(0,0,front,bsheet,4)
+                }, 500),
+                new ATile(3,0,front,new STile[]
+                {
+                    new STile(0,0,front,bsheet,2),
+                    new STile(0,0,front,bsheet,5)
+                }, 500),
+                new ATile(1,1,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,6),
+                    new STile(0,0,wall,bsheet,9)
+                }, 500),
+                new ATile(2,1,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,7),
+                    new STile(0,0,wall,bsheet,10)
+                }, 500),
+                new ATile(3,1,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,8),
+                    new STile(0,0,wall,bsheet,11)
+                }, 500),
+                new ATile(1,2,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,12),
+                    new STile(0,0,wall,bsheet,15)
+                }, 500),
+                new ATile(2,2,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,13),
+                    new STile(0,0,wall,bsheet,16)
+                }, 500),
+                new ATile(3,2,wall,new STile[]
+                {
+                    new STile(0,0,wall,bsheet,14),
+                    new STile(0,0,wall,bsheet,17)
+                }, 500),
+                new PTile(1,2,wall,"Action","DDLoot Gems 1"),
+                new PTile(2,2,wall,"Action","DDLoot Gems 1"),
+                new PTile(3,2,wall,"Action","DDLoot Gems 1")
+            });
             if (this.Floor % 3 == 0)
                 this.BuildStructure(ref map, "DwardVendor", 4, 3, 50, 1, 1, new ITile[]
                 {
@@ -1512,21 +1560,28 @@ namespace Entoarox.DynamicDungeons
                     new STile(0,1,wall,vsheet,16),
                     new STile(1,1,wall,vsheet,17),
                     new PTile(0,1,wall,"Action","DDShop DwarfVendor"),
-                    new PTile(1,1,wall,"Action","DDShop DwarfVendor")
+                    new PTile(1,1,wall,"Action","DDShop DwarfVendor"),
                 });
             for (int c = 0; c < this.Seeder.Next(3, 7); c++)
                 GenerateTrack(map, rsheet);
             // Randomise floor
             for (int x = 0; x < this.Width; x++)
                 for (int y = 0; y < this.Height; y++)
-                    if (floor.Tiles[x, y] != null && floor.Tiles[x, y].TileIndex == 138 && this.Seeder.NextDouble() < 0.05)
-                        floor.Tiles[x, y].TileIndex = floorTiles[(x * y) % floorTiles.Length];
+                    if (floor.Tiles[x, y] != null && floor.Tiles[x, y].TileIndex == 138)
+                    {
+                        if (info.Tiles[x, y] == null)
+                            info.Tiles[x, y] = new StaticTile(info, isheet, BlendMode.Additive, 1);
+                        if (this.Seeder.NextDouble() < 0.05)
+                            floor.Tiles[x, y].TileIndex = floorTiles[(x * y) % floorTiles.Length];
+                    }
             Point entry = GetFloorPoint();
             front.Tiles[entry.X, entry.Y-4] = new StaticTile(wall, sheet, BlendMode.Additive, 67);
             front.Tiles[entry.X, entry.Y - 3] = new StaticTile(wall, sheet, BlendMode.Additive, 83);
             front.Tiles[entry.X, entry.Y - 2] = new StaticTile(wall, sheet, BlendMode.Additive, 99);
             wall.Tiles[entry.X, entry.Y - 1] = new StaticTile(wall, sheet, BlendMode.Additive, 115);
+            wall.Tiles[entry.X, entry.Y - 1].Properties.Add("Action", "DDExit");
             floor.Tiles[entry.X, entry.Y] = new StaticTile(floor, sheet, BlendMode.Additive, 204);
+            info.Tiles[entry.X, entry.Y] = new StaticTile(info, isheet, BlendMode.Additive, 7);
             return map;
         }
         public Point GetFloorPoint()
@@ -1535,7 +1590,7 @@ namespace Entoarox.DynamicDungeons
                 for (int x = 0; x < this.Width; x++)
                     if (this.CMap[x, y] == Color.White)
                         return new Point(x, y);
-            return default(Point);
+            return default;
         }
     }
 }

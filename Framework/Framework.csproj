@@ -63,6 +63,7 @@
     <Compile Include="Core\AssetHandlers\DeferredTypeHandler.cs" />
     <Compile Include="Core\AssetHandlers\DictionaryInjector.cs" />
     <Compile Include="Core\AssetHandlers\TextureInjector.cs" />
+    <Compile Include="Core\ConditionsHelper.cs" />
     <Compile Include="Core\FakeManifest.cs" />
     <Compile Include="Core\InterModHelper.cs" />
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
     <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
+    <Compile Include="Core\Utilities\Events.cs" />
     <Compile Include="Core\Utilities\Globals.cs" />
     <Compile Include="Core\Utilities\ModuleProvider.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
@@ -78,9 +80,9 @@
     <Compile Include="Events\EventArgsArguments.cs" />
     <Compile Include="Events\EventArgsEditable.cs" />
     <Compile Include="Events\EventArgsReturnable.cs" />
-    <Compile Include="Experimental\InterfaceProxy.cs" />
+    <Compile Include="Events\ItemEvents.cs" />
     <Compile Include="Experimental\PathFinder.cs" />
-    <Compile Include="Experimental\WrapperBuilder.cs" />
+    <Compile Include="Extensions\String.cs" />
     <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />
     <Compile Include="IConditionHelper.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="Core\FrameworkConfig.cs" />
+    <Compile Include="ICustomItem.cs" />
     <Compile Include="IHookedLocation.cs" />
     <Compile Include="IInterModHelper.cs" />
     <Compile Include="IMessageHelper.cs" />
@@ -135,12 +138,13 @@
     <Compile Include="IPlayerModifierHelper.cs" />
     <Compile Include="Core\Utilities\TextureHelper.cs" />
     <Compile Include="Core\ConditionHelper.cs" />
-    <Compile Include="Core\ModEntry.cs" />
+    <Compile Include="Core\EntoaroxFrameworkMod.cs" />
     <Compile Include="Core\MessageHelper.cs" />
     <Compile Include="Events\MoreEvents.cs" />
     <Compile Include="IModHelperExtensions.cs" />
     <Compile Include="IMonitorExtensions.cs" />
     <Compile Include="PlayerModifier.cs" />
+    <Compile Include="UI\Containers\BookComponent.cs" />
     <Compile Include="UI\OverlayMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StackableShopObject.cs" />
