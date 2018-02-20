@@ -1,12 +1,7 @@
 {
   "Name": "Extended Minecart",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 7,
-    "PatchVersion": 1,
-    "Build": null
-  },
+  "Version": "1.7.1",
   "MinimumApiVersion": "2.1",
   "Description": "More destinations for your minecart needs!",
   "UniqueID": "Entoarox.ExtendedMinecart",

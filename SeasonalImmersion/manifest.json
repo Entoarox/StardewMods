@@ -1,12 +1,7 @@
 {
   "Name": "Seasonal Immersion",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 11,
-    "PatchVersion": 0,
-    "Build": null
-  },
+  "Version": "1.11.0",
   "MinimumApiVersion": "2.1",
   "Description": "Immerse yourself in a more seasonal world!",
   "UniqueID": "Entoarox.SeasonalImmersion",

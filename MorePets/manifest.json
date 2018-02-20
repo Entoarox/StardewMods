@@ -1,12 +1,7 @@
 {
   "Name": "More Animals",
   "Author": "Entoarox, see credits.txt for texture authors",
-  "Version": {
-    "MajorVersion": 2,
-    "MinorVersion": 0,
-    "PatchVersion": 2,
-    "Build": null
-  },
+  "Version": "2.0.2",
   "MinimumApiVersion": "2.1",
   "Description": "Lets you adopt more pets, with skins of your choice! - Now also includes randomised animal skins!",
   "UniqueID": "Entoarox.MoreAnimals",

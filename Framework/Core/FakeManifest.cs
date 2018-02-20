@@ -21,6 +21,8 @@ namespace Entoarox.Framework.Core
 
         public string EntryDll => throw new NotImplementedException();
 
+        public IManifestContentPackFor ContentPackFor => throw new NotImplementedException();
+
         public IManifestDependency[] Dependencies => throw new NotImplementedException();
 
         public string[] UpdateKeys { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
