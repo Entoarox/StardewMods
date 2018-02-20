@@ -1,14 +1,16 @@
+using System;
 using System.Collections.Generic;
-
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-
-using StardewValley;
-
+using System.IO;
+using System.Linq;
+using Entoarox.AdvancedLocationLoader.Configs;
+using Entoarox.AdvancedLocationLoader.Processing;
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
-
-using Entoarox.AdvancedLocationLoader.Configs;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
 {
@@ -16,46 +18,90 @@ namespace Entoarox.AdvancedLocationLoader
     {
         internal static ITranslationHelper Strings;
         internal static IMonitor Logger;
-        internal static string ModPath;
         internal static IModHelper SHelper;
+        internal static Compound PatchData;
+        private Patcher Patcher;
+
         public override void Entry(IModHelper helper)
         {
+            // init
             Logger = this.Monitor;
-            ModPath = helper.DirectoryPath;
             SHelper = helper;
             Strings = helper.Translation;
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/update.json");
 
-            Events.GameEvents_LoadContent(null, null, this.Helper.GetContentPacks());
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
-            GameEvents.UpdateTick+=Events.GameEvents_UpdateTick;
+            GameEvents.UpdateTick += this.InitAfterLoad;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
             this.Helper.Content.RegisterSerializerType<Locations.Greenhouse>();
             this.Helper.Content.RegisterSerializerType<Locations.Sewer>();
             this.Helper.Content.RegisterSerializerType<Locations.Desert>();
             this.Helper.Content.RegisterSerializerType<Locations.DecoratableLocation>();
+
+            // load content packs
+            ContentPackData[] contentPacks = this.LoadContentPackData().ToArray();
+            this.Patcher = new Patcher(this.Monitor, this.Helper.Content, contentPacks);
         }
+
+        /// <summary>Load the data from each available content pack.</summary>
+        private IEnumerable<ContentPackData> LoadContentPackData()
+        {
+            ConfigReader configReader = new ConfigReader(this.Monitor);
+            foreach (IContentPack contentPack in this.GetAllContentPacks())
+            {
+                this.Monitor.Log($"Loading content pack '{contentPack.Manifest.Name}'...", LogLevel.Debug);
+                ContentPackData data = configReader.Load(contentPack);
+                if (data != null)
+                    yield return data;
+            }
+        }
+
+        private void InitAfterLoad(object sender, EventArgs e)
+        {
+            // wait until game loaded
+            if (!Game1.hasLoadedGame)
+                Game1.eveningColor = Microsoft.Xna.Framework.Color.Black;
+            if (Game1.eveningColor == Microsoft.Xna.Framework.Color.Black)
+                return;
+            GameEvents.UpdateTick -= this.InitAfterLoad;
+
+            // apply patcher
+            this.Patcher.ApplyPatches(out Compound compoundData);
+            ModEntry.PatchData = compoundData;
+
+            // start handling dynamic stuff
+            if (compoundData.DynamicTiles.Any() || compoundData.DynamicProperties.Any() || compoundData.DynamicWarps.Any() || compoundData.SeasonalTilesheets.Any())
+            {
+                this.Monitor.Log("Dynamic content detected, preparing dynamic update logic...", LogLevel.Info);
+                TimeEvents.AfterDayStarted += Events.TimeEvents_AfterDayStarted;
+            }
+        }
+
         internal static void UpdateConditionalEdits()
         {
-            foreach(Tile t in Compound.DynamicTiles)
+            foreach (Tile t in ModEntry.PatchData.DynamicTiles)
                 Processors.ApplyTile(t);
-            foreach (Configs.Warp t in Compound.DynamicWarps)
+            foreach (Configs.Warp t in ModEntry.PatchData.DynamicWarps)
                 Processors.ApplyWarp(t);
-            foreach (Property t in Compound.DynamicProperties)
+            foreach (Property t in ModEntry.PatchData.DynamicProperties)
                 Processors.ApplyProperty(t);
         }
+
         internal static void UpdateTilesheets()
         {
             Logger.Log("Month changed, updating custom seasonal tilesheets...", LogLevel.Trace);
-            List<string> locations=new List<string>();
-            foreach (Tilesheet t in Compound.SeasonalTilesheets)
+            List<string> locations = new List<string>();
+            foreach (var pair in ModEntry.PatchData.SeasonalTilesheets)
             {
-                Processors.ApplyTilesheet(t);
-                if (!locations.Contains(t.MapName))
-                    locations.Add(t.MapName);
+                foreach (var tilesheet in pair.Value)
+                {
+                    Processors.ApplyTilesheet(ModEntry.SHelper.Content, pair.Key, tilesheet);
+                    if (!locations.Contains(tilesheet.MapName))
+                        locations.Add(tilesheet.MapName);
+                }
             }
-            foreach(string map in locations)
+            foreach (string map in locations)
             {
                 xTile.Map location = Game1.getLocationFromName(map).map;
                 location.DisposeTileSheets(Game1.mapDisplayDevice);
@@ -67,6 +113,73 @@ namespace Entoarox.AdvancedLocationLoader
             if (condition.Substring(0, 13) != "ALLCondition:")
                 return null;
             return Game1.player.mailReceived.Contains("ALLCondition_" + condition.Substring(13));
+        }
+
+        private IEnumerable<IContentPack> GetAllContentPacks()
+        {
+            // read SMAPI content packs
+            foreach (IContentPack contentPack in this.Helper.GetContentPacks())
+                yield return contentPack;
+
+            // read legacy content packs
+            string baseDir = Path.Combine(this.Helper.DirectoryPath, "locations");
+            Directory.CreateDirectory(baseDir);
+            foreach (string dir in Directory.EnumerateDirectories(baseDir))
+            {
+                IContentPack contentPack = null;
+                try
+                {
+                    // skip SMAPI content pack (shouldn't be installed here)
+                    if (File.Exists(Path.Combine(dir, "locations.json")))
+                    {
+                        ModEntry.Logger.Log($"The folder at path '{dir}' looks like a SMAPI content pack. Those should be installed directly in your Mods folder. This content pack won't be loaded.", LogLevel.Warn);
+                        continue;
+                    }
+
+                    // read manifest
+                    string file = Path.Combine(dir, "manifest.json");
+                    if (!File.Exists(file))
+                    {
+                        ModEntry.Logger.Log($"Can't find a manifest.json in the '{dir}' folder. This content pack won't be loaded.", LogLevel.Warn);
+                        continue;
+                    }
+                    JObject config;
+                    try
+                    {
+                        config = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(file));
+                    }
+                    catch (Exception ex)
+                    {
+                        ModEntry.Logger.Log($"Can't read manifest.json in the '{dir}' folder. This content pack won't be loaded.", LogLevel.Error, ex);
+                        continue;
+                    }
+
+                    // get 'about' field
+                    JObject about = config.GetValue("About", StringComparison.InvariantCultureIgnoreCase) as JObject;
+                    if (about == null)
+                    {
+                        ModEntry.Logger.Log($"Can't read content pack 'about' info from the manifest.json in the '{dir}' folder. This content pack won't be loaded.", LogLevel.Error);
+                        continue;
+                    }
+
+                    // prepare basic data
+                    string id = about.GetValue("ModID", StringComparison.InvariantCultureIgnoreCase)?.Value<string>() ?? Guid.NewGuid().ToString("N");
+                    string name = about.GetValue("ModName", StringComparison.InvariantCultureIgnoreCase)?.Value<string>() ?? Path.GetDirectoryName(dir);
+                    string author = about.GetValue("Author", StringComparison.InvariantCultureIgnoreCase)?.Value<string>();
+                    string description = about.GetValue("Description", StringComparison.InvariantCultureIgnoreCase)?.Value<string>();
+                    string version = about.GetValue("Version", StringComparison.InvariantCultureIgnoreCase)?.Value<string>() ?? "1.0.0";
+
+                    // create content pack
+                    contentPack = this.Helper.CreateTransitionalContentPack(baseDir, id, name, description, author, new SemanticVersion(version));
+                }
+                catch (Exception ex)
+                {
+                    ModEntry.Logger.Log($"Could not parse location mod at path '{dir}'. This content pack won't be loaded.", LogLevel.Error, ex);
+                }
+
+                if (contentPack != null)
+                    yield return contentPack;
+            }
         }
     }
 }

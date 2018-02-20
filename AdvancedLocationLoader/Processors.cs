@@ -114,7 +114,8 @@ namespace Entoarox.AdvancedLocationLoader
                 ModEntry.Logger.ExitGameImmediately("Unable to patch warp, a unexpected error occured: " + warp.ToString(),err);
             }
         }
-        internal static void ApplyTilesheet(Tilesheet tilesheet)
+
+        internal static void ApplyTilesheet(IContentHelper coreContentHelper, IContentPack contentPack, Tilesheet tilesheet)
         {
             int stage = 0;
             int branch = 0;
@@ -128,7 +129,6 @@ namespace Entoarox.AdvancedLocationLoader
                     skip = 1;
                 else
                 {
-                    tilesheet.FileName = tilesheet.FileName.Replace(ModEntry.SHelper.DirectoryPath + Path.DirectorySeparatorChar, "");
                     skip = 2;
                     string fakepath = Path.Combine("AdvancedLocationLoader/FakePath_paths_objects", tilesheet.FileName);
                     if (tilesheet.Seasonal)
@@ -136,7 +136,7 @@ namespace Entoarox.AdvancedLocationLoader
                     stage++; // 3
                     if (!_MappingCache.Contains(tilesheet.FileName))
                     {
-                        ModEntry.SHelper.Content.RegisterXnbReplacement(fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                        coreContentHelper.RegisterXnbReplacement(contentPack, fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
                         _MappingCache.Add(tilesheet.FileName);
                     }
                     stage++; // 4
@@ -166,12 +166,12 @@ namespace Entoarox.AdvancedLocationLoader
                 ModEntry.Logger.ExitGameImmediately($"Unable to patch tilesheet, a unexpected error occured at stage {stage}{(skip > 0 ? ("-" + skip) : "")}{(branch > 0 ? ("-" + branch) : "")}: {tilesheet}", err);
             }
         }
-        internal static void ApplyLocation(Location location)
+        internal static void ApplyLocation(IContentPack contentPack, Location location)
         {
             try
             {
                 GameLocation loc;
-                xTile.Map map = ModEntry.SHelper.Content.Load<xTile.Map>(location.FileName);
+                xTile.Map map = contentPack.LoadAsset<xTile.Map>(location.FileName);
                 switch (location.Type)
                 {
                     case "Cellar":
@@ -205,14 +205,14 @@ namespace Entoarox.AdvancedLocationLoader
             }
             catch (Exception err)
             {
-                ModEntry.Logger.ExitGameImmediately("Unable to add custom location, a unexpected error occured: " + location.ToString(),err);
+                ModEntry.Logger.ExitGameImmediately("Unable to add custom location, a unexpected error occured: " + location, err);
             }
         }
-        internal static void ApplyOverride(Override obj)
+        internal static void ApplyOverride(IContentPack contentPack, Override obj)
         {
             try
             {
-                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), ModEntry.SHelper.Content.Load<xTile.Map>(obj.FileName), obj.MapName);
+                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.LoadAsset<xTile.Map>(obj.FileName), obj.MapName);
             }
             catch (Exception err)
             {

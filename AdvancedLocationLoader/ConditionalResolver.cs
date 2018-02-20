@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
@@ -15,7 +16,7 @@ namespace Entoarox.AdvancedLocationLoader
         private Configs.Conditional Conditional;
         private ConditionalResolver(string name)
         {
-            this.Conditional = Configs.Compound.Conditionals.Find(e => e.Name == name);
+            this.Conditional = ModEntry.PatchData.Conditionals.FirstOrDefault(e => e.Name == name);
         }
         private string GetItemName()
         {

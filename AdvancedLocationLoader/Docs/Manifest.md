@@ -19,28 +19,6 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 {
 	/* What config loader ALL should use to load the file, for the 1.2 branch should always be `1.2` */
 	"LoaderVersion":"1.2",
-	/* The about section contains general information about the mod and its author */
-	"About":{
-		/* The name of your content pack, is printed to the log */
-		"ModName":"",
-		/* The name of the mod author, is printed to the log */
-		"Author":"",
-		/* People the author wishes to thank for having contributed to their mod in some fashion, is not printed to the log */
-		"ThanksTo":["","",...],
-		/* A website url linked to the mod, best used as the place where updates for the mod can be found and downloaded, not printed to the log */
-		"Website":"",
-		/* A short description of the mod, is printed to the log */
-		"Description":"",
-		/* The version of the mod this is, is printed to the log */
-		"Version":"1.0.0",
-		/*
-		A unique ID given to this mod, currently only used for localization but might be expanded upon in the future.
-		It is recommended to use the AuthorName.ModName format for your mod ID, as this makes collision less likely
-		*/
-		"ModID":"AuthorName.ModName",
-		/* A site to check for updates to this mod, currently is not used, but once it is it will be done using EntoaroxFramework's update checking mechanic */
-		"UpdateUrl":"http://example.com/dir/updatefile.json"
-	},
 	/* The locations section is where new locations are registered for addition to the game */
 	"Locations":[
 		{
