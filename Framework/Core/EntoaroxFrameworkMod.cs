@@ -228,15 +228,15 @@ namespace Entoarox.Framework.Core
                 if (CreditsDone || !(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
                     return;
                 Game1.playSound("bigDeSelect");
-                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
-                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
+                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
+                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
                 Game1.delayedActions.Clear();
-                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
-                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
-                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
-                this.Helper.Reflection.GetPrivateField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
-                this.Helper.Reflection.GetPrivateField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
-                this.Helper.Reflection.GetPrivateField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
+                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
+                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
+                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
+                this.Helper.Reflection.GetField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
+                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
+                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
                 Game1.changeMusicTrack("MainTheme");
                 CreditsDone = true;
             }

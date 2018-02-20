@@ -1,12 +1,7 @@
 {
   "Name": "Shop Expander",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 7,
-    "PatchVersion": 0,
-    "Build": null
-  },
+  "Version": "1.7.0",
   "MinimumApiVersion": "2.1",
   "Description": "Adds bulk options for wood & stone to the carpenter.",
   "UniqueID": "Entoarox.ShopExpander",

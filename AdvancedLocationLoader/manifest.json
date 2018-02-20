@@ -1,13 +1,8 @@
 {
   "Name": "Advanced Location Loader",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 1,
-    "MinorVersion": 3,
-    "PatchVersion": 7,
-    "Build": null
-  },
-  "MinimumApiVersion": "2.1",
+  "Version": "1.3.7",
+  "MinimumApiVersion": "2.5-beta",
   "Description": "Get your content into stardew without replacing any xnb files.",
   "UniqueID": "Entoarox.AdvancedLocationLoader",
   "EntryDll": "AdvancedLocationLoader.dll",

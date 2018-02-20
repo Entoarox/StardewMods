@@ -1,12 +1,7 @@
 {
   "Name": "Dynamic Dungeons",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 0,
-    "MinorVersion": 1,
-    "PatchVersion": 16,
-    "Build": ""
-  },
+  "Version": "0.1.16",
   "MinimumApiVersion": "2.1",
   "Description": "Adds new dynamically generated dungeons to stardew valley!",
   "UniqueID": "Entoarox.DynamicDungeons",

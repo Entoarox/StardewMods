@@ -1,13 +1,8 @@
 {
   "Name": "Entoarox Framework",
   "Author": "Entoarox",
-  "Version": {
-    "MajorVersion": 2,
-    "MinorVersion": 0,
-    "PatchVersion": 6,
-    "Build": null
-  },
-  "MinimumApiVersion": "2.1",
+  "Version": "2.0.6",
+  "MinimumApiVersion": "2.5-beta",
   "Description": "A collection of API's to make modding easier",
   "UniqueID": "Entoarox.EntoaroxFramework",
   "EntryDll": "EntoaroxFramework.dll"

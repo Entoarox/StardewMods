@@ -26,7 +26,7 @@ namespace Entoarox.AdvancedLocationLoader
             Strings = helper.Translation;
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/update.json");
 
-            Events.GameEvents_LoadContent(null,null);
+            Events.GameEvents_LoadContent(null, null, this.Helper.GetContentPacks());
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             GameEvents.UpdateTick+=Events.GameEvents_UpdateTick;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;

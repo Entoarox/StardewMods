@@ -1,6 +1,6 @@
 ﻿ALL Docs
 ==============
-[Introduction](Introduction.md) / [Manifest & Shop Format](Manifest.md) / **Custom Actions** / [Miscellaneous](Misc.md)
+[Introduction](Introduction.md) / [Content Pack Format](Manifest.md) / **Custom Actions** / [Miscellaneous](Misc.md)
 
 ---------------------------------------------------------------------------------------------------------
 Custom Actions

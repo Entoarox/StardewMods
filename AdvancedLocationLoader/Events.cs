@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Newtonsoft.Json.Linq;
 
@@ -15,17 +17,27 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Events
     {
-        internal static void GameEvents_LoadContent(object s, EventArgs e)
+        internal static void GameEvents_LoadContent(object s, EventArgs e, IEnumerable<IContentPack> contentPacks)
         {
             try
             {
-                ModEntry.Logger.Log("Loading location mods into memory...",LogLevel.Debug);
+                // get content pack folders
                 string baseDir = Path.Combine(ModEntry.ModPath, "locations");
-                int count = 0;
                 Directory.CreateDirectory(baseDir);
-                foreach (string dir in Directory.EnumerateDirectories(baseDir))
+                string[] contentPackDirs =
+                    Directory.EnumerateDirectories(baseDir) // legacy ALL content packs
+                    .Concat(contentPacks.Select(p => p.DirectoryPath)) // SMAPI content packs
+                    .ToArray();
+
+                ModEntry.Logger.Log("Loading content packs into memory...",LogLevel.Debug);
+                
+                int count = 0;
+                foreach (string dir in contentPackDirs)
                 {
-                    string file = Path.Combine(dir, "manifest.json");
+                    string file = Path.Combine(dir, "locations.json"); // SMAPI content pack
+                    if(!File.Exists(file))
+                        file = Path.Combine(dir, "manifest.json"); // legacy ALL content pack
+
                     if (File.Exists(file))
                     {
                         JObject o;
@@ -64,16 +76,16 @@ namespace Entoarox.AdvancedLocationLoader
                         }
                     }
                     else
-                        ModEntry.Logger.Log("Could not find a manifest.json in the "+dir+" directory, if this is intentional you can ignore this message", LogLevel.Warn);
+                        ModEntry.Logger.Log("Could not find a location.json (for a SMAPI content pack) or manifest.json (for a legacy location mod) in the "+dir+" directory, if this is intentional you can ignore this message", LogLevel.Warn);
                 }
                 if(count>0)
-                    ModEntry.Logger.Log("Found and loaded [" + count + "] location mods into memory",LogLevel.Info);
+                    ModEntry.Logger.Log("Found and loaded [" + count + "] content packs into memory",LogLevel.Info);
                 else
-                    ModEntry.Logger.Log("Was unable to load any location mods, if you do not have any installed yet you can ignore this message", LogLevel.Warn);
+                    ModEntry.Logger.Log("Was unable to load any content packs, if you do not have any installed yet you can ignore this message", LogLevel.Warn);
             }
             catch(Exception err)
             {
-                ModEntry.Logger.ExitGameImmediately("A unexpected error occured while loading location mod manifests", err);
+                ModEntry.Logger.ExitGameImmediately("A unexpected error occured while loading content packs manifests", err);
             }
         }
         internal static void TimeEvents_AfterDayStarted(object s, EventArgs e)
