@@ -1,23 +1,27 @@
 ALL Docs
 ==============
-[Introduction](Introduction.md) / **Manifest & Shop Format** / [Custom Actions](Actions.md) / [Miscellaneous](Misc.md)
+[Introduction](Introduction.md) / **Content Pack Format** / [Custom Actions](Actions.md) / [Miscellaneous](Misc.md)
 
 ---------------------------------------------------------------------------------------------------------
-Manifest & Shop format
-======================
-This file contains the basic layouts for both location-mod and shop manifests.
+Content Pack Format
+===================
+Each ALL content pack must have two files:
+* a `manifest.json` for SMAPI (see [Modding:Content packs](https://stardewvalleywiki.com/Modding:Content_packs));
+* a `locations.json` which describes the location changes.
+
+This `locations.json` contains the basic layouts for both custom locations and shops.
 For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](../../Framework/Docs/Conditions.md) over in the Entoarox Framework github.
 
 To use a `Conditional` in your conditions, use the name of the conditional prefixed with `ALLCondition_`.
 
-**Location Manifest (Version 1.2)**
+**Location Config (Version 1.2)**
 ```javascript
 {
-	/* What manifest loader ALL should use to load the file, for the 1.2 branch should always be `1.2` */
+	/* What config loader ALL should use to load the file, for the 1.2 branch should always be `1.2` */
 	"LoaderVersion":"1.2",
 	/* The about section contains general information about the mod and its author */
 	"About":{
-		/* The name of your location mod, is printed to the log */
+		/* The name of your content pack, is printed to the log */
 		"ModName":"",
 		/* The name of the mod author, is printed to the log */
 		"Author":"",
@@ -42,7 +46,7 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 		{
 			/* The name to use for this new location in warps and such, if not unique then ALL will report a error */
 			"MapName":"",
-			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			/* The path to the xnb file, relative to this locations.json, of the tbin that contains the map for this location, without the xnb extension */
 			"FileName":"",
 			/* If set to `true` then this new location is a outdoor location and exhibits all behaviour outdoor locations have */
 			"Outdoor":false,
@@ -70,17 +74,17 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 		{
 			/* The name that SDV uses for the location you wish to override */
 			"MapName":"",
-			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			/* The path to the xnb file, relative to this locations.json file, of the tbin that contains the map for this location, without the xnb extension */
 			"FileName":""
 		},
 		...
 	],
-	/* The redirects section is where you can redirect the loading of any xnb file relative to Content to a xnb file relative to the manifest instead */
+	/* The redirects section is where you can redirect the loading of any xnb file relative to Content to a xnb file relative to the locations.json instead */
 	"Redirects":[
 		{
 			/* The path (Without the c:/blabla/../Content/ prefix) to the xnb file that should be redirected, without the xnb extension */
 			"FromFile":"",
-			/* The path (Relative to the manifest) to the xnb file that should be loaded instead, without the xnb extension */
+			/* The path (Relative to the locations.json) to the xnb file that should be loaded instead, without the xnb extension */
 			"ToFile":""
 		},
 		...
@@ -90,7 +94,7 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 		{
 			/* The name of the location that this tilesheet is attached to and needs to be edited on */
 			"MapName":"",
-			/* The path to the xnb file, relative to this manifest, of the tbin that contains the map for this location, without the xnb extension */
+			/* The path to the xnb file, relative to this locations.json, of the tbin that contains the map for this location, without the xnb extension */
 			"FileName":"",
 			/* The name given to the tilesheet in tIDE */
 			"SheetId":"",
@@ -225,7 +229,7 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 		{
 			/* The name of this unique teleporter list */
 			"Name":"",
-			/* The list of destinations, if the previously given name has been used by another manifest, then both destination lists are merged */
+			/* The list of destinations, if the previously given name has been used by another content pack, then both destination lists are merged */
 			"Destinations":[
 				{
 					/* The name of the map that this specific destination will teleport the player to */
@@ -242,19 +246,19 @@ To use a `Conditional` in your conditions, use the name of the conditional prefi
 		},
 		...
 	],
-	/* The shops section references the names of the individual <shopname>.json files relative to the manifest, without the json extension */
+	/* The shops section references the names of the individual <shopname>.json files relative to the locations.json, without the json extension */
 	"Shops":["","",...]
 }
 ```
 
 Shops have their own format that can be found below:
 
-**Shop Manifest (Version 1)**
+**Shop Config (Version 1)**
 ```javascript
 {
-	/* What version of the shop manifest parser ALL should use to read this file */
+	/* What version of the shop config parser ALL should use to read this file */
 	"ParserVersion":1,
-	/* Path relative to the shop manifest to a png to be used as a owner portrait for the shop */
+	/* Path relative to the shop config to a png to be used as a owner portrait for the shop */
 	"Portrait":"",
 	/* Name of the NPC who owns this shop, if no NPC exists then a placeholder NPC is created */
 	"Owner":"",
