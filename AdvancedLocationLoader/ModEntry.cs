@@ -31,7 +31,7 @@ namespace Entoarox.AdvancedLocationLoader
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/AdvancedLocationLoader/About/update.json");
 
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
-            GameEvents.UpdateTick += this.InitAfterLoad;
+            SpecialisedEvents.UnvalidatedUpdateTick += this.InitAfterLoad;
             LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
 
             this.Helper.Content.RegisterSerializerType<Locations.Greenhouse>();
@@ -64,7 +64,7 @@ namespace Entoarox.AdvancedLocationLoader
                 Game1.eveningColor = Microsoft.Xna.Framework.Color.Black;
             if (Game1.eveningColor == Microsoft.Xna.Framework.Color.Black)
                 return;
-            GameEvents.UpdateTick -= this.InitAfterLoad;
+            SpecialisedEvents.UnvalidatedUpdateTick -= this.InitAfterLoad;
 
             // apply patcher
             this.Patcher.ApplyPatches(out Compound compoundData);
