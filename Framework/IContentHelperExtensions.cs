@@ -123,6 +123,7 @@ namespace Entoarox.Framework
                 helper.InvalidateCache(assetName);
             }
         }
+
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
         /// </summary>

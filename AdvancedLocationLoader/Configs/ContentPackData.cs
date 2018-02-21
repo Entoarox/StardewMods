@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using StardewModdingAPI;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class LocationConfig
+    /// <summary>The loaded data for a content pack.</summary>
+    public class ContentPackData
     {
-        /// <summary>The secondary location configs to read. This is ignored on a secondary location config.</summary>
-        public IList<string> Includes { get; set; } = new List<string>();
+        public IContentPack ContentPack { get; set; }
 
         public IList<Location> Locations { get; set; } = new List<Location>();
         public IList<Override> Overrides { get; set; } = new List<Override>();
@@ -16,6 +17,6 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public IList<Warp> Warps { get; set; } = new List<Warp>();
         public IList<Conditional> Conditionals { get; set; } = new List<Conditional>();
         public IList<TeleporterList> Teleporters { get; set; } = new List<TeleporterList>();
-        public IList<string> Shops { get; set; } = new List<string>();
+        public IList<ShopConfig> Shops { get; set; } = new List<ShopConfig>();
     }
 }

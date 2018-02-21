@@ -4,13 +4,10 @@ using System.Linq;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 using StardewValley;
 
 using Entoarox.Framework;
-
-using StardewModdingAPI.Events;
 
 using StardewValley.Menus;
 
@@ -56,13 +53,13 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void Teleporter(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
-            if(Configs.Compound.Teleporters.Exists(e => e.ListName.Equals(arguments[0].Trim())))
+            if(ModEntry.PatchData.Teleporters.Any(e => e.ListName.Equals(arguments[0].Trim())))
                 TeleportationResolver.Request(arguments[0]).Init();
             else
             {
                 ModEntry.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
                 List<string> lists = new List<string>();
-                foreach (var list in Configs.Compound.Teleporters)
+                foreach (var list in ModEntry.PatchData.Teleporters)
                     lists.Add(list.ListName);
                 ModEntry.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
                 Game1.drawObjectDialogue(ModEntry.Strings.Get("sparkle"));
@@ -70,7 +67,7 @@ namespace Entoarox.AdvancedLocationLoader
         }
         internal static void Conditional(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
-            if(!who.mailReceived.Contains("ALLCondition_"+arguments[0]) && Configs.Compound.Conditionals.Exists(e => e.Name==arguments[0]))
+            if(!who.mailReceived.Contains("ALLCondition_"+arguments[0]) && ModEntry.PatchData.Conditionals.Any(e => e.Name==arguments[0]))
                 ConditionalResolver.Request(arguments[0]).Init();
             else
             {
@@ -85,14 +82,14 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                if (!Configs.Compound.Shops.ContainsKey(arguments[0]))
+                if (!ModEntry.PatchData.Shops.Any(p => p.Name == arguments[0]))
                 {
                     Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
                     ModEntry.Logger.Log("Unable to open shop, shop not found: " + arguments[0], StardewModdingAPI.LogLevel.Error);
                 }
                 else
                 {
-                    Configs.ShopConfig shop = Configs.Compound.Shops[arguments[0]];
+                    Configs.ShopConfig shop = ModEntry.PatchData.Shops.First(p => p.Name == arguments[0]);
                     List<Item> stock = new List<Item>();
                     NPC portrait = new NPC();
                     portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);

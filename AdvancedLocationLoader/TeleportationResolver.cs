@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader
@@ -17,7 +18,7 @@ namespace Entoarox.AdvancedLocationLoader
         private Dictionary<string, Response> Destinations;
         private TeleportationResolver(string list)
         {
-            this.List = Configs.Compound.Teleporters.Find(e => e.ListName == list);
+            this.List = ModEntry.PatchData.Teleporters.FirstOrDefault(e => e.ListName == list);
             this.Destinations = new Dictionary<string, Response>() { { "", new Response("cancel", ModEntry.Strings.Get("cancel")) } };
             for (int c = 0; c < this.List.Destinations.Count; c++)
             {

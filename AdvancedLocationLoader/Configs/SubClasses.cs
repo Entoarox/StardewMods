@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
@@ -42,15 +42,6 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         }
     }
     // LocationConfig1_2
-    public class About
-    {
-        public string ModName;
-        public string Author;
-        public List<string> ThanksTo;
-        public string Website;
-        public string Description;
-        public string Version;
-    }
     public class Location : MapFileLink
     {
         [DefaultValue(false)]
