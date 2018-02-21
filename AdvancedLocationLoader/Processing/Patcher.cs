@@ -127,7 +127,8 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                         {
                             if (!redirCache.Contains(obj.ToFile))
                             {
-                                this.CoreContentHelper.RegisterXnbReplacement(pack.ContentPack, obj.FromFile, obj.ToFile);
+                                string toAssetPath = pack.ContentPack.GetRelativePath(fromAbsolutePath: ModEntry.SHelper.DirectoryPath, toLocalPath: obj.ToFile);
+                                this.CoreContentHelper.RegisterXnbReplacement(obj.FromFile, toAssetPath);
                                 redirCache.Add(obj.ToFile);
                             }
                         }

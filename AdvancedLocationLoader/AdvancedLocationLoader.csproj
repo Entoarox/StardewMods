@@ -50,6 +50,7 @@
     <Compile Include="Configs\ShopConfig.cs" />
     <Compile Include="Configs\SubClasses.cs" />
     <Compile Include="Configs\ContentPackData.cs" />
+    <Compile Include="ContentPackExtensions.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Processing\ConfigReader.cs" />
     <Compile Include="Processing\Patcher.cs" />

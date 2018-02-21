@@ -123,25 +123,7 @@ namespace Entoarox.Framework
                 helper.InvalidateCache(assetName);
             }
         }
-        /// <summary>
-        /// Lets you define a xnb file to completely replace with another
-        /// </summary>
-        /// <param name="helper">The <see cref="IContentHelper"/> this extension method is attached to</param>
-        /// <param name="contentPack">The content pack from which to read the file.</param>
-        /// <param name="assetName">The asset (Relative to Content and without extension) to replace</param>
-        /// <param name="replacementAssetName">The asset (Relative to your mod directory and without extension) to use instead</param>
-        public static void RegisterXnbReplacement(this IContentHelper helper, IContentPack contentPack, string assetName, string replacementAssetName)
-        {
-            assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
-            replacementAssetName = contentPack.GetActualAssetKey(replacementAssetName);
-            if (XnbLoader._Map.ContainsKey(assetName))
-                EntoaroxFrameworkMod.Logger.Log("[IContentHelper] The `" + Globals.GetModName(helper) + "` mod's attempt to register a replacement asset for the `" + assetName + "` asset failed, as another mod has already done so.", LogLevel.Error);
-            else
-            {
-                XnbLoader._Map.Add(assetName, (helper, replacementAssetName));
-                helper.InvalidateCache(assetName);
-            }
-        }
+
         /// <summary>
         /// Lets you define a xnb file to completely replace with another
         /// </summary>

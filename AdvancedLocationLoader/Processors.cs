@@ -136,7 +136,11 @@ namespace Entoarox.AdvancedLocationLoader
                     stage++; // 3
                     if (!_MappingCache.Contains(tilesheet.FileName))
                     {
-                        coreContentHelper.RegisterXnbReplacement(contentPack, fakepath, tilesheet.Seasonal ? (tilesheet.FileName + "_" + Game1.currentSeason) : tilesheet.FileName);
+                        string toAssetPath = contentPack.GetRelativePath(
+                            fromAbsolutePath: ModEntry.SHelper.DirectoryPath,
+                            toLocalPath: tilesheet.Seasonal ? ($"{tilesheet.FileName}_{Game1.currentSeason}") : tilesheet.FileName
+                        );
+                        coreContentHelper.RegisterXnbReplacement(fakepath, toAssetPath);
                         _MappingCache.Add(tilesheet.FileName);
                     }
                     stage++; // 4
