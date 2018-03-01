@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -47,15 +48,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Book.cs" />
-    <Compile Include="BookMenu.cs" />
+    <Compile Include="Menu\BookMenu.cs" />
     <Compile Include="Bookshelf.cs" />
-    <Compile Include="ConfigPage.cs" />
+    <Compile Include="Menu\ConfigPage.cs" />
     <Compile Include="CustomBooksMod.cs" />
-    <Compile Include="ImagePage.cs" />
-    <Compile Include="Page.cs" />
+    <Compile Include="Menu\ImagePage.cs" />
+    <Compile Include="Menu\InsertPage.cs" />
+    <Compile Include="Menu\Page.cs" />
+    <Compile Include="Menu\SystemPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TextPage.cs" />
-    <Compile Include="TitlePage.cs" />
+    <Compile Include="Menu\TextPage.cs" />
+    <Compile Include="Menu\TitlePage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />

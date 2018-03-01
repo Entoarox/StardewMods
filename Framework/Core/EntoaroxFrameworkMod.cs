@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -25,6 +26,7 @@ namespace Entoarox.Framework.Core
     using Events;
     using Core.AssetHandlers;
     using Extensions;
+    using Serialization;
 
     internal class EntoaroxFrameworkMod : Mod
     {
@@ -68,6 +70,7 @@ namespace Entoarox.Framework.Core
             GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
+            SaveEvents.AfterSave += this.SaveEvents_AfterSave;
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
         }
         #endregion
@@ -272,45 +275,68 @@ namespace Entoarox.Framework.Core
         }
         private void SaveEvents_BeforeSave(object s, EventArgs e)
         {
+            this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
+            var data = new Dictionary<string, CustomItem>();
             foreach(GameLocation loc in Game1.locations)
             {
                 foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
                 {
-                    chest.items = Serialize(chest.items);
+                    chest.items = Serialize(data, chest.items);
                 }
             }
+            Game1.player.items = Serialize(data, Game1.player.items);
+            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
+            if (house.fridge != null)
+                house.fridge.items = Serialize(data, house.fridge.items);
+            string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
+            this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
         }
         private void SaveEvents_AfterSave(object s, EventArgs e)
         {
+            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
+            string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
+            var data = this.Helper.ReadJsonFile<Dictionary<string, CustomItem>>(path);
+            if (data == null || data.Count == 0)
+                return;
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
                 {
-                    chest.items = Deserialize(chest.items);
+                    chest.items = Deserialize(data, chest.items);
                 }
             }
+            Game1.player.items = Deserialize(data, Game1.player.items);
+            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
+            if(house.fridge!=null)
+                house.fridge.items = Deserialize(data, house.fridge.items);
             ItemEvents.FireAfterDeserialize();
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(List<Item> items)
+        private List<Item> Serialize(Dictionary<string, CustomItem> data, List<Item> items)
         {
             List<Item> output = new List<Item>();
-            foreach(SObject item in items.Where(a => a is SObject))
+            foreach(Item item in items)
             {
-                if (item is ICustomItem)
+                if (item is SObject itm && item is ICustomItem citm)
                 {
+                    string id = Guid.NewGuid().ToString();
+                    int counter = 0;
+                    while (data.ContainsKey(id) && counter++<25)
+                        id = Guid.NewGuid().ToString();
+                    if (counter == 25)
+                        throw new TimeoutException("Unable to assign a GUID to all items!");
                     SObject obj = new SObject
                     {
                         parentSheetIndex = 0,
-                        type = $"{(item.GetType().AssemblyQualifiedName.Base64Encode())}@{(item as ICustomItem).Sleep().Base64Encode()}",
+                        type = id,
                         name = "[Entoarox.Framework.ICustomItem]",
-                        price = item.price
+                        price = itm.price
                     };
-                    output.Add(obj);
+                    data.Add(id, new CustomItem(item.GetType().AssemblyQualifiedName, citm.Sleep()));
                     output.Add(obj);
                 }
                 else
@@ -318,52 +344,56 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private List<Item> Deserialize(List<Item> items)
+        private List<Item> Deserialize(Dictionary<string, CustomItem> data, List<Item> items)
         {
             List<Item> output = new List<Item>();
-            foreach (SObject item in items.Where(a => a is SObject))
+            foreach (Item item in items)
             {
-                if (item.name.Equals("[Entoarox.Framework.ICustomItem]"))
+                if (item is SObject itm && itm.name.Equals("[Entoarox.Framework.ICustomItem]")==true)
                 {
-                    SObject obj;
-                    string[] split = item.type.Split('@');
-                    if (split.Length != 2)
-                        obj = item;
-                    else
+                    Item obj;
+                    if (data.ContainsKey(itm.type))
                     {
-                        string cls = split[0].Base64Decode();
-                        string data = split[1].Base64Decode();
-                        try
+                        string cls = data[itm.type].Type;
+                        Type type = Type.GetType(cls);
+                        if(type==null)
                         {
-                            Type type = Type.GetType(cls, true);
-                            if (!typeof(SObject).IsAssignableFrom(type))
-                            {
-                                this.Monitor.Log("Unable to deserialize custom item, item class is not a Stardew Object: " + cls, LogLevel.Error);
-                                obj = item;
-                            }
-                            else if(!type.GetInterfaces().Contains(typeof(ICustomItem)))
-                            {
-                                this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                                obj = item;
-                            }
-                            else
-                            {
-                                obj = (SObject)Activator.CreateInstance(type);
-                                (obj as ICustomItem).Wakeup(data);
-                            }
+                            this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
+                            output.Add(item);
+                            continue;
                         }
-                        catch(TypeLoadException)
+                        else if (!typeof(Item).IsAssignableFrom(type))
                         {
-                            this.Monitor.Log("Unable to deserialize custom item, item class was not found: " + cls, LogLevel.Error);
-                            obj = item;
+                            this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
+                            output.Add(item);
+                            continue;
                         }
-                        catch(Exception err)
+                        else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
-                            this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
-                            obj = item;
+                            this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
+                            output.Add(item);
+                            continue;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                obj = (Item)Newtonsoft.Json.JsonConvert.DeserializeObject(data[itm.type].Data, type);
+                                output.Add(obj);
+                            }
+                            catch(Exception err)
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
+                                output.Add(item);
+                                continue;
+                            }
                         }
                     }
-                    output.Add(obj);
+                    else
+                    {
+                        output.Add(item);
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.name, LogLevel.Error);
+                    }
                 }
                 else
                     output.Add(item);

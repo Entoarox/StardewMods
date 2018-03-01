@@ -170,7 +170,9 @@ namespace Entoarox.AdvancedLocationLoader
                     string version = about.GetValue("Version", StringComparison.InvariantCultureIgnoreCase)?.Value<string>() ?? "1.0.0";
 
                     // create content pack
+#pragma warning disable CS0618 // Type or member is obsolete
                     contentPack = this.Helper.CreateTransitionalContentPack(baseDir, id, name, description, author, new SemanticVersion(version));
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
                 catch (Exception ex)
                 {

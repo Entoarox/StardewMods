@@ -44,5 +44,20 @@ namespace Entoarox.CustomBooks
             };
             return page;
         }
+
+        public override void Click(Rectangle region, int x, int y)
+        {
+            
+        }
+
+        public override void Release(Rectangle region, int x, int y)
+        {
+
+        }
+
+        public override void Hover(Rectangle region, int x, int y)
+        {
+            
+        }
     }
 }

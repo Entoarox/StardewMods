@@ -24,7 +24,7 @@ namespace Entoarox.FurnitureAnywhere
             //var harmony = HarmonyInstance.Create("Entoarox.FurnitureAnywhere");
             //harmony.PatchAll(Assembly.GetExecutingAssembly());
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
-            MoreEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
+            ItemEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
             LocationEvents.CurrentLocationChanged += this.TriggerItemChangedEvent;
             MenuEvents.MenuChanged += this.TriggerItemChangedEvent;
             MenuEvents.MenuClosed += this.TriggerItemChangedEvent;

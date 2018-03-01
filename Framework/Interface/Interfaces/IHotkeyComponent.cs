@@ -1,6 +1,6 @@
-﻿namespace Entoarox.Framework.Interface
+namespace Entoarox.Framework.Interface
 {
-    interface IHotkeyComponent : IDynamicComponent
+    public interface IHotkeyComponent : IDynamicComponent
     {
         /// <summary>
         /// This event is triggered whenever a keyboard key is pressed

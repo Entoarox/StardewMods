@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 
 namespace Entoarox.Framework.Config
 {
+    [Obsolete]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class ConfigMinMaxAttribute : ConfigAttribute
     {

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Entoarox.Framework.Extensions
 {
-    public static class String
+    public static class StringExtensions
     {
         public static string Base64Encode(this string str)
         {

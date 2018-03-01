@@ -1,24 +1,36 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-
-
+using Microsoft.Xna.Framework.Input;
 
 namespace Entoarox.Framework.Interface
 {
-    public abstract class BaseComponentContainer : BaseDynamicComponent, IComponentContainer
+    [Obsolete]
+    public abstract class BaseComponentContainer : BaseComponent, IComponentContainer
     {
-        protected BaseComponentContainer(string name, Rectangle bounds, int layer) : base(name, bounds, layer)
+        protected BaseComponentContainer(string name, IComponent component, Rectangle bounds, int layer) : base(name, bounds, layer)
         {
+            this.Component = component;
         }
-        public InterfaceMenu Menu => this.Owner != null ? this.Owner.Menu : throw new NullReferenceException(Strings.ContainerNotAttached);
-        public virtual Rectangle InnerBounds { get => this.OuterBounds; set => this.OuterBounds = value; }
-        public abstract bool TabNext();
-        public abstract bool TabBack();
-        public abstract void TabAccess(TabType type);
-        public abstract bool HasFocus(IComponent component);
+
+        protected IComponent Component;
+
+        public InterfaceMenu Menu => this.Owner.Menu;
+
+        public Rectangle InnerBounds => this.OuterBounds;
+
+        public bool HasFocus(IDynamicComponent component)
+        {
+            return false;
+        }
+
+        public bool TabBack()
+        {
+            return false;
+        }
+
+        public bool TabNext()
+        {
+            return false;
+        }
     }
 }

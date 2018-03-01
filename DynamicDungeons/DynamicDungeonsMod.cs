@@ -46,7 +46,7 @@ namespace Entoarox.DynamicDungeons
                 new TitlePage("PufferChick", "Pufferium Chickate", "Adorable abomination, dont you just want to cuddle it?"),
             });
         }
-        public object GetApi()
+        public override object GetApi()
         {
             return new DynamicDungeonsAPI();
         }

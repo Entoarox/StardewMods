@@ -27,7 +27,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>embedded</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -42,9 +42,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Applications\Steam\steamapps\common\Stardew Valley\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
@@ -69,6 +69,7 @@
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
+    <Compile Include="Core\Serialization\CustomItem.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
     <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
     <Compile Include="Core\Utilities\Events.cs" />
@@ -76,13 +77,15 @@
     <Compile Include="Core\Utilities\ModuleProvider.cs" />
     <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
+    <Compile Include="CustomObject.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Events\EventArgsArguments.cs" />
     <Compile Include="Events\EventArgsEditable.cs" />
     <Compile Include="Events\EventArgsReturnable.cs" />
     <Compile Include="Events\ItemEvents.cs" />
     <Compile Include="Experimental\PathFinder.cs" />
-    <Compile Include="Extensions\String.cs" />
+    <Compile Include="Extensions\PointExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />
     <Compile Include="IConditionHelper.cs" />
@@ -131,7 +134,6 @@
     <Compile Include="Interface\Misc\EFInterfaceMenu.cs" />
     <Compile Include="Interface\Misc\KeyboardResolver.cs" />
     <Compile Include="Interface\Misc\Strings.cs" />
-    <Compile Include="Interface\Misc\TabType.cs" />
     <Compile Include="Interface\Static\TextComponent.cs" />
     <Compile Include="Interface\Static\TextureComponent.cs" />
     <Compile Include="IPlayerHelper.cs" />

@@ -1,6 +1,6 @@
-﻿namespace Entoarox.Framework.Interface
+namespace Entoarox.Framework.Interface
 {
-    interface IInputComponent : IDynamicComponent
+    public interface IInputComponent : IDynamicComponent
     {
         /// <summary>
         /// Input components will only receive input events while this value is true

@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewValley;
-using StardewValley.BellsAndWhistles;
 using StardewValley.Menus;
 
 namespace Entoarox.CustomBooks
@@ -16,9 +11,8 @@ namespace Entoarox.CustomBooks
     class BookMenu : IClickableMenu
     {
         private int Offset = 0;
-        private int HoveredArrow = 0;
-        private bool HoveredClose = false;
-        private Texture2D Background;
+        private int Hover = 0;
+        //private Texture2D Background;
         private Texture2D Binder;
         private Texture2D Content;
         public List<Page> Pages;
@@ -39,9 +33,8 @@ namespace Entoarox.CustomBooks
         {
             this.Id = id;
             this.Pages = CustomBooksMod.Shelf.Books[id].GetPages();
-            this.Pages.Insert(0, new ConfigPage());
-            this.Pages.Add(new ConfigPage(true));
-            this.Background = CustomBooksMod.SHelper.Content.Load<Texture2D>("book.png");
+            this.Pages.Insert(0, new ConfigPage(this));
+            this.Pages.Add(new InsertPage(this));
             this.Binder = CustomBooksMod.SHelper.Content.Load<Texture2D>("binding.png");
             this.Content = CustomBooksMod.SHelper.Content.Load<Texture2D>("pages.png");
         }
@@ -51,25 +44,48 @@ namespace Entoarox.CustomBooks
         }
         public override void performHoverAction(int x, int y)
         {
-            this.HoveredArrow = this.ArrowHotspotLeft.Contains(x, y) ? 1 : this.ArrowHotspotRight.Contains(x, y) ? 2 : 0;
-            this.HoveredClose = this.CloseHotspot.Contains(x, y);
+            if (this.Offset > 0 && this.ArrowHotspotLeft.Contains(x, y))
+                this.Hover = 2;
+            else if (this.Offset < this.Pages.Count - 2 && this.ArrowHotspotRight.Contains(x, y))
+                this.Hover = 3;
+            else if (this.CloseHotspot.Contains(x, y))
+                this.Hover = 1;
+            else
+            {
+                this.Hover = 0;
+                if (this.LeftPage.Contains(x, y))
+                    this.Pages[this.Offset].Hover(this.LeftPage, x, y);
+                if (this.Offset + 1 < this.Pages.Count && this.RightPage.Contains(x, y))
+                    this.Pages[this.Offset + 1].Hover(this.RightPage, x, y);
+            }
+        }
+        public override void releaseLeftClick(int x, int y)
+        {
+            if (this.LeftPage.Contains(x, y))
+                this.Pages[this.Offset].Release(this.LeftPage, x, y);
+            if (this.Offset + 1 < this.Pages.Count && this.RightPage.Contains(x, y))
+                this.Pages[this.Offset + 1].Release(this.RightPage, x, y);
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            if (this.Offset > 0 && this.ArrowHotspotLeft.Contains(x, y))
+            switch(this.Hover)
             {
-                this.Offset-=2;
-                Game1.playSound("shwip");
+                case 1:
+                    this.exitThisMenu(true);
+                    break;
+                case 2:
+                    this.Offset -= 2;
+                    Game1.playSound("shwip");
+                    break;
+                case 3:
+                    this.Offset += 2;
+                    Game1.playSound("shwip");
+                    break;
             }
-            if (this.Offset < this.Pages.Count-2 && this.ArrowHotspotRight.Contains(x, y))
-            {
-                this.Offset+=2;
-                Game1.playSound("shwip");
-            }
-            else if(this.CloseHotspot.Contains(x,y))
-            {
-                this.exitThisMenu(true);
-            }
+            if (this.LeftPage.Contains(x, y))
+                this.Pages[this.Offset].Click(this.LeftPage, x, y);
+            if (this.Offset + 1 < this.Pages.Count && this.RightPage.Contains(x, y))
+                this.Pages[this.Offset + 1].Click(this.RightPage, x, y);
         }
         public override void draw(SpriteBatch b)
         {
@@ -83,11 +99,11 @@ namespace Entoarox.CustomBooks
             b.Draw(this.Binder, p, null, CustomBooksMod.Shelf.Books[this.Id].Color, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
             b.Draw(this.Content, p, null, Color.White, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
 
-            b.Draw(Game1.mouseCursors, new Vector2(this.CloseHotspot.X - (this.HoveredClose ? CloseButton.Height * 0.25f : 0), this.CloseHotspot.Y - (this.HoveredClose ? CloseButton.Height * 0.25f : 0)), CloseButton, Color.White, 0, Vector2.Zero, this.HoveredClose ? 3.5f : 3f, SpriteEffects.None, 0);
+            b.Draw(Game1.mouseCursors, new Vector2(this.CloseHotspot.X - (this.Hover==1 ? CloseButton.Height * 0.25f : 0), this.CloseHotspot.Y - (this.Hover==1 ? CloseButton.Height * 0.25f : 0)), CloseButton, Color.White, 0, Vector2.Zero, this.Hover==1 ? 3.5f : 3f, SpriteEffects.None, 0);
             if (this.Offset > 0)
-                b.Draw(Game1.mouseCursors, new Vector2(this.ArrowHotspotLeft.X - (this.HoveredArrow == 1 ? RightArrow.Width * 0.25f : 0), this.ArrowHotspotLeft.Y - (this.HoveredArrow == 1 ? RightArrow.Height * 0.25f : 0)), LeftArrow, Color.White, 0, Vector2.Zero, this.HoveredArrow == 1 ? 4.5f : 4, SpriteEffects.None, 0);
+                b.Draw(Game1.mouseCursors, new Vector2(this.ArrowHotspotLeft.X - (this.Hover == 2 ? RightArrow.Width * 0.25f : 0), this.ArrowHotspotLeft.Y - (this.Hover == 2 ? RightArrow.Height * 0.25f : 0)), LeftArrow, Color.White, 0, Vector2.Zero, this.Hover == 2 ? 4.5f : 4, SpriteEffects.None, 0);
             if (this.Offset < this.Pages.Count-2)
-                b.Draw(Game1.mouseCursors, new Vector2(this.ArrowHotspotRight.X - (this.HoveredArrow == 2 ? RightArrow.Width * 0.25f : 0), this.ArrowHotspotRight.Y - (this.HoveredArrow == 2 ? RightArrow.Height * 0.25f : 0)), RightArrow, Color.White, 0, Vector2.Zero, this.HoveredArrow == 2 ? 4.5f : 4, SpriteEffects.None, 0);
+                b.Draw(Game1.mouseCursors, new Vector2(this.ArrowHotspotRight.X - (this.Hover == 3 ? RightArrow.Width * 0.25f : 0), this.ArrowHotspotRight.Y - (this.Hover == 3 ? RightArrow.Height * 0.25f : 0)), RightArrow, Color.White, 0, Vector2.Zero, this.Hover == 3 ? 4.5f : 4, SpriteEffects.None, 0);
             this.Pages[this.Offset].Draw(b, this.LeftPage);
             if(this.Offset+1 < this.Pages.Count)
                 this.Pages[this.Offset+1].Draw(b, this.RightPage);

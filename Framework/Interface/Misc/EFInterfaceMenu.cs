@@ -12,12 +12,17 @@ using StardewValley.Menus;
 
 namespace Entoarox.Framework.Interface
 {
+    [Obsolete("The Interface framework has not yet been completed and should not be used!")]
     public class InterfaceMenu : IClickableMenu, IComponentCollection
     {
-        [Obsolete("The Interface framework has not yet been completed and should not be used!", true)]
-        public InterfaceMenu()
+        public InterfaceMenu(Rectangle bounds)
         {
-
+            this.OuterBounds = bounds;
+        }
+        public InterfaceMenu(int width, int height)
+        {
+            var origin = Utility.getTopLeftPositionForCenteringOnScreen(width * Game1.pixelZoom, height * Game1.pixelZoom);
+            this.OuterBounds = new Rectangle((int)origin.X, (int)origin.Y, width, height);
         }
 
         public bool AcceptsComponent<T>() where T : IComponent
@@ -88,6 +93,22 @@ namespace Entoarox.Framework.Interface
         public InterfaceMenu Menu => this;
         public Rectangle OuterBounds { get; set; }
         public Rectangle InnerBounds { get; set; }
+
+        InterfaceMenu IComponentContainer.Menu => throw new NotImplementedException();
+
+        Rectangle IComponentContainer.InnerBounds => throw new NotImplementedException();
+
+        int IComponent.Layer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        bool IComponent.Visible { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        Rectangle IComponent.OuterBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        string IComponent.Name => throw new NotImplementedException();
+
+        IComponentCollection IComponent.Owner => throw new NotImplementedException();
+
+        bool IComponent.IsAttached => throw new NotImplementedException();
+
+        IComponent IComponentCollection.this[string name] => throw new NotImplementedException();
 
         public bool TabNext()
         {
@@ -194,7 +215,7 @@ namespace Entoarox.Framework.Interface
 
         private void ReceiveInput(char input)
         {
-            if ((this._FocusComponent as IInputComponent).Selected)
+            if ((this._FocusComponent as IInputComponent)?.Selected==true)
                 (this._FocusComponent as IInputComponent).ReceiveInput(input);
         }
 
@@ -352,6 +373,96 @@ namespace Entoarox.Framework.Interface
                 if(component.Visible)
                     component.Draw(offset, b);
             (this._FocusComponent as IFloatComponent)?.FloatComponent?.Draw(new Point(0, 0), b);
+        }
+
+        bool IComponentCollection.AcceptsComponent<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentCollection.AcceptsComponent(IComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponentCollection.AddComponent(IComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentCollection.RemoveComponent(IComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentCollection.RemoveComponent(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentCollection.ContainsComponent(IComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentCollection.ContainsComponent(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponentCollection.RemoveComponents<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponentCollection.RemoveComponents(Predicate<IComponent> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponentCollection.ClearComponents()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator<IComponent> IEnumerable<IComponent>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentContainer.TabNext()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentContainer.TabBack()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IComponentContainer.HasFocus(IDynamicComponent component)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponent.Attach(IComponentCollection collection)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponent.Detach(IComponentCollection collection)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponent.Update(GameTime time)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IComponent.Draw(Point offset, SpriteBatch batch)
+        {
+            throw new NotImplementedException();
         }
     }
 }
