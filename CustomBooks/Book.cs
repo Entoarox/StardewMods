@@ -18,7 +18,7 @@ namespace Entoarox.CustomBooks
         private static Texture2D Icon;
         private static Color CategoryColor= new Color(0, 100, 200);
         public string Id;
-        private bool Broken = false;
+        private bool Broken => !CustomBooksMod.Shelf.Books.ContainsKey(this.Id);
         public Book()
         {
             if(Icon==null)
@@ -37,24 +37,12 @@ namespace Entoarox.CustomBooks
         {
             if (this.Broken)
             {
-                Game1.drawObjectDialogue("The book has been completely destroyed, it has become completely useless...");
+                Game1.drawObjectDialogue("The book has been damaged beyond repair...");
             }
             else
             {
                 Game1.activeClickableMenu = new BookMenu(this.Id);
             }
-        }
-
-        public string Sleep()
-        {
-            return this.Id;
-        }
-
-        public void Wakeup(string data)
-        {
-            this.Id = data;
-            if(!CustomBooksMod.Shelf.Books.ContainsKey(this.Id))
-                this.Broken = true;
         }
 
         public override string DisplayName { get => this.Broken ? "Destroyed Book" : this.name; set => this.displayName = value; }

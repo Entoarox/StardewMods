@@ -69,7 +69,10 @@
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
+    <Compile Include="Core\Serialization\ReadonlyContractResolver.cs" />
     <Compile Include="Core\Serialization\CustomItem.cs" />
+    <Compile Include="Core\Serialization\Placeholder.cs" />
+    <Compile Include="Core\Serialization\RectangleConverter.cs" />
     <Compile Include="Core\UpdateHandler.cs" />
     <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
     <Compile Include="Core\Utilities\Events.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
     <Compile Include="CustomObject.cs" />
     <Compile Include="Delegates.cs" />
+    <Compile Include="EntoaroxFrameworkAPI.cs" />
     <Compile Include="Events\EventArgsArguments.cs" />
     <Compile Include="Events\EventArgsEditable.cs" />
     <Compile Include="Events\EventArgsReturnable.cs" />
@@ -198,6 +202,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="About\Changelog.txt" />
+    <Content Include="Content\placeholder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\common.targets" />

@@ -21,6 +21,9 @@ using Microsoft.Xna.Framework.Input;
 using xTile.Tiles;
 using xTile.ObjectModel;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace Entoarox.Framework.Core
 {
     using Events;
@@ -41,6 +44,7 @@ namespace Entoarox.Framework.Core
         private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
         private static bool CreditsDone = false;
+        private JsonSerializer Serializer;
         private EventArgsActionTriggered ActionInfo;
         private Item prevItem = null;
         private static Vector2? LastTouchAction = null;
@@ -48,6 +52,12 @@ namespace Entoarox.Framework.Core
         #region Mod
         public override void Entry(IModHelper helper)
         {
+            this.Serializer = new JsonSerializer();
+            this.Serializer.Converters.Add(new RectangleConverter());
+            this.Serializer.Formatting = Formatting.None;
+            this.Serializer.NullValueHandling = NullValueHandling.Ignore;
+            this.Serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+            this.Serializer.ContractResolver = new ReadonlyContractResolver();
             var TypeHandler = new DeferredAssetHandler();
             helper.Content.AssetEditors.Add(TypeHandler);
             helper.Content.AssetEditors.Add(TypeHandler);
@@ -72,6 +82,10 @@ namespace Entoarox.Framework.Core
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
             SaveEvents.AfterSave += this.SaveEvents_AfterSave;
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
+        }
+        public override object GetApi()
+        {
+            return new EntoaroxFrameworkAPI();
         }
         #endregion
         #region Events
@@ -298,9 +312,7 @@ namespace Entoarox.Framework.Core
             this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
-            var data = this.Helper.ReadJsonFile<Dictionary<string, CustomItem>>(path);
-            if (data == null || data.Count == 0)
-                return;
+            var data = this.Helper.ReadJsonFile<Dictionary<string, CustomItem>>(path) ?? new Dictionary<string, CustomItem>();
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
@@ -321,22 +333,26 @@ namespace Entoarox.Framework.Core
             List<Item> output = new List<Item>();
             foreach(Item item in items)
             {
-                if (item is SObject itm && item is ICustomItem citm)
+                if (item is ICustomItem)
                 {
                     string id = Guid.NewGuid().ToString();
                     int counter = 0;
-                    while (data.ContainsKey(id) && counter++<25)
+                    while (data.ContainsKey(id) && counter++ < 25)
                         id = Guid.NewGuid().ToString();
-                    if (counter == 25)
+                    if (counter >= 25)
                         throw new TimeoutException("Unable to assign a GUID to all items!");
-                    SObject obj = new SObject
+                    SObject obj = new SObject()
                     {
+                        stack = item.getStack(),
                         parentSheetIndex = 0,
                         type = id,
-                        name = "[Entoarox.Framework.ICustomItem]",
-                        price = itm.price
+                        name = "(Entoarox.Framework.ICustomItem)",
+                        price = item.salePrice(),
                     };
-                    data.Add(id, new CustomItem(item.GetType().AssemblyQualifiedName, citm.Sleep()));
+                    if (item is Placeholder pitm)
+                        data.Add(id, new CustomItem(pitm.Id, pitm.Data));
+                    else
+                        data.Add(id, new CustomItem(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, this.Serializer)));
                     output.Add(obj);
                 }
                 else
@@ -349,9 +365,8 @@ namespace Entoarox.Framework.Core
             List<Item> output = new List<Item>();
             foreach (Item item in items)
             {
-                if (item is SObject itm && itm.name.Equals("[Entoarox.Framework.ICustomItem]")==true)
+                if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
                 {
-                    Item obj;
                     if (data.ContainsKey(itm.type))
                     {
                         string cls = data[itm.type].Type;
@@ -359,32 +374,31 @@ namespace Entoarox.Framework.Core
                         if(type==null)
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
-                            output.Add(item);
+                            output.Add(new Placeholder(cls, data[itm.type].Data));
                             continue;
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
-                            output.Add(item);
+                            output.Add(new Placeholder(cls, data[itm.type].Data));
                             continue;
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                            output.Add(item);
+                            output.Add(new Placeholder(cls, data[itm.type].Data));
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                obj = (Item)Newtonsoft.Json.JsonConvert.DeserializeObject(data[itm.type].Data, type);
-                                output.Add(obj);
+                                output.Add((Item)data[itm.type].Data.ToObject(type, this.Serializer));
                             }
                             catch(Exception err)
                             {
                                 this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
-                                output.Add(item);
+                                output.Add(new Placeholder(cls, data[itm.type].Data));
                                 continue;
                             }
                         }
@@ -392,7 +406,7 @@ namespace Entoarox.Framework.Core
                     else
                     {
                         output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.name, LogLevel.Error);
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.type, LogLevel.Error);
                     }
                 }
                 else

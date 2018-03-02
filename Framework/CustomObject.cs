@@ -34,9 +34,6 @@ namespace Entoarox.Framework
             this.ItemIcon = itemIcon;
         }
 
-        public abstract string Sleep();
-        public abstract void Wakeup(string data);
-
         public override string DisplayName { get => this.name ?? this.ItemName; set => this.name = value; }
         public override bool canBeDropped()
         {

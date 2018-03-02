@@ -8,7 +8,6 @@ namespace Entoarox.Framework
 {
     public interface ICustomItem
     {
-        void Wakeup(string data);
-        string Sleep();
+
     }
 }
