@@ -117,178 +117,209 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             try
             {
                 // validate locations
-                currentStep = "Locations";
-                foreach (Location location in config.Locations)
+                if (config.Locations != null)
                 {
-                    if (!this.AssertFileExists(contentPack, "location", location.FileName))
-                        continue;
-                    if (!this.AffectedLocations.Add(location.MapName))
+                    currentStep = "Locations";
+                    foreach (Location location in config.Locations)
                     {
-                        this.Monitor.Log($"   Skipped {location}: that map is already being modified.", LogLevel.Error);
-                        continue;
-                    }
-                    if (!this.LocationTypes.Contains(location.Type))
-                    {
-                        this.Monitor.Log($"   Location {location} has unknown type, using 'Default' instead.", LogLevel.Warn);
-                        location.Type = "Default";
-                    }
+                        if (!this.AssertFileExists(contentPack, "location", location.FileName))
+                            continue;
+                        if (!this.AffectedLocations.Add(location.MapName))
+                        {
+                            this.Monitor.Log($"   Skipped {location}: that map is already being modified.", LogLevel.Error);
+                            continue;
+                        }
+                        if (!this.LocationTypes.Contains(location.Type))
+                        {
+                            this.Monitor.Log($"   Location {location} has unknown type, using 'Default' instead.", LogLevel.Warn);
+                            location.Type = "Default";
+                        }
 
-                    data.Locations.Add(location);
+                        data.Locations.Add(location);
+                    }
                 }
 
                 // validate overrides
-                currentStep = "Overrides";
-                foreach (Override @override in config.Overrides)
+                if (config.Overrides != null)
                 {
-                    if (!this.AssertFileExists(contentPack, "override", @override.FileName))
-                        continue;
-                    if (!this.AffectedLocations.Add(@override.MapName))
+                    currentStep = "Overrides";
+                    foreach (Override @override in config.Overrides)
                     {
-                        this.Monitor.Log($"   Skipped {@override}: that map is already being modified.", LogLevel.Error);
-                        continue;
-                    }
+                        if (!this.AssertFileExists(contentPack, "override", @override.FileName))
+                            continue;
+                        if (!this.AffectedLocations.Add(@override.MapName))
+                        {
+                            this.Monitor.Log($"   Skipped {@override}: that map is already being modified.", LogLevel.Error);
+                            continue;
+                        }
 
-                    data.Overrides.Add(@override);
+                        data.Overrides.Add(@override);
+                    }
                 }
 
                 // validate redirects
-                currentStep = "Redirects";
-                foreach (Redirect redirect in config.Redirects)
+                if (config.Redirects != null)
                 {
-                    if (!File.Exists(Path.Combine(Game1.content.RootDirectory, $"{redirect.FromFile}.xnb")))
+                    currentStep = "Redirects";
+                    foreach (Redirect redirect in config.Redirects)
                     {
-                        this.Monitor.Log($"   Skipped {redirect}: file {redirect.FromFile}.xnb doesn't exist in the game's content folder.", LogLevel.Error);
-                        continue;
-                    }
-                    if (!this.AssertFileExists(contentPack, "redirect", redirect.ToFile))
-                        continue;
+                        if (!File.Exists(Path.Combine(Game1.content.RootDirectory, $"{redirect.FromFile}.xnb")))
+                        {
+                            this.Monitor.Log($"   Skipped {redirect}: file {redirect.FromFile}.xnb doesn't exist in the game's content folder.", LogLevel.Error);
+                            continue;
+                        }
+                        if (!this.AssertFileExists(contentPack, "redirect", redirect.ToFile))
+                            continue;
 
-                    data.Redirects.Add(redirect);
+                        data.Redirects.Add(redirect);
+                    }
                 }
 
                 // validate tilesheets
-                currentStep = "Tilesheets";
-                foreach (Tilesheet tilesheet in config.Tilesheets)
+                if (config.Tilesheets != null)
                 {
-                    if (tilesheet.FileName != null)
+                    currentStep = "Tilesheets";
+                    foreach (Tilesheet tilesheet in config.Tilesheets)
                     {
-                        if (tilesheet.Seasonal)
+                        if (tilesheet.FileName != null)
                         {
-                            bool filesExist =
-                                this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_spring")
-                                && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_summer")
-                                && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_fall")
-                                && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_winter");
-                            if (!filesExist)
+                            if (tilesheet.Seasonal)
+                            {
+                                bool filesExist =
+                                    this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_spring")
+                                    && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_summer")
+                                    && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_fall")
+                                    && this.AssertFileExists(contentPack, "tilesheet", $"{tilesheet.FileName}_winter");
+                                if (!filesExist)
+                                    continue;
+                            }
+                            else if (!this.AssertFileExists(contentPack, "tilesheet", tilesheet.FileName))
                                 continue;
                         }
-                        else if (!this.AssertFileExists(contentPack, "tilesheet", tilesheet.FileName))
-                            continue;
-                    }
 
-                    data.Tilesheets.Add(tilesheet);
+                        data.Tilesheets.Add(tilesheet);
+                    }
                 }
 
                 // validate tiles
-                currentStep = "Tiles";
-                foreach (Tile tile in config.Tiles)
+                if (config.Tiles != null)
                 {
-                    if (!this.ValidLayers.Contains(tile.LayerId))
+                    currentStep = "Tiles";
+                    foreach (Tile tile in config.Tiles)
                     {
-                        this.Monitor.Log($"   Skipped {tile}: unknown layer '{tile.LayerId}'.", LogLevel.Error);
-                        continue;
-                    }
+                        if (!this.ValidLayers.Contains(tile.LayerId))
+                        {
+                            this.Monitor.Log($"   Skipped {tile}: unknown layer '{tile.LayerId}'.", LogLevel.Error);
+                            continue;
+                        }
 
-                    data.Tiles.Add(tile);
+                        data.Tiles.Add(tile);
+                    }
                 }
 
                 // validate properties
-                currentStep = "Properties";
-                foreach (Property property in config.Properties)
+                if (config.Properties != null)
                 {
-                    if (!this.ValidLayers.Contains(property.LayerId))
+                    currentStep = "Properties";
+                    foreach (Property property in config.Properties)
                     {
-                        this.Monitor.Log($"   Skipped `{property}`: unknown layer '{property.LayerId}'.", LogLevel.Error);
-                        continue;
-                    }
+                        if (!this.ValidLayers.Contains(property.LayerId))
+                        {
+                            this.Monitor.Log($"   Skipped `{property}`: unknown layer '{property.LayerId}'.",
+                                LogLevel.Error);
+                            continue;
+                        }
 
-                    data.Properties.Add(property);
+                        data.Properties.Add(property);
+                    }
                 }
 
                 // validate warps
-                currentStep = "Warps";
-                foreach (Warp war in config.Warps)
-                    data.Warps.Add(war);
+                if (config.Warps != null)
+                {
+                    currentStep = "Warps";
+                    foreach (Warp warp in config.Warps)
+                        data.Warps.Add(warp);
+                }
 
                 // validate conditionals
-                currentStep = "Conditionals";
-                foreach (Conditional condition in config.Conditionals)
+                if (config.Conditionals != null)
                 {
-                    if (condition.Item < -1)
+                    currentStep = "Conditionals";
+                    foreach (Conditional condition in config.Conditionals)
                     {
-                        this.Monitor.Log($"   Skipped {condition}, references null item.", LogLevel.Error);
-                        continue;
-                    }
-                    if (condition.Amount < 1)
-                    {
-                        this.Monitor.Log($"   Skipped {condition}, item amount can't be less then 1.", LogLevel.Error);
-                        continue;
-                    }
-                    if (!this.AddedConditionNames.Add(condition.Name))
-                    {
-                        this.Monitor.Log($"   Skipped {condition.Name}, another condition with this name already exists.", LogLevel.Error);
-                        continue;
-                    }
+                        if (condition.Item < -1)
+                        {
+                            this.Monitor.Log($"   Skipped {condition}, references null item.", LogLevel.Error);
+                            continue;
+                        }
+                        if (condition.Amount < 1)
+                        {
+                            this.Monitor.Log($"   Skipped {condition}, item amount can't be less then 1.", LogLevel.Error);
+                            continue;
+                        }
+                        if (!this.AddedConditionNames.Add(condition.Name))
+                        {
+                            this.Monitor.Log($"   Skipped {condition.Name}, another condition with this name already exists.", LogLevel.Error);
+                            continue;
+                        }
 
-                    data.Conditionals.Add(condition);
+                        data.Conditionals.Add(condition);
+                    }
                 }
 
                 // validate minecarts
-                currentStep = "Teleporters";
-                foreach (TeleporterList list in config.Teleporters)
+                if (config.Teleporters != null)
                 {
-                    bool valid = true;
-                    foreach (TeleporterList prevList in this.AddedTeleporters)
+                    currentStep = "Teleporters";
+                    foreach (TeleporterList list in config.Teleporters)
                     {
-                        if (prevList.ListName == list.ListName)
+                        bool valid = true;
+                        foreach (TeleporterList prevList in this.AddedTeleporters)
                         {
-                            valid = false;
-                            foreach (TeleporterDestination dest in list.Destinations)
+                            if (prevList.ListName == list.ListName)
                             {
-                                if (prevList.Destinations.TrueForAll(a => !a.Equals(dest)))
-                                    prevList.Destinations.Add(dest);
-                                else
-                                    this.Monitor.Log($"   Can't add teleporter destination for the `{list.ListName}` teleporter, the destination already exists: `{dest}`.", LogLevel.Error);
+                                valid = false;
+                                foreach (TeleporterDestination dest in list.Destinations)
+                                {
+                                    if (prevList.Destinations.TrueForAll(a => !a.Equals(dest)))
+                                        prevList.Destinations.Add(dest);
+                                    else
+                                        this.Monitor.Log($"   Can't add teleporter destination for the `{list.ListName}` teleporter, the destination already exists: `{dest}`.", LogLevel.Error);
+                                }
+                                this.Monitor.Log($"   Teleporter updated: {prevList}", LogLevel.Trace);
+                                break;
                             }
-                            this.Monitor.Log($"   Teleporter updated: {prevList}", LogLevel.Trace);
-                            break;
                         }
-                    }
-                    if (valid)
-                    {
-                        this.AddedTeleporters.Add(list);
-                        this.Monitor.Log($"   Teleporter created: {list}", LogLevel.Trace);
+                        if (valid)
+                        {
+                            this.AddedTeleporters.Add(list);
+                            this.Monitor.Log($"   Teleporter created: {list}", LogLevel.Trace);
+                        }
                     }
                 }
 
                 // validate shops
-                currentStep = "Shops";
-                foreach (string shop in config.Shops)
+                if (config.Shops != null)
                 {
-                    try
+                    currentStep = "Shops";
+                    foreach (string shop in config.Shops)
                     {
-                        ShopConfig shopConfig = contentPack.ReadJsonFile<ShopConfig>($"{shop}.json");
-                        if (shopConfig == null)
+                        try
                         {
-                            this.Monitor.Log($"   Skipped shop '{shop}.json': file does not exist.", LogLevel.Error);
-                            continue;
+                            ShopConfig shopConfig = contentPack.ReadJsonFile<ShopConfig>($"{shop}.json");
+                            if (shopConfig == null)
+                            {
+                                this.Monitor.Log($"   Skipped shop '{shop}.json': file does not exist.", LogLevel.Error);
+                                continue;
+                            }
+                            shopConfig.Name = shop;
+                            data.Shops.Add(shopConfig);
                         }
-                        shopConfig.Name = shop;
-                        data.Shops.Add(shopConfig);
-                    }
-                    catch (Exception ex)
-                    {
-                        this.Monitor.Log($"   Skipped shop '{shop}.json': unexpected error parsing file.", LogLevel.Error, ex);
+                        catch (Exception ex)
+                        {
+                            this.Monitor.Log($"   Skipped shop '{shop}.json': unexpected error parsing file.", LogLevel.Error, ex);
+                        }
                     }
                 }
             }
