@@ -16,10 +16,10 @@ namespace Entoarox.Framework
     {
         protected Texture2D ItemIcon;
         protected string ItemName;
-        protected string ItemDescription;
+        protected string ItemDescription = null;
         protected string ItemCategory;
         protected int ItemStack = 1;
-        protected Color? CategoryColor;
+        protected Color? CategoryColor = null;
         protected bool IsDroppable = false;
         protected bool IsGiftable = false;
         protected bool IsTrashable = false;

@@ -158,6 +158,9 @@ namespace Entoarox.MorePetsAndAnimals
                     }
                     npc.updatedDialogueYet = true;
                 }
+            if (Game1.getFarm() == null)
+                return;
+            Random random = new Random();
             foreach(FarmAnimal animal in Game1.getFarm().getAllFarmAnimals())
             {
                 string str = animal.type;
@@ -171,7 +174,9 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        animal.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>("skins/" + str + "_" + (animal.meatIndex - 999).ToString()), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/" + str + "_" + (animal.meatIndex - 999).ToString());
+                        if (animal.sprite.Texture != texture)
+                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
@@ -179,27 +184,39 @@ namespace Entoarox.MorePetsAndAnimals
                         if (str.Equals("BabyDuck"))
                             try
                             {
-                                animal.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>("skins/BabyDuck"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/BabyDuck");
+                                if (animal.sprite.Texture != texture)
+                                    animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                             catch
                             {
                                 this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                                animal.sprite = new AnimatedSprite(Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
+                                if (animal.sprite.Texture != texture)
+                                    animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                         else
-                            animal.sprite = new AnimatedSprite(Game1.content.Load<Texture2D>("Animals\\" + str), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        {
+                            Texture2D texture = Game1.content.Load<Texture2D>("Animals\\" + str);
+                            if (animal.sprite.Texture != texture)
+                                animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        }
                     }
                 }
                 else if (animal.type == "Duck" && animal.age < animal.ageWhenMature)
                 {
                     try
                     {
-                        animal.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>("skins/BabyDuck"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/BabyDuck");
+                        if (animal.sprite.Texture != texture)
+                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
                         this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                        animal.sprite = new AnimatedSprite(Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken"), 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
+                        if (animal.sprite.Texture != texture)
+                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                 }
             }

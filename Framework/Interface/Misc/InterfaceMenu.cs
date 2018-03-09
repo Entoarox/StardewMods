@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,16 +12,28 @@ using StardewValley.Menus;
 namespace Entoarox.Framework.Interface
 {
     [Obsolete("The Interface framework has not yet been completed and should not be used!")]
-    public class InterfaceMenu : IClickableMenu, IComponentCollection
+    public class InterfaceMenu : IClickableMenu, IComponentContainer
     {
-        public InterfaceMenu(Rectangle bounds)
+        private bool ShowCloseButton;
+        private bool DrawChrome;
+        public InterfaceMenu(Rectangle bounds, bool showCloseButton = true, bool drawChrome = true)
         {
+            Rectangle realRect = Utilities.GetRealRectangle(bounds);
+            this.DrawChrome = drawChrome;
             this.OuterBounds = bounds;
+            initialize(realRect.X, realRect.Y, realRect.Width, realRect.Height, showCloseButton);
         }
-        public InterfaceMenu(int width, int height)
+        public InterfaceMenu(Point size, bool showCloseButton=true, bool drawChrome=true) : this(size.X,size.Y,showCloseButton,drawChrome)
         {
-            var origin = Utility.getTopLeftPositionForCenteringOnScreen(width * Game1.pixelZoom, height * Game1.pixelZoom);
-            this.OuterBounds = new Rectangle((int)origin.X, (int)origin.Y, width, height);
+
+        }
+        public InterfaceMenu(int width, int height, bool showCloseButton = true, bool drawChrome = true)
+        {
+            Vector2 vector = Utility.getTopLeftPositionForCenteringOnScreen(width, height);
+            Rectangle realRect = new Rectangle((int)vector.X, (int)vector.Y, width * Game1.pixelZoom, height * Game1.pixelZoom);
+            this.DrawChrome = drawChrome;
+            this.OuterBounds = Utilities.GetZoomRectangle(realRect);
+            initialize(realRect.X, realRect.Y, realRect.Width, realRect.Height, showCloseButton);
         }
 
         public bool AcceptsComponent<T>() where T : IComponent
@@ -90,26 +101,6 @@ namespace Entoarox.Framework.Interface
             this._EventComponents.Clear();
         }
 
-        public InterfaceMenu Menu => this;
-        public Rectangle OuterBounds { get; set; }
-        public Rectangle InnerBounds { get; set; }
-
-        InterfaceMenu IComponentContainer.Menu => throw new NotImplementedException();
-
-        Rectangle IComponentContainer.InnerBounds => throw new NotImplementedException();
-
-        int IComponent.Layer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        bool IComponent.Visible { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        Rectangle IComponent.OuterBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        string IComponent.Name => throw new NotImplementedException();
-
-        IComponentCollection IComponent.Owner => throw new NotImplementedException();
-
-        bool IComponent.IsAttached => throw new NotImplementedException();
-
-        IComponent IComponentCollection.this[string name] => throw new NotImplementedException();
-
         public bool TabNext()
         {
             if (this._FocusComponent == null)
@@ -146,24 +137,6 @@ namespace Entoarox.Framework.Interface
             return true;
         }
 
-
-        public bool HasFocus(IComponent component)
-        {
-            return this._FocusComponent == component;
-        }
-
-        public IComponent this[string name] => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound);
-
-        public IEnumerator<IComponent> GetEnumerator()
-        {
-            foreach (var component in this._Components.Values)
-                yield return component;
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         // Internals
         private Dictionary<string, IComponent> _Components = new Dictionary<string, IComponent>();
         private List<IComponent> _DrawComponents = new List<IComponent>();
@@ -171,6 +144,12 @@ namespace Entoarox.Framework.Interface
         private IDynamicComponent _FocusComponent;
         private IDynamicComponent _HoverComponent;
         private int RepeatCounter = 0;
+
+        public InterfaceMenu Menu => this;
+
+        public Rectangle InnerBounds => this.OuterBounds;
+
+        public Rectangle OuterBounds { get; private set; }
 
         private void UpdateSorting()
         {
@@ -218,6 +197,17 @@ namespace Entoarox.Framework.Interface
             if ((this._FocusComponent as IInputComponent)?.Selected==true)
                 (this._FocusComponent as IInputComponent).ReceiveInput(input);
         }
+        private void ReceiveKeypress(Keys key)
+        {
+            if (key != Keys.Escape && (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true))
+                return;
+            else if (key == Keys.Escape && this._FocusComponent != null)
+                UpdateFocus(null);
+            else if (key == Keys.Tab)
+                TabNext();
+            else
+                base.receiveKeyPress(key);
+        }
 
         // IClickableMenu implementations
         public override bool areGamePadControlsImplemented()
@@ -233,10 +223,10 @@ namespace Entoarox.Framework.Interface
                 switch (b)
                 {
                     case Buttons.A:
-                        this.receiveKeyPress(Keys.Enter);
+                        this.ReceiveKeypress(Keys.Enter);
                         break;
                     case Buttons.B:
-                        this.receiveKeyPress(Keys.Escape);
+                        this.ReceiveKeypress(Keys.Escape);
                         break;
                     case Buttons.LeftShoulder:
                     case Buttons.LeftTrigger:
@@ -248,21 +238,36 @@ namespace Entoarox.Framework.Interface
                         break;
                     case Buttons.LeftThumbstickUp:
                     case Buttons.DPadUp:
-                        this.receiveKeyPress(Keys.Up);
+                        this.ReceiveKeypress(Keys.Up);
                         break;
                     case Buttons.LeftThumbstickDown:
                     case Buttons.DPadDown:
-                        this.receiveKeyPress(Keys.Down);
+                        this.ReceiveKeypress(Keys.Down);
                         break;
                     case Buttons.LeftThumbstickLeft:
                     case Buttons.DPadLeft:
-                        this.receiveKeyPress(Keys.Left);
+                        this.ReceiveKeypress(Keys.Left);
                         break;
                     case Buttons.LeftThumbstickRight:
                     case Buttons.DPadRight:
-                        this.receiveKeyPress(Keys.Right);
+                        this.ReceiveKeypress(Keys.Right);
                         break;
                 }
+                int X = this.InnerBounds.X;
+                int Y = this.InnerBounds.Y;
+                IComponent target = this._FocusComponent;
+                X += target.OuterBounds.X;
+                Y += target.OuterBounds.Y;
+                while (target is IComponentContainer parent && parent.FocusComponent != null)
+                {
+                    target = parent.FocusComponent;
+                    X += target.OuterBounds.X;
+                    Y += target.OuterBounds.Y;
+                }
+                X += target.OuterBounds.Width - 1;
+                Y += target.OuterBounds.Height - 1;
+                Mouse.SetPosition(X*Game1.pixelZoom, Y*Game1.pixelZoom);
+
             }
         }
         public override void receiveGamePadButton(Buttons b)
@@ -337,14 +342,6 @@ namespace Entoarox.Framework.Interface
         }
         public override void receiveKeyPress(Keys key)
         {
-            if (key!=Keys.Escape && (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true))
-                return;
-            if (key == Keys.Escape && this._FocusComponent != null)
-                UpdateFocus(null);
-            else if (key == Keys.Tab)
-                TabNext();
-            else
-                base.receiveKeyPress(key);
         }
         public override void receiveScrollWheelAction(int direction)
         {
@@ -361,6 +358,7 @@ namespace Entoarox.Framework.Interface
         }
         public override void update(GameTime time)
         {
+            base.update(time);
             foreach (IComponent component in this._DrawComponents)
                 if (component.Visible && (!(component is IDynamicComponent) || (component as IDynamicComponent).Enabled))
                     component.Update(time);
@@ -368,101 +366,25 @@ namespace Entoarox.Framework.Interface
         }
         public override void draw(SpriteBatch b)
         {
+            if (this.DrawChrome)
+            {
+                Rectangle drawRect = Utilities.GetRealRectangle(this.OuterBounds);
+                Utilities.DrawMenuRect(b, drawRect.X, drawRect.Y, drawRect.Width, drawRect.Height);
+            }
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y);
             foreach (IComponent component in this._DrawComponents)
-                if(component.Visible)
+                if (component.Visible)
                     component.Draw(offset, b);
             (this._FocusComponent as IFloatComponent)?.FloatComponent?.Draw(new Point(0, 0), b);
+            base.draw(b);
+            this.drawMouse(b);
         }
 
-        bool IComponentCollection.AcceptsComponent<T>()
+        public bool HasFocus(IDynamicComponent component)
         {
-            throw new NotImplementedException();
+            return this._FocusComponent == component || (this._FocusComponent as IComponentContainer)?.HasFocus(component) == true;
         }
 
-        bool IComponentCollection.AcceptsComponent(IComponent component)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponentCollection.AddComponent(IComponent component)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentCollection.RemoveComponent(IComponent component)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentCollection.RemoveComponent(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentCollection.ContainsComponent(IComponent component)
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentCollection.ContainsComponent(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponentCollection.RemoveComponents<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponentCollection.RemoveComponents(Predicate<IComponent> predicate)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponentCollection.ClearComponents()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator<IComponent> IEnumerable<IComponent>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentContainer.TabNext()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentContainer.TabBack()
-        {
-            throw new NotImplementedException();
-        }
-
-        bool IComponentContainer.HasFocus(IDynamicComponent component)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponent.Attach(IComponentCollection collection)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponent.Detach(IComponentCollection collection)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponent.Update(GameTime time)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IComponent.Draw(Point offset, SpriteBatch batch)
-        {
-            throw new NotImplementedException();
-        }
+        public IDynamicComponent FocusComponent => this._FocusComponent;
     }
 }

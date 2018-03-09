@@ -2,13 +2,18 @@ using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.Interface
 {
-    public interface IComponentContainer : IComponent
+    public interface IComponentContainer
     {
         /// <summary>
         /// The menu this container is a part of
         /// </summary>
         /// <exception cref="System.NullReferenceException">Container is not attached to a menu</exception>
         InterfaceMenu Menu { get; }
+        /// <summary>
+        /// The outer bounds of the container, scaled using <see cref="StardewValley.Game1.pixelZoom"/>
+        /// These bounds should be relative to the viewport
+        /// </summary>
+        Rectangle OuterBounds { get; }
         /// <summary>
         /// The inner bounds of the container, scaled using <see cref="StardewValley.Game1.pixelZoom"/>
         /// These bounds should be relative to the outer bounds
@@ -33,5 +38,11 @@ namespace Entoarox.Framework.Interface
         /// <param name="component">The component to check for focus</param>
         /// <returns>If the component currently has focus</returns>
         bool HasFocus(IDynamicComponent component);
+        /// <summary>
+        /// If the given component has focus, returns false for components that are not owned by this container
+        /// </summary>
+        /// <param name="component">The component to check for focus</param>
+        /// <returns>If the component currently has focus</returns>
+        IDynamicComponent FocusComponent { get; }
     }
 }

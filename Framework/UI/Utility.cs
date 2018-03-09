@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entoarox.Framework.Interface
+namespace Entoarox.Framework.UI
 {
-    interface ControllerMapping
+    class Utility
     {
     }
 }

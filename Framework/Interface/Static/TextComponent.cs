@@ -12,7 +12,7 @@ namespace Entoarox.Framework.Interface
         private string _Label;
         public string Label
         {
-            get => _Label;
+            get => this._Label;
             set
             {
                 this._Label = value;
@@ -23,7 +23,7 @@ namespace Entoarox.Framework.Interface
         private SpriteFont _Font;
         public SpriteFont Font
         {
-            get => _Font;
+            get => this._Font;
             set
             {
                 this._Font = value;
@@ -33,7 +33,7 @@ namespace Entoarox.Framework.Interface
         private float _Scale;
         public float Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
                 this._Scale = value;
@@ -52,13 +52,13 @@ namespace Entoarox.Framework.Interface
         protected void CalculateBounds()
         {
             Vector2 bounds = this.Font.MeasureString(this._Label) * this._Scale;
-            Rectangle rect = GetRealRectangle(this.OuterBounds);
-            this.OuterBounds = GetZoomRectangle(new Rectangle(rect.X, rect.Y, (int)Math.Floor(bounds.X), (int)Math.Floor(bounds.Y)));
+            Rectangle rect = Utilities.GetRealRectangle(this.OuterBounds);
+            this.OuterBounds = Utilities.GetZoomRectangle(new Rectangle(rect.X, rect.Y, (int)Math.Floor(bounds.X), (int)Math.Floor(bounds.Y)));
         }
 
         public override void Draw(Point offset, SpriteBatch batch)
         {
-            Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
+            Rectangle rect = Utilities.GetDrawRectangle(offset, this.OuterBounds);
             if (this.Shadow)
                 batch.DrawString(this._Font, this._Label, new Vector2(rect.X + Game1.pixelZoom, rect.Y + Game1.pixelZoom), new Color(0, 0, 0, 0.33f), 0f, Vector2.Zero, this._Scale, SpriteEffects.None, 0);
             batch.DrawString(this._Font, this._Label, new Vector2(rect.X, rect.Y), this.Color, 0f, Vector2.Zero, this._Scale, SpriteEffects.None, 0);

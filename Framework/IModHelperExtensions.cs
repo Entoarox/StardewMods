@@ -14,14 +14,12 @@ namespace Entoarox.Framework
         private static IPlayerHelper _PlayerHelper;
         /// <summary>
         /// Allows you to request a hotkey with the given label
-        /// Also enables access for controller users by way of a feature-select menu
         /// </summary>
-        /// <param name="label">The label to use for this in the keybind & feature-select menu's</param>
-        /// <param name="key">The preferred default key, if already taken a random unused letter will be selected</param>
-        /// <param name="menuIcon">The `springobjects` item index to use as a icon in the feature-select menu</param>
+        /// <param name="label">The label to use for this keybind in the settings menu</param>
+        /// <param name="key">The preferred default key, if already taken a random unused key will be selected</param>
         /// <param name="handler">The method to invoke when the key is pressed</param>
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public static void RequestHotkey(this IModHelper helper, string label, Keys key, int menuIcon, Delegate handler)
+        public static void RequestHotkey(this IModHelper helper, string label, Keys key, Action handler)
         {
 
         }

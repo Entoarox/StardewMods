@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.Framework.Interface
@@ -16,9 +16,9 @@ namespace Entoarox.Framework.Interface
         }
         public override void Draw(Point offset, SpriteBatch batch)
         {
-            Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
+            Rectangle rect = Utilities.GetDrawRectangle(offset, this.OuterBounds);
             batch.Draw(StardewValley.Game1.staminaRect, rect, this.FromColor);
-            batch.Draw(this.Vertical ? Cache.GradientTextureVertical : Cache.GradientTextureHorizontal, rect, this.ToColor);
+            batch.Draw(this.Vertical ? Utilities.GradientTextureVertical : Utilities.GradientTextureHorizontal, rect, this.ToColor);
         }
     }
 }

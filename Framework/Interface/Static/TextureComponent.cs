@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.Framework.Interface
@@ -10,7 +10,7 @@ namespace Entoarox.Framework.Interface
         private bool _Scaled;
         public bool Scaled
         {
-            get => _Scaled;
+            get => this._Scaled;
             set
             {
                 this._Scaled = value;
@@ -23,7 +23,7 @@ namespace Entoarox.Framework.Interface
         private Rectangle _Subrect;
         public Rectangle Subrect
         {
-            get => _Subrect;
+            get => this._Subrect;
             set
             {
                 this._Subrect = value;
@@ -55,7 +55,7 @@ namespace Entoarox.Framework.Interface
 
         public override void Draw(Point offset, SpriteBatch batch)
         {
-            Rectangle rect = GetDrawRectangle(offset, this.OuterBounds);
+            Rectangle rect = Utilities.GetDrawRectangle(offset, this.OuterBounds);
             batch.Draw(this.Texture, rect, this._Subrect, this.Color);
         }
     }

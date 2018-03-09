@@ -262,6 +262,7 @@ namespace Entoarox.Framework.Interface
         {
             return this._FocusComponent == component;
         }
+        public virtual IDynamicComponent FocusComponent => this._FocusComponent;
 
         public IComponent this[string name] { get => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound); }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 
@@ -6,7 +6,7 @@ namespace Entoarox.Framework.Interface
 {
     public abstract class BaseClickableComponent : BaseDynamicComponent
     {
-        protected BaseClickableComponent(string name, Rectangle bounds, int layer) : base(name, bounds, layer)
+        public BaseClickableComponent(string name, Rectangle bounds, int layer) : base(name, bounds, layer)
         {
         }
         public event Action EventClicked;

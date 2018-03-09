@@ -29,6 +29,11 @@ namespace Entoarox.Framework.Interface
         /// </summary>
         static public event Action<Keys> KeyUp;
         /// <summary>
+        /// This event is triggered when a given key counts as having been pressed
+        /// This event is essentially like subscribing to both <see cref="KeyDown"/> and <see cref="KeyHeld"/> with a single method
+        /// </summary>
+        static public event Action<Keys> KeyPress;
+        /// <summary>
         /// This event is trigger when a given key is first pressed or held
         /// It outputs the char for the intended value rather then the Keys enumeration for the actual key pressed
         /// </summary>
@@ -71,6 +76,7 @@ namespace Entoarox.Framework.Interface
             foreach (Keys key in Down)
             {
                 KeyDown?.Invoke(key);
+                KeyPress?.Invoke(key);
                 // int[]{ticks,tickRate}
                 Counter.Add(key, new int[2] { 30, 30 });
             }
@@ -88,6 +94,7 @@ namespace Entoarox.Framework.Interface
                 if (Counter[key][1] > 15)
                     Counter[key][1]--;
                 KeyHeld?.Invoke(key);
+                KeyPress?.Invoke(key);
             }
             Old = New;
         }

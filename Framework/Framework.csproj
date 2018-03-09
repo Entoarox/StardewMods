@@ -36,6 +36,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
+    <NoWarn>CS0618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Harmony, Version=1.0.9.1, Culture=neutral, processorArchitecture=MSIL">
@@ -121,11 +122,12 @@
     <Compile Include="Interface\Base\BaseComponentCollection.cs" />
     <Compile Include="Interface\Base\BaseComponent.cs" />
     <Compile Include="Interface\Base\BaseDynamicComponent.cs" />
+    <Compile Include="Interface\Base\BaseItemslotComponent.cs" />
     <Compile Include="Interface\Containers\GenericComponentCollection.cs" />
-    <Compile Include="Interface\ControllerMapping.cs" />
-    <Compile Include="Interface\IControllerComponent.cs" />
+    <Compile Include="Interface\Interfaces\IControllerComponent.cs" />
+    <Compile Include="Interface\Interfaces\IItemContainer.cs" />
     <Compile Include="Interface\Interfaces\IVisibilityObserver.cs" />
-    <Compile Include="Interface\Misc\Cache.cs" />
+    <Compile Include="Interface\Misc\Utilities.cs" />
     <Compile Include="Interface\Containers\ScrollableComponentCollection.cs" />
     <Compile Include="Interface\Static\GradientComponent.cs" />
     <Compile Include="Interface\Interfaces\IFloatComponent.cs" />
@@ -135,7 +137,7 @@
     <Compile Include="Interface\Interfaces\IComponentCollection.cs" />
     <Compile Include="Interface\Interfaces\IDynamicComponent.cs" />
     <Compile Include="Interface\Interfaces\IInputComponent.cs" />
-    <Compile Include="Interface\Misc\EFInterfaceMenu.cs" />
+    <Compile Include="Interface\Misc\InterfaceMenu.cs" />
     <Compile Include="Interface\Misc\KeyboardResolver.cs" />
     <Compile Include="Interface\Misc\Strings.cs" />
     <Compile Include="Interface\Static\TextComponent.cs" />
@@ -150,6 +152,8 @@
     <Compile Include="IModHelperExtensions.cs" />
     <Compile Include="IMonitorExtensions.cs" />
     <Compile Include="PlayerModifier.cs" />
+    <Compile Include="Advanced\PolyTuple.cs" />
+    <Compile Include="Advanced\TupleSyntax.cs" />
     <Compile Include="UI\Containers\BookComponent.cs" />
     <Compile Include="UI\OverlayMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

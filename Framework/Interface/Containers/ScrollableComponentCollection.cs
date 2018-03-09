@@ -83,7 +83,7 @@ namespace Entoarox.Framework.Interface
         public override void Draw(Point offset, SpriteBatch batch)
         {
             batch.End();
-            var drawRect = GetDrawRectangle(offset, new Rectangle(this.OuterBounds.X, this.OuterBounds.Y, this.InnerBounds.Width, this.InnerBounds.Height));
+            var drawRect = Utilities.GetDrawRectangle(offset, new Rectangle(this.OuterBounds.X, this.OuterBounds.Y, this.InnerBounds.Width, this.InnerBounds.Height));
             batch.GraphicsDevice.ScissorRectangle = drawRect;
             batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, new RasterizerState() { ScissorTestEnable = true });
             Point offset2 = new Point(this.OuterBounds.X + this.InnerBounds.X + offset.X, this.OuterBounds.Y + this.InnerBounds.Y + offset.Y - this.ScrollOffset);
@@ -97,14 +97,14 @@ namespace Entoarox.Framework.Interface
             if (this.ScrollLimit == 0)
                 return;
             // Up
-            var uprect = GetDrawRectangle(offset, new Rectangle(this.MyUp.X, this.MyUp.Y, UpButton.Width, UpButton.Height));
+            var uprect = Utilities.GetDrawRectangle(offset, new Rectangle(this.MyUp.X, this.MyUp.Y, UpButton.Width, UpButton.Height));
             if (this.HoverUp)
-                uprect = ScaleRectangle(uprect, 1.2);
+                uprect = Utilities.ScaleRectangle(uprect, 1.2);
             batch.Draw(Game1.mouseCursors, uprect, UpButton, Color.White * (this.ScrollOffset > 0 ? 1 : 0.5f));
             // down
-            var downrect = GetDrawRectangle(offset, new Rectangle(this.MyDown.X + offset.X, this.MyDown.Y + offset.Y, UpButton.Width, UpButton.Height));
+            var downrect = Utilities.GetDrawRectangle(offset, new Rectangle(this.MyDown.X + offset.X, this.MyDown.Y + offset.Y, UpButton.Width, UpButton.Height));
             if (this.HoverDown)
-                downrect = ScaleRectangle(downrect, 1.2);
+                downrect = Utilities.ScaleRectangle(downrect, 1.2);
             batch.Draw(Game1.mouseCursors, downrect, DownButton, Color.White * (this.ScrollOffset < this.ScrollLimit ? 1 : 0.5f));
         }
         // IVisibilityObserver

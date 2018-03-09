@@ -9,39 +9,11 @@ namespace Entoarox.Framework.Interface
 {
     public abstract class BaseComponent : IComponent
     {
-        protected BaseComponent(string name, Rectangle bounds, int layer)
+        public BaseComponent(string name, Rectangle bounds, int layer)
         {
             this.Name = name;
             this.Layer = layer;
             this.OuterBounds = bounds;
-        }
-        protected Rectangle GetDrawRectangle(Point offset, Rectangle rect)
-        {
-            return new Rectangle((offset.X + rect.X) * Game1.pixelZoom, (offset.Y + rect.Y) * Game1.pixelZoom, rect.Width * Game1.pixelZoom, rect.Height * Game1.pixelZoom);
-        }
-
-        protected Vector2 GetDrawVector(Point offset, Rectangle rect)
-        {
-            return new Vector2((offset.X + rect.X) * Game1.pixelZoom, (offset.Y + rect.Y) * Game1.pixelZoom);
-        }
-
-        protected Rectangle GetRealRectangle(Rectangle rect)
-        {
-            return new Rectangle(rect.X * Game1.pixelZoom, rect.Y * Game1.pixelZoom, rect.Width * Game1.pixelZoom, rect.Height * Game1.pixelZoom);
-        }
-
-        protected Rectangle GetZoomRectangle(Rectangle rect)
-        {
-            return new Rectangle((int)Math.Floor(rect.X / Game1.pixelZoom + 0f), (int)Math.Floor(rect.Y / Game1.pixelZoom + 0f), (int)Math.Ceiling(rect.Width / Game1.pixelZoom + 0f), (int)Math.Ceiling(rect.Height / Game1.pixelZoom + 0f));
-        }
-
-        protected Rectangle ScaleRectangle(Rectangle rect, double scale)
-        {
-            int width = (int)Math.Round(rect.Width * scale);
-            int height = (int)Math.Round(rect.Height * scale);
-            int xdiff = (int)Math.Round((rect.Width - width) / 2D);
-            int ydiff = (int)Math.Round((rect.Height - height) / 2D);
-            return new Rectangle(rect.X + xdiff, rect.Y + ydiff, width, height);
         }
 
         public int Layer { get; set; }
@@ -62,12 +34,12 @@ namespace Entoarox.Framework.Interface
         public virtual Rectangle OuterBounds { get; set; }
 
         public string Name { get; private set; }
-        private IComponentCollection _Owner;
-        public IComponentCollection Owner => this._Owner ?? throw new InvalidOperationException(Strings.ComponentNotAttached);
+        private IComponentContainer _Owner;
+        public IComponentContainer Owner => this._Owner ?? throw new InvalidOperationException(Strings.ComponentNotAttached);
 
         public bool IsAttached { get; private set; } = false;
 
-        public virtual void Attach(IComponentCollection collection)
+        public virtual void Attach(IComponentContainer collection)
         {
             if (this.IsAttached)
                 throw new InvalidOperationException(Strings.ComponentAttached);
@@ -75,7 +47,7 @@ namespace Entoarox.Framework.Interface
             this._Owner = collection;
         }
 
-        public virtual void Detach(IComponentCollection collection)
+        public virtual void Detach(IComponentContainer collection)
         {
             if (!this.IsAttached)
                 throw new ArgumentException(Strings.ComponentNotAttached);

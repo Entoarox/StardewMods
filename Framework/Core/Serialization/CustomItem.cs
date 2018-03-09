@@ -8,16 +8,16 @@ using Newtonsoft.Json.Linq;
 
 namespace Entoarox.Framework.Core.Serialization
 {
-    class CustomItem
+    class InstanceState
     {
         public string Type;
         public JToken Data;
 
-        public CustomItem()
+        public InstanceState()
         {
 
         }
-        public CustomItem(string type, JToken data)
+        public InstanceState(string type, JToken data)
         {
             this.Type = type;
             this.Data = data;

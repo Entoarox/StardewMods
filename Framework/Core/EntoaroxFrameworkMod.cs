@@ -28,7 +28,6 @@ namespace Entoarox.Framework.Core
 {
     using Events;
     using Core.AssetHandlers;
-    using Extensions;
     using Serialization;
 
     internal class EntoaroxFrameworkMod : Mod
@@ -38,9 +37,6 @@ namespace Entoarox.Framework.Core
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
-        internal static List<(string Mod, Keys key, Delegate Handler)> Keybinds = new List<(string Mod, Keys key, Delegate Handler)>();
-
-        private static Dictionary<Keys, (string Mod, Delegate Handler)> _Keybinds = new Dictionary<Keys, (string Mod, Delegate Handler)>();
         private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
         private static bool CreditsDone = false;
@@ -89,20 +85,6 @@ namespace Entoarox.Framework.Core
         }
         #endregion
         #region Events
-        private void ControlEvents_KeyboardChanged(object sender, EventArgsKeyboardStateChanged e)
-        {
-           foreach(Keys key in e.PriorState.GetPressedKeys())
-                if(e.NewState.IsKeyUp(key) && _Keybinds.ContainsKey(key))
-                    try
-                    {
-                        _Keybinds[key].Handler.DynamicInvoke();
-                    }
-                    catch (Exception ex)
-                    {
-                        string[] parts = _Keybinds[key].Mod.Split('\n');
-                        Logger.Log($"The {parts[0]} mod failed handling the `{parts[1]}` keybind being triggered:\n{ex}", LogLevel.Error);
-                    }
-        }
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
@@ -291,7 +273,7 @@ namespace Entoarox.Framework.Core
         {
             this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
-            var data = new Dictionary<string, CustomItem>();
+            var data = new Dictionary<string, InstanceState>();
             foreach(GameLocation loc in Game1.locations)
             {
                 foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
@@ -312,7 +294,7 @@ namespace Entoarox.Framework.Core
             this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
-            var data = this.Helper.ReadJsonFile<Dictionary<string, CustomItem>>(path) ?? new Dictionary<string, CustomItem>();
+            var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
@@ -328,7 +310,7 @@ namespace Entoarox.Framework.Core
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(Dictionary<string, CustomItem> data, List<Item> items)
+        private List<Item> Serialize(Dictionary<string, InstanceState> data, List<Item> items)
         {
             List<Item> output = new List<Item>();
             foreach(Item item in items)
@@ -350,9 +332,9 @@ namespace Entoarox.Framework.Core
                         price = item.salePrice(),
                     };
                     if (item is Placeholder pitm)
-                        data.Add(id, new CustomItem(pitm.Id, pitm.Data));
+                        data.Add(id, new InstanceState(pitm.Id, pitm.Data));
                     else
-                        data.Add(id, new CustomItem(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, this.Serializer)));
+                        data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, this.Serializer)));
                     output.Add(obj);
                 }
                 else
@@ -360,7 +342,7 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private List<Item> Deserialize(Dictionary<string, CustomItem> data, List<Item> items)
+        private List<Item> Deserialize(Dictionary<string, InstanceState> data, List<Item> items)
         {
             List<Item> output = new List<Item>();
             foreach (Item item in items)
@@ -469,87 +451,6 @@ namespace Entoarox.Framework.Core
             ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
             ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-        }
-        private void SetupHotkeys()
-        {
-            List<Keys> letters = new List<Keys>()
-            {
-                Keys.A,
-                Keys.B,
-                Keys.C,
-                Keys.D,
-                Keys.E,
-                Keys.F,
-                Keys.G,
-                Keys.H,
-                Keys.I,
-                Keys.J,
-                Keys.K,
-                Keys.L,
-                Keys.M,
-                Keys.N,
-                Keys.O,
-                Keys.P,
-                Keys.Q,
-                Keys.R,
-                Keys.S,
-                Keys.T,
-                Keys.U,
-                Keys.V,
-                Keys.W,
-                Keys.X,
-                Keys.Y,
-                Keys.Z,
-                Keys.D0,
-                Keys.D1,
-                Keys.D2,
-                Keys.D3,
-                Keys.D4,
-                Keys.D5,
-                Keys.D6,
-                Keys.D7,
-                Keys.D8,
-                Keys.D9,
-                Keys.OemPlus,
-                Keys.OemMinus
-            };
-            letters.RemoveAll(a => Game1.options.isKeyInUse(a));
-            _Keybinds = new Dictionary<Keys, (string Mod, Delegate Handler)>();
-            var keybinds = new List<(string mod, Keys key, Delegate handler)>(Keybinds);
-            Dictionary<string, Keys> memory = this.Helper.ReadJsonFile<Dictionary<string, Keys>>("keybinds.json");
-            foreach ((string mod, Keys key, Delegate handler) in new List<(string mod, Keys key, Delegate handler)>(keybinds))
-                if (memory.ContainsKey(mod) && letters.Contains(key))
-                {
-                    _Keybinds.Add(key, (mod, handler));
-                    keybinds.Remove((mod, key, handler));
-                    letters.Remove(key);
-                }
-            foreach ((string mod, Keys key, Delegate handler) in new List<(string mod, Keys key, Delegate handler)>(keybinds))
-                if (!_Keybinds.ContainsKey(key) && letters.Contains(key))
-                {
-                    _Keybinds.Add(key, (mod, handler));
-                    keybinds.Remove((mod, key, handler));
-                    letters.Remove(key);
-                }
-            foreach ((string mod, Keys key, Delegate handler) in keybinds)
-            {
-                if (letters.Count > 0)
-                {
-                    Keys letter = letters[0];
-                    letters.Remove(letter);
-                    _Keybinds.Add(letter, (mod, handler));
-                    Keybinds.Remove((mod, key, handler));
-                    keybinds.Add((mod, letter, handler));
-                }
-                else
-                {
-                    Keybinds.Remove((mod, key, handler));
-                    keybinds.Add((mod, Keys.None, handler));
-                    var split = mod.Split('\n');
-                    this.Monitor.Log($"Could not automatically provide a hotkey for the `{split[0]}` mod's `{split[1]}` key, you will need to manually assign one!", LogLevel.Error);
-                }
-            }
-            ControlEvents.KeyboardChanged += this.ControlEvents_KeyboardChanged;
         }
         #endregion
     }

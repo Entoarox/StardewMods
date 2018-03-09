@@ -1,36 +1,20 @@
-using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace Entoarox.Framework.Interface
 {
-    [Obsolete]
     public abstract class BaseComponentContainer : BaseComponent, IComponentContainer
     {
-        protected BaseComponentContainer(string name, IComponent component, Rectangle bounds, int layer) : base(name, bounds, layer)
+        public BaseComponentContainer(string name, Rectangle bounds, int layer) : base(name, bounds, layer)
         {
-            this.Component = component;
+
         }
-
-        protected IComponent Component;
-
         public InterfaceMenu Menu => this.Owner.Menu;
-
         public Rectangle InnerBounds => this.OuterBounds;
 
-        public bool HasFocus(IDynamicComponent component)
-        {
-            return false;
-        }
+        public IDynamicComponent FocusComponent => null;
 
-        public bool TabBack()
-        {
-            return false;
-        }
-
-        public bool TabNext()
-        {
-            return false;
-        }
+        public abstract bool HasFocus(IDynamicComponent component);
+        public abstract bool TabBack();
+        public abstract bool TabNext();
     }
 }

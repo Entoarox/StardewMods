@@ -10,7 +10,5 @@ namespace Entoarox.Framework.Interface
         internal static string NullOwner = "Component is not attached to a container";
         internal static string NotAccepted = "Component is not accepted by this collection";
         internal static string ContainerNotAttached = "Container is not attached to a menu";
-        internal static string InvalidClassMethod = "Use of this method is invalid for this class";
-        internal static string NotAvailableYet = "This functionality is not yet available and thus should not be used";
     }
 }

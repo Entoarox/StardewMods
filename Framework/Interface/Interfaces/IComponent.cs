@@ -28,7 +28,7 @@ namespace Entoarox.Framework.Interface
         /// <summary>
         /// A reference to the collection that holds the component, must be set during Attach and null-ed during Detach
         /// </summary>
-        IComponentCollection Owner { get; }
+        IComponentContainer Owner { get; }
         /// <summary>
         /// If this component is attached right now, must be set to true during Attach and set to false during Detach
         /// </summary>
@@ -39,13 +39,13 @@ namespace Entoarox.Framework.Interface
         /// Components can only exist in one collection at a time
         /// </summary>
         /// <param name="collection">The collection this component is being added to</param>
-        void Attach(IComponentCollection collection);
+        void Attach(IComponentContainer container);
         /// <summary>
         /// Triggers when this component is removed from a collection
         /// Components can only exist in one collection at a time
         /// </summary>
         /// <param name="collection">The collection this component is being removed from</param>
-        void Detach(IComponentCollection collection);
+        void Detach(IComponentContainer container);
         
         /// <summary>
         /// Triggers during every update tick that the menu this component is a part of is on the screen

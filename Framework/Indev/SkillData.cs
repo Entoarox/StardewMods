@@ -6,10 +6,10 @@ namespace Entoarox.Framework.Indev
     {
         public class SkillInfo
         {
-            public int Experience;
-            public int Level;
-            public List<string> Professions;
+            public int Experience = 0;
+            public int Level = 0;
+            public List<string> Professions = new List<string>();
         }
-        public Dictionary<string, SkillInfo> Skills;
+        public Dictionary<string, SkillInfo> Skills = new Dictionary<string, SkillInfo>();
     }
 }
