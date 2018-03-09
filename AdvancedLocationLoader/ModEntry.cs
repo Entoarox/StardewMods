@@ -22,6 +22,11 @@ namespace Entoarox.AdvancedLocationLoader
         internal static Compound PatchData;
         private Patcher Patcher;
 
+        /// <summary>Whether a player save has been loaded.</summary>
+        internal bool IsSaveLoaded => Game1.hasLoadedGame && !string.IsNullOrEmpty(Game1.player.name) && !SaveGame.IsProcessing;
+
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             // init
@@ -60,9 +65,7 @@ namespace Entoarox.AdvancedLocationLoader
         private void InitAfterLoad(object sender, EventArgs e)
         {
             // wait until game loaded
-            if (!Game1.hasLoadedGame)
-                Game1.eveningColor = Microsoft.Xna.Framework.Color.Black;
-            if (Game1.eveningColor == Microsoft.Xna.Framework.Color.Black)
+            if (!this.IsSaveLoaded)
                 return;
             SpecialisedEvents.UnvalidatedUpdateTick -= this.InitAfterLoad;
 
