@@ -35,7 +35,7 @@ namespace Entoarox.Framework.Core
                     opts.Add("landslide");
                 if (Game1.stats.daysPlayed > 30)
                     opts.Add("earthquake");
-                if ((Game1.getLocationFromName("Beach") as StardewValley.Locations.Beach).bridgeFixed)
+                if ((Game1.getLocationFromName("Beach") as StardewValley.Locations.Beach).bridgeFixed.Value)
                     opts.Add("beach");
                 return resolver(args[0], opts.ToArray());
             });
@@ -68,15 +68,19 @@ namespace Entoarox.Framework.Core
                 return resolver(args[0], Game1.player.spouse.Substring(7), "true");
             });
             RegisterConditionResolver("divorced", (args, resolver) => {
-                var matches = Utility.getAllCharacters().Where(a => a.divorcedFromFarmer);
-                if (!matches.Any())
+                List<NPC> matches = null;
+                foreach(NPC c in Utility.getAllCharacters())
+                {
+                    if(c.divorcedFromFarmer) matches.Add(c);
+                }
+                if (matches is null)
                     return false;
-                var list = matches.Select(a => a.name).ToList();
+                var list = matches.Select(a => a.Name).ToList();
                 list.Add("true");
                 return resolver(args[0], list.ToArray());
             });
             RegisterConditionResolver("house", (args, resolver) => {
-                return resolver(args[0], Game1.player.houseUpgradeLevel.ToString());
+                return resolver(args[0], Game1.player.HouseUpgradeLevel.ToString());
             });
             RegisterConditionResolver("farm", (args, resolver) => {
                 return resolver(args[0], FarmMap[Math.Min(5, Game1.whichFarm)]);
@@ -88,7 +92,7 @@ namespace Entoarox.Framework.Core
                 return resolver(args[0], Game1.player.money.ToString());
             });
             RegisterConditionResolver("carries", (args, resolver) => {
-                var matches= Game1.player.items.Where(a => a.Name == args[0]);
+                var matches= Game1.player.Items.Where(a => a.Name == args[0]);
                 if (!matches.Any())
                     return false;
                 int c = 0;

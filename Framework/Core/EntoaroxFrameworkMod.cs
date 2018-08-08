@@ -139,38 +139,43 @@ namespace Entoarox.Framework.Core
             switch (command)
             {
                 case "world_bushreset":
-                    foreach (GameLocation loc in Game1.locations)
+                    foreach (GameLocation l in Game1.locations)
                     {
-                        loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
-                        if ((loc.isOutdoors || loc.name.Equals("BathHouse_Entry") || loc.treatAsOutdoors) && loc.map.GetLayer("Paths") != null)
+                        //loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
+                        foreach(Bush b in l.largeTerrainFeatures)
                         {
-                            for (int x = 0; x < loc.map.Layers[0].LayerWidth; ++x)
+                            if ((l.IsOutdoors || l.Name.Equals("BathHouse_Entry") || l.treatAsOutdoors) && l.map.GetLayer("Paths") != null)
                             {
-                                for (int y = 0; y < loc.map.Layers[0].LayerHeight; ++y)
+                                for (int x = 0; x < l.map.Layers[0].LayerWidth; ++x)
                                 {
-                                    Tile tile = loc.map.GetLayer("Paths").Tiles[x, y];
-                                    if (tile != null)
+                                    for (int y = 0; y < l.map.Layers[0].LayerHeight; ++y)
                                     {
-                                        Vector2 vector2 = new Vector2(x, y);
-                                        switch (tile.TileIndex)
+                                        Tile tile = l.map.GetLayer("Paths").Tiles[x, y];
+                                        if (tile != null)
                                         {
-                                            case 24:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 2, loc));
-                                                break;
-                                            case 25:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 1, loc));
-                                                break;
-                                            case 26:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 0, loc));
-                                                break;
+                                            Vector2 vector2 = new Vector2(x, y);
+                                            switch (tile.TileIndex)
+                                            {
+                                                case 24:
+                                                    if (!l.terrainFeatures.ContainsKey(vector2))
+                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 2, l));
+                                                    break;
+                                                case 25:
+                                                    if (!l.terrainFeatures.ContainsKey(vector2))
+                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 1, l));
+                                                    break;
+                                                case 26:
+                                                    if (!l.terrainFeatures.ContainsKey(vector2))
+                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 0, l));
+                                                    break;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+
+                        
                     }
                     break;
                 case "farm_settype":
