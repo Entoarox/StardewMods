@@ -29,6 +29,7 @@ namespace Entoarox.Framework.Core
     using Events;
     using Core.AssetHandlers;
     using Serialization;
+    using StardewValley.BellsAndWhistles;
 
     internal class EntoaroxFrameworkMod : Mod
     {
@@ -77,6 +78,7 @@ namespace Entoarox.Framework.Core
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
             SaveEvents.AfterSave += this.SaveEvents_AfterSave;
+            //TODO Update update checker
             this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
         }
         public override object GetApi()
@@ -144,7 +146,7 @@ namespace Entoarox.Framework.Core
                         //loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
                         foreach(Bush b in l.largeTerrainFeatures)
                         {
-                            if ((l.IsOutdoors || l.Name.Equals("BathHouse_Entry") || l.treatAsOutdoors) && l.map.GetLayer("Paths") != null)
+                            if ((l.IsOutdoors || l.Name.Equals("BathHouse_Entry") || l.treatAsOutdoors.Value) && l.map.GetLayer("Paths") != null)
                             {
                                 for (int x = 0; x < l.map.Layers[0].LayerWidth; ++x)
                                 {
@@ -281,14 +283,15 @@ namespace Entoarox.Framework.Core
             var data = new Dictionary<string, InstanceState>();
             foreach(GameLocation loc in Game1.locations)
             {
+                //TODO look into where Chests & Fridge store thier item locations
                 foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
                 {
-                    chest.items = Serialize(data, chest.items);
+                    Serialize(data, chest.items);
                 }
             }
-            Game1.player.items = Serialize(data, Game1.player.items);
+            Game1.player.Items = Serialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if (house.fridge != null)
+            if (house.fridge.Value != null)
                 house.fridge.items = Serialize(data, house.fridge.items);
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
@@ -307,15 +310,15 @@ namespace Entoarox.Framework.Core
                     chest.items = Deserialize(data, chest.items);
                 }
             }
-            Game1.player.items = Deserialize(data, Game1.player.items);
+            Game1.player.Items = Deserialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if(house.fridge!=null)
+            if(house.fridge.Value !=null)
                 house.fridge.items = Deserialize(data, house.fridge.items);
             ItemEvents.FireAfterDeserialize();
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private List<Item> Serialize(Dictionary<string, InstanceState> data, IList<Item> items)
         {
             List<Item> output = new List<Item>();
             foreach(Item item in items)
@@ -330,11 +333,11 @@ namespace Entoarox.Framework.Core
                         throw new TimeoutException("Unable to assign a GUID to all items!");
                     SObject obj = new SObject()
                     {
-                        stack = item.getStack(),
-                        parentSheetIndex = 0,
-                        type = id,
+                        Stack = item.getStack(),
+                        ParentSheetIndex = 0,
+                        Type = id,
                         name = "(Entoarox.Framework.ICustomItem)",
-                        price = item.salePrice(),
+                        Price = item.salePrice(),
                     };
                     if (item is Placeholder pitm)
                         data.Add(id, new InstanceState(pitm.Id, pitm.Data));
@@ -347,45 +350,45 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private List<Item> Deserialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private IList<Item> Deserialize(Dictionary<string, InstanceState> data, IList<Item> items)
         {
             List<Item> output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
                 {
-                    if (data.ContainsKey(itm.type))
+                    if (data.ContainsKey(itm.Type))
                     {
-                        string cls = data[itm.type].Type;
+                        string cls = data[itm.Type].Type;
                         Type type = Type.GetType(cls);
                         if(type==null)
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                output.Add((Item)data[itm.type].Data.ToObject(type, this.Serializer));
+                                output.Add((Item)data[itm.Type].Data.ToObject(type, this.Serializer));
                             }
                             catch(Exception err)
                             {
                                 this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
-                                output.Add(new Placeholder(cls, data[itm.type].Data));
+                                output.Add(new Placeholder(cls, data[itm.Type].Data));
                                 continue;
                             }
                         }
@@ -393,7 +396,7 @@ namespace Entoarox.Framework.Core
                     else
                     {
                         output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.type, LogLevel.Error);
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
                     }
                 }
                 else
@@ -412,7 +415,7 @@ namespace Entoarox.Framework.Core
         {
             typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
             typeof (Fireball), typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
-            typeof (StardewValley.Characters.Cat),
+            typeof (Cat),
             typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
             typeof (SkeletonMage),
             typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
@@ -428,7 +431,7 @@ namespace Entoarox.Framework.Core
         {
             typeof (Tool), typeof (Crow), typeof (Duggy), typeof (Fireball), typeof (Ghost),
             typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), typeof (SkeletonWarrior),
-            typeof (Child), typeof (Pet), typeof (Dog), typeof (StardewValley.Characters.Cat), typeof (Horse),
+            typeof (Child), typeof (Pet), typeof (Dog), typeof (Cat), typeof (Horse),
             typeof (SquidKid),
             typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
             typeof (BreakableContainer),

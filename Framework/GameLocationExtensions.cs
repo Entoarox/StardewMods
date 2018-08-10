@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -168,6 +168,7 @@ namespace Entoarox.Framework
         }
         public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace=true)
         {
+            //TODO Warp extensions needed
             if (!replace && self.warps.Exists(a => a.X == x && a.Y == y))
                 throw new ArgumentException("Index already set " + x.ToString() + ',' + y.ToString());
             else
@@ -186,8 +187,7 @@ namespace Entoarox.Framework
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
             Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            if (tile.TileIndexProperties.TryGetValue("Passable", out value) && value!=null)
+            if (tile.TileIndexProperties.TryGetValue("Passable", out PropertyValue value) && value != null)
                 return true;
             if (self.objects.ContainsKey(new Vector2(x, y)))
                 return false;
@@ -217,8 +217,7 @@ namespace Entoarox.Framework
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
             Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            tile.TileIndexProperties.TryGetValue("Water", out value);
+            tile.TileIndexProperties.TryGetValue("Water", out PropertyValue value);
             return value != null;
         }
     }
