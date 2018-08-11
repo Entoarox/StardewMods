@@ -165,10 +165,14 @@ namespace Entoarox.Framework
                 return false;
             value = _layer.Tiles[x, y].Properties[key];
             return true;
+
         }
+
+        //TODO Warp extensions needed
+        /*
         public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace=true)
         {
-            //TODO Warp extensions needed
+            
             if (!replace && self.warps.Exists(a => a.X == x && a.Y == y))
                 throw new ArgumentException("Index already set " + x.ToString() + ',' + y.ToString());
             else
@@ -178,7 +182,7 @@ namespace Entoarox.Framework
         public static void RemoveWarp(this GameLocation self, int x, int y)
         {
             self.warps.RemoveAll(a => a.X == x && a.Y == y);
-        }
+        }*/
         public static bool IsPassable(this GameLocation self, int x, int y)
         {
             Layer layer = self.map.GetLayer("Back");

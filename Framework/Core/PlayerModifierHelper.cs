@@ -112,10 +112,10 @@ namespace Entoarox.Framework.Core
             Game1.player.weaponSpeedModifier += _Compound.WeaponSpeedModifier;
             Game1.player.weaponPrecisionModifier += _Compound.WeaponPrecisionModifier;
             Game1.player.MagneticRadius += _Compound.MagnetRange;
-            if (_Compound.GlowDistance > 0)
-                Game1.currentLightSources.Add(new LightSource(Game1.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
+            //if (_Compound.GlowDistance > 0)
+                //Game1.currentLightSources.Add(new LightSource(Game1.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
         }
-#pragma warning restore CS0618
+
         internal static void _UpdateModifiers()
         {
             if(Game1.currentLocation.currentEvent != null)
@@ -139,7 +139,7 @@ namespace Entoarox.Framework.Core
                 {
                     Utility.repositionLightSource(_MyUnique, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y));
                     //TODO Look into changes of lightsources in stardew exe
-                    lightSource.radius = (Game1.currentLocation.IsOutdoors || Game1.currentLocation is StardewValley.Locations.MineShaft) ? _Compound.GlowDistance : Math.Min(3f, _Compound.GlowDistance);
+                    //lightSource.radius = (Game1.currentLocation.IsOutdoors || Game1.currentLocation is StardewValley.Locations.MineShaft) ? _Compound.GlowDistance : Math.Min(3f, _Compound.GlowDistance);
                 }
         }
         public int Count

@@ -143,7 +143,6 @@ namespace Entoarox.Framework.Core
                 case "world_bushreset":
                     foreach (GameLocation l in Game1.locations)
                     {
-                        //loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
                         foreach(Bush b in l.largeTerrainFeatures)
                         {
                             if ((l.IsOutdoors || l.Name.Equals("BathHouse_Entry") || l.treatAsOutdoors.Value) && l.map.GetLayer("Paths") != null)
@@ -281,18 +280,18 @@ namespace Entoarox.Framework.Core
             this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
             var data = new Dictionary<string, InstanceState>();
-            foreach(GameLocation loc in Game1.locations)
+           /* foreach(GameLocation loc in Game1.locations)
             {
                 //TODO look into where Chests & Fridge store thier item locations
                 foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
                 {
                     Serialize(data, chest.items);
                 }
-            }
+            }*/
             Game1.player.Items = Serialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if (house.fridge.Value != null)
-                house.fridge.items = Serialize(data, house.fridge.items);
+           /* if (house.fridge.Value != null)
+                house.fridge.items = Serialize(data, house.fridge.items);*/
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
@@ -305,15 +304,15 @@ namespace Entoarox.Framework.Core
             var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
-                foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                /*foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
                 {
                     chest.items = Deserialize(data, chest.items);
-                }
+                }*/
             }
             Game1.player.Items = Deserialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if(house.fridge.Value !=null)
-                house.fridge.items = Deserialize(data, house.fridge.items);
+           /* if(house.fridge.Value !=null)
+                house.fridge.items = Deserialize(data, house.fridge.items);*/
             ItemEvents.FireAfterDeserialize();
         }
         #endregion
@@ -411,13 +410,14 @@ namespace Entoarox.Framework.Core
         private XmlSerializer MainSerializer;
         private XmlSerializer FarmerSerializer;
         private XmlSerializer LocationSerializer;
-        private static Type[] _serialiserTypes = new Type[27]
+        
+        private static Type[] _serialiserTypes = new Type[25] //27
         {
             typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
-            typeof (Fireball), typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
+            /*typeof (Fireball),*/ typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
             typeof (Cat),
             typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
-            typeof (SkeletonMage),
+            /*typeof (SkeletonMage),*/
             typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
             typeof (ShadowGirl),
             typeof (Monster), typeof (TerrainFeature)
@@ -427,10 +427,10 @@ namespace Entoarox.Framework.Core
             typeof (Tool)
         };
 
-        private static Type[] _locationTypes = new Type[26]
+        private static Type[] _locationTypes = new Type[24] //26
         {
-            typeof (Tool), typeof (Crow), typeof (Duggy), typeof (Fireball), typeof (Ghost),
-            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), typeof (SkeletonWarrior),
+            typeof (Tool), typeof (Crow), typeof (Duggy), /*typeof (Fireball),*/ typeof (Ghost),
+            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), /*typeof (SkeletonWarrior),*/
             typeof (Child), typeof (Pet), typeof (Dog), typeof (Cat), typeof (Horse),
             typeof (SquidKid),
             typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
