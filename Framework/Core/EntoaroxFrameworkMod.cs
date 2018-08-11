@@ -283,7 +283,7 @@ namespace Entoarox.Framework.Core
            /* foreach(GameLocation loc in Game1.locations)
             {
                 //TODO look into where Chests & Fridge store thier item locations
-                foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => a.Value))
                 {
                     Serialize(data, chest.items);
                 }
