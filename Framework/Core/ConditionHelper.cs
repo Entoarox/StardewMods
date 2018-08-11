@@ -149,12 +149,7 @@ namespace Entoarox.Framework.Core
         public bool ValidateConditions(string[] conditions)
         {
             Array.Sort(conditions);
-            if (conditions.Length > 5)
-                return false;
-            foreach (string condition in conditions)
-                if (!ValidateCondition(condition))
-                    return false;
-            return true;
+            return conditions.Length <= 5 && conditions.All(this.ValidateCondition);
         }
     }
 }

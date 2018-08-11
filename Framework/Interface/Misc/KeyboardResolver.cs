@@ -16,34 +16,34 @@ namespace Entoarox.Framework.Interface
         /// This event is triggered when a given key is first pressed
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// </summary>
-        static public event Action<Keys> KeyDown;
+        public static event Action<Keys> KeyDown;
         /// <summary>
         /// This event is triggered for a key that is held down long enough to require a repeat firing
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// This will not fire every update, as a internal counter is used to keep repeat firing at a acceptable rate
         /// </summary>
-        static public event Action<Keys> KeyHeld;
+        public static event Action<Keys> KeyHeld;
         /// <summary>
         /// This event is triggered when a given key is released
         /// Note that this uses the XNA Keys enumeration, thus alternative (shift/caps) values are not taken into account
         /// </summary>
-        static public event Action<Keys> KeyUp;
+        public static event Action<Keys> KeyUp;
         /// <summary>
         /// This event is triggered when a given key counts as having been pressed
         /// This event is essentially like subscribing to both <see cref="KeyDown"/> and <see cref="KeyHeld"/> with a single method
         /// </summary>
-        static public event Action<Keys> KeyPress;
+        public static event Action<Keys> KeyPress;
         /// <summary>
         /// This event is trigger when a given key is first pressed or held
         /// It outputs the char for the intended value rather then the Keys enumeration for the actual key pressed
         /// </summary>
-        static public event Action<char> CharReceived;
+        public static event Action<char> CharReceived;
         // Private fields
-        static private KeyboardState Old;
-        static private Dictionary<Keys, int[]> Counter = new Dictionary<Keys, int[]>();
-        static private bool Shift = false;
-        static private bool Caps = false;
-        static private bool Alt = false;
+        private static KeyboardState Old;
+        private static Dictionary<Keys, int[]> Counter = new Dictionary<Keys, int[]>();
+        private static bool Shift = false;
+        private static bool Caps = false;
+        private static bool Alt = false;
         // Initializer, as there is some init needed
         static KeyboardResolver()
         {
@@ -66,7 +66,7 @@ namespace Entoarox.Framework.Interface
             }
         }
         // The method responsible for handling the update
-        static private void Update(object s, EventArgs e)
+        private static void Update(object s, EventArgs e)
         {
             KeyboardState New = Keyboard.GetState();
             Keys[] OldDown = Old.GetPressedKeys();
@@ -99,7 +99,7 @@ namespace Entoarox.Framework.Interface
             Old = New;
         }
         // if XNA is being used, we need to do quite a bit of logic to make sure that the correct characters are output
-        static private void KeyDownHandler(Keys key)
+        private static void KeyDownHandler(Keys key)
         {
             switch (key)
             {
@@ -115,7 +115,7 @@ namespace Entoarox.Framework.Interface
             }
             CharReceived?.Invoke(ResolveChar(@key));
         }
-        static private void KeyUpHandler(Keys key)
+        private static void KeyUpHandler(Keys key)
         {
             switch (key)
             {
@@ -130,11 +130,11 @@ namespace Entoarox.Framework.Interface
                     break;
             }
         }
-        static private void KeyHeldHandler(Keys key)
+        private static void KeyHeldHandler(Keys key)
         {
             CharReceived?.Invoke(ResolveChar(key));
         }
-        static private char ResolveChar(Keys key)
+        private static char ResolveChar(Keys key)
         {
             char Char = (char)key;
             if (!Alt)
@@ -161,7 +161,7 @@ namespace Entoarox.Framework.Interface
             uint flags
             );
         // If MonoGame is in use, we can easily take advantage of its build-in input handler
-        static private void TextInputHandler(object s, EventArgs e)
+        private static void TextInputHandler(object s, EventArgs e)
         {
             CharReceived?.Invoke((char)e.GetType().GetField("Character").GetValue(e));
         }

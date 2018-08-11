@@ -84,15 +84,15 @@ namespace Entoarox.Framework.Interface
             int ydiff = (int)Math.Round((rect.Height - height) / 2D);
             return new Rectangle(rect.X + xdiff, rect.Y + ydiff, width, height);
         }
-        private readonly static Rectangle tl = new Rectangle(0, 0, 64, 64);
-        private readonly static Rectangle tc = new Rectangle(128, 0, 64, 64);
-        private readonly static Rectangle tr = new Rectangle(192, 0, 64, 64);
-        private readonly static Rectangle ml = new Rectangle(0, 128, 64, 64);
-        private readonly static Rectangle mr = new Rectangle(192, 128, 64, 64);
-        private readonly static Rectangle br = new Rectangle(192, 192, 64, 64);
-        private readonly static Rectangle bl = new Rectangle(0, 192, 64, 64);
-        private readonly static Rectangle bc = new Rectangle(128, 192, 64, 64);
-        private readonly static Rectangle bg = new Rectangle(64, 128, 64, 64);
+        private static readonly Rectangle tl = new Rectangle(0, 0, 64, 64);
+        private static readonly Rectangle tc = new Rectangle(128, 0, 64, 64);
+        private static readonly Rectangle tr = new Rectangle(192, 0, 64, 64);
+        private static readonly Rectangle ml = new Rectangle(0, 128, 64, 64);
+        private static readonly Rectangle mr = new Rectangle(192, 128, 64, 64);
+        private static readonly Rectangle br = new Rectangle(192, 192, 64, 64);
+        private static readonly Rectangle bl = new Rectangle(0, 192, 64, 64);
+        private static readonly Rectangle bc = new Rectangle(128, 192, 64, 64);
+        private static readonly Rectangle bg = new Rectangle(64, 128, 64, 64);
         public static void DrawMenuRect(SpriteBatch b, int x, int y, int width, int height)
         {
             Rectangle o = new Rectangle(x + 2, y + 2, width - 4, height - 4);

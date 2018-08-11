@@ -248,7 +248,7 @@ namespace Entoarox.Framework.Core
                 return;
             if ((Game1.player.CurrentItem == null && this.prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.prevItem)))
             {
-                MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
+                ItemEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
                 this.prevItem = Game1.player.CurrentItem;
             }
             PlayerModifierHelper._UpdateModifiers();

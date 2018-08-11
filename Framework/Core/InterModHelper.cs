@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Entoarox.Framework.Core
 {
@@ -28,9 +28,9 @@ namespace Entoarox.Framework.Core
         }
         public void Publish(string channel, string message)
         {
-            if (_Map.ContainsKey(channel))
-                foreach (ReceiveMessage handler in _Map[channel])
-                    handler(this.ModID, channel, message, false);
+            if (!_Map.ContainsKey(channel)) return;
+            foreach (ReceiveMessage handler in _Map[channel])
+                handler(this.ModID, channel, message, false);
         }
     }
 }

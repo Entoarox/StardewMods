@@ -79,25 +79,15 @@ namespace Entoarox.Framework.Core
                 list.Add("true");
                 return resolver(args[0], list.ToArray());
             });
-            RegisterConditionResolver("house", (args, resolver) => {
-                return resolver(args[0], Game1.player.HouseUpgradeLevel.ToString());
-            });
-            RegisterConditionResolver("farm", (args, resolver) => {
-                return resolver(args[0], FarmMap[Math.Min(5, Game1.whichFarm)]);
-            });
-            RegisterConditionResolver("event", (args, resolver) => {
-                return resolver(args[0], Game1.player.eventsSeen.Select(a => a.ToString()).ToArray());
-            });
-            RegisterConditionResolver("money", (args, resolver) => {
-                return resolver(args[0], Game1.player.money.ToString());
-            });
+            RegisterConditionResolver("house", (args, resolver) => resolver(args[0], Game1.player.HouseUpgradeLevel.ToString()));
+            RegisterConditionResolver("farm", (args, resolver) => resolver(args[0], FarmMap[Math.Min(5, Game1.whichFarm)]));
+            RegisterConditionResolver("event", (args, resolver) => resolver(args[0], Game1.player.eventsSeen.Select(a => a.ToString()).ToArray()));
+            RegisterConditionResolver("money", (args, resolver) => resolver(args[0], Game1.player.money.ToString()));
             RegisterConditionResolver("carries", (args, resolver) => {
                 var matches= Game1.player.Items.Where(a => a.Name == args[0]);
                 if (!matches.Any())
                     return false;
-                int c = 0;
-                foreach (var match in matches)
-                    c += match.Stack;
+                int c = matches.Sum(match => match.Stack);
                 return resolver(args[1], c.ToString());
             });
             /*TODO RegisterConditionResolver("shipped", (args, resolver) => {
@@ -111,9 +101,7 @@ namespace Entoarox.Framework.Core
             });
             */
             //TODO RegisterConditionResolver("skill");
-            RegisterConditionResolver("friendship", (args, resolver) => {
-                return resolver(args[1], Game1.player.getFriendshipHeartLevelForNPC(args[0]).ToString());
-            });
+            RegisterConditionResolver("friendship", (args, resolver) => resolver(args[1], Game1.player.getFriendshipHeartLevelForNPC(args[0]).ToString()));
         }
         #endregion
         #region Public API
@@ -125,10 +113,7 @@ namespace Entoarox.Framework.Core
         {
             string[] conds = list.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (string cond in conds)
-                if (!ResolveCondition(cond))
-                    return false;
-            return true;
+            return conds.All(this.ResolveCondition);
         }
 
         public bool ResolveCondition(string condition)
@@ -168,9 +153,10 @@ namespace Entoarox.Framework.Core
                     {
                         string[] parts = arg.Substring(1, arg.Length - 2).Split(new[] { '|' });
 
-                        foreach (string part in parts)
-                            if (ResolveOperators(part, values))
-                                return true;
+                        if (parts.Any(part => this.ResolveOperators(part, values)))
+                        {
+                            return true;
+                        }
                     }
                     else if (int.TryParse(value, out int result))
                     {

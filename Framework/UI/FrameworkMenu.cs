@@ -115,8 +115,8 @@ namespace Entoarox.Framework.UI
                 return;
             ResetFocus();
             this.FocusElement = component;
-            if(this.FocusElement is IKeyboardComponent)
-                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)this.FocusElement);
+            if(this.FocusElement is IKeyboardComponent keyboardComponent)
+                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy(keyboardComponent);
             if (!this._InteractiveComponents.Contains(component))
             {
                 this.FloatingComponent = component;
@@ -126,8 +126,8 @@ namespace Entoarox.Framework.UI
         }
         public virtual void AddComponent(IMenuComponent component)
         {
-            if (component is IInteractiveMenuComponent)
-                this._InteractiveComponents.Add(component as IInteractiveMenuComponent);
+            if (component is IInteractiveMenuComponent menuComponent)
+                this._InteractiveComponents.Add(menuComponent);
             else
                 this._StaticComponents.Add(component);
             component.Attach(this);
@@ -135,8 +135,7 @@ namespace Entoarox.Framework.UI
         }
         public virtual void RemoveComponent(IMenuComponent component)
         {
-            bool Removed = false;
-            RemoveComponents(a => a == component && !Removed);
+            RemoveComponents(a => a == component);
         }
         public virtual void RemoveComponents<T>() where T : IMenuComponent
         {
@@ -160,14 +159,10 @@ namespace Entoarox.Framework.UI
         {
             return true;
         }
-        public virtual Rectangle EventRegion
-        {
-            get { return new Rectangle(this.Area.X + zoom10, this.Area.Y + zoom10, this.Area.Width - zoom20, this.Area.Height - zoom20); }
-        }
-        public virtual Rectangle ZoomEventRegion
-        {
-            get { return new Rectangle((this.Area.X + zoom10)/Game1.pixelZoom,(this.Area.Y + zoom10)/Game1.pixelZoom,(this.Area.Width - zoom20)/Game1.pixelZoom,(this.Area.Height - zoom20)/Game1.pixelZoom); }
-        }
+        public virtual Rectangle EventRegion => new Rectangle(this.Area.X + zoom10, this.Area.Y + zoom10, this.Area.Width - zoom20, this.Area.Height - zoom20);
+
+        public virtual Rectangle ZoomEventRegion => new Rectangle((this.Area.X + zoom10)/Game1.pixelZoom,(this.Area.Y + zoom10)/Game1.pixelZoom,(this.Area.Width - zoom20)/Game1.pixelZoom,(this.Area.Height - zoom20)/Game1.pixelZoom);
+
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
             if (!this.Centered)
@@ -292,8 +287,7 @@ namespace Entoarox.Framework.UI
         public override void update(GameTime time)
         {
             base.update(time);
-            if (this.FloatingComponent != null)
-                this.FloatingComponent.Update(time);
+            this.FloatingComponent?.Update(time);
             foreach (IMenuComponent el in this.DrawOrder)
                 el.Update(time);
         }
@@ -304,8 +298,7 @@ namespace Entoarox.Framework.UI
             Point o = new Point(this.Area.X + zoom10, this.Area.Y + zoom10);
             foreach (IMenuComponent el in this.DrawOrder)
                 el.Draw(b, o);
-            if (this.FloatingComponent != null)
-                this.FloatingComponent.Draw(b, o);
+            this.FloatingComponent?.Draw(b, o);
             base.draw(b);
             drawMouse(b);
         }

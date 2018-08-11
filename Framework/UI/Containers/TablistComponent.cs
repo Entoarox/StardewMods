@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -35,17 +35,12 @@ namespace Entoarox.Framework.UI
 
         public int Index
         {
-            get
-            {
-                return this.Current;
-            }
+            get => this.Current;
             set
             {
-                if(value >= 0 && value < this.Tabs.Count)
-                {
-                    this.Current = value;
-                    this.CurrentTab = this.Tabs[value].Component;
-                }
+                if (value < 0 || value >= this.Tabs.Count) return;
+                this.Current = value;
+                this.CurrentTab = this.Tabs[value].Component;
             }
         }
 
@@ -65,11 +60,9 @@ namespace Entoarox.Framework.UI
         {
             this.Tabs.Add(new TabInfo(collection, texture, crop));
             collection.Attach(this);
-            if (this.CurrentTab == null)
-            {
-                this.Current = 0;
-                this.CurrentTab = collection;
-            }
+            if (this.CurrentTab != null) return;
+            this.Current = 0;
+            this.CurrentTab = collection;
         }
         // IInteractiveMenuComponent
         public override void FocusLost()
@@ -108,7 +101,7 @@ namespace Entoarox.Framework.UI
         }
         public override bool Scroll(int d, Point p, Point o)
         {
-            return this.CurrentTab == null ? false : this.CurrentTab.Scroll(d, p, new Point(o.X + this.Area.X + zoom5, o.Y + this.Area.Y + zoom22));
+            return this.CurrentTab?.Scroll(d, p, new Point(o.X + this.Area.X + zoom5, o.Y + this.Area.Y + zoom22)) ?? false;
         }
         public override void Update(GameTime t)
         {
@@ -121,7 +114,7 @@ namespace Entoarox.Framework.UI
             // Draw chrome
             FrameworkMenu.DrawMenuRect(b, o.X + this.Area.X - zoom2, o.Y + this.Area.Y + zoom15, this.Area.Width, this.Area.Height - zoom15);
             // Draw tabs
-            for(var c=0;c< this.Tabs.Count;c++)
+            for(int c =0;c< this.Tabs.Count;c++)
             {
                 b.Draw(Game1.mouseCursors, new Rectangle(o.X + this.Area.X + zoom4 + c * zoom16, o.Y + this.Area.Y + (c == this.Current ? zoom2 : 0), zoom16, zoom16), Tab, Color.White);
                 b.Draw(this.Tabs[c].Texture, new Rectangle(o.X + this.Area.X + zoom8 + c * zoom16, o.Y + this.Area.Y + zoom5 + (c == this.Current ? zoom2 : 0), zoom8, zoom8), this.Tabs[c].Crop, Color.White);
@@ -130,20 +123,10 @@ namespace Entoarox.Framework.UI
             this.CurrentTab?.Draw(b, new Point(o.X + this.Area.X + zoom5, o.Y + this.Area.Y + zoom22));
         }
         // IComponentCollection proxy
-        public Rectangle EventRegion
-        {
-            get
-            {
-                return new Rectangle(this.Area.X+zoom5, this.Area.Y + zoom22, this.Area.Width-zoom10, this.Area.Height - zoom28);
-            }
-        }
-        public Rectangle ZoomEventRegion
-        {
-            get
-            {
-                return new Rectangle((this.Area.X + zoom5)/Game1.pixelZoom, (this.Area.Y + zoom22)/Game1.pixelZoom, (this.Area.Width - zoom14)/Game1.pixelZoom, (this.Area.Height - zoom28)/Game1.pixelZoom);
-            }
-        }
+        public Rectangle EventRegion => new Rectangle(this.Area.X+zoom5, this.Area.Y + zoom22, this.Area.Width-zoom10, this.Area.Height - zoom28);
+
+        public Rectangle ZoomEventRegion => new Rectangle((this.Area.X + zoom5)/Game1.pixelZoom, (this.Area.Y + zoom22)/Game1.pixelZoom, (this.Area.Width - zoom14)/Game1.pixelZoom, (this.Area.Height - zoom28)/Game1.pixelZoom);
+
         public FrameworkMenu GetAttachedMenu()
         {
             return this.Parent.GetAttachedMenu();
@@ -167,8 +150,8 @@ namespace Entoarox.Framework.UI
             this.Parent.GiveFocus(this);
             ResetFocus();
             this.FocusElement = component;
-            if (this.FocusElement is IKeyboardComponent)
-                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy((IKeyboardComponent)this.FocusElement);
+            if (this.FocusElement is IKeyboardComponent keyboardComponent)
+                Game1.keyboardDispatcher.Subscriber = new KeyboardSubscriberProxy(keyboardComponent);
             component.FocusGained();
         }
     }

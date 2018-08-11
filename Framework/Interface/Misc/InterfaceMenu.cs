@@ -109,7 +109,7 @@ namespace Entoarox.Framework.Interface
                     return false;
                 this._FocusComponent = this._EventComponents[0];
             }
-            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabNext())
+            else if (!(this._FocusComponent is IComponentContainer) || !((IComponentContainer) this._FocusComponent).TabNext())
             {
                 int index = this._EventComponents.IndexOf(this._FocusComponent) + 1;
                 if (index >= this._EventComponents.Count)
@@ -127,7 +127,7 @@ namespace Entoarox.Framework.Interface
                     return false;
                 this._FocusComponent = this._EventComponents[0];
             }
-            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabBack())
+            else if (!(this._FocusComponent is IComponentContainer) || !((IComponentContainer) this._FocusComponent).TabBack())
             {
                 int index = this._EventComponents.IndexOf(this._FocusComponent) - 1;
                 if (index < 0)
@@ -201,12 +201,18 @@ namespace Entoarox.Framework.Interface
         {
             if (key != Keys.Escape && (this._FocusComponent is IInputComponent || (this._FocusComponent as IHotkeyComponent)?.ReceiveHotkey(key) == true))
                 return;
-            else if (key == Keys.Escape && this._FocusComponent != null)
-                UpdateFocus(null);
-            else if (key == Keys.Tab)
-                TabNext();
-            else
-                base.receiveKeyPress(key);
+            else switch (key)
+            {
+                case Keys.Escape when this._FocusComponent != null:
+                    this.UpdateFocus(null);
+                    break;
+                case Keys.Tab:
+                    this.TabNext();
+                    break;
+                default:
+                    base.receiveKeyPress(key);
+                    break;
+            }
         }
 
         // IClickableMenu implementations

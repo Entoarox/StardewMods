@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewValley;
@@ -7,16 +7,13 @@ namespace Entoarox.Framework.UI
 {
     public class LabelComponent : BaseMenuComponent
     {
-        protected readonly static Rectangle Left = new Rectangle(256, 267, 6, 16);
-        protected readonly static Rectangle Right = new Rectangle(263, 267, 6, 16);
-        protected readonly static Rectangle Center = new Rectangle(262, 267, 1, 16);
+        protected static readonly Rectangle Left = new Rectangle(256, 267, 6, 16);
+        protected static readonly Rectangle Right = new Rectangle(263, 267, 6, 16);
+        protected static readonly Rectangle Center = new Rectangle(262, 267, 1, 16);
         protected string _Label;
         public string Label
         {
-            get
-            {
-                return this._Label;
-            }
+            get => this._Label;
             set
             {
                 this._Label = value;

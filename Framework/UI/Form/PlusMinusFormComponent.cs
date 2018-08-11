@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,15 +10,12 @@ namespace Entoarox.Framework.UI
 {
     public class PlusMinusFormComponent : BaseKeyboardFormComponent
     {
-        protected readonly static Rectangle PlusButton = new Rectangle(185, 345, 6, 8);
-        protected readonly static Rectangle MinusButton = new Rectangle(177, 345, 6, 8);
-        protected readonly static Rectangle Background = new Rectangle(227, 425, 9, 9);
+        protected static readonly Rectangle PlusButton = new Rectangle(185, 345, 6, 8);
+        protected static readonly Rectangle MinusButton = new Rectangle(177, 345, 6, 8);
+        protected static readonly Rectangle Background = new Rectangle(227, 425, 9, 9);
         public event ValueChanged<int> Handler;
         public int Value {
-            get
-            {
-                return this._Value;
-            }
+            get => this._Value;
             set
             {
                 this._Value = value;
@@ -58,12 +55,10 @@ namespace Entoarox.Framework.UI
                 return;
             }
             Rectangle MinusAreaOffset = new Rectangle(this.MinusArea.X + o.X, this.MinusArea.Y + o.Y, this.MinusArea.Height, this.MinusArea.Width);
-            if (MinusAreaOffset.Contains(p) && this.Value > this.MinValue)
-            {
-                Game1.playSound("drumkit6");
-                this.Value--;
-                return;
-            }
+            if (!MinusAreaOffset.Contains(p) || this.Value <= this.MinValue) return;
+            Game1.playSound("drumkit6");
+            this.Value--;
+            return;
         }
         public override void LeftClick(Point p, Point o)
         {

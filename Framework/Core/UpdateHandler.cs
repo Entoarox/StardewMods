@@ -14,11 +14,9 @@ namespace Entoarox.Framework.Core
 {
     internal class UpdateHandler
     {
-#pragma warning disable CS0649
         public string Latest;
         public string Recommended;
         public string Minimum;
-#pragma warning restore CS0649
 
         public static Dictionary<IManifest, string> Map = new Dictionary<IManifest, string>();
 

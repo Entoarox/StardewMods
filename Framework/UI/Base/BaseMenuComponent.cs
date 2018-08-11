@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,28 +7,28 @@ using StardewValley;
 
 namespace Entoarox.Framework.UI
 {
-    abstract public class BaseMenuComponent : IMenuComponent
+    public abstract class BaseMenuComponent : IMenuComponent
     {
-        protected readonly static int zoom05 = Game1.pixelZoom / 2;
-        protected readonly static int zoom2 = 2 * Game1.pixelZoom;
-        protected readonly static int zoom3 = 3 * Game1.pixelZoom;
-        protected readonly static int zoom4 = 4 * Game1.pixelZoom;
-        protected readonly static int zoom5 = 5 * Game1.pixelZoom;
-        protected readonly static int zoom6 = 6 * Game1.pixelZoom;
-        protected readonly static int zoom7 = 7 * Game1.pixelZoom;
-        protected readonly static int zoom8 = 8 * Game1.pixelZoom;
-        protected readonly static int zoom9 = 9 * Game1.pixelZoom;
-        protected readonly static int zoom10 = 10 * Game1.pixelZoom;
-        protected readonly static int zoom11 = 11 * Game1.pixelZoom;
-        protected readonly static int zoom12 = 12 * Game1.pixelZoom;
-        protected readonly static int zoom13 = 13 * Game1.pixelZoom;
-        protected readonly static int zoom14 = 14 * Game1.pixelZoom;
-        protected readonly static int zoom15 = 15 * Game1.pixelZoom;
-        protected readonly static int zoom16 = 16 * Game1.pixelZoom;
-        protected readonly static int zoom17 = 17 * Game1.pixelZoom;
-        protected readonly static int zoom20 = 20 * Game1.pixelZoom;
-        protected readonly static int zoom22 = 22 * Game1.pixelZoom;
-        protected readonly static int zoom28 = 28 * Game1.pixelZoom;
+        protected static readonly int zoom05 = Game1.pixelZoom / 2;
+        protected static readonly int zoom2 = 2 * Game1.pixelZoom;
+        protected static readonly int zoom3 = 3 * Game1.pixelZoom;
+        protected static readonly int zoom4 = 4 * Game1.pixelZoom;
+        protected static readonly int zoom5 = 5 * Game1.pixelZoom;
+        protected static readonly int zoom6 = 6 * Game1.pixelZoom;
+        protected static readonly int zoom7 = 7 * Game1.pixelZoom;
+        protected static readonly int zoom8 = 8 * Game1.pixelZoom;
+        protected static readonly int zoom9 = 9 * Game1.pixelZoom;
+        protected static readonly int zoom10 = 10 * Game1.pixelZoom;
+        protected static readonly int zoom11 = 11 * Game1.pixelZoom;
+        protected static readonly int zoom12 = 12 * Game1.pixelZoom;
+        protected static readonly int zoom13 = 13 * Game1.pixelZoom;
+        protected static readonly int zoom14 = 14 * Game1.pixelZoom;
+        protected static readonly int zoom15 = 15 * Game1.pixelZoom;
+        protected static readonly int zoom16 = 16 * Game1.pixelZoom;
+        protected static readonly int zoom17 = 17 * Game1.pixelZoom;
+        protected static readonly int zoom20 = 20 * Game1.pixelZoom;
+        protected static readonly int zoom22 = 22 * Game1.pixelZoom;
+        protected static readonly int zoom28 = 28 * Game1.pixelZoom;
         protected Rectangle Area;
         protected Texture2D Texture;
         protected Rectangle Crop;

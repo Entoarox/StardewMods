@@ -10,15 +10,8 @@ namespace Entoarox.Framework.Core
     internal class PlayerHelper : IPlayerHelper
     {
         private IPlayerModifierHelper _Modifiers;
-        public IPlayerModifierHelper Modifiers
-        {
-            get
-            {
-                if (this._Modifiers == null)
-                    this._Modifiers = new PlayerModifierHelper();
-                return this._Modifiers;
-            }
-        }
+        public IPlayerModifierHelper Modifiers => this._Modifiers ?? (this._Modifiers = new PlayerModifierHelper());
+
         public void MoveTo(int x, int y)
         {
             Game1.warpFarmer(Game1.player.currentLocation.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure.Value);
