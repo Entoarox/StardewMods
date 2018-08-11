@@ -97,7 +97,7 @@ namespace Entoarox.Framework
                 assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
                 if (!DictionaryInjector._Map.ContainsKey(assetName))
                     DictionaryInjector._Map.Add(assetName, new DictionaryWrapper<TKey, TValue>());
-                (DictionaryInjector._Map[assetName] as DictionaryWrapper<TKey, TValue>).Register(helper, patchAsset);
+                (DictionaryInjector._Map[assetName] as DictionaryWrapper<TKey, TValue>)?.Register(helper, patchAsset);
                 helper.InvalidateCache(assetName);
             }
             catch

@@ -38,7 +38,7 @@ namespace Entoarox.Framework.Core
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
-        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
+        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "Wilderness" };
         private static string Verify;
         private static bool CreditsDone = false;
         private JsonSerializer Serializer;
@@ -94,42 +94,35 @@ namespace Entoarox.Framework.Core
         }
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
-            if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
+            if (this.ActionInfo == null || e.ButtonReleased != Buttons.A) return;
+            MoreEvents.FireActionTriggered(this.ActionInfo);
+            this.ActionInfo = null;
         }
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
-            if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
+            if (this.ActionInfo == null || e.NewState.RightButton != ButtonState.Released) return;
+            MoreEvents.FireActionTriggered(this.ActionInfo);
+            this.ActionInfo = null;
         }
         private void CheckForAction()
         {
-            if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
-            {
-                this.ActionInfo = null;
-                Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
-                if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
-                    grabTile = Game1.player.GetGrabTile();
-                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
-                PropertyValue propertyValue = null;
-                if (tile != null)
-                    tile.Properties.TryGetValue("Action", out propertyValue);
-                if (propertyValue != null)
-                {
-                    string[] split = ((string)propertyValue).Split(' ');
-                    string[] args = new string[split.Length - 1];
-                    Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
-                }
-            }
+            if (Game1.activeClickableMenu != null || Game1.player.UsingTool || Game1.pickingTool || Game1.menuUp ||
+                (Game1.eventUp && !Game1.currentLocation.currentEvent.playerControlSequence) || Game1.nameSelectUp ||
+                Game1.numberOfSelectedItems != -1 || Game1.fadeToBlack) return;
+            this.ActionInfo = null;
+            var grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
+            if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
+                grabTile = Game1.player.GetGrabTile();
+            var tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
+            PropertyValue propertyValue = null;
+            tile?.Properties.TryGetValue("Action", out propertyValue);
+            if (propertyValue == null) return;
+            string[] split = ((string)propertyValue).Split(' ');
+            string[] args = new string[split.Length - 1];
+            Array.Copy(split, 1, args, 0, args.Length);
+            this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
         }
         private void Commands(string command, string[] args)
         {
@@ -145,31 +138,30 @@ namespace Entoarox.Framework.Core
                     {
                         foreach(Bush b in l.largeTerrainFeatures)
                         {
-                            if ((l.IsOutdoors || l.Name.Equals("BathHouse_Entry") || l.treatAsOutdoors.Value) && l.map.GetLayer("Paths") != null)
+                            if ((!l.IsOutdoors && !l.Name.Equals("BathHouse_Entry") && !l.treatAsOutdoors.Value) ||
+                                l.map.GetLayer("Paths") == null) continue;
+                            for (int x = 0; x < l.map.Layers[0].LayerWidth; ++x)
                             {
-                                for (int x = 0; x < l.map.Layers[0].LayerWidth; ++x)
+                                for (int y = 0; y < l.map.Layers[0].LayerHeight; ++y)
                                 {
-                                    for (int y = 0; y < l.map.Layers[0].LayerHeight; ++y)
+                                    Tile tile = l.map.GetLayer("Paths").Tiles[x, y];
+                                    if (tile != null)
                                     {
-                                        Tile tile = l.map.GetLayer("Paths").Tiles[x, y];
-                                        if (tile != null)
+                                        Vector2 vector2 = new Vector2(x, y);
+                                        switch (tile.TileIndex)
                                         {
-                                            Vector2 vector2 = new Vector2(x, y);
-                                            switch (tile.TileIndex)
-                                            {
-                                                case 24:
-                                                    if (!l.terrainFeatures.ContainsKey(vector2))
-                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 2, l));
-                                                    break;
-                                                case 25:
-                                                    if (!l.terrainFeatures.ContainsKey(vector2))
-                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 1, l));
-                                                    break;
-                                                case 26:
-                                                    if (!l.terrainFeatures.ContainsKey(vector2))
-                                                        l.largeTerrainFeatures.Add(new Bush(vector2, 0, l));
-                                                    break;
-                                            }
+                                            case 24:
+                                                if (!l.terrainFeatures.ContainsKey(vector2))
+                                                    l.largeTerrainFeatures.Add(new Bush(vector2, 2, l));
+                                                break;
+                                            case 25:
+                                                if (!l.terrainFeatures.ContainsKey(vector2))
+                                                    l.largeTerrainFeatures.Add(new Bush(vector2, 1, l));
+                                                break;
+                                            case 26:
+                                                if (!l.terrainFeatures.ContainsKey(vector2))
+                                                    l.largeTerrainFeatures.Add(new Bush(vector2, 0, l));
+                                                break;
                                         }
                                     }
                                 }
@@ -261,19 +253,15 @@ namespace Entoarox.Framework.Core
             }
             PlayerModifierHelper._UpdateModifiers();
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
-            if (LastTouchAction!=playerPos)
-            {
-                string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
-                LastTouchAction = playerPos;
-                if (text != null)
-                {
-                    string[] split = (text).Split(' ');
-                    string[] args = new string[split.Length - 1];
-                    Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
-                    MoreEvents.FireTouchActionTriggered(this.ActionInfo);
-                }
-            }
+            if (LastTouchAction == playerPos) return;
+            string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
+            LastTouchAction = playerPos;
+            if (text == null) return;
+            string[] split = (text).Split(' ');
+            string[] args = new string[split.Length - 1];
+            Array.Copy(split, 1, args, 0, args.Length);
+            this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
+            MoreEvents.FireTouchActionTriggered(this.ActionInfo);
         }
         private void SaveEvents_BeforeSave(object s, EventArgs e)
         {
@@ -317,9 +305,9 @@ namespace Entoarox.Framework.Core
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(Dictionary<string, InstanceState> data, IList<Item> items)
+        private List<Item> Serialize(IDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
+            var output = new List<Item>();
             foreach(Item item in items)
             {
                 if (item is ICustomItem)
@@ -349,9 +337,9 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private IList<Item> Deserialize(Dictionary<string, InstanceState> data, IList<Item> items)
+        private IList<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
+            var output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
@@ -411,31 +399,65 @@ namespace Entoarox.Framework.Core
         private XmlSerializer FarmerSerializer;
         private XmlSerializer LocationSerializer;
         
-        private static Type[] _serialiserTypes = new Type[25] //27
+        private static Type[] _serialiserTypes = new Type[25]
         {
-            typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
-            /*typeof (Fireball),*/ typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
+            typeof (Tool),
+            typeof (GameLocation),
+            typeof (Duggy),
+            typeof (Bug),
+            typeof (BigSlime),
+            typeof (Ghost),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
             typeof (Cat),
-            typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
-            /*typeof (SkeletonMage),*/
-            typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
+            typeof (Horse),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (SquidKid),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Quest),
+            typeof (MetalHead),
             typeof (ShadowGirl),
-            typeof (Monster), typeof (TerrainFeature)
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
 
         private static Type[] _farmerTypes = new Type[1] {
             typeof (Tool)
         };
-
+ 
         private static Type[] _locationTypes = new Type[24] //26
         {
-            typeof (Tool), typeof (Crow), typeof (Duggy), /*typeof (Fireball),*/ typeof (Ghost),
-            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), /*typeof (SkeletonWarrior),*/
-            typeof (Child), typeof (Pet), typeof (Dog), typeof (Cat), typeof (Horse),
+            typeof (Tool),
+            typeof (Duggy),
+            typeof (Ghost),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
+            typeof (Cat),
+            typeof (Horse),
             typeof (SquidKid),
-            typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Bug),
+            typeof (BigSlime),
             typeof (BreakableContainer),
-            typeof (MetalHead), typeof (ShadowGirl), typeof (Monster), typeof (TerrainFeature)
+            typeof (MetalHead),
+            typeof (ShadowGirl),
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
         private void SetupSerializer()
         {

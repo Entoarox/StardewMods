@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -31,23 +31,23 @@ namespace Entoarox.Framework.UI
 
         public Rectangle Area;
 
-        public List<IMenuComponent> StaticComponents { get { return new List<IMenuComponent>(this._StaticComponents); } }
-        public List<IInteractiveMenuComponent> InteractiveComponents { get { return new List<IInteractiveMenuComponent>(this._InteractiveComponents); } }
-        protected readonly static Rectangle tl = new Rectangle(0, 0, 64, 64);
-        protected readonly static Rectangle tc = new Rectangle(128, 0, 64, 64);
-        protected readonly static Rectangle tr = new Rectangle(192, 0, 64, 64);
-        protected readonly static Rectangle ml = new Rectangle(0, 128, 64, 64);
-        protected readonly static Rectangle mr = new Rectangle(192, 128, 64, 64);
-        protected readonly static Rectangle br = new Rectangle(192, 192, 64, 64);
-        protected readonly static Rectangle bl = new Rectangle(0, 192, 64, 64);
-        protected readonly static Rectangle bc = new Rectangle(128, 192, 64, 64);
-        protected readonly static Rectangle bg = new Rectangle(64, 128, 64, 64);
-        protected readonly static int zoom2 = Game1.pixelZoom * 2;
-        protected readonly static int zoom3 = Game1.pixelZoom * 3;
-        protected readonly static int zoom4 = Game1.pixelZoom * 4;
-        protected readonly static int zoom6 = Game1.pixelZoom * 6;
-        protected readonly static int zoom10 = Game1.pixelZoom * 10;
-        protected readonly static int zoom20 = Game1.pixelZoom * 20;
+        public List<IMenuComponent> StaticComponents => new List<IMenuComponent>(this._StaticComponents);
+        public List<IInteractiveMenuComponent> InteractiveComponents => new List<IInteractiveMenuComponent>(this._InteractiveComponents);
+        protected static readonly Rectangle tl = new Rectangle(0, 0, 64, 64);
+        protected static readonly Rectangle tc = new Rectangle(128, 0, 64, 64);
+        protected static readonly Rectangle tr = new Rectangle(192, 0, 64, 64);
+        protected static readonly Rectangle ml = new Rectangle(0, 128, 64, 64);
+        protected static readonly Rectangle mr = new Rectangle(192, 128, 64, 64);
+        protected static readonly Rectangle br = new Rectangle(192, 192, 64, 64);
+        protected static readonly Rectangle bl = new Rectangle(0, 192, 64, 64);
+        protected static readonly Rectangle bc = new Rectangle(128, 192, 64, 64);
+        protected static readonly Rectangle bg = new Rectangle(64, 128, 64, 64);
+        protected static readonly int zoom2 = Game1.pixelZoom * 2;
+        protected static readonly int zoom3 = Game1.pixelZoom * 3;
+        protected static readonly int zoom4 = Game1.pixelZoom * 4;
+        protected static readonly int zoom6 = Game1.pixelZoom * 6;
+        protected static readonly int zoom10 = Game1.pixelZoom * 10;
+        protected static readonly int zoom20 = Game1.pixelZoom * 20;
         public static void DrawMenuRect(SpriteBatch b, int x, int y, int width, int height)
         {
             Rectangle o = new Rectangle(x + zoom2, y + zoom2, width - zoom4, height - zoom4);
@@ -105,11 +105,9 @@ namespace Entoarox.Framework.UI
                 Game1.keyboardDispatcher.Subscriber = null;
             }
             this.FocusElement = null;
-            if (this.FloatingComponent != null)
-            {
-                this.FloatingComponent.Detach(this);
-                this.FloatingComponent = null;
-            }
+            if (this.FloatingComponent == null) return;
+            this.FloatingComponent.Detach(this);
+            this.FloatingComponent = null;
         }
         public virtual void GiveFocus(IInteractiveMenuComponent component)
         {
