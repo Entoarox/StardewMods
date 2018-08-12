@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 
 using StardewValley;
+using Object = StardewValley.Object;
 
 namespace Entoarox.Framework.Core
 {
@@ -112,13 +113,9 @@ namespace Entoarox.Framework.Core
             Game1.player.weaponSpeedModifier += _Compound.WeaponSpeedModifier;
             Game1.player.weaponPrecisionModifier += _Compound.WeaponPrecisionModifier;
             Game1.player.MagneticRadius += _Compound.MagnetRange;
-            //TODO Repair Game1.lantern
-
-            /*
             if (_Compound.GlowDistance > 0)
-                Game1.currentLightSources.Add(new LightSource(Game1.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
-                */
-    }
+                Game1.currentLightSources.Add(new LightSource(LightSource.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
+        }
 
         internal static void _UpdateModifiers()
         {
@@ -136,15 +133,22 @@ namespace Entoarox.Framework.Core
             if (_Compound.StaminaRegenModifier != 0 && Game1.player.stamina < Game1.player.MaxStamina)
                 Game1.player.stamina = Math.Min(Game1.player.stamina + _Compound.StaminaRegenModifier, Game1.player.MaxStamina);
             LightSource lightSource = Utility.getLightSource(_MyUnique);
-            if (lightSource != null)
-                if (_Compound.GlowDistance == 0)
-                    Game1.currentLightSources.Remove(lightSource);
-                else
+            if (lightSource == null) return;
+            if (_Compound.GlowDistance == 0)
+                Game1.currentLightSources.Remove(lightSource);
+            else
+            {
+                //TODO Test Lightsources
+                if (Game1.currentLocation.IsOutdoors || Game1.currentLocation is StardewValley.Locations.MineShaft)
                 {
                     Utility.repositionLightSource(_MyUnique, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y));
-                    //TODO Look into changes of lightsources in stardew exe
-                    //lightSource.radius = (Game1.currentLocation.IsOutdoors || Game1.currentLocation is StardewValley.Locations.MineShaft) ? _Compound.GlowDistance : Math.Min(3f, _Compound.GlowDistance);
                 }
+                else
+                {
+                    Game1.currentLightSources.Remove(lightSource);
+                    lightSource = new LightSource(1, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y), _Compound.GlowDistance);
+                }
+            }
         }
         public int Count => _Modifiers.Count;
 
