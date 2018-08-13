@@ -23,6 +23,8 @@ using xTile.ObjectModel;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StardewValley.Locations;
+using Object = System.Object;
 
 namespace Entoarox.Framework.Core
 {
@@ -275,19 +277,19 @@ System.InvalidCastException: Unable to cast object of type 'StardewValley.Object
    at Entoarox.Framework.Core.EntoaroxFrameworkMod.SaveEvents_AfterSave(Object s, EventArgs e)
    at StardewModdingAPI.Framework.Events.ManagedEvent.Raise() in C:\source\_Stardew\SMAPI\src\SMAPI\Framework\Events\ManagedEvent.cs:line 126
    */
-                foreach (Chest chest in loc.Objects.Values)
+                foreach (SObject objects in loc.Objects.Values)
                 {
-                    Serialize(data, chest.items);
+                    if (objects is Chest chest)
+                        Serialize(data, chest.items);
                 }
             }
             Game1.player.Items = Serialize(data, Game1.player.Items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
+            if (Game1.getLocationFromName("FarmHouse") is FarmHouse house && house.fridge.Value != null)
+            {
+                    Serialize(data, house.fridge.Value.items);
+            }
 
-            if (house.fridge.Value != null)
-                foreach (Chest chest in house.fridge)
-                {
-                    Serialize(data, chest.items);
-                }
+            
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
@@ -300,23 +302,24 @@ System.InvalidCastException: Unable to cast object of type 'StardewValley.Object
             var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
-                foreach (Chest chest in loc.Objects.Values)
+                foreach (SObject objects in loc.Objects.Values)
                 {
-                    foreach (Item item in Deserialize(data, chest.items))
+                    if (objects is Chest chest)
                     {
-                        chest.addItem(item);
+                        chest = new Chest(chest.coins.Value, Deserialize(data, chest.items), chest.TileLocation, chest.giftbox.Value, chest.giftboxIndex.Value);
                     }
                 }
             }
             Game1.player.Items = Deserialize(data, Game1.player.Items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if (house.fridge.Value != null)
+            if (Game1.getLocationFromName("FarmHouse") is FarmHouse house)
             {
-                foreach (Chest chest in house.fridge)
+                house.fridge.Value?.items.Clear();
+                if (house.fridge.Value != null)
                 {
-                    foreach (Item item in Deserialize(data, chest.items))
+                    var items = this.Deserialize(data, house.fridge.Value.items);
+                    foreach (Item item in items)
                     {
-                        chest.addItem(item);
+                        house.fridge.Value.addItem(item);
                     }
                 }
             }
@@ -356,7 +359,7 @@ System.InvalidCastException: Unable to cast object of type 'StardewValley.Object
             }
             return output;
         }
-        private IList<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
+        private List<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
             var output = new List<Item>();
             foreach (Item item in items)
