@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,14 +12,11 @@ namespace Entoarox.Framework.UI
 {
     public class SliderFormComponent<T> : BaseFormComponent
     {
-        protected readonly static Rectangle Background = new Rectangle(403, 383, 6, 6);
-        protected readonly static Rectangle Button = new Rectangle(420, 441, 10, 6);
+        protected static readonly Rectangle Background = new Rectangle(403, 383, 6, 6);
+        protected static readonly Rectangle Button = new Rectangle(420, 441, 10, 6);
         public T Value
         {
-            get
-            {
-                return this._Value;
-            }
+            get => this._Value;
             set
             {
                 int i = this.Values.IndexOf(value);

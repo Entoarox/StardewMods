@@ -29,9 +29,7 @@ namespace Entoarox.Framework.Core.Injection
         }
         public static GameLocation GetOriginLocation(GameLocation location)
         {
-            if (!(location is IHookedLocation))
-                return location;
-           return CopyData(location, location.GetType().BaseType);
+            return !(location is IHookedLocation) ? location : CopyData(location, location.GetType().BaseType);
         }
 
 

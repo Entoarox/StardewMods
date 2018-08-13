@@ -23,12 +23,15 @@ using xTile.ObjectModel;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StardewValley.Locations;
+using Object = System.Object;
 
 namespace Entoarox.Framework.Core
 {
     using Events;
     using Core.AssetHandlers;
     using Serialization;
+    using StardewValley.BellsAndWhistles;
 
     internal class EntoaroxFrameworkMod : Mod
     {
@@ -37,7 +40,7 @@ namespace Entoarox.Framework.Core
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
-        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
+        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "Wilderness" };
         private static string Verify;
         private static bool CreditsDone = false;
         private JsonSerializer Serializer;
@@ -77,7 +80,9 @@ namespace Entoarox.Framework.Core
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
             SaveEvents.AfterSave += this.SaveEvents_AfterSave;
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
+            //TODO Update update checker
+            //this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/Framework/About/update.json");
+            this.Helper.RequestUpdateCheck("https://github.com/Slamerz/StardewMods/tree/master/Framework/About/update.json");
         }
         public override object GetApi()
         {
@@ -92,42 +97,35 @@ namespace Entoarox.Framework.Core
         }
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
-            if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
+            if (this.ActionInfo == null || e.ButtonReleased != Buttons.A) return;
+            MoreEvents.FireActionTriggered(this.ActionInfo);
+            this.ActionInfo = null;
         }
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
                 CheckForAction();
-            if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
+            if (this.ActionInfo == null || e.NewState.RightButton != ButtonState.Released) return;
+            MoreEvents.FireActionTriggered(this.ActionInfo);
+            this.ActionInfo = null;
         }
         private void CheckForAction()
         {
-            if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
-            {
-                this.ActionInfo = null;
-                Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
-                if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
-                    grabTile = Game1.player.GetGrabTile();
-                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
-                PropertyValue propertyValue = null;
-                if (tile != null)
-                    tile.Properties.TryGetValue("Action", out propertyValue);
-                if (propertyValue != null)
-                {
-                    string[] split = ((string)propertyValue).Split(' ');
-                    string[] args = new string[split.Length - 1];
-                    Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
-                }
-            }
+            if (Game1.activeClickableMenu != null || Game1.player.UsingTool || Game1.pickingTool || Game1.menuUp ||
+                (Game1.eventUp && !Game1.currentLocation.currentEvent.playerControlSequence) || Game1.nameSelectUp ||
+                Game1.numberOfSelectedItems != -1 || Game1.fadeToBlack) return;
+            this.ActionInfo = null;
+            var grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
+            if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
+                grabTile = Game1.player.GetGrabTile();
+            var tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
+            PropertyValue propertyValue = null;
+            tile?.Properties.TryGetValue("Action", out propertyValue);
+            if (propertyValue == null) return;
+            string[] split = ((string)propertyValue).Split(' ');
+            string[] args = new string[split.Length - 1];
+            Array.Copy(split, 1, args, 0, args.Length);
+            this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
         }
         private void Commands(string command, string[] args)
         {
@@ -139,38 +137,39 @@ namespace Entoarox.Framework.Core
             switch (command)
             {
                 case "world_bushreset":
-                    foreach (GameLocation loc in Game1.locations)
+                    foreach (GameLocation l in Game1.locations)
                     {
-                        loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
-                        if ((loc.isOutdoors || loc.name.Equals("BathHouse_Entry") || loc.treatAsOutdoors) && loc.map.GetLayer("Paths") != null)
+                        foreach(Bush b in l.largeTerrainFeatures)
                         {
-                            for (int x = 0; x < loc.map.Layers[0].LayerWidth; ++x)
+                            if ((!l.IsOutdoors && !l.Name.Equals("BathHouse_Entry") && !l.treatAsOutdoors.Value) ||
+                                l.map.GetLayer("Paths") == null) continue;
+                            for (int x = 0; x < l.map.Layers[0].LayerWidth; ++x)
                             {
-                                for (int y = 0; y < loc.map.Layers[0].LayerHeight; ++y)
+                                for (int y = 0; y < l.map.Layers[0].LayerHeight; ++y)
                                 {
-                                    Tile tile = loc.map.GetLayer("Paths").Tiles[x, y];
-                                    if (tile != null)
+                                    Tile tile = l.map.GetLayer("Paths").Tiles[x, y];
+                                    if (tile == null) continue;
+                                    Vector2 vector2 = new Vector2(x, y);
+                                    switch (tile.TileIndex)
                                     {
-                                        Vector2 vector2 = new Vector2(x, y);
-                                        switch (tile.TileIndex)
-                                        {
-                                            case 24:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 2, loc));
-                                                break;
-                                            case 25:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 1, loc));
-                                                break;
-                                            case 26:
-                                                if (!loc.terrainFeatures.ContainsKey(vector2))
-                                                    loc.largeTerrainFeatures.Add(new Bush(vector2, 0, loc));
-                                                break;
-                                        }
+                                        case 24:
+                                            if (!l.terrainFeatures.ContainsKey(vector2))
+                                                l.largeTerrainFeatures.Add(new Bush(vector2, 2, l));
+                                            break;
+                                        case 25:
+                                            if (!l.terrainFeatures.ContainsKey(vector2))
+                                                l.largeTerrainFeatures.Add(new Bush(vector2, 1, l));
+                                            break;
+                                        case 26:
+                                            if (!l.terrainFeatures.ContainsKey(vector2))
+                                                l.largeTerrainFeatures.Add(new Bush(vector2, 0, l));
+                                            break;
                                     }
                                 }
                             }
                         }
+
+                        
                     }
                     break;
                 case "farm_settype":
@@ -250,24 +249,20 @@ namespace Entoarox.Framework.Core
                 return;
             if ((Game1.player.CurrentItem == null && this.prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.prevItem)))
             {
-                MoreEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
+                ItemEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
                 this.prevItem = Game1.player.CurrentItem;
             }
             PlayerModifierHelper._UpdateModifiers();
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
-            if (LastTouchAction!=playerPos)
-            {
-                string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
-                LastTouchAction = playerPos;
-                if (text != null)
-                {
-                    string[] split = (text).Split(' ');
-                    string[] args = new string[split.Length - 1];
-                    Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
-                    MoreEvents.FireTouchActionTriggered(this.ActionInfo);
-                }
-            }
+            if (LastTouchAction == playerPos) return;
+            string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
+            LastTouchAction = playerPos;
+            if (text == null) return;
+            string[] split = (text).Split(' ');
+            string[] args = new string[split.Length - 1];
+            Array.Copy(split, 1, args, 0, args.Length);
+            this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
+            MoreEvents.FireTouchActionTriggered(this.ActionInfo);
         }
         private void SaveEvents_BeforeSave(object s, EventArgs e)
         {
@@ -276,15 +271,25 @@ namespace Entoarox.Framework.Core
             var data = new Dictionary<string, InstanceState>();
             foreach(GameLocation loc in Game1.locations)
             {
-                foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                //TODO Testing.    look into where Chests & Fridge store thier item locations
+                /*[22:58:19 ERROR Entoarox Framework] This mod failed in the SaveEvents.AfterSave event. Technical details:
+System.InvalidCastException: Unable to cast object of type 'StardewValley.Object' to type 'StardewValley.Objects.Chest'.
+   at Entoarox.Framework.Core.EntoaroxFrameworkMod.SaveEvents_AfterSave(Object s, EventArgs e)
+   at StardewModdingAPI.Framework.Events.ManagedEvent.Raise() in C:\source\_Stardew\SMAPI\src\SMAPI\Framework\Events\ManagedEvent.cs:line 126
+   */
+                foreach (SObject objects in loc.Objects.Values)
                 {
-                    chest.items = Serialize(data, chest.items);
+                    if (objects is Chest chest)
+                        Serialize(data, chest.items);
                 }
             }
-            Game1.player.items = Serialize(data, Game1.player.items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if (house.fridge != null)
-                house.fridge.items = Serialize(data, house.fridge.items);
+            Game1.player.Items = Serialize(data, Game1.player.Items);
+            if (Game1.getLocationFromName("FarmHouse") is FarmHouse house && house.fridge.Value != null)
+            {
+                    Serialize(data, house.fridge.Value.items);
+            }
+
+            
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
@@ -297,22 +302,34 @@ namespace Entoarox.Framework.Core
             var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
-                foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                foreach (SObject objects in loc.Objects.Values)
                 {
-                    chest.items = Deserialize(data, chest.items);
+                    if (objects is Chest chest)
+                    {
+                        chest = new Chest(chest.coins.Value, Deserialize(data, chest.items), chest.TileLocation, chest.giftbox.Value, chest.giftboxIndex.Value);
+                    }
                 }
             }
-            Game1.player.items = Deserialize(data, Game1.player.items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if(house.fridge!=null)
-                house.fridge.items = Deserialize(data, house.fridge.items);
+            Game1.player.Items = Deserialize(data, Game1.player.Items);
+            if (Game1.getLocationFromName("FarmHouse") is FarmHouse house)
+            {
+                house.fridge.Value?.items.Clear();
+                if (house.fridge.Value != null)
+                {
+                    var items = this.Deserialize(data, house.fridge.Value.items);
+                    foreach (Item item in items)
+                    {
+                        house.fridge.Value.addItem(item);
+                    }
+                }
+            }
             ItemEvents.FireAfterDeserialize();
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private List<Item> Serialize(IDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
+            var output = new List<Item>();
             foreach(Item item in items)
             {
                 if (item is ICustomItem)
@@ -325,11 +342,11 @@ namespace Entoarox.Framework.Core
                         throw new TimeoutException("Unable to assign a GUID to all items!");
                     SObject obj = new SObject()
                     {
-                        stack = item.getStack(),
-                        parentSheetIndex = 0,
-                        type = id,
+                        Stack = item.getStack(),
+                        ParentSheetIndex = 0,
+                        Type = id,
                         name = "(Entoarox.Framework.ICustomItem)",
-                        price = item.salePrice(),
+                        Price = item.salePrice(),
                     };
                     if (item is Placeholder pitm)
                         data.Add(id, new InstanceState(pitm.Id, pitm.Data));
@@ -342,45 +359,45 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private List<Item> Deserialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private List<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
+            var output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
                 {
-                    if (data.ContainsKey(itm.type))
+                    if (data.ContainsKey(itm.Type))
                     {
-                        string cls = data[itm.type].Type;
+                        string cls = data[itm.Type].Type;
                         Type type = Type.GetType(cls);
                         if(type==null)
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                output.Add((Item)data[itm.type].Data.ToObject(type, this.Serializer));
+                                output.Add((Item)data[itm.Type].Data.ToObject(type, this.Serializer));
                             }
                             catch(Exception err)
                             {
                                 this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
-                                output.Add(new Placeholder(cls, data[itm.type].Data));
+                                output.Add(new Placeholder(cls, data[itm.Type].Data));
                                 continue;
                             }
                         }
@@ -388,7 +405,7 @@ namespace Entoarox.Framework.Core
                     else
                     {
                         output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.type, LogLevel.Error);
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
                     }
                 }
                 else
@@ -403,31 +420,66 @@ namespace Entoarox.Framework.Core
         private XmlSerializer MainSerializer;
         private XmlSerializer FarmerSerializer;
         private XmlSerializer LocationSerializer;
-        private static Type[] _serialiserTypes = new Type[27]
+        
+        private static Type[] _serialiserTypes = new Type[25]
         {
-            typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
-            typeof (Fireball), typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
-            typeof (StardewValley.Characters.Cat),
-            typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
-            typeof (SkeletonMage),
-            typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
+            typeof (Tool),
+            typeof (GameLocation),
+            typeof (Duggy),
+            typeof (Bug),
+            typeof (BigSlime),
+            typeof (Ghost),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
+            typeof (Cat),
+            typeof (Horse),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (SquidKid),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Quest),
+            typeof (MetalHead),
             typeof (ShadowGirl),
-            typeof (Monster), typeof (TerrainFeature)
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
 
         private static Type[] _farmerTypes = new Type[1] {
             typeof (Tool)
         };
-
-        private static Type[] _locationTypes = new Type[26]
+ 
+        private static Type[] _locationTypes = new Type[24]
         {
-            typeof (Tool), typeof (Crow), typeof (Duggy), typeof (Fireball), typeof (Ghost),
-            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), typeof (SkeletonWarrior),
-            typeof (Child), typeof (Pet), typeof (Dog), typeof (StardewValley.Characters.Cat), typeof (Horse),
+            typeof (Tool),
+            typeof (Duggy),
+            typeof (Ghost),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
+            typeof (Cat),
+            typeof (Horse),
             typeof (SquidKid),
-            typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Bug),
+            typeof (BigSlime),
             typeof (BreakableContainer),
-            typeof (MetalHead), typeof (ShadowGirl), typeof (Monster), typeof (TerrainFeature)
+            typeof (MetalHead),
+            typeof (ShadowGirl),
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
         private void SetupSerializer()
         {

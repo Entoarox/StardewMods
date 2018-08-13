@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,15 +16,15 @@ namespace Entoarox.Framework
         {
             this.Item = item;
             this.stackAmount = stack;
-            this.parentSheetIndex = item.parentSheetIndex;
-            this.price = salePrice() * stack;
+            this.ParentSheetIndex = item.ParentSheetIndex;
+            this.Price = salePrice() * stack;
             this.MaxStackSize = (int)Math.Floor(999d / stack);
             this.name = this.Item.Name;
         }
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
+        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
         {
             this.Item.drawInMenu(spriteBatch, location, scaleSize, transparency, layerDepth, false);
-            var _scale = 0.5f + scaleSize;
+            float _scale = 0.5f + scaleSize;
             Game1.drawWithBorder(getStackNumber().ToString(), Color.Black, Color.White, location + new Vector2(Game1.tileSize - Game1.tinyFont.MeasureString(getStackNumber().ToString()).X * _scale, Game1.tileSize - (float)((double)Game1.tinyFont.MeasureString(getStackNumber().ToString()).Y * 3.0f / 4.0f) * _scale), 0.0f, _scale, 1f, true);
         }
         public override int salePrice()
@@ -33,7 +33,7 @@ namespace Entoarox.Framework
         }
         public int getStackNumber()
         {
-            return (this.stack * this.stackAmount);
+            return (this.Stack * this.stackAmount);
         }
         public override int maximumStackSize()
         {
@@ -73,7 +73,7 @@ namespace Entoarox.Framework
         }
         public StardewValley.Object Revert()
         {
-            return new StardewValley.Object(this.Item.parentSheetIndex, this.stackAmount * this.stack);
+            return new StardewValley.Object(this.Item.ParentSheetIndex, this.stackAmount * this.Stack);
         }
     }
 }

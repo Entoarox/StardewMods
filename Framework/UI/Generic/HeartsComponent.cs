@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,18 +9,12 @@ namespace Entoarox.Framework.UI
 {
     public class HeartsComponent : BaseMenuComponent
     {
-        protected readonly static Rectangle HeartFull = new Rectangle(211, 428, 7, 6);
-        protected readonly static Rectangle HeartEmpty = new Rectangle(218, 428, 7, 6);
+        protected static readonly Rectangle HeartFull = new Rectangle(211, 428, 7, 6);
+        protected static readonly Rectangle HeartEmpty = new Rectangle(218, 428, 7, 6);
         public int Value
         {
-            get
-            {
-                return this._Value;
-            }
-            set
-            {
-                this._Value = Math.Min(Math.Max(0, value), this.MaxValue);
-            }
+            get => this._Value;
+            set => this._Value = Math.Min(Math.Max(0, value), this.MaxValue);
         }
         protected int _Value;
         protected int MaxValue;

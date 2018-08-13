@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Entoarox.Framework
 {
@@ -70,30 +70,30 @@ namespace Entoarox.Framework
          * <summary>Additive, multiple modifiers will stack</summary>
          */
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierFarming { get { return this.Unlocked ? this._Farming : Math.Min(5f,Math.Max(-1f, this._Farming)); } set { this._Farming = value; } }
+        public float ExperienceModifierFarming { get => this.Unlocked ? this._Farming : Math.Min(5f,Math.Max(-1f, this._Farming));  set { this._Farming = value; } }
         private float _Fishing = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierFishing { get { return this.Unlocked ? this._Fishing : Math.Min(5f, Math.Max(-1f, this._Fishing)); } set { this._Fishing = value; } }
+        public float ExperienceModifierFishing { get => this.Unlocked ? this._Fishing : Math.Min(5f, Math.Max(-1f, this._Fishing)); set { this._Fishing = value; } }
         private float _Foraging = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierForaging { get { return this.Unlocked ? this._Foraging : Math.Min(5f, Math.Max(-1f, this._Foraging)); } set { this._Foraging = value; } }
+        public float ExperienceModifierForaging { get => this.Unlocked ? this._Foraging : Math.Min(5f, Math.Max(-1f, this._Foraging)); set { this._Foraging = value; } }
         private float _Mining = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierMining { get { return this.Unlocked ? this._Mining : Math.Min(5f, Math.Max(-1f, this._Mining)); } set { this._Mining = value; } }
+        public float ExperienceModifierMining { get => this.Unlocked ? this._Mining : Math.Min(5f, Math.Max(-1f, this._Mining)); set { this._Mining = value; } }
         private float _Combat = 1;
         /**
          * <summary>Additive, multiple modifiers will stack</summary>
          */
         [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierCombat { get { return this.Unlocked ? this._Combat : Math.Min(5f, Math.Max(-1f, this._Farming)); } set { this._Combat = value; } }
+        public float ExperienceModifierCombat { get => this.Unlocked ? this._Combat : Math.Min(5f, Math.Max(-1f, this._Farming)); set { this._Combat = value; } }
     }
 }

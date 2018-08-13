@@ -1,4 +1,4 @@
-﻿namespace Entoarox.Framework.UI
+namespace Entoarox.Framework.UI
 {
     public class KeyboardSubscriberProxy : StardewValley.IKeyboardSubscriber
     {
@@ -9,10 +9,7 @@
         }
         public bool Selected
         {
-            get
-            {
-                return this.Component.Selected;
-            }
+            get => this.Component.Selected;
             set
             {
                 if (value == false)

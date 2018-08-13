@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -54,23 +54,21 @@ namespace Entoarox.Framework.Core
         void IMessageHelper.Add(string message, Color color) => (this as IMessageHelper).Add(message, null, color);
         public override void draw(SpriteBatch b)
         {
-            if (messages.Any())
-            {
-                int width = (int)Game1.smallFont.MeasureString(messages.OrderByDescending(msg => Game1.smallFont.MeasureString(msg.Text).X).First().Text).X;
-                drawTextureBox(b, Game1.mouseCursors, new Rectangle(384, 373, 18, 18), 6, 6, width + 12, (messages.Sum(t => t.Size + 2) + 10), Color.White * messages.Last().Alpha);
+            if (!messages.Any()) return;
+            int width = (int)Game1.smallFont.MeasureString(messages.OrderByDescending(msg => Game1.smallFont.MeasureString(msg.Text).X).First().Text).X;
+            drawTextureBox(b, Game1.mouseCursors, new Rectangle(384, 373, 18, 18), 6, 6, width + 12, (messages.Sum(t => t.Size + 2) + 10), Color.White * messages.Last().Alpha);
 
-                int num = 0;
-                for (int index = 0; index < maxMessages; index++)
-                {
-                    if (index > 0)
-                        num += messages[index - 1].Size + 2;
-                    Utility.drawTextWithShadow(b, messages[index].Text, Game1.smallFont, new Vector2(16f, 16 + num), messages[index].Color * messages[index].Alpha, 1f, 0.99f);
-                    messages[index].Time--;
-                    if (messages[index].Time < 75)
-                        messages[index].Alpha = messages[index].Time / 75f;
-                }
-                messages.Where(msg => Math.Abs(msg.Alpha) < 0.05f).ToList().ForEach(msg => messages.Remove(msg));
+            int num = 0;
+            for (int index = 0; index < maxMessages; index++)
+            {
+                if (index > 0)
+                    num += messages[index - 1].Size + 2;
+                Utility.drawTextWithShadow(b, messages[index].Text, Game1.smallFont, new Vector2(16f, 16 + num), messages[index].Color * messages[index].Alpha, 1f, 0.99f);
+                messages[index].Time--;
+                if (messages[index].Time < 75)
+                    messages[index].Alpha = messages[index].Time / 75f;
             }
+            messages.Where(msg => Math.Abs(msg.Alpha) < 0.05f).ToList().ForEach(msg => messages.Remove(msg));
         }
     }
 }
