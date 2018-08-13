@@ -24,11 +24,9 @@ namespace Entoarox.Framework.Interface
             get => this._Visible;
             set
             {
-                if(value!=this._Visible)
-                {
-                    this._Visible = value;
-                    (this._Owner as IVisibilityObserver)?.VisibilityChanged(this);
-                }
+                if (value == this._Visible) return;
+                this._Visible = value;
+                (this._Owner as IVisibilityObserver)?.VisibilityChanged(this);
             }
         }
         public virtual Rectangle OuterBounds { get; set; }

@@ -32,12 +32,10 @@ namespace Entoarox.Framework.Interface
         }
         protected virtual void UpdateFocus(IDynamicComponent component)
         {
-            if (this._FocusComponent != component)
-            {
-                this._FocusComponent?.FocusLost();
-                this._FocusComponent = component;
-                component?.FocusGained();
-            }
+            if (this._FocusComponent == component) return;
+            this._FocusComponent?.FocusLost();
+            this._FocusComponent = component;
+            component?.FocusGained();
         }
         protected bool GetTarget(Point offset, Point position, out IDynamicComponent component)
         {
@@ -62,11 +60,9 @@ namespace Entoarox.Framework.Interface
         }
         public override void HoverOut(Point offset, Point position)
         {
-            if (this._HoverComponent != null)
-            {
-                this._HoverComponent?.HoverOut(GetMyOffset(offset), position);
-                this._HoverComponent = null;
-            }
+            if (this._HoverComponent == null) return;
+            this._HoverComponent?.HoverOut(this.GetMyOffset(offset), position);
+            this._HoverComponent = null;
         }
         public override void HoverOver(Point offset, Point position)
         {
@@ -115,9 +111,7 @@ namespace Entoarox.Framework.Interface
         public override bool Scroll(Point offset, Point position, int amount)
         {
             var myOffset = GetMyOffset(offset);
-            if (GetTarget(myOffset, position, out IDynamicComponent component))
-                return component.Scroll(myOffset, position, amount);
-            return false;
+            return this.GetTarget(myOffset, position, out IDynamicComponent component) && component.Scroll(myOffset, position, amount);
         }
 
         public override void Update(GameTime time)
@@ -232,7 +226,7 @@ namespace Entoarox.Framework.Interface
                     return false;
                 this._FocusComponent = this._EventComponents[0];
             }
-            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabNext())
+            else if (!(this._FocusComponent is IComponentContainer) || !((IComponentContainer) this._FocusComponent).TabNext())
             {
                 int index = this._EventComponents.IndexOf(this._FocusComponent) + 1;
                 if (index >= this._EventComponents.Count)
@@ -249,7 +243,7 @@ namespace Entoarox.Framework.Interface
                     return false;
                 this._FocusComponent = this._EventComponents[this._EventComponents.Count - 1];
             }
-            else if (!(this._FocusComponent is IComponentContainer) || !(this._FocusComponent as IComponentContainer).TabNext())
+            else if (!(this._FocusComponent is IComponentContainer) || !((IComponentContainer) this._FocusComponent).TabNext())
             {
                 int index = this._EventComponents.IndexOf(this._FocusComponent) - 1;
                 if (index < 0)
@@ -264,7 +258,7 @@ namespace Entoarox.Framework.Interface
         }
         public virtual IDynamicComponent FocusComponent => this._FocusComponent;
 
-        public IComponent this[string name] { get => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound); }
+        public IComponent this[string name] => this._Components.ContainsKey(name) ? this._Components[name] : throw new KeyNotFoundException(Strings.KeyNotFound);
 
         public IEnumerator<IComponent> GetEnumerator()
         {

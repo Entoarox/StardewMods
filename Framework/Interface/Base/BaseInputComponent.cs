@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.Interface
 {
@@ -9,6 +9,6 @@ namespace Entoarox.Framework.Interface
         }
         public bool Selected { get; set; }
 
-        abstract public void ReceiveInput(char input);
+        public abstract void ReceiveInput(char input);
     }
 }

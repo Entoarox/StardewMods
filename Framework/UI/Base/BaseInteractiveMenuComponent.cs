@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.Framework.UI
 {
-    abstract public class BaseInteractiveMenuComponent : BaseMenuComponent, IInteractiveMenuComponent
+    public abstract class BaseInteractiveMenuComponent : BaseMenuComponent, IInteractiveMenuComponent
     {
         public delegate void ValueChanged<T>(IInteractiveMenuComponent component, IComponentContainer collection, FrameworkMenu menu, T value);
         public delegate void ClickHandler(IInteractiveMenuComponent component, IComponentContainer collection, FrameworkMenu menu);
@@ -17,7 +17,7 @@ namespace Entoarox.Framework.UI
         }
         public virtual bool InBounds(Point p, Point o)
         {
-            return this.Visible ? new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height).Contains(p) : false;
+            return this.Visible && new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, this.Area.Width, this.Area.Height).Contains(p);
         }
         public virtual void RightClick(Point p, Point o)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -132,13 +132,9 @@ namespace Entoarox.Framework.UI
             }
             public override void CommandReceived(char cmd)
             {
-                switch ((int)cmd)
-                {
-                    case 13:
-                        this.Value = this.Owner.Values[this.KeyboardOffset];
-                        this.Parent.ResetFocus();
-                        break;
-                }
+                if ((int) cmd != 13) return;
+                this.Value = this.Owner.Values[this.KeyboardOffset];
+                this.Parent.ResetFocus();
             }
             public override void SpecialReceived(Keys key)
             {
@@ -159,17 +155,14 @@ namespace Entoarox.Framework.UI
                 }
             }
         }
-        protected readonly static Rectangle Background = new Rectangle(433, 451, 3, 3);
-        protected readonly static Rectangle Button = new Rectangle(438, 450, 9, 11);
-        protected readonly static Rectangle UpScroll = new Rectangle(421, 459, 11, 12);
-        protected readonly static Rectangle DownScroll = new Rectangle(421, 472, 11, 12);
+        protected static readonly Rectangle Background = new Rectangle(433, 451, 3, 3);
+        protected static readonly Rectangle Button = new Rectangle(438, 450, 9, 11);
+        protected static readonly Rectangle UpScroll = new Rectangle(421, 459, 11, 12);
+        protected static readonly Rectangle DownScroll = new Rectangle(421, 472, 11, 12);
         public event ValueChanged<string> Handler;
         public string Value
         {
-            get
-            {
-                return this._Value;
-            }
+            get => this._Value;
             set
             {
                 if(this.Values.Contains(value))

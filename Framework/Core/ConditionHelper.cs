@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -116,7 +116,7 @@ namespace Entoarox.Framework.Core
                             return Game1.year > Convert.ToInt32(condition.Substring(5));
                         // House upgrade level conditions
                         if (condition.StartsWith("houseLevel="))
-                            return Game1.player.houseUpgradeLevel == Convert.ToInt32(condition.Substring(11));
+                            return Game1.player.HouseUpgradeLevel == Convert.ToInt32(condition.Substring(11));
                         // Farm type conditions
                         if (condition.StartsWith("farmType="))
                             return Game1.whichFarm == Convert.ToInt32(condition.Substring(9));
@@ -149,12 +149,7 @@ namespace Entoarox.Framework.Core
         public bool ValidateConditions(string[] conditions)
         {
             Array.Sort(conditions);
-            if (conditions.Length > 5)
-                return false;
-            foreach (string condition in conditions)
-                if (!ValidateCondition(condition))
-                    return false;
-            return true;
+            return conditions.Length <= 5 && conditions.All(this.ValidateCondition);
         }
     }
 }

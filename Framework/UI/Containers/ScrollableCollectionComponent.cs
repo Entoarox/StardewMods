@@ -43,10 +43,7 @@ namespace Entoarox.Framework.UI
                 if (b > height)
                     height = b;
             }
-            if (height > this.Area.Height)
-                this.BarOffset = zoom12;
-            else
-                this.BarOffset = 0;
+            this.BarOffset = height > this.Area.Height ? zoom12 : 0;
             this.InnerHeight = (int)Math.Ceiling((height - this.Area.Height) / (double)zoom10);
             // Remove components that do not intersect the collection viewport from both the draw and event order
             Rectangle self = new Rectangle(0, -(this.ScrollOffset * zoom10), this.Area.Width, this.Area.Height);
@@ -64,13 +61,10 @@ namespace Entoarox.Framework.UI
             int change = d / 120;
             int oldOffset = this.ScrollOffset;
             this.ScrollOffset = Math.Max(0, Math.Min(this.ScrollOffset - change, this.InnerHeight));
-            if (oldOffset != this.ScrollOffset)
-            {
-                Game1.playSound("drumkit6");
-                UpdateDrawOrder();
-                return true;
-            }
-            return false;
+            if (oldOffset == this.ScrollOffset) return false;
+            Game1.playSound("drumkit6");
+            this.UpdateDrawOrder();
+            return true;
         }
         public override void HoverOver(Point p, Point o)
         {

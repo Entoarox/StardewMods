@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Xna.Framework;
 
 using StardewValley;
@@ -15,14 +16,14 @@ namespace Entoarox.Framework
     {
         public static bool HasTile(this GameLocation self, int x, int y, string layer)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
                 return false;
             return _layer.Tiles[x, y] != null;
         }
         public static void SetTile(this GameLocation self, int x, int y, string layer, int index, string sheet = null)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
             if (_layer.LayerWidth < x || x< 0 )
@@ -46,7 +47,7 @@ namespace Entoarox.Framework
         {
             if (interval < 0)
                 throw new ArgumentOutOfRangeException(nameof(interval));
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
             if (_layer.LayerWidth < x || x < 0)
@@ -65,14 +66,11 @@ namespace Entoarox.Framework
             for (int c = 0; c < indexes.Length; c++)
                 if (_sheet.TileCount < indexes[c] || indexes[c] < 0)
                     throw new ArgumentOutOfRangeException(nameof(indexes) + '[' + c.ToString() + ']', "Must be at least 0 and less then " + _sheet.TileCount + " for tilesheet with Id `" + _sheet.Id + '`');
-            List<StaticTile> Frames = new List<StaticTile>();
-            foreach(int index in indexes)
-            Frames.Add(new StaticTile(_layer, _sheet, BlendMode.Alpha, index));
-            _layer.Tiles[x, y] = new AnimatedTile(_layer, Frames.ToArray(), interval);
+            _layer.Tiles[x, y] = new AnimatedTile(_layer, indexes.Select(index => new StaticTile(_layer, _sheet, BlendMode.Alpha, index)).ToArray(), interval);
         }
         public static void RemoveTile(this GameLocation self, int x, int y, string layer)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
             if (_layer.LayerWidth < x || x < 0)
@@ -83,10 +81,10 @@ namespace Entoarox.Framework
         }
         public static bool TrySetTile(this GameLocation self, int x, int y, string layer, int index, string sheet = null)
         {
-            TileSheet _sheet = sheet == null ? self.map.TileSheets[0] : self.map.GetTileSheet(sheet);
+            var _sheet = sheet == null ? self.map.TileSheets[0] : self.map.GetTileSheet(sheet);
             if (_sheet == null || _sheet.TileCount < index || index < 0)
                 return false;
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
                 return false;
             _layer.Tiles[x, y] = new StaticTile(_layer, _sheet, BlendMode.Alpha, index);
@@ -94,24 +92,22 @@ namespace Entoarox.Framework
         }
         public static bool TrySetTile(this GameLocation self, int x, int y, string layer, int[] indexes, int interval, string sheet = null)
         {
-            TileSheet _sheet = sheet == null ? self.map.TileSheets[0] : self.map.GetTileSheet(sheet);
+            var _sheet = sheet == null ? self.map.TileSheets[0] : self.map.GetTileSheet(sheet);
             if (_sheet == null || interval < 0)
                 return false;
-            for (int c = 0; c < indexes.Length; c++)
-                if (_sheet.TileCount < indexes[c] || indexes[c] < 0)
-                    return false;
-            Layer _layer = self.map.GetLayer(layer);
+            if (indexes.Any(t => _sheet.TileCount < t || t < 0))
+            {
+                return false;
+            }
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
                 return false;
-            List<StaticTile> Frames = new List<StaticTile>();
-            foreach (int index in indexes)
-                Frames.Add(new StaticTile(_layer, _sheet, BlendMode.Alpha, index));
-            _layer.Tiles[x, y] = new AnimatedTile(_layer, Frames.ToArray(), interval);
+            _layer.Tiles[x, y] = new AnimatedTile(_layer, indexes.Select(index => new StaticTile(_layer, _sheet, BlendMode.Alpha, index)).ToArray(), interval);
             return true;
         }
         public static bool TryRemoveTile(this GameLocation self, int x, int y, string layer)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
                 return false;
             _layer.Tiles[x, y] = null;
@@ -119,7 +115,7 @@ namespace Entoarox.Framework
         }
         public static void SetTileProperty(this GameLocation self, int x, int y, string layer, string key, string value)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
             if (_layer.LayerWidth < x || x < 0)
@@ -135,7 +131,7 @@ namespace Entoarox.Framework
         }
         public static bool TrySetTileProperty(this GameLocation self, int x, int y, string layer, string key, string value)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0)
                 return false;
             if (_layer.Tiles[x, y].Properties.ContainsKey(key))
@@ -146,7 +142,7 @@ namespace Entoarox.Framework
         }
         public static string GetTileProperty(this GameLocation self, int x, int y, string layer, string key)
         {
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null)
                 throw new ArgumentNullException(nameof(layer));
             if (_layer.LayerWidth < x || x < 0)
@@ -160,34 +156,50 @@ namespace Entoarox.Framework
         public static bool TryGetTileProperty(this GameLocation self, int x, int y, string layer, string key, out string value)
         {
             value = null;
-            Layer _layer = self.map.GetLayer(layer);
+            var _layer = self.map.GetLayer(layer);
             if (_layer == null || _layer.LayerWidth < x || x < 0 || _layer.LayerHeight < y || y < 0 || !_layer.Tiles[x, y].Properties.ContainsKey(key))
                 return false;
             value = _layer.Tiles[x, y].Properties[key];
             return true;
+
         }
+
         public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace=true)
         {
-            if (!replace && self.warps.Exists(a => a.X == x && a.Y == y))
+            List<Warp> warps = null;
+            foreach (var w in self.warps)
+            {
+                warps.Add(w);
+            }
+            if (!replace && warps.Exists(a => a.X == x && a.Y == y))
                 throw new ArgumentException("Index already set " + x.ToString() + ',' + y.ToString());
-            else
-                self.warps.RemoveAll(a => a.X == x && a.Y == y);
+            else if (warps != null)
+                foreach (var warp in warps.Where(a => a.X == x && a.Y == y))
+                    self.warps.Remove(warp);
             self.warps.Add(new Warp(x, y, target, x, y, false));
         }
         public static void RemoveWarp(this GameLocation self, int x, int y)
         {
-            self.warps.RemoveAll(a => a.X == x && a.Y == y);
+            List<Warp> warps = null;
+            foreach (var w in self.warps)
+            {
+                warps.Add(w);
+            }
+            if (warps == null) return;
+            foreach (var w in warps.Where(a => a.X ==x && a.Y == y))
+            {
+                self.warps.Remove(w);
+            }
         }
         public static bool IsPassable(this GameLocation self, int x, int y)
         {
-            Layer layer = self.map.GetLayer("Back");
+            var layer = self.map.GetLayer("Back");
             if (layer.LayerWidth < x || x < 0)
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
-            Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            if (tile.TileIndexProperties.TryGetValue("Passable", out value) && value!=null)
+            var tile = layer.Tiles[x, y];
+            if (tile.TileIndexProperties.TryGetValue("Passable", out var value) && value != null)
                 return true;
             if (self.objects.ContainsKey(new Vector2(x, y)))
                 return false;
@@ -195,8 +207,8 @@ namespace Entoarox.Framework
                 self.getObjectAt(x, y).isPassable();
             if (self.isTerrainFeatureAt(x, y))
             {
-                Rectangle rectangle = new Rectangle(x * Game1.tileSize, y * Game1.tileSize, Game1.tileSize, Game1.tileSize);
-                foreach (StardewValley.TerrainFeatures.LargeTerrainFeature largeTerrainFeature in self.largeTerrainFeatures)
+                var rectangle = new Rectangle(x * Game1.tileSize, y * Game1.tileSize, Game1.tileSize, Game1.tileSize);
+                foreach (var largeTerrainFeature in self.largeTerrainFeatures)
                     if (largeTerrainFeature.getBoundingBox().Intersects(rectangle))
                         return largeTerrainFeature.isPassable();
             }
@@ -211,14 +223,13 @@ namespace Entoarox.Framework
         }
         public static bool IsWater(this GameLocation self, int x, int y)
         {
-            Layer layer = self.map.GetLayer("Back");
+            var layer = self.map.GetLayer("Back");
             if (layer.LayerWidth < x || x < 0)
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
-            Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            tile.TileIndexProperties.TryGetValue("Water", out value);
+            var tile = layer.Tiles[x, y];
+            tile.TileIndexProperties.TryGetValue("Water", out var value);
             return value != null;
         }
     }
