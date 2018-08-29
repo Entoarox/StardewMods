@@ -23,9 +23,8 @@ namespace Entoarox.FurnitureAnywhere
         {
             //var harmony = HarmonyInstance.Create("Entoarox.FurnitureAnywhere");
             //harmony.PatchAll(Assembly.GetExecutingAssembly());
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FurnitureAnywhere/update.json");
             ItemEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
-            LocationEvents.CurrentLocationChanged += this.TriggerItemChangedEvent;
+            PlayerEvents.Warped += this.TriggerItemChangedEvent;
             MenuEvents.MenuChanged += this.TriggerItemChangedEvent;
             MenuEvents.MenuClosed += this.TriggerItemChangedEvent;
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
@@ -35,15 +34,15 @@ namespace Entoarox.FurnitureAnywhere
         }
         private void RestoreVanillaObjects()
         {
-            for (int c = 0; c < Game1.player.items.Count; c++)
-                if (Game1.player.items[c] != null && Game1.player.items[c] is AnywhereFurniture)
-                    Game1.player.items[c] = (Game1.player.items[c] as AnywhereFurniture).Revert();
+            for (int c = 0; c < Game1.player.Items.Count; c++)
+                if (Game1.player.Items[c] != null && Game1.player.Items[c] is AnywhereFurniture)
+                    Game1.player.Items[c] = (Game1.player.Items[c] as AnywhereFurniture).Revert();
         }
         private void InitSpecialObject(Item i)
         {
-            for (int c = 0; c < Game1.player.items.Count; c++)
-                if (Game1.player.items[c] != null && Game1.player.items[c].Equals(i))
-                    Game1.player.items[c] = new AnywhereFurniture(Game1.player.items[c] as Furniture);
+            for (int c = 0; c < Game1.player.Items.Count; c++)
+                if (Game1.player.Items[c] != null && Game1.player.Items[c].Equals(i))
+                    Game1.player.Items[c] = new AnywhereFurniture(Game1.player.Items[c] as Furniture);
         }
         internal void MoreEvents_ActiveItemChanged(object s, EventArgsActiveItemChanged e)
         {
@@ -75,40 +74,43 @@ namespace Entoarox.FurnitureAnywhere
         }
         internal void IterateFurniture(Action<GameLocation> handler)
         {
-            for (int c= 0;c<Game1.locations.Count;c++)
+            foreach (var loc in Game1.locations)
             {
-                var loc = Game1.locations[c];
                 handler(loc);
-                if (loc is StardewValley.Locations.BuildableGameLocation)
-                    foreach (StardewValley.Buildings.Building build in (loc as StardewValley.Locations.BuildableGameLocation).buildings)
-                        if (build.indoors != null)
-                            handler(build.indoors);
+                if (!(loc is StardewValley.Locations.BuildableGameLocation)) continue;
+                foreach (StardewValley.Buildings.Building build in (loc as StardewValley.Locations.BuildableGameLocation).buildings)
+                    if (build.indoors.Value != null)
+                        handler(build.indoors.Value);
             }
         }
         internal void SleepFurniture(GameLocation loc)
         {
             List<Vector2> Positions = new List<Vector2>();
-            foreach (KeyValuePair<Vector2,StardewValley.Object> obj in loc.objects)
+            foreach (KeyValuePair<Vector2,StardewValley.Object> obj in loc.objects.Pairs)
                 if (obj.Value is AnywhereFurniture)
                     Positions.Add(obj.Key);
             foreach (Vector2 pos in Positions)
-                loc.objects[pos] = new Chest(false)
+            {
+                var items = new List<Item>() {(loc.objects[pos] as AnywhereFurniture).Revert()};
+                Chest chest = new Chest(false)
                 {
-                    items=new List<Item>() { (loc.objects[pos] as AnywhereFurniture).Revert() },
-                    type = "AnywhereSerializedContainer",
-                    tileLocation = pos
+                    Type = "AnywhereSerializedContainer",
+                    TileLocation = pos,
                 };
+                chest.items.Set(items);
+                loc.objects[pos] = chest;
+            }
         }
         internal void WakeupFurniture(GameLocation loc)
         {
             List<Vector2> Positions = new List<Vector2>();
-            foreach (KeyValuePair<Vector2, StardewValley.Object> obj in loc.objects)
-                if (obj.Value is Chest && (obj.Value as Chest).type.Equals("AnywhereSerializedContainer"))
+            foreach (KeyValuePair<Vector2, StardewValley.Object> obj in loc.objects.Pairs)
+                if (obj.Value is Chest && (obj.Value as Chest).Type.Equals("AnywhereSerializedContainer"))
                     Positions.Add(obj.Key);
             foreach (Vector2 pos in Positions)
                 loc.objects[pos] = new AnywhereFurniture((loc.objects[pos] as Chest).items[0] as Furniture)
                 {
-                    tileLocation = pos
+                    TileLocation = pos
                 };
         }
     }
