@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -303,7 +303,7 @@ namespace Entoarox.ExtendedMinecart
                 Destinations["Desert"].Disabled = true;
             if (this.Config.WoodsDestinationEnabled && !Game1.player.mailReceived.Contains("beenToWoods"))
                 Destinations["Woods"].Disabled = true;
-            if (this.Config.BeachDestinationEnabled && !(Game1.getLocationFromName("Beach") as StardewValley.Locations.Beach).bridgeFixed)
+            if (this.Config.BeachDestinationEnabled && !(Game1.getLocationFromName("Beach") as StardewValley.Locations.Beach).bridgeFixed.Value)
                 Destinations["Beach"].Disabled = true;
             this.CheckRefuel = false;
             Game1.activeClickableMenu = Menu;
