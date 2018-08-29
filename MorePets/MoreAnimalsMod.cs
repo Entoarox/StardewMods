@@ -19,6 +19,7 @@ namespace Entoarox.MorePetsAndAnimals
 {
     public class MoreAnimalsMod : Mod
     {
+
         private static bool replaceBus = true;
         private bool _TriggerAction = false;
         internal static Random random;
@@ -97,8 +98,6 @@ namespace Entoarox.MorePetsAndAnimals
                 ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
             }
-            // check version
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/MorePets/update.json");
         }
 
         private void LoadPetSkins()
