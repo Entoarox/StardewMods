@@ -217,6 +217,12 @@ namespace Entoarox.Framework.Core
                         this.Monitor.Log("A error occured trying to warp: ", LogLevel.Error, err);
                     }
                     break;
+                case "world_locations":
+                    foreach (GameLocation location in Game1.locations)
+                    {
+                        this.Monitor.Log(location.Name, LogLevel.Alert);
+                    }
+                    break;
             }
         }
         private void GameEvents_FirstUpdateTick(object s, EventArgs e)
