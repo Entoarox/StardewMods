@@ -203,7 +203,6 @@
   <ItemGroup>
     <None Include="About\ConditionDocumentation.md" />
     <None Include="manifest.json" />
-    <None Include="About\update.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
