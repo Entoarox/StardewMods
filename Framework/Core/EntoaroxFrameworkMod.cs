@@ -65,7 +65,7 @@ namespace Entoarox.Framework.Core
             Logger = this.Monitor;
             Config = this.Helper.ReadConfig<FrameworkConfig>();
             this.PrepareCustomEvents();
-            this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
+            //this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
             if (Config.TrainerCommands)
                 helper.ConsoleCommands
                     .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", Farms), this.Commands)
@@ -138,7 +138,8 @@ namespace Entoarox.Framework.Core
             }
             switch (command)
             {
-                case "world_bushreset":
+                /* TODO fix bush reset
+                 case "world_bushreset":
                     foreach (GameLocation loc in Game1.locations)
                     {
                         loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
@@ -172,7 +173,7 @@ namespace Entoarox.Framework.Core
                             }
                         }
                     }
-                    break;
+                    break;*/
                 case "farm_settype":
                     if (args.Length == 0)
                         this.Monitor.Log("Please provide the type you wish to change your farm to.", LogLevel.Error);
@@ -274,17 +275,18 @@ namespace Entoarox.Framework.Core
             this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
             var data = new Dictionary<string, InstanceState>();
-            foreach(GameLocation loc in Game1.locations)
+            foreach (GameLocation loc in Game1.locations)
             {
-                foreach(Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
                 {
-                    chest.items = Serialize(data, chest.items);
+                    Serialize(data, chest.items);
                 }
             }
-            Game1.player.items = Serialize(data, Game1.player.items);
+            Game1.player.Items = Serialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if (house.fridge != null)
-                house.fridge.items = Serialize(data, house.fridge.items);
+
+            if (house.fridge.Value != null)
+                Serialize(data, house.fridge.Value.items);
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
@@ -297,23 +299,22 @@ namespace Entoarox.Framework.Core
             var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
-                foreach (Chest chest in loc.objects.Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
+                foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
                 {
-                    chest.items = Deserialize(data, chest.items);
+                    chest.items.Set(Deserialize(data, chest.items));
                 }
             }
-            Game1.player.items = Deserialize(data, Game1.player.items);
+            Game1.player.Items = Deserialize(data, Game1.player.Items);
             var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
-            if(house.fridge!=null)
-                house.fridge.items = Deserialize(data, house.fridge.items);
+            house.fridge.Value?.items.Set(this.Deserialize(data, house.fridge.Value.items));
             ItemEvents.FireAfterDeserialize();
         }
         #endregion
         #region Functions
-        private List<Item> Serialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private List<Item> Serialize(IDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
-            foreach(Item item in items)
+            var output = new List<Item>();
+            foreach (Item item in items)
             {
                 if (item is ICustomItem)
                 {
@@ -325,11 +326,11 @@ namespace Entoarox.Framework.Core
                         throw new TimeoutException("Unable to assign a GUID to all items!");
                     SObject obj = new SObject()
                     {
-                        stack = item.getStack(),
-                        parentSheetIndex = 0,
-                        type = id,
+                        Stack = item.getStack(),
+                        ParentSheetIndex = 0,
+                        Type = id,
                         name = "(Entoarox.Framework.ICustomItem)",
-                        price = item.salePrice(),
+                        Price = item.salePrice(),
                     };
                     if (item is Placeholder pitm)
                         data.Add(id, new InstanceState(pitm.Id, pitm.Data));
@@ -342,45 +343,45 @@ namespace Entoarox.Framework.Core
             }
             return output;
         }
-        private List<Item> Deserialize(Dictionary<string, InstanceState> data, List<Item> items)
+        private IList<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            List<Item> output = new List<Item>();
+            var output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
                 {
-                    if (data.ContainsKey(itm.type))
+                    if (data.ContainsKey(itm.Type))
                     {
-                        string cls = data[itm.type].Type;
+                        string cls = data[itm.Type].Type;
                         Type type = Type.GetType(cls);
-                        if(type==null)
+                        if (type == null)
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.type].Data));
+                            output.Add(new Placeholder(cls, data[itm.Type].Data));
                             continue;
                         }
                         else
                         {
                             try
                             {
-                                output.Add((Item)data[itm.type].Data.ToObject(type, this.Serializer));
+                                output.Add((Item)data[itm.Type].Data.ToObject(type, this.Serializer));
                             }
-                            catch(Exception err)
+                            catch (Exception err)
                             {
                                 this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
-                                output.Add(new Placeholder(cls, data[itm.type].Data));
+                                output.Add(new Placeholder(cls, data[itm.Type].Data));
                                 continue;
                             }
                         }
@@ -388,7 +389,7 @@ namespace Entoarox.Framework.Core
                     else
                     {
                         output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.type, LogLevel.Error);
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
                     }
                 }
                 else
@@ -403,31 +404,65 @@ namespace Entoarox.Framework.Core
         private XmlSerializer MainSerializer;
         private XmlSerializer FarmerSerializer;
         private XmlSerializer LocationSerializer;
-        private static Type[] _serialiserTypes = new Type[27]
+        private static Type[] _serialiserTypes = new Type[25]
         {
-            typeof (Tool), typeof (GameLocation), typeof (Crow), typeof (Duggy), typeof (Bug), typeof (BigSlime),
-            typeof (Fireball), typeof (Ghost), typeof (Child), typeof (Pet), typeof (Dog),
-            typeof (StardewValley.Characters.Cat),
-            typeof (Horse), typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy),
-            typeof (SkeletonMage),
-            typeof (SquidKid), typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Quest), typeof (MetalHead),
+            typeof (Tool),
+            typeof (GameLocation),
+            typeof (Duggy),
+            typeof (Bug),
+            typeof (BigSlime),
+            typeof (Ghost),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
+            typeof (Cat),
+            typeof (Horse),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (SquidKid),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Quest),
+            typeof (MetalHead),
             typeof (ShadowGirl),
-            typeof (Monster), typeof (TerrainFeature)
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
 
         private static Type[] _farmerTypes = new Type[1] {
             typeof (Tool)
         };
 
-        private static Type[] _locationTypes = new Type[26]
+        private static Type[] _locationTypes = new Type[24]
         {
-            typeof (Tool), typeof (Crow), typeof (Duggy), typeof (Fireball), typeof (Ghost),
-            typeof (GreenSlime), typeof (LavaCrab), typeof (RockCrab), typeof (ShadowGuy), typeof (SkeletonWarrior),
-            typeof (Child), typeof (Pet), typeof (Dog), typeof (StardewValley.Characters.Cat), typeof (Horse),
+            typeof (Tool),
+            typeof (Duggy),
+            typeof (Ghost),
+            typeof (GreenSlime),
+            typeof (LavaCrab),
+            typeof (RockCrab),
+            typeof (ShadowGuy),
+            typeof (Child),
+            typeof (Pet),
+            typeof (Dog),
+            typeof (Cat),
+            typeof (Horse),
             typeof (SquidKid),
-            typeof (Grub), typeof (Fly), typeof (DustSpirit), typeof (Bug), typeof (BigSlime),
+            typeof (Grub),
+            typeof (Fly),
+            typeof (DustSpirit),
+            typeof (Bug),
+            typeof (BigSlime),
             typeof (BreakableContainer),
-            typeof (MetalHead), typeof (ShadowGirl), typeof (Monster), typeof (TerrainFeature)
+            typeof (MetalHead),
+            typeof (ShadowGirl),
+            typeof (Monster),
+            typeof (JunimoHarvester),
+            typeof (TerrainFeature)
         };
         private void SetupSerializer()
         {

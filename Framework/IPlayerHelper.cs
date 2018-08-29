@@ -1,4 +1,5 @@
-﻿using StardewValley;
+using System.Collections.Generic;
+using StardewValley;
 using StardewValley.Characters;
 
 namespace Entoarox.Framework
@@ -47,6 +48,6 @@ namespace Entoarox.Framework
         /// Returns a list of all pets found
         /// </summary>
         /// <returns>A list of all pets found in the game</returns>
-        Pet[] GetAllPets();
+        List<Pet> GetAllPets();
     }
 }
