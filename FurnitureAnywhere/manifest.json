@@ -1,12 +1,12 @@
 {
   "Name": "Furniture Anywhere",
   "Author": "Entoarox",
-  "Version": "2.2.1-beta",
+  "Version": "2.3.0-beta",
   "Description": "Lets you place furniture anywhere you can place chests or machines!",
   "UniqueID": "Entoarox.FurnitureAnywhere",
   "EntryDll": "FurnitureAnywhere.dll",
   "MinimumApiVersion": "2.6",
-  "UpdateKeys": [ "GitHub:Slamerz/StardewMods" ],
+  "UpdateKeys": [ "GitHub:Entoarox/StardewMods" ],
   "Dependencies": [
     {
       "UniqueID": "Entoarox.EntoaroxFramework"
