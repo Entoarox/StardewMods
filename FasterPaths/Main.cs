@@ -16,11 +16,9 @@ namespace Entoarox.FasterPaths
     {
         private ConfigFP cfg;
         private PlayerModifier[] Modifiers;
-        private Version Version = new Version(1, 3, 1);
         private PlayerModifier CurrentBoost;
         public override void Entry(IModHelper helper)
         {
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/FasterPaths/update.json");
             this.cfg = this.Helper.ReadConfig<ConfigFP>();
             GameEvents.UpdateTick += this.UpdateTick;
             helper.ConsoleCommands.Add("fp_info", "Gives info about the path you are currently standing on", this.CommandInfo);
@@ -45,7 +43,7 @@ namespace Entoarox.FasterPaths
             Vector2 pos = Game1.player.getTileLocation();
             if (Game1.currentLocation.terrainFeatures.ContainsKey(pos) && Game1.currentLocation.terrainFeatures[pos] is Flooring)
             {
-                PlayerModifier NewBoost = this.Modifiers[(Game1.currentLocation.terrainFeatures[pos] as Flooring).whichFloor];
+                PlayerModifier NewBoost = this.Modifiers[(Game1.currentLocation.terrainFeatures[pos] as Flooring).whichFloor.Value];
                 if (this.CurrentBoost != null && this.CurrentBoost == NewBoost)
                     return;
                 if (this.CurrentBoost != null)
@@ -69,7 +67,7 @@ namespace Entoarox.FasterPaths
             if(Game1.currentLocation.terrainFeatures.ContainsKey(Game1.player.getTileLocation()) && Game1.currentLocation.terrainFeatures[Game1.player.getTileLocation()] is Flooring)
             {
                 Flooring floor = (Flooring)Game1.currentLocation.terrainFeatures[Game1.player.getTileLocation()];
-                this.Monitor.Log("Floor ID for current tile's floor: " + floor.whichFloor,LogLevel.Alert);
+                this.Monitor.Log("Floor ID for current tile's floor: " + floor.whichFloor.Value,LogLevel.Alert);
             }
             else
                 this.Monitor.Log("No path in the current tile", LogLevel.Alert);
