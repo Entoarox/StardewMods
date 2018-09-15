@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using Entoarox.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -17,11 +19,14 @@ namespace Entoarox.MorePetsAndAnimals
 {
     public class MoreAnimalsMod : Mod
     {
+
         private static bool replaceBus = true;
         private bool _TriggerAction = false;
         internal static Random random;
         internal static ModConfig Config;
         internal static IModHelper SHelper;
+        private static readonly ListPool<Pet> Pool = new ListPool<Pet>();
+        internal static LocalizedContentManager Content = new LocalizedContentManager(Game1.content.ServiceProvider, "Mods\\MoreAnimals\\skins");
         internal static Dictionary<string, List<int>> Indexes = new Dictionary<string, List<int>>()
         {
             ["BabyBlue Chicken"] = new List<int>(),
@@ -93,8 +98,6 @@ namespace Entoarox.MorePetsAndAnimals
                 ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
             }
-            // check version
-            this.Helper.RequestUpdateCheck("https://raw.githubusercontent.com/Entoarox/StardewMods/master/MorePets/update.json");
         }
 
         private void LoadPetSkins()
@@ -122,10 +125,18 @@ namespace Entoarox.MorePetsAndAnimals
             }
             this.Monitor.Log("Skin files found: " + string.Join(", ", skins), LogLevel.Trace);
         }
-        private List<Pet> GetAllPets()
+        public List<Pet> GetAllPets()
         {
-            return Utility.getAllCharacters().Where(a => a is Pet).Cast<Pet>().ToList();
+            List<Pet> pets = new List<Pet>();
+            List<NPC> npcs = new List<NPC>();
+            foreach (NPC npc in Utility.getAllCharacters())
+            {
+                npcs.Add(npc);
+            }
+            pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
+            return pets;
         }
+
         internal void GameEvents_UpdateTick(object s, EventArgs e)
         {
             if (!Context.IsWorldReady)
@@ -144,17 +155,17 @@ namespace Entoarox.MorePetsAndAnimals
                 bus.SetTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
                 replaceBus = false;
             }
-            foreach (NPC npc in GetAllPets())
-                if (npc.manners > 0 && npc.updatedDialogueYet == false)
+            foreach (Pet npc in GetAllPets())
+                if (npc.Manners > 0 && npc.updatedDialogueYet == false)
                 {
                     try
                     {
                         string type = npc is Dog ? "dog" : "cat";
-                        npc.sprite = new AnimatedSprite(this.Helper.Content.Load<Texture2D>($"skins/{type}_{npc.manners}"), 0, 32, 32);
+                        npc.Sprite = new AnimatedSprite(Content, $"{type}_{npc.Manners}", 0, 32, 32);
                     }
                     catch
                     {
-                        this.Monitor.Log("Pet with unknown skin number found, using default: " + npc.manners.ToString(), LogLevel.Error);
+                        this.Monitor.Log("Pet with unknown skin number found, using default: " + npc.Manners.ToString(), LogLevel.Error);
                     }
                     npc.updatedDialogueYet = true;
                 }
@@ -163,60 +174,60 @@ namespace Entoarox.MorePetsAndAnimals
             Random random = new Random();
             foreach(FarmAnimal animal in Game1.getFarm().getAllFarmAnimals())
             {
-                string str = animal.type;
-                if (animal.age < animal.ageWhenMature)
-                    str = "Baby" + animal.type;
-                else if (animal.showDifferentTextureWhenReadyForHarvest && animal.currentProduce <= 0)
-                    str = "Sheared" + animal.type;
-                if (animal.meatIndex < 999)
-                    animal.meatIndex = Indexes[str][random.Next(0, Indexes[str].Count)] + 999;
-                else if (animal.meatIndex > 999)
+                string str = animal.type.Value;
+                if (animal.age.Value < animal.ageWhenMature.Value)
+                    str = "Baby" + animal.type.Value;
+                else if (animal.showDifferentTextureWhenReadyForHarvest.Value && animal.currentProduce.Value <= 0)
+                    str = "Sheared" + animal.type.Value;
+                if (animal.meatIndex.Value < 999)
+                    animal.meatIndex.Set(Indexes[str][random.Next(0, Indexes[str].Count)] + 999);
+                else if (animal.meatIndex.Value > 999)
                 {
                     try
                     {
-                        Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/" + str + "_" + (animal.meatIndex - 999).ToString());
-                        if (animal.sprite.Texture != texture)
-                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        Texture2D texture = this.Helper.Content.Load<Texture2D>(str + "_" + (animal.meatIndex.Value - 999).ToString());
+                        if (animal.Sprite.Texture != texture)
+                            animal.Sprite = new AnimatedSprite(Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
-                        this.Monitor.Log("Animal with unknown skin number found, using default instead: " + (animal.meatIndex - 999).ToString(), LogLevel.Error);
+                        this.Monitor.Log("Animal with unknown skin number found, using default instead: " + (animal.meatIndex.Value - 999).ToString(), LogLevel.Error);
                         if (str.Equals("BabyDuck"))
                             try
                             {
-                                Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/BabyDuck");
-                                if (animal.sprite.Texture != texture)
-                                    animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                Texture2D texture = Content.Load<Texture2D>("BabyDuck");
+                                if (animal.Sprite.Texture != texture)
+                                    animal.Sprite = new AnimatedSprite(Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                             catch
                             {
                                 this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
                                 Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
-                                if (animal.sprite.Texture != texture)
-                                    animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                if (animal.Sprite.Texture != texture)
+                                    animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                         else
                         {
                             Texture2D texture = Game1.content.Load<Texture2D>("Animals\\" + str);
-                            if (animal.sprite.Texture != texture)
-                                animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                            if (animal.Sprite.Texture != texture)
+                                animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                         }
                     }
                 }
-                else if (animal.type == "Duck" && animal.age < animal.ageWhenMature)
+                else if (animal.type.Value == "Duck" && animal.age.Value < animal.ageWhenMature.Value)
                 {
                     try
                     {
-                        Texture2D texture = this.Helper.Content.Load<Texture2D>("skins/BabyDuck");
-                        if (animal.sprite.Texture != texture)
-                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        Texture2D texture = Content.Load<Texture2D>("BabyDuck");
+                        if (animal.Sprite.Texture != texture)
+                            animal.Sprite = new AnimatedSprite(Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
                         this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
                         Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
-                        if (animal.sprite.Texture != texture)
-                            animal.sprite = new AnimatedSprite(texture, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        if (animal.Sprite.Texture != texture)
+                            animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                 }
             }
@@ -226,7 +237,7 @@ namespace Entoarox.MorePetsAndAnimals
             GameLocation farm = Game1.getLocationFromName("Farm");
             GameLocation house = Game1.getLocationFromName("FarmHouse");
             foreach (Pet pet in GetAllPets())
-                if (pet.age > 0)
+                if (pet.Age > 0)
                     if (farm.characters.Contains(pet))
                         farm.characters.Remove(pet);
                     else
@@ -281,7 +292,7 @@ namespace Entoarox.MorePetsAndAnimals
             int seed = Game1.year * 1000 + seasons.IndexOf(Game1.currentSeason) * 100 + Game1.dayOfMonth;
             random = new Random(seed);
             List<Pet> list = GetAllPets();
-            if ((Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.age == seed) != -1)
+            if ((Config.UseMaxAdoptionLimit && list.Count >= Config.MaxAdoptionLimit) || random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.Age == seed) != -1)
                 Game1.drawObjectDialogue("Just an empty box.");
             else
                 AdoptQuestion.Show();
