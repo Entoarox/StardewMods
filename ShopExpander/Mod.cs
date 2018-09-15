@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using StardewValley;
@@ -11,7 +11,7 @@ using Entoarox.Framework;
 
 namespace Entoarox.ShopExpander
 {
-    public class ShopExpanderMod : Mod
+    public class Mod : StardewModdingAPI.Mod
     {
         internal ShopExpanderConfig Config;
         private bool eventsActive = false;
@@ -133,7 +133,7 @@ namespace Entoarox.ShopExpander
                 // There are by default two shops in the forest, and neither has a owner, so we need to manually resolve the shop owner
                 if(menu.portraitPerson!=null)
                 {
-                    shopOwner = menu.portraitPerson.name;
+                    shopOwner = menu.portraitPerson.Name;
                     // Clint has two shops, we need to check if this is the tool upgrade shop and modify the owner if that is the case
                     if (shopOwner == "Clint" && menu.potraitPersonDialogue == "I can upgrade your tools with more power. You'll have to leave them with me for a few days, though.")
                         shopOwner = "ClintUpgrade";
