@@ -19,34 +19,35 @@ namespace Entoarox.Framework.Core.Injection
             {
                 if (state == 1)
                 {
-                    if (!__instance.fullyGrown)
+                    if (!__instance.fullyGrown.Value)
                     {
-                        __instance.dayOfCurrentPhase = Math.Min(__instance.dayOfCurrentPhase + 1, (__instance.phaseDays.Count > 0) ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase)] : 0);
+                        __instance.dayOfCurrentPhase.Set(Math.Min(__instance.dayOfCurrentPhase.Value + 1, (__instance.phaseDays.Count > 0) ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase.Value)] : 0));
                     }
                     else
                     {
-                        __instance.dayOfCurrentPhase--;
+                        __instance.dayOfCurrentPhase.Set(__instance.dayOfCurrentPhase.Value--);
                     }
-                    if (__instance.dayOfCurrentPhase >= ((__instance.phaseDays.Count > 0) ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase)] : 0) && __instance.currentPhase < __instance.phaseDays.Count - 1)
+                    if (__instance.dayOfCurrentPhase.Value >= ((__instance.phaseDays.Count > 0) ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase.Value)] : 0) && __instance.currentPhase.Value < __instance.phaseDays.Count - 1)
                     {
-                        __instance.currentPhase++;
-                        __instance.dayOfCurrentPhase = 0;
+                        __instance.currentPhase.Set(__instance.currentPhase.Value++);
+                        __instance.dayOfCurrentPhase.Set(0);
                     }
-                    while (__instance.currentPhase < __instance.phaseDays.Count - 1 && __instance.phaseDays.Count > 0 && __instance.phaseDays[__instance.currentPhase] <= 0)
+                    while (__instance.currentPhase.Value < __instance.phaseDays.Count - 1 && __instance.phaseDays.Count > 0 && __instance.phaseDays[__instance.currentPhase.Value] <= 0)
                     {
-                        __instance.currentPhase++;
+                        __instance.currentPhase.Set(__instance.currentPhase.Value++);
                     }
-                    if (__instance.rowInSpriteSheet == 23 && __instance.phaseToShow == -1 && __instance.currentPhase > 0)
+                    if (__instance.rowInSpriteSheet.Value == 23 && __instance.phaseToShow.Value == -1 && __instance.currentPhase.Value > 0)
                     {
-                        __instance.phaseToShow = Game1.random.Next(1, 7);
+
+                        __instance.phaseToShow.Set(Game1.random.Next(1, 7));
                     }
                 }
-                if ((!__instance.fullyGrown || __instance.dayOfCurrentPhase <= 0) && __instance.currentPhase >= __instance.phaseDays.Count - 1 && __instance.rowInSpriteSheet == 23)
+                if ((!__instance.fullyGrown.Value || __instance.dayOfCurrentPhase.Value <= 0) && __instance.currentPhase.Value >= __instance.phaseDays.Count - 1 && __instance.rowInSpriteSheet.Value == 23)
                 {
                     Vector2 vector = new Vector2(xTile, yTile);
                     environment.objects.Remove(vector);
                     string season = Game1.currentSeason;
-                    switch (__instance.whichForageCrop)
+                    switch (__instance.whichForageCrop.Value)
                     {
                         case 495:
                             season = "spring";
@@ -63,8 +64,8 @@ namespace Entoarox.Framework.Core.Injection
                     }
                     environment.objects.Add(vector, new SObject(vector, __instance.getRandomWildCropForSeason(season), 1)
                     {
-                        isSpawnedObject = true,
-                        canBeGrabbed = true
+                        IsSpawnedObject = true,
+                        CanBeGrabbed = true
                     });
                     if (environment.terrainFeatures[vector] != null && environment.terrainFeatures[vector] is HoeDirt)
                     {

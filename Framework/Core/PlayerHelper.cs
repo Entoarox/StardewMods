@@ -1,6 +1,7 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-
+using Harmony;
 using StardewValley;
 using StardewValley.Characters;
 
@@ -20,7 +21,7 @@ namespace Entoarox.Framework.Core
         }
         public void MoveTo(int x, int y)
         {
-            Game1.warpFarmer(Game1.player.currentLocation, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure);
+            Game1.warpFarmer(Game1.player.currentLocation.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure.Value);
         }
         public void MoveTo(string location, int x, int y)
         {
@@ -31,27 +32,40 @@ namespace Entoarox.Framework.Core
         }
         public void MoveTo(GameLocation location, int x, int y)
         {
-            Game1.warpFarmer(location, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, location.isStructure);
+            Game1.warpFarmer(location.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, location.isStructure.Value);
         }
         public bool HasPet(bool vanillaOnly)
         {
-            var matches = Utility.getAllCharacters().Where(a => a is Pet);
+            List<Pet> pets = this.GetAllPets();
             if (vanillaOnly)
-                return matches.Any(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.manners == 0 && a.age == 0);
+                return pets.Any(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
             else
-                return matches.Any();
+                return pets.Any();
         }
         public Pet GetPet()
         {
-            var matches = Utility.getAllCharacters().Where(a => a is Pet).Cast<Pet>();
-            Pet pet = matches.First(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.manners == 0 && a.age == 0);
-            if (pet == null && matches.Any())
-                pet = matches.First();
+            List<Pet> pets = new List<Pet>();
+            List<NPC> npcs = new List<NPC>();
+            foreach (NPC npc in Utility.getAllCharacters())
+            {
+                npcs.Add(npc);
+            }
+            pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
+            Pet pet = pets.First(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
+            if (pet == null && pets.Any())
+                pet = pets.First();
             return pet;
         }
-        public Pet[] GetAllPets()
+        public List<Pet> GetAllPets()
         {
-            return Utility.getAllCharacters().Where(a => a is Pet).Cast<Pet>().ToArray();
+            List<Pet> pets = new List<Pet>();
+            List<NPC> npcs = new List<NPC>();
+            foreach (NPC npc in Utility.getAllCharacters())
+            {
+                npcs.Add(npc);
+            }
+            pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
+            return pets;
         }
     }
 }

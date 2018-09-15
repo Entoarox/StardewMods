@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -8,6 +8,7 @@ using StardewValley;
 using xTile.Tiles;
 using xTile.Layers;
 using xTile.ObjectModel;
+using System.Linq;
 
 namespace Entoarox.Framework
 {
@@ -166,17 +167,32 @@ namespace Entoarox.Framework
             value = _layer.Tiles[x, y].Properties[key];
             return true;
         }
-        public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace=true)
+        public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace = true)
         {
-            if (!replace && self.warps.Exists(a => a.X == x && a.Y == y))
+            List<Warp> warps = null;
+            foreach (var w in self.warps)
+            {
+                warps.Add(w);
+            }
+            if (warps == null) return;
+            if (!replace && warps.Exists(a => a.X == x && a.Y == y))
                 throw new ArgumentException("Index already set " + x.ToString() + ',' + y.ToString());
-            else
-                self.warps.RemoveAll(a => a.X == x && a.Y == y);
+            foreach (var warp in warps.Where(a => a.X == x && a.Y == y))
+                self.warps.Remove(warp);
             self.warps.Add(new Warp(x, y, target, x, y, false));
         }
         public static void RemoveWarp(this GameLocation self, int x, int y)
         {
-            self.warps.RemoveAll(a => a.X == x && a.Y == y);
+            List<Warp> warps = null;
+            foreach (var w in self.warps)
+            {
+                warps.Add(w);
+            }
+            if (warps == null) return;
+            foreach (var w in warps.Where(a => a.X == x && a.Y == y))
+            {
+                self.warps.Remove(w);
+            }
         }
         public static bool IsPassable(this GameLocation self, int x, int y)
         {
@@ -186,8 +202,7 @@ namespace Entoarox.Framework
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
             Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            if (tile.TileIndexProperties.TryGetValue("Passable", out value) && value!=null)
+            if (tile.TileIndexProperties.TryGetValue("Passable", out PropertyValue value) && value != null)
                 return true;
             if (self.objects.ContainsKey(new Vector2(x, y)))
                 return false;
@@ -217,8 +232,7 @@ namespace Entoarox.Framework
             if (layer.LayerHeight < y || y < 0)
                 throw new ArgumentOutOfRangeException(nameof(y));
             Tile tile = layer.Tiles[x, y];
-            PropertyValue value;
-            tile.TileIndexProperties.TryGetValue("Water", out value);
+            tile.TileIndexProperties.TryGetValue("Water", out PropertyValue value);
             return value != null;
         }
     }

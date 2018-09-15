@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using StardewValley;
 using StardewValley.TerrainFeatures;
@@ -20,7 +20,7 @@ namespace Entoarox.Framework.Core.Injection
             if (crop.seasonsToGrowIn.Count == 0)
                 __return = false;
             else
-                __return =  !crop.raisedSeeds || !Utility.doesRectangleIntersectTile(Game1.player.GetBoundingBox(), tileX, tileY);
+                __return =  !crop.raisedSeeds.Value || !Utility.doesRectangleIntersectTile(Game1.player.GetBoundingBox(), tileX, tileY);
         }
     }
 }

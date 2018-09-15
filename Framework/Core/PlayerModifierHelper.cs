@@ -95,7 +95,7 @@ namespace Entoarox.Framework.Core
             Game1.player.critPowerModifier -= _Compound.CritPowerModifier;
             Game1.player.weaponSpeedModifier -= _Compound.WeaponSpeedModifier;
             Game1.player.weaponPrecisionModifier -= _Compound.WeaponPrecisionModifier;
-            Game1.player.magneticRadius -= _Compound.MagnetRange;
+            Game1.player.MagneticRadius -= _Compound.MagnetRange;
             if (_Compound.GlowDistance == 0)
                 Utility.removeLightSource(_MyUnique);
             Game1.player.addedSpeed = 0;
@@ -111,9 +111,9 @@ namespace Entoarox.Framework.Core
             Game1.player.critPowerModifier += _Compound.CritPowerModifier;
             Game1.player.weaponSpeedModifier += _Compound.WeaponSpeedModifier;
             Game1.player.weaponPrecisionModifier += _Compound.WeaponPrecisionModifier;
-            Game1.player.magneticRadius += _Compound.MagnetRange;
+            Game1.player.MagneticRadius += _Compound.MagnetRange;
             if (_Compound.GlowDistance > 0)
-                Game1.currentLightSources.Add(new LightSource(Game1.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
+                Game1.currentLightSources.Add(new LightSource(LightSource.lantern, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y + Game1.tileSize), _Compound.GlowDistance, new Color(0, 30, 150), _MyUnique));
         }
 #pragma warning restore CS0618
         internal static void _UpdateModifiers()
@@ -137,8 +137,8 @@ namespace Entoarox.Framework.Core
                     Game1.currentLightSources.Remove(lightSource);
                 else
                 {
-                    Utility.repositionLightSource(_MyUnique, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y));
-                    lightSource.radius = (Game1.currentLocation.isOutdoors || Game1.currentLocation is StardewValley.Locations.MineShaft) ? _Compound.GlowDistance : Math.Min(3f, _Compound.GlowDistance);
+                    Game1.currentLightSources.Remove(lightSource);
+                    lightSource = new LightSource(1, new Vector2(Game1.player.position.X + (Game1.tileSize / 3), Game1.player.position.Y), _Compound.GlowDistance);
                 }
         }
         public int Count
