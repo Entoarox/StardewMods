@@ -33,8 +33,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.3" />
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
