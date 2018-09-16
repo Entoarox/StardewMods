@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Xml.Serialization;
 
 using Microsoft.Xna.Framework;
@@ -15,10 +15,10 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         {
             public FakeWallpaper(Wallpaper item)
             {
-                this.isFloor = item.isFloor;
-                this.parentSheetIndex = item.parentSheetIndex;
+                this.isFloor.Value = item.isFloor;
+                this.parentSheetIndex.Value = item.parentSheetIndex;
                 this.name = this.isFloor ? "Flooring" : "Wallpaper";
-                this.price = 100;
+                this.price.Value = 100;
             }
             public override bool canBePlacedHere(GameLocation l, Vector2 tile)
             {
@@ -38,22 +38,26 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         {
 
         }
-        public DecoratableLocation(xTile.Map map, string name) : base(map,name)
+
+        public DecoratableLocation(string mapPath, string name)
+            : base(mapPath, name)
         {
 
         }
-        public override void resetForPlayerEntry()
+
+        protected override void resetLocalState()
         {
             reset.Invoke(this, null);
             foreach (Furniture furniture in this.furniture)
                 furniture.resetOnPlayerEntry(this);
-            for (int c=0;c<Game1.player.items.Count;c++)
+            for (int c = 0; c < Game1.player.items.Count; c++)
             {
                 Item i = Game1.player.items[c];
                 if (Game1.player.items[c] is Wallpaper)
                     Game1.player.items[c] = new FakeWallpaper((Wallpaper)Game1.player.items[c]);
             }
         }
+
         public override void cleanupBeforePlayerExit()
         {
             base.cleanupBeforePlayerExit();
@@ -68,7 +72,8 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         {
             return;
         }
-        public override void setWallpaper(int which, int whichRoom = -1, bool persist = false)
+
+        protected override void doSetVisibleWallpaper(int whichRoom, int which)
         {
             return;
         }

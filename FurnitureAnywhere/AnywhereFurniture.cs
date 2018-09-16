@@ -104,7 +104,7 @@ namespace Entoarox.FurnitureAnywhere
                 }
             }
             this.boundingBox.Set(new Rectangle(x / Game1.tileSize * Game1.tileSize, y / Game1.tileSize * Game1.tileSize, this.boundingBox.Width, this.boundingBox.Height));
-            foreach (Character character in location.getFarmers())
+            foreach (Character character in location.farmers)
             {
                 if (character.GetBoundingBox().Intersects(this.boundingBox.Value))
                 {

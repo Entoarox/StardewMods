@@ -18,7 +18,7 @@ namespace Entoarox.AdvancedLocationLoader
         internal static Random _Random = new Random();
         internal static void Shift(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
-            Game1.warpFarmer(who.currentLocation, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]),who.facingDirection,who.currentLocation.isStructure);
+            Game1.warpFarmer(who.currentLocation.Name, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]),who.facingDirection,who.currentLocation.isStructure);
         }
         internal static void Message(StardewValley.Farmer who, string[] arguments, Vector2 tile)
         {
@@ -93,7 +93,7 @@ namespace Entoarox.AdvancedLocationLoader
                     List<Item> stock = new List<Item>();
                     NPC portrait = new NPC();
                     portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);
-                    portrait.name = shop.Owner;
+                    portrait.Name = shop.Owner;
                     foreach (Configs.ShopItem item in shop.Items)
                     {
                         if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(item.Conditions))

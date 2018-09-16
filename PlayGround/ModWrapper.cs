@@ -26,8 +26,7 @@ namespace PlayGround
                 switch (args[0])
                 {
                     case "pooltest":
-                        var map = this.Helper.Content.Load<Map>("map.tbin");
-                        map.RemoveLayer(map.GetLayer("AlwaysFront"));
+                        string mapPath = this.Helper.Content.GetActualAssetKey("map.tbin");
                         Texture2D texture = null;
                         try
                         {
@@ -37,7 +36,7 @@ namespace PlayGround
                         {
                             texture = null;
                         }
-                        Game1.locations.Add(new CustomBathhouse(map, "CustomBathhouse", texture));
+                        Game1.locations.Add(new CustomBathhouse(mapPath, "CustomBathhouse", texture));
                         Game1.warpFarmer("CustomBathhouse", 15, 5, false);
                         break;
                 }

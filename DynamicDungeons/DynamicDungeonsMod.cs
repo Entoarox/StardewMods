@@ -126,7 +126,7 @@ namespace Entoarox.DynamicDungeons
             {
                 GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
                 InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
-                LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
+                PlayerEvents.Warped += this.PlayerEvents_Warped;
                 var loc = Game1.getLocationFromName("WizardHouse");
                 var sheet = new TileSheet("Custom",loc.map, this.Helper.Content.GetActualAssetKey("door.png"), new xTile.Dimensions.Size(4, 7), new xTile.Dimensions.Size(16, 16));
                 loc.map.AddTileSheet(sheet);
@@ -150,10 +150,10 @@ namespace Entoarox.DynamicDungeons
 
                 (5, 13, "Buildings", "Action", "DDDoor").ApplyTo(loc.map);
                 if (Game1.getLocationFromName("DynamicDungeonEntrance") == null)
-                    Game1.locations.Add(new GameLocation(this.Helper.Content.Load<xTile.Map>("DynamicDungeonsEntrance.tbin"), "DynamicDungeonEntrance"));
+                    Game1.locations.Add(new GameLocation(this.Helper.Content.GetActualAssetKey("DynamicDungeonsEntrance.tbin"), "DynamicDungeonEntrance"));
             }
         }
-        private void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)
+        private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
         {
             if(e.PriorLocation!=null && (e.PriorLocation.name=="DynamicDungeonEntrance" || e.PriorLocation.name == "WizardHouse"))
             {

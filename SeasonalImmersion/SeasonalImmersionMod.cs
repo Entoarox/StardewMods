@@ -168,7 +168,7 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log("Making file seasonal: " + file, LogLevel.Trace);
                 SeasonTextures.Add(name, textures);
             }
-            LocationEvents.CurrentLocationChanged += this.LocationEvents_CurrentLocationChanged;
+            PlayerEvents.Warped += this.PlayerEvents_Warped;
             TimeEvents.AfterDayStarted += this.TimeEvents_AfterDayStarted;
             this.Monitor.Log("ContentPack processed, found [" + SeasonTextures.Count + "] seasonal files", LogLevel.Info);
         }
@@ -238,7 +238,7 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log("Attempting to update seasonal textures...", LogLevel.Trace);
                 // Check houses/greenhouse
                 if (SeasonTextures.ContainsKey("houses"))
-                    Game1.getFarm().houseTextures = SeasonTextures["houses"][Game1.currentSeason];
+                    this.Helper.Reflection.GetField<Texture2D>(typeof(Farm), nameof(Farm.houseTextures)).SetValue(SeasonTextures["houses"][Game1.currentSeason]);
                 // Check flooring
                 if (SeasonTextures.ContainsKey("Flooring"))
                     StardewValley.TerrainFeatures.Flooring.floorsTexture = SeasonTextures["Flooring"][Game1.currentSeason];
@@ -266,7 +266,7 @@ namespace Entoarox.SeasonalImmersion
                 // Loop buildings
                 foreach (Building building in Game1.getFarm().buildings)
                     if (SeasonTextures.ContainsKey(building.buildingType))
-                        building.texture = SeasonTextures[building.buildingType][Game1.currentSeason];
+                        building.texture = new Lazy<Texture2D>(() => SeasonTextures[building.buildingType][Game1.currentSeason]);
             }
             catch (Exception ex)
             {
@@ -278,7 +278,7 @@ namespace Entoarox.SeasonalImmersion
             if (Game1.dayOfMonth == 1)
                 UpdateTextures();
         }
-        internal void LocationEvents_CurrentLocationChanged(object s, EventArgsCurrentLocationChanged e)
+        internal void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
         {
             if (e.NewLocation.name=="Farm" || (e.PriorLocation!=null && e.PriorLocation.isOutdoors!=e.NewLocation.isOutdoors))
                 UpdateTextures();

@@ -30,7 +30,7 @@ namespace Entoarox.CustomBooks
                 Icon = CustomBooksMod.SHelper.Content.Load<Texture2D>("icon.png");
             this.Id = id;
             this.name = CustomBooksMod.Shelf.Books[id].Name;
-            this.bigCraftable = true;
+            this.bigCraftable.Value = true;
         }
 
         public void Activate()
@@ -79,7 +79,8 @@ namespace Entoarox.CustomBooks
             return 1;
         }
         private Color Color => this.Broken ? new Color(139, 69, 19) : CustomBooksMod.Shelf.Books[this.Id].Color;
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber)
+
+        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
         {
             float halfTilesize = Game1.tileSize / 2;
             spriteBatch.Draw(Game1.shadowTexture, location + new Vector2(halfTilesize, (Game1.tileSize * 3 / 4)), new Rectangle?(Game1.shadowTexture.Bounds), Color.White * 0.5f, 0f, new Vector2(Game1.shadowTexture.Bounds.Center.X, Game1.shadowTexture.Bounds.Center.Y), 3f, SpriteEffects.None, layerDepth - 0.0001f);

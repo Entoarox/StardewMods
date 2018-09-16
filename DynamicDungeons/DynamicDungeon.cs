@@ -36,7 +36,7 @@ namespace Entoarox.DynamicDungeons
         public List<ResourceClump> ResourceClumps = new List<ResourceClump>();
         public DynamicDungeon(double difficulty=0, int? seed = null)
         {
-            this.name = "DynamicDungeon";
+            this.name.Value = "DynamicDungeon";
             this._Seed = seed ?? _Random.Next();
             this.Difficulty = difficulty;
             var builder = new DungeonBuilder(difficulty, 1);
@@ -124,12 +124,15 @@ namespace Entoarox.DynamicDungeons
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 20, p.Y + 21, 1, 1), Color.Red * 0.66f);
             Game1.spriteBatch.Draw(Game1.staminaRect, new Rectangle(p.X + 20, p.Y + 20, 1, 1), Color.Red * 0.99f);
         }
-        public override void resetForPlayerEntry()
+
+        protected override void resetLocalState()
         {
             this._Time = Game1.timeOfDay;
+            base.resetLocalState();
             base.resetForPlayerEntry();
             this.forceViewportPlayerFollow = true;
         }
+
         public override void checkForMusic(GameTime time)
         {
             if(Game1.currentSong==null || !Game1.currentSong.IsPlaying)
@@ -139,7 +142,7 @@ namespace Entoarox.DynamicDungeons
         {
             Game1.timeOfDay = this._Time;
             foreach (ResourceClump current in this.ResourceClumps)
-                current.tickUpdate(time, current.tile);
+                current.tickUpdate(time, current.tile.Value, this);
             base.UpdateWhenCurrentLocation(time);
         }
         public override StardewValley.Object getFish(float millisecondsAfterNibble, int bait, int waterDepth, SFarmer who, double baitPotency)

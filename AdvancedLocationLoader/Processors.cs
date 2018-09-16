@@ -12,6 +12,7 @@ using Warp = StardewValley.Warp;
 using Entoarox.Framework;
 
 using Entoarox.AdvancedLocationLoader.Configs;
+using Entoarox.Framework.Extensions;
 
 namespace Entoarox.AdvancedLocationLoader
 {
@@ -106,7 +107,7 @@ namespace Entoarox.AdvancedLocationLoader
                     return;
                 Warp _warp = new Warp(warp.TileX, warp.TileY, warp.TargetName, warp.TargetX, warp.TargetY, false);
                 GameLocation loc = Game1.getLocationFromName(warp.MapName);
-                loc.warps.RemoveAll((a) => a.X == _warp.X && a.Y == _warp.Y);
+                loc.warps.Filter(a => a.X != _warp.X || a.Y != _warp.Y);
                 loc.warps.Add(_warp);
             }
             catch (Exception err)
@@ -175,36 +176,33 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 GameLocation loc;
-                xTile.Map map = contentPack.LoadAsset<xTile.Map>(location.FileName);
+                string mapPath = contentPack.GetActualAssetKey(location.FileName);
                 switch (location.Type)
                 {
                     case "Cellar":
-                        loc = new StardewValley.Locations.Cellar(map, location.MapName)
-                        {
-                            objects = new SerializableDictionary<Microsoft.Xna.Framework.Vector2, StardewValley.Object>()
-                        };
+                        loc = new StardewValley.Locations.Cellar(mapPath, location.MapName);
                         break;
                     case "BathHousePool":
-                        loc = new StardewValley.Locations.BathHousePool(map, location.MapName);
+                        loc = new StardewValley.Locations.BathHousePool(mapPath, location.MapName);
                         break;
                     case "Decoratable":
-                        loc = new Locations.DecoratableLocation(map, location.MapName);
+                        loc = new Locations.DecoratableLocation(mapPath, location.MapName);
                         break;
                     case "Desert":
-                        loc = new Locations.Desert(map, location.MapName);
+                        loc = new Locations.Desert(mapPath, location.MapName);
                         break;
                     case "Greenhouse":
-                        loc = new Locations.Greenhouse(map, location.MapName);
+                        loc = new Locations.Greenhouse(mapPath, location.MapName);
                         break;
                     case "Sewer":
-                        loc = new Locations.Sewer(map, location.MapName);
+                        loc = new Locations.Sewer(mapPath, location.MapName);
                         break;
                     default:
-                        loc = new GameLocation(map, location.MapName);
+                        loc = new GameLocation(mapPath, location.MapName);
                         break;
                 }
-                loc.isOutdoors = location.Outdoor;
-                loc.isFarm = location.Farmable;
+                loc.isOutdoors.Value = location.Outdoor;
+                loc.isFarm.Value = location.Farmable;
                 Game1.locations.Add(loc);
             }
             catch (Exception err)

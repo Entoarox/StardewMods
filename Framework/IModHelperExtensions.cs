@@ -30,7 +30,7 @@ namespace Entoarox.Framework
         /// <param name="uri">The url to retrieve the json file to parse from</param>
         public static void RequestUpdateCheck(this IModHelper helper, string uri)
         {
-            IManifest manifest = helper.ModRegistry.Get((helper as IModLinked).ModID);
+            IManifest manifest = helper.ModRegistry.Get((helper as IModLinked).ModID).Manifest;
             if (!UpdateHandler.Map.ContainsKey(manifest))
                 UpdateHandler.Map.Add(manifest, uri);
         }

@@ -37,7 +37,7 @@ namespace Entoarox.AdvancedLocationLoader
 
             MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
             SpecialisedEvents.UnvalidatedUpdateTick += this.InitAfterLoad;
-            LocationEvents.CurrentLocationChanged += Events.LocationEvents_CurrentLocationChanged;
+            PlayerEvents.Warped += Events.PlayerEvents_Warped;
 
             this.Helper.Content.RegisterSerializerType<Locations.Greenhouse>();
             this.Helper.Content.RegisterSerializerType<Locations.Sewer>();

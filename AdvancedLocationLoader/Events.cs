@@ -58,9 +58,9 @@ namespace Entoarox.AdvancedLocationLoader
                 ModEntry.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened", err);
             }
         }
-        internal static void LocationEvents_CurrentLocationChanged(object s, EventArgs e)
+        internal static void PlayerEvents_Warped(object s, EventArgs e)
         {
-            LocationEvents.CurrentLocationChanged -= LocationEvents_CurrentLocationChanged;
+            PlayerEvents.Warped -= PlayerEvents_Warped;
             ModEntry.UpdateConditionalEdits();
         }
     }

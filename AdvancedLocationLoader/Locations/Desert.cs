@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Xml.Serialization;
 
 using Microsoft.Xna.Framework;
@@ -21,7 +21,8 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         public Desert()
         {
         }
-        public Desert(xTile.Map map, string name) : base(map,name)
+        public Desert(string mapPath, string name)
+            : base(mapPath, name)
         {
         }
         public override void draw(SpriteBatch spriteBatch)
@@ -32,9 +33,10 @@ namespace Entoarox.AdvancedLocationLoader.Locations
         {
             update.Invoke(this, new object[] { time });
         }
-        public override void resetForPlayerEntry()
+
+        protected override void resetLocalState()
         {
-            reset.Invoke(this,null);
+            reset.Invoke(this, null);
             rememberRain = Game1.isRaining;
             rememberDebris = Game1.isDebrisWeather;
             rememberLightning = Game1.isLightning;
@@ -45,6 +47,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
             Game1.isSnowing = false;
             Game1.ambientLight = Color.White;
         }
+
         public override void cleanupBeforePlayerExit()
         {
             cleanup.Invoke(this,null);
