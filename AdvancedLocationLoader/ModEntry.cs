@@ -111,12 +111,6 @@ namespace Entoarox.AdvancedLocationLoader
                 location.LoadTileSheets(Game1.mapDisplayDevice);
             }
         }
-        internal static bool? ConditionResolver(string condition)
-        {
-            if (condition.Substring(0, 13) != "ALLCondition:")
-                return null;
-            return Game1.player.mailReceived.Contains("ALLCondition_" + condition.Substring(13));
-        }
 
         private IEnumerable<IContentPack> GetAllContentPacks()
         {

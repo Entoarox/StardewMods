@@ -44,13 +44,12 @@ namespace Entoarox.Framework.Core
         }
         public Pet GetPet()
         {
-            List<Pet> pets = new List<Pet>();
             List<NPC> npcs = new List<NPC>();
             foreach (NPC npc in Utility.getAllCharacters())
             {
                 npcs.Add(npc);
             }
-            pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
+            List<Pet> pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
             Pet pet = pets.First(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
             if (pet == null && pets.Any())
                 pet = pets.First();
@@ -58,13 +57,12 @@ namespace Entoarox.Framework.Core
         }
         public List<Pet> GetAllPets()
         {
-            List<Pet> pets = new List<Pet>();
             List<NPC> npcs = new List<NPC>();
             foreach (NPC npc in Utility.getAllCharacters())
             {
                 npcs.Add(npc);
             }
-            pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
+            List<Pet> pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
             return pets;
         }
     }

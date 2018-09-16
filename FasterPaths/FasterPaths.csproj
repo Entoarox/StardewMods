@@ -51,9 +51,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\VersionChecker\FasterPaths.json">
-      <Link>FasterPaths.json</Link>
-    </None>
     <None Include="manifest.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

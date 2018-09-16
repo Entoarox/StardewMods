@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -25,22 +25,6 @@ namespace Entoarox.AdvancedLocationLoader
                 for(int c=0;c<count;c++)
                     data.Add(reader.ReadString(), reader.ReadInt32());
                 return data;
-            }
-        }
-        public static void Write(string file, Dictionary<string,int> data)
-        {
-            if (data.Count == 0)
-                return;
-            using (BinaryWriter writer = new BinaryWriter(new FileStream(file, FileMode.Create)))
-            {
-                writer.Write(new char[] { 'S', 'B', 'F' });
-                writer.Write((byte)0);
-                writer.Write("ALLCS");
-                foreach(KeyValuePair<string,int> index in data)
-                {
-                    writer.Write(index.Key);
-                    writer.Write(index.Value);
-                }
             }
         }
     }

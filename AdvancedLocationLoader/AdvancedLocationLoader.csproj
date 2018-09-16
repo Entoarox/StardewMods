@@ -66,9 +66,6 @@
     <Compile Include="TeleportationResolver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\VersionChecker\AdvancedLocationLoader.json">
-      <Link>AdvancedLocationLoader.json</Link>
-    </None>
     <None Include="Docs\Actions.md" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
