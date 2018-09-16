@@ -49,12 +49,11 @@
     <None Include="update.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Framework\Framework.csproj">
+    <ProjectReference Include="..\Framework\EntoaroxFramework.csproj">
       <Project>{174275e7-3ae4-41a6-9884-9e08a07d1101}</Project>
       <Name>Framework</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\common.targets" />
 </Project>

@@ -122,5 +122,4 @@
     <EmbeddedResource Include="ContentPack\winter\Well.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\common.targets" />
 </Project>

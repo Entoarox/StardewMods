@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "Framework\Framework.csproj", "{174275E7-3AE4-41A6-9884-9E08A07D1101}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntoaroxFramework", "Framework\EntoaroxFramework.csproj", "{174275E7-3AE4-41A6-9884-9E08A07D1101}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedLocationLoader", "AdvancedLocationLoader\AdvancedLocationLoader.csproj", "{9EA06249-2096-43E0-B616-DDD3FE731147}"
 EndProject
