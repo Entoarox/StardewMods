@@ -304,7 +304,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             string[] seasons = { "spring", "summer", "fall", "winter" };
             foreach (GameLocation loc in Game1.locations)
             {
-                if (loc.isOutdoors && !loc.Name.Equals("Desert"))
+                if (loc.IsOutdoors && !loc.Name.Equals("Desert"))
                 {
                     foreach (TileSheet sheet in loc.map.TileSheets)
                     {

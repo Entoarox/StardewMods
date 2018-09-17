@@ -30,7 +30,7 @@ namespace Entoarox.AdvancedLocationLoader
         {
             List<Response> destinations = new List<Response>();
             foreach (KeyValuePair<string, Response> entry in this.Destinations)
-                if (entry.Key != Game1.currentLocation.name)
+                if (entry.Key != Game1.currentLocation.Name)
                     destinations.Add(entry.Value);
             Game1.currentLocation.lastQuestionKey = "SelectTeleportDestination";
             Game1.currentLocation.createQuestionDialogue(ModEntry.Strings.Get("teleporter"), destinations.ToArray(), this.Resolver, null);
@@ -55,7 +55,7 @@ namespace Entoarox.AdvancedLocationLoader
             this.Destinations = new Dictionary<string, Response> { { "", new Response("cancel", ModEntry.Strings.Get("cancel")) } };
             for (int c = 0; c < this.List.Destinations.Count; c++)
             {
-                if (this.List.Destinations[c].MapName != Game1.currentLocation.name)
+                if (this.List.Destinations[c].MapName != Game1.currentLocation.Name)
                     this.Destinations.Add(this.List.Destinations[c].MapName, new Response(c.ToString(), this.List.Destinations[c].ItemText));
             }
         }

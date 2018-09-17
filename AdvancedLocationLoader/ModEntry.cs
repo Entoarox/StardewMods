@@ -29,7 +29,7 @@ namespace Entoarox.AdvancedLocationLoader
         private Patcher Patcher;
 
         /// <summary>Whether a player save has been loaded.</summary>
-        internal bool IsSaveLoaded => Game1.hasLoadedGame && !string.IsNullOrEmpty(Game1.player.name) && !SaveGame.IsProcessing;
+        internal bool IsSaveLoaded => Game1.hasLoadedGame && !string.IsNullOrEmpty(Game1.player.Name) && !SaveGame.IsProcessing;
 
 
         /*********

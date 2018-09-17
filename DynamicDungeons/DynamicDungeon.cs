@@ -172,14 +172,14 @@ namespace Entoarox.DynamicDungeons
         public override void draw(SpriteBatch b)
         {
             foreach (ResourceClump current in this.ResourceClumps)
-                current.draw(b, current.tile);
+                current.draw(b, current.tile.Value);
             base.draw(b);
         }
 
         public override bool isCollidingPosition(XnaRectangle position, xTileRectangle viewport, bool isFarmer, int damagesFarmer, bool glider, Character character)
         {
             foreach (ResourceClump current in this.ResourceClumps)
-                if (!glider && current.getBoundingBox(current.tile).Intersects(position))
+                if (!glider && current.getBoundingBox(current.tile.Value).Intersects(position))
                     return true;
             return base.isCollidingPosition(position, viewport, isFarmer, damagesFarmer, glider, character);
         }

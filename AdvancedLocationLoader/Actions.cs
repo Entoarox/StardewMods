@@ -29,7 +29,7 @@ namespace Entoarox.AdvancedLocationLoader
         *********/
         public static void Shift(Farmer who, string[] arguments, Vector2 tile)
         {
-            Game1.warpFarmer(who.currentLocation.Name, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]), who.facingDirection, who.currentLocation.isStructure);
+            Game1.warpFarmer(who.currentLocation.Name, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]), who.facingDirection, who.currentLocation.isStructure.Value);
         }
 
         public static void Message(Farmer who, string[] arguments, Vector2 tile)

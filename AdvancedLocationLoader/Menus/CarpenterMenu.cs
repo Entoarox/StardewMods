@@ -162,7 +162,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                 Building building1 = ((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getOldMouseY()) / Game1.tileSize)) ?? ((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getOldMouseY() + Game1.tileSize * 2) / Game1.tileSize)) ?? ((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getOldMouseY() + Game1.tileSize * 3) / Game1.tileSize));
                 if (this.upgrading)
                 {
-                    if (building1 != null && this.CurrentBlueprint.nameOfBuildingToUpgrade != null && this.CurrentBlueprint.nameOfBuildingToUpgrade.Equals(building1.buildingType))
+                    if (building1 != null && this.CurrentBlueprint.nameOfBuildingToUpgrade != null && this.CurrentBlueprint.nameOfBuildingToUpgrade.Equals(building1.buildingType.Value))
                         building1.color.Value = Color.Lime * 0.8f;
                     else
                     {
@@ -310,9 +310,9 @@ namespace Entoarox.AdvancedLocationLoader.Menus
             if (this.demolishing)
             {
                 Building buildingAt = ((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).getBuildingAt(new Vector2((Game1.viewport.X + Game1.getOldMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getOldMouseY()) / Game1.tileSize));
-                if (buildingAt != null && (buildingAt.daysOfConstructionLeft > 0 || buildingAt.daysUntilUpgrade > 0))
+                if (buildingAt != null && (buildingAt.daysOfConstructionLeft.Value > 0 || buildingAt.daysUntilUpgrade.Value > 0))
                     Game1.addHUDMessage(new HUDMessage(Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_DuringConstruction"), Color.Red, 3500f));
-                else if (buildingAt != null && buildingAt.indoors != null && buildingAt.indoors.Value is AnimalHouse && (buildingAt.indoors.Value as AnimalHouse).animalsThatLiveHere.Count > 0)
+                else if (buildingAt?.indoors.Value != null && buildingAt.indoors.Value is AnimalHouse house && house.animalsThatLiveHere.Count > 0)
                     Game1.addHUDMessage(new HUDMessage(Game1.content.LoadString("Strings\\UI:Carpenter_CantDemolish_AnimalsHere"), Color.Red, 3500f));
                 else
                 {
@@ -352,7 +352,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                     this.buildingToMove = ((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).getBuildingAt(new Vector2((Game1.viewport.X + Game1.getMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getMouseY()) / Game1.tileSize));
                     if (this.buildingToMove == null)
                         return;
-                    if (this.buildingToMove.daysOfConstructionLeft > 0)
+                    if (this.buildingToMove.daysOfConstructionLeft.Value > 0)
                         this.buildingToMove = null;
                     else
                     {
@@ -466,7 +466,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
             {
                 base.draw(b);
                 IClickableMenu.drawTextureBox(b, this.xPositionOnScreen - Game1.tileSize * 3 / 2, this.yPositionOnScreen - Game1.tileSize / 4, this.maxWidthOfBuildingViewer + Game1.tileSize, this.maxHeightOfBuildingViewer + Game1.tileSize, this.magicalConstruction ? Color.RoyalBlue : Color.White);
-                this.currentBuilding.drawInMenu(b, this.xPositionOnScreen + this.maxWidthOfBuildingViewer / 2 - this.currentBuilding.tilesWide * Game1.tileSize / 2 - Game1.tileSize, this.yPositionOnScreen + this.maxHeightOfBuildingViewer / 2 - this.currentBuilding.getSourceRectForMenu().Height * Game1.pixelZoom / 2);
+                this.currentBuilding.drawInMenu(b, this.xPositionOnScreen + this.maxWidthOfBuildingViewer / 2 - this.currentBuilding.tilesWide.Value * Game1.tileSize / 2 - Game1.tileSize, this.yPositionOnScreen + this.maxHeightOfBuildingViewer / 2 - this.currentBuilding.getSourceRectForMenu().Height * Game1.pixelZoom / 2);
                 if (this.CurrentBlueprint.isUpgrade())
                     this.upgradeIcon.draw(b);
                 SpriteText.drawStringWithScrollBackground(b, this.buildingName, this.xPositionOnScreen + this.maxWidthOfBuildingViewer - IClickableMenu.spaceToClearSideBorder - Game1.tileSize / 4 + Game1.tileSize + ((this.width - (this.maxWidthOfBuildingViewer + Game1.tileSize * 2)) / 2 - SpriteText.getWidthOfString("Deluxe Barn") / 2), this.yPositionOnScreen, "Deluxe Barn", 1f, -1);
@@ -493,7 +493,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                 {
                     location.Y += Game1.tileSize + Game1.pixelZoom;
                     obj.drawInMenu(b, location, 1f);
-                    bool flag = !(obj is Object) || Game1.player.hasItemInInventory((obj as Object).parentSheetIndex, obj.Stack, 0);
+                    bool flag = !(obj is Object) || Game1.player.hasItemInInventory((obj as Object).ParentSheetIndex, obj.Stack);
                     if (this.magicalConstruction)
                     {
                         Utility.drawTextWithShadow(b, obj.Name, Game1.dialogueFont, new Vector2(location.X + Game1.tileSize + Game1.pixelZoom * 3, location.Y + Game1.pixelZoom * 6), Game1.textColor * 0.25f, 1f, -1f, -1, -1, this.magicalConstruction ? 0.0f : 0.25f, 3);
@@ -534,8 +534,8 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                 else if (this.moving && this.buildingToMove != null)
                 {
                     Vector2 vector2 = new Vector2((Game1.viewport.X + Game1.getOldMouseX()) / Game1.tileSize, (Game1.viewport.Y + Game1.getOldMouseY()) / Game1.tileSize);
-                    for (int y = 0; y < this.buildingToMove.tilesHigh; ++y)
-                        for (int x = 0; x < this.buildingToMove.tilesWide; ++x)
+                    for (int y = 0; y < this.buildingToMove.tilesHigh.Value; ++y)
+                        for (int x = 0; x < this.buildingToMove.tilesWide.Value; ++x)
                         {
                             int structurePlacementTile = this.buildingToMove.getTileSheetIndexForStructurePlacementTile(x, y);
                             Vector2 tileLocation = new Vector2(vector2.X + x, vector2.Y + y);

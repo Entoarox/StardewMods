@@ -43,7 +43,6 @@ namespace Entoarox.ShopExpander
             Vector2 vector2_1 = location;
             double num1 = Game1.tileSize / 2;
             int num2 = Game1.tileSize * 3 / 4;
-            int num3 = Game1.pixelZoom;
             double num4 = num2;
             Vector2 vector2_2 = new Vector2((float)num1, (float)num4);
             Vector2 position = vector2_1 + vector2_2;

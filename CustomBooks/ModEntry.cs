@@ -48,7 +48,7 @@ namespace Entoarox.CustomBooks
 
         private void InputEvents_ButtonReleased(object s, EventArgsInput e)
         {
-            if ((!Game1.eventUp || Game1.currentLocation.currentEvent != null && Game1.currentLocation.currentEvent.showActiveObject) && !Game1.player.FarmerSprite.pauseForSingleAnimation && !Game1.player.isRidingHorse() && !Game1.player.bathingClothes && e.Button == SButton.MouseRight)
+            if ((!Game1.eventUp || Game1.currentLocation.currentEvent != null && Game1.currentLocation.currentEvent.showActiveObject) && !Game1.player.FarmerSprite.pauseForSingleAnimation && !Game1.player.isRidingHorse() && !Game1.player.bathingClothes.Value && e.Button == SButton.MouseRight)
                 (Game1.player.CurrentItem as Book)?.Activate();
         }
 

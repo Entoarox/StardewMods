@@ -30,11 +30,11 @@ namespace Entoarox.Framework.Interface
 
         public bool Selected
         {
-            get => this._FocusComponent != null && this._FocusComponent is IInputComponent && (this._FocusComponent as IInputComponent).Selected;
+            get => this._FocusComponent is IInputComponent component && component.Selected;
             set
             {
-                if (this._FocusComponent != null && this._FocusComponent is IInputComponent)
-                    (this._FocusComponent as IInputComponent).Selected = value;
+                if (this._FocusComponent is IInputComponent component)
+                    component.Selected = value;
             }
         }
 

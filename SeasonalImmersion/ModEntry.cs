@@ -298,8 +298,8 @@ namespace Entoarox.SeasonalImmersion
 
                 // Loop buildings
                 foreach (Building building in Game1.getFarm().buildings)
-                    if (ModEntry.SeasonTextures.ContainsKey(building.buildingType))
-                        building.texture = new Lazy<Texture2D>(() => ModEntry.SeasonTextures[building.buildingType][Game1.currentSeason]);
+                    if (ModEntry.SeasonTextures.ContainsKey(building.buildingType.Value))
+                        building.texture = new Lazy<Texture2D>(() => ModEntry.SeasonTextures[building.buildingType.Value][Game1.currentSeason]);
             }
             catch (Exception ex)
             {
@@ -315,7 +315,7 @@ namespace Entoarox.SeasonalImmersion
 
         private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
         {
-            if (e.NewLocation.name == "Farm" || (e.PriorLocation != null && e.PriorLocation.isOutdoors != e.NewLocation.isOutdoors))
+            if (e.NewLocation.Name == "Farm" || (e.PriorLocation != null && e.PriorLocation.IsOutdoors != e.NewLocation.IsOutdoors))
                 this.UpdateTextures();
         }
     }

@@ -16,7 +16,7 @@ namespace Entoarox.AdvancedLocationLoader.Locations
 
         public override void DayUpdate(int dayOfMonth)
         {
-            string realName = this.name;
+            string realName = this.Name;
             this.name.Value = "Greenhouse";
             base.DayUpdate(dayOfMonth);
             this.name.Value = realName;

@@ -49,8 +49,8 @@ namespace Entoarox.Framework.Core.Skills
         private Dictionary<string, ISkill> _Skills = new Dictionary<string, ISkill>();
         private void _ValidateFarmer(SFarmer player)
         {
-            if (!this._SkillData.ContainsKey(player.uniqueMultiplayerID))
-                throw new KeyNotFoundException("There is no farmer by this name registered:" + player.name);
+            if (!this._SkillData.ContainsKey(player.UniqueMultiplayerID))
+                throw new KeyNotFoundException("There is no farmer by this name registered:" + player.Name);
         }
         private void _ValidateSkill(string skillName)
         {
@@ -77,7 +77,7 @@ namespace Entoarox.Framework.Core.Skills
                 return;
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
-            PlayerSkillData.SkillInfo info = this._SkillData[player.uniqueMultiplayerID].Skills[skillName];
+            PlayerSkillData.SkillInfo info = this._SkillData[player.UniqueMultiplayerID].Skills[skillName];
             info.Experience += experience;
             if (info.Experience >= TotalExperienceRequiredForLevel(skillName, info.Level + 1))
             {
@@ -111,7 +111,7 @@ namespace Entoarox.Framework.Core.Skills
         {
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
-            return this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Experience - TotalExperienceRequiredForLevel(skillName, this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Level);
+            return this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Experience - TotalExperienceRequiredForLevel(skillName, this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Level);
         }
 
         public int GetPrestigeLevel(SFarmer player, string skillName)
@@ -119,7 +119,7 @@ namespace Entoarox.Framework.Core.Skills
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
             ISkill skill = GetSkillInfo(skillName);
-            return Math.Max(0, this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Level - skill.MaxSkillLevel);
+            return Math.Max(0, this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Level - skill.MaxSkillLevel);
         }
 
         public ISkill GetSkillInfo(string skillName)
@@ -132,14 +132,14 @@ namespace Entoarox.Framework.Core.Skills
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
             ISkill skill = GetSkillInfo(skillName);
-            return Math.Min(skill.MaxSkillLevel, this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Level);
+            return Math.Min(skill.MaxSkillLevel, this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Level);
         }
 
         public int GetTotalExperience(SFarmer player, string skillName)
         {
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
-            return this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Experience;
+            return this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Experience;
         }
 
         public void GiveProfession(SFarmer player, string skillName, string professionName)
@@ -150,8 +150,8 @@ namespace Entoarox.Framework.Core.Skills
             ISkill skill = GetSkillInfo(skillName);
             if(skill is VanillaSkill && !player.professions.Contains(_VanillaProfessions[professionName]))
                     player.professions.Add(_VanillaProfessions[professionName]);
-            if (!this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Professions.Contains(professionName))
-                this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Professions.Add(professionName);
+            if (!this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Professions.Contains(professionName))
+                this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Professions.Add(professionName);
         }
 
         public bool HasProfession(SFarmer player, string skillName, string professionName)
@@ -159,7 +159,7 @@ namespace Entoarox.Framework.Core.Skills
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
             _ValidateProfession(skillName, professionName);
-            return this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Professions.Contains(professionName);
+            return this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Professions.Contains(professionName);
         }
 
         public bool IsActivePrestigeSkill(SFarmer player, string skillName)
@@ -167,7 +167,7 @@ namespace Entoarox.Framework.Core.Skills
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
             ISkill skill = GetSkillInfo(skillName);
-            return this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Level <= skill.MaxSkillLevel;
+            return this._SkillData[player.UniqueMultiplayerID].Skills[skillName].Level <= skill.MaxSkillLevel;
         }
 
         public void RegisterSkill(string skillName, ISkill skill)

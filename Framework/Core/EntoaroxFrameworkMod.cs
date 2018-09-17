@@ -235,7 +235,7 @@ namespace Entoarox.Framework.Core
                     foreach (GameLocation loc in Game1.locations)
                     {
                         loc.largeTerrainFeatures.Filter(a => !(a is Bush));
-                        if ((loc.isOutdoors || loc.name.Equals("BathHouse_Entry") || loc.treatAsOutdoors) && loc.map.GetLayer("Paths") != null)
+                        if ((loc.IsOutdoors || loc.Name.Equals("BathHouse_Entry") || loc.treatAsOutdoors.Value) && loc.map.GetLayer("Paths") != null)
                         {
                             for (int x = 0; x < loc.map.Layers[0].LayerWidth; ++x)
                             {
@@ -400,8 +400,8 @@ namespace Entoarox.Framework.Core
                     this.Deserialize(data, chest.items);
             }
 
+            FarmHouse house = (FarmHouse)Game1.getLocationFromName("FarmHouse");
             this.Deserialize(data, Game1.player.Items);
-            FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
             this.Deserialize(data, house.fridge.Value.items);
             ItemEvents.FireAfterDeserialize();
         }

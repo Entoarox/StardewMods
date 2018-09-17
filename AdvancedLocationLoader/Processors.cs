@@ -210,8 +210,8 @@ namespace Entoarox.AdvancedLocationLoader
                         break;
                 }
 
-                loc.isOutdoors.Value = location.Outdoor;
-                loc.isFarm.Value = location.Farmable;
+                loc.IsOutdoors = location.Outdoor;
+                loc.IsFarm = location.Farmable;
                 Game1.locations.Add(loc);
             }
             catch (Exception err)
@@ -227,7 +227,7 @@ namespace Entoarox.AdvancedLocationLoader
                 for (int i = 0; i < Game1.locations.Count; i++)
                 {
                     GameLocation location = Game1.locations[i];
-                    if (location.name == obj.MapName)
+                    if (location.Name == obj.MapName)
                     {
                         Game1.locations[i] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.LoadAsset<Map>(obj.FileName), obj.MapName);
                         break;

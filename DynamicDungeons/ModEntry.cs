@@ -174,21 +174,21 @@ namespace Entoarox.DynamicDungeons
 
         private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
         {
-            if (e.PriorLocation != null && (e.PriorLocation.name == "DynamicDungeonEntrance" || e.PriorLocation.name == "WizardHouse"))
+            if (e.PriorLocation != null && (e.PriorLocation.Name == "DynamicDungeonEntrance" || e.PriorLocation.Name == "WizardHouse"))
             {
                 ControlEvents.ControllerButtonPressed -= this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.ControllerButtonReleased -= this.ControlEvents_ControllerButtonReleased;
                 ControlEvents.MouseChanged -= this.ControlEvents_MouseChanged;
-                if (e.PriorLocation.name == "DynamicDungeonEntrance")
+                if (e.PriorLocation.Name == "DynamicDungeonEntrance")
                     GraphicsEvents.OnPreRenderHudEvent -= this.GraphicsEvents_OnPreRenderHudEvent;
             }
 
-            if (e.NewLocation.name == "DynamicDungeonEntrance" || e.NewLocation.name == "WizardHouse")
+            if (e.NewLocation.Name == "DynamicDungeonEntrance" || e.NewLocation.Name == "WizardHouse")
             {
                 ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
                 ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
-                if (e.NewLocation.name == "DynamicDungeonEntrance")
+                if (e.NewLocation.Name == "DynamicDungeonEntrance")
                     GraphicsEvents.OnPreRenderHudEvent += this.GraphicsEvents_OnPreRenderHudEvent;
             }
         }
