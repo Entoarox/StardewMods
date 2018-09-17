@@ -2,8 +2,9 @@
   "Name": "Dynamic Dungeons",
   "Author": "Entoarox",
   "Version": "0.1.16",
-  "MinimumApiVersion": "2.1",
   "Description": "Adds new dynamically generated dungeons to stardew valley!",
   "UniqueID": "Entoarox.DynamicDungeons",
-  "EntryDll": "DynamicDungeons.dll"
+  "EntryDll": "DynamicDungeons.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": []
 }

@@ -2,10 +2,11 @@
   "Name": "Xnb Loader",
   "Author": "Entoarox",
   "Version": "1.1.10",
-  "MinimumApiVersion": "2.1",
   "Description": "Safely load custom xnb files without touching your Content directory!",
   "UniqueID": "Entoarox.XnbLoader",
   "EntryDll": "XnbLoader.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": [ "Nexus:2275" ],
   "Dependencies": [
     {
       "UniqueID": "Entoarox.EntoaroxFramework"

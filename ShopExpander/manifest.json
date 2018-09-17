@@ -1,12 +1,12 @@
 {
   "Name": "Shop Expander",
   "Author": "Entoarox",
-  "Version": "2.3.0-beta",
+  "Version": "1.6.0",
   "Description": "Adds bulk options for wood & stone to the carpenter.",
   "UniqueID": "Entoarox.ShopExpander",
   "EntryDll": "ShopExpander.dll",
-  "MinimumApiVersion": "2.6",
-  "UpdateKeys": [ "GitHub:Entoarox/StardewMods" ],
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": [ "Nexus:2278" ],
   "Dependencies": [
     {
       "UniqueID": "Entoarox.EntoaroxFramework"

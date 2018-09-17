@@ -2,8 +2,9 @@
   "Name": "Playerground",
   "Author": "Entoarox",
   "Version": "0.0.1",
-  "MinimumApiVersion": "2.1",
   "Description": "Dev mod, not for use by end-users!",
   "UniqueID": "Entoarox.Playground",
-  "EntryDll": "PlayGround.dll"
+  "EntryDll": "PlayGround.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": []
 }

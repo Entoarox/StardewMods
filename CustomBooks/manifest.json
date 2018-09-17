@@ -2,8 +2,9 @@
   "Name": "Custom Books",
   "Author": "Entoarox",
   "Version": "0.1.0",
-  "MinimumApiVersion": "2.1",
   "Description": "Custom books that the player can fill up as they want!",
   "UniqueID": "Entoarox.CustomBooks",
-  "EntryDll": "CustomBooks.dll"
+  "EntryDll": "CustomBooks.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": []
 }

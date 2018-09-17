@@ -43,7 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
-    <None Include="update.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\EntoaroxFramework.csproj">
