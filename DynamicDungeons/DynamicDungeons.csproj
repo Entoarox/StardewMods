@@ -72,7 +72,7 @@
     <Compile Include="TupleMagic.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\content\DynamicDungeonsEntrance.tbin">
+    <None Include="assets\DynamicDungeonsEntrance.tbin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="assets\unused\merged.xcf" />
@@ -84,16 +84,13 @@
     <Content Include="assets\book.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\content\book.png">
+    <Content Include="assets\book\doodle1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\content\book\doodle1.png">
+    <Content Include="assets\book\doodle2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\content\book\doodle2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\content\book\doodle3.png">
+    <Content Include="assets\book\doodle3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\unused\DoorSpriteSheet.png" />
@@ -102,13 +99,10 @@
     <Content Include="assets\unused\door_wall.png" />
     <Content Include="assets\unused\probably_old_robot_thingy.png" />
     <Content Include="assets\unused\pufferchick.png" />
-    <Content Include="assets\content\door.png">
+    <Content Include="assets\dungeon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\content\dungeon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\content\entrance.png">
+    <Content Include="assets\entrance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="assets\door.png">

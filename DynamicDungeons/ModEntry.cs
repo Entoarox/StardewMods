@@ -47,11 +47,11 @@ namespace Entoarox.DynamicDungeons
                 new TextPage(helper.Translation.Get("Book_Page1")),
                 new TextPage(helper.Translation.Get("Book_Page2")),
                 new PaymentPage(),
-                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle1.png"), Game1.textColor, true),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/book/doodle1.png"), Game1.textColor, true),
                 new TitlePage("DickBut", "Dickius Buttius Maximus", "The Dickius Buttius Maximus, better know as the DickBut is a mighty creature of great majesty."),
-                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle2.png"), Game1.textColor, true),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/book/doodle2.png"), Game1.textColor, true),
                 new TitlePage("The Lie", "Absolutum Lie-um", "Please turn the page somewhere else, there is nothing to see here."),
-                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle3.png"), Game1.textColor, true),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/book/doodle3.png"), Game1.textColor, true),
                 new TitlePage("PufferChick", "Pufferium Chickate", "Adorable abomination, dont you just want to cuddle it?")
             });
         }
