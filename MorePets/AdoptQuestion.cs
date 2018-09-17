@@ -27,7 +27,7 @@ namespace Entoarox.MorePetsAndAnimals
             this.Cat = cat;
             this.Skin = skin;
 
-            this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"skins/{(cat ? "cat" : "dog")}_{skin}"), 28, 32, 32)
+            this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{(cat ? "cat" : "dog")}_{skin}"), 28, 32, 32)
             {
                 loop = true
             };
@@ -91,14 +91,14 @@ namespace Entoarox.MorePetsAndAnimals
             {
                 pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y)
                 {
-                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"skins/cat_{this.Skin}"), 0, 32, 32)
+                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/cat_{this.Skin}"), 0, 32, 32)
                 };
             }
             else
             {
                 pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y)
                 {
-                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"skins/dog_{this.Skin}"), 0, 32, 32)
+                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/dog_{this.Skin}"), 0, 32, 32)
                 };
             }
 

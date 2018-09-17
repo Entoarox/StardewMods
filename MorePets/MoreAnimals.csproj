@@ -52,70 +52,70 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="box.xnb">
+    <None Include="assets\box.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="manifest.json" />
-    <None Include="skins\BabyDuck.xnb">
+    <None Include="assets\skins\BabyDuck.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_1.xnb">
+    <None Include="assets\skins\cat_1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_2.xnb">
+    <None Include="assets\skins\cat_2.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_3.xnb">
+    <None Include="assets\skins\cat_3.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_4.xnb">
+    <None Include="assets\skins\cat_4.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_5.xnb">
+    <None Include="assets\skins\cat_5.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_6.xnb">
+    <None Include="assets\skins\cat_6.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_7.xnb">
+    <None Include="assets\skins\cat_7.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_8.xnb">
+    <None Include="assets\skins\cat_8.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\cat_9.xnb">
+    <None Include="assets\skins\cat_9.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_1.xnb">
+    <None Include="assets\skins\dog_1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_2.xnb">
+    <None Include="assets\skins\dog_2.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_3.xnb">
+    <None Include="assets\skins\dog_3.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_4.xnb">
+    <None Include="assets\skins\dog_4.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_5.xnb">
+    <None Include="assets\skins\dog_5.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_6.xnb">
+    <None Include="assets\skins\dog_6.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_7.xnb">
+    <None Include="assets\skins\dog_7.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_8.xnb">
+    <None Include="assets\skins\dog_8.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="skins\dog_9.xnb">
+    <None Include="assets\skins\dog_9.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="credits.txt">
+    <Content Include="assets\credits.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
