@@ -225,7 +225,15 @@ namespace Entoarox.AdvancedLocationLoader
         {
             try
             {
-                Game1.locations[Game1.locations.FindIndex(l => l.name == obj.MapName)] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.LoadAsset<Map>(obj.FileName), obj.MapName);
+                for (int i = 0; i < Game1.locations.Count; i++)
+                {
+                    GameLocation location = Game1.locations[i];
+                    if (location.name == obj.MapName)
+                    {
+                        Game1.locations[i] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.LoadAsset<Map>(obj.FileName), obj.MapName);
+                        break;
+                    }
+                }
             }
             catch (Exception err)
             {

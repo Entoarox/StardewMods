@@ -181,27 +181,16 @@ namespace Entoarox.Framework
 
         public static void AddWarp(this GameLocation self, int x, int y, string target, int targetX, int targetY, bool replace = true)
         {
-            List<Warp> warps = null;
-            foreach (Warp w in self.warps)
-                warps.Add(w);
-            if (warps == null)
-                return;
-            if (!replace && warps.Exists(a => a.X == x && a.Y == y))
-                throw new ArgumentException("Index already set " + x + ',' + y);
-            foreach (Warp warp in warps.Where(a => a.X == x && a.Y == y))
-                self.warps.Remove(warp);
+            if (!replace && self.warps.Any(a => a.X == x && a.Y == y))
+                throw new ArgumentException($"Index already set {x},{y}");
+            else
+                self.warps.Filter(a => a.X != x || a.Y != y);
             self.warps.Add(new Warp(x, y, target, x, y, false));
         }
 
         public static void RemoveWarp(this GameLocation self, int x, int y)
         {
-            List<Warp> warps = null;
-            foreach (Warp w in self.warps)
-                warps.Add(w);
-            if (warps == null)
-                return;
-            foreach (Warp w in warps.Where(a => a.X == x && a.Y == y))
-                self.warps.Remove(w);
+            self.warps.Filter(a => a.X != x || a.Y != y);
         }
 
         public static bool IsPassable(this GameLocation self, int x, int y)

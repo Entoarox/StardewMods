@@ -90,7 +90,6 @@
     <Compile Include="Experimental\PathFinder.cs" />
     <Compile Include="Experimental\PathNode.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
-    <Compile Include="Extensions\IListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GameLocationExtensions.cs" />
     <Compile Include="IAugmentedLocation.cs" />

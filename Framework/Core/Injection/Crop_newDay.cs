@@ -20,19 +20,19 @@ namespace Entoarox.Framework.Core.Injection
                 if (state == 1)
                 {
                     if (!__instance.fullyGrown.Value)
-                        __instance.dayOfCurrentPhase.Set(Math.Min(__instance.dayOfCurrentPhase.Value + 1, __instance.phaseDays.Count > 0 ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase.Value)] : 0));
+                        __instance.dayOfCurrentPhase.Value = Math.Min(__instance.dayOfCurrentPhase.Value + 1, __instance.phaseDays.Count > 0 ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase.Value)] : 0);
                     else
-                        __instance.dayOfCurrentPhase.Set(__instance.dayOfCurrentPhase.Value--);
+                        __instance.dayOfCurrentPhase.Value = __instance.dayOfCurrentPhase.Value--;
                     if (__instance.dayOfCurrentPhase.Value >= (__instance.phaseDays.Count > 0 ? __instance.phaseDays[Math.Min(__instance.phaseDays.Count - 1, __instance.currentPhase.Value)] : 0) && __instance.currentPhase.Value < __instance.phaseDays.Count - 1)
                     {
-                        __instance.currentPhase.Set(__instance.currentPhase.Value++);
-                        __instance.dayOfCurrentPhase.Set(0);
+                        __instance.currentPhase.Value = __instance.currentPhase.Value++;
+                        __instance.dayOfCurrentPhase.Value = 0;
                     }
 
                     while (__instance.currentPhase.Value < __instance.phaseDays.Count - 1 && __instance.phaseDays.Count > 0 && __instance.phaseDays[__instance.currentPhase.Value] <= 0)
-                        __instance.currentPhase.Set(__instance.currentPhase.Value++);
+                        __instance.currentPhase.Value = __instance.currentPhase.Value++;
                     if (__instance.rowInSpriteSheet.Value == 23 && __instance.phaseToShow.Value == -1 && __instance.currentPhase.Value > 0)
-                        __instance.phaseToShow.Set(Game1.random.Next(1, 7));
+                        __instance.phaseToShow.Value = Game1.random.Next(1, 7);
                 }
 
                 if ((!__instance.fullyGrown.Value || __instance.dayOfCurrentPhase.Value <= 0) && __instance.currentPhase.Value >= __instance.phaseDays.Count - 1 && __instance.rowInSpriteSheet.Value == 23)

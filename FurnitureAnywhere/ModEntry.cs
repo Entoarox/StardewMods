@@ -108,13 +108,12 @@ namespace Entoarox.FurnitureAnywhere
                     positions.Add(obj.Key);
             foreach (Vector2 pos in positions)
             {
-                List<Item> items = new List<Item> {(loc.objects[pos] as AnywhereFurniture).Revert()};
                 Chest chest = new Chest(false)
                 {
                     Type = "AnywhereSerializedContainer",
                     TileLocation = pos
                 };
-                chest.items.Set(items);
+                chest.items.Set(new List<Item> { (loc.objects[pos] as AnywhereFurniture).Revert() });
                 loc.objects[pos] = chest;
             }
         }

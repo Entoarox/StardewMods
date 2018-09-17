@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Entoarox.Framework;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -31,7 +30,6 @@ namespace Entoarox.MorePetsAndAnimals
         internal static Random Random;
         internal static ModConfig Config;
         internal static IModHelper SHelper;
-        internal static LocalizedContentManager Content = new LocalizedContentManager(Game1.content.ServiceProvider, "Mods\\MoreAnimals\\skins");
         internal static Dictionary<string, List<int>> Indexes = new Dictionary<string, List<int>>
         {
             ["BabyBlue Chicken"] = new List<int>(),
@@ -182,7 +180,7 @@ namespace Entoarox.MorePetsAndAnimals
                     try
                     {
                         string type = npc is Dog ? "dog" : "cat";
-                        npc.Sprite = new AnimatedSprite(ModEntry.Content, $"{type}_{npc.Manners}", 0, 32, 32);
+                        npc.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey($"skins/{type}_{npc.Manners}"), 0, 32, 32);
                     }
                     catch
                     {
@@ -204,14 +202,14 @@ namespace Entoarox.MorePetsAndAnimals
                 else if (animal.showDifferentTextureWhenReadyForHarvest.Value && animal.currentProduce.Value <= 0)
                     str = "Sheared" + animal.type.Value;
                 if (animal.meatIndex.Value < 999)
-                    animal.meatIndex.Set(ModEntry.Indexes[str][random.Next(0, ModEntry.Indexes[str].Count)] + 999);
+                    animal.meatIndex.Value = ModEntry.Indexes[str][random.Next(0, ModEntry.Indexes[str].Count)] + 999;
                 else if (animal.meatIndex.Value > 999)
                 {
                     try
                     {
-                        Texture2D texture = this.Helper.Content.Load<Texture2D>(str + "_" + (animal.meatIndex.Value - 999));
-                        if (animal.Sprite.Texture != texture)
-                            animal.Sprite = new AnimatedSprite(ModEntry.Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        string assetKey = this.Helper.Content.GetActualAssetKey($"skins/{str}_{animal.meatIndex.Value - 999}");
+                        if (animal.Sprite.textureName.Value != assetKey)
+                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
@@ -219,22 +217,22 @@ namespace Entoarox.MorePetsAndAnimals
                         if (str.Equals("BabyDuck"))
                             try
                             {
-                                Texture2D texture = ModEntry.Content.Load<Texture2D>("BabyDuck");
-                                if (animal.Sprite.Texture != texture)
-                                    animal.Sprite = new AnimatedSprite(ModEntry.Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                string assetKey = this.Helper.Content.GetActualAssetKey("skins/BabyDuck");
+                                if (animal.Sprite.textureName.Value != assetKey)
+                                    animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                             catch
                             {
                                 this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                                Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
-                                if (animal.Sprite.Texture != texture)
-                                    animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                                string assetKey = this.Helper.Content.GetActualAssetKey("Animals\\BabyWhite Chicken", ContentSource.GameContent);
+                                if (animal.Sprite.textureName.Value != assetKey)
+                                    animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
                         else
                         {
-                            Texture2D texture = Game1.content.Load<Texture2D>("Animals\\" + str);
-                            if (animal.Sprite.Texture != texture)
-                                animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                            string assetKey = this.Helper.Content.GetActualAssetKey($"Animals\\{str}", ContentSource.GameContent);
+                            if (animal.Sprite.textureName.Value != assetKey)
+                                animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                         }
                     }
                 }
@@ -242,16 +240,16 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        Texture2D texture = ModEntry.Content.Load<Texture2D>("BabyDuck");
-                        if (animal.Sprite.Texture != texture)
-                            animal.Sprite = new AnimatedSprite(ModEntry.Content, texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        string assetKey = this.Helper.Content.GetActualAssetKey("skins/BabyDuck");
+                        if (animal.Sprite.textureName.Value != assetKey)
+                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                     catch
                     {
                         this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                        Texture2D texture = Game1.content.Load<Texture2D>("Animals\\BabyWhite Chicken");
-                        if (animal.Sprite.Texture != texture)
-                            animal.Sprite = new AnimatedSprite(texture.Name, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                        string assetKey = this.Helper.Content.GetActualAssetKey("Animals\\BabyWhite Chicken", ContentSource.GameContent);
+                        if (animal.Sprite.textureName.Value != assetKey)
+                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
                 }
             }

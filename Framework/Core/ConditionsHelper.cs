@@ -129,15 +129,15 @@ namespace Entoarox.Framework.Core
             });
             this.RegisterConditionResolver("divorced", (args, resolver) =>
             {
-                List<NPC> matches = null;
-                foreach (NPC c in Utility.getAllCharacters())
-                    if (c.divorcedFromFarmer)
-                        matches.Add(c);
-                if (matches is null)
+                List<NPC> matches = new List<NPC>();
+                Utility.getAllCharacters(matches);
+                matches = matches.Where(a => a.divorcedFromFarmer).ToList();
+                if (!matches.Any())
                     return false;
-                List<string> list = matches.Select(a => a.Name).ToList();
-                list.Add("true");
-                return resolver(args[0], list.ToArray());
+
+                List<string> names = matches.Select(a => a.Name).ToList();
+                names.Add("true");
+                return resolver(args[0], names.ToArray());
             });
             this.RegisterConditionResolver("house", (args, resolver) => resolver(args[0], Game1.player.HouseUpgradeLevel.ToString()));
             this.RegisterConditionResolver("farm", (args, resolver) => resolver(args[0], ConditionsHelper.FarmMap[Math.Min(5, Game1.whichFarm)]));

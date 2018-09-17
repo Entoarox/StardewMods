@@ -9,15 +9,9 @@ namespace Entoarox.Framework.Core
     internal class PlayerHelper : IPlayerHelper
     {
         /*********
-        ** Fields
-        *********/
-        private IPlayerModifierHelper _Modifiers;
-
-
-        /*********
         ** Accessors
         *********/
-        public IPlayerModifierHelper Modifiers => this._Modifiers ?? (this._Modifiers = new PlayerModifierHelper());
+        public IPlayerModifierHelper Modifiers { get; } = new PlayerModifierHelper();
 
 
         /*********
@@ -43,7 +37,7 @@ namespace Entoarox.Framework.Core
 
         public bool HasPet(bool vanillaOnly)
         {
-            List<Pet> pets = this.GetAllPets();
+            Pet[] pets = this.GetAllPets().ToArray();
             return vanillaOnly
                 ? pets.Any(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0)
                 : pets.Any();
@@ -51,23 +45,17 @@ namespace Entoarox.Framework.Core
 
         public Pet GetPet()
         {
-            List<NPC> npcs = new List<NPC>();
-            foreach (NPC npc in Utility.getAllCharacters())
-                npcs.Add(npc);
-            List<Pet> pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
-            Pet pet = pets.First(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
-            if (pet == null && pets.Any())
-                pet = pets.First();
-            return pet;
+            Pet[] pets = this.GetAllPets().ToArray();
+            return pets.FirstOrDefault(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
         }
 
-        public List<Pet> GetAllPets()
+        public IEnumerable<Pet> GetAllPets()
         {
-            List<NPC> npcs = new List<NPC>();
             foreach (NPC npc in Utility.getAllCharacters())
-                npcs.Add(npc);
-            List<Pet> pets = npcs.Where(a => a is Pet).Cast<Pet>().ToList();
-            return pets;
+            {
+                if (npc is Pet pet)
+                    yield return pet;
+            }
         }
     }
 }

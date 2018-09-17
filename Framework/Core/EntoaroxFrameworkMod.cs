@@ -142,12 +142,15 @@ namespace Entoarox.Framework.Core
             EntoaroxFrameworkMod.Logger = this.Monitor;
             EntoaroxFrameworkMod.Config = this.Helper.ReadConfig<ModConfig>();
             this.PrepareCustomEvents();
-            //this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
+            this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
             if (EntoaroxFrameworkMod.Config.TrainerCommands)
+            {
                 helper.ConsoleCommands
                     .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", EntoaroxFrameworkMod.Farms), this.Commands)
                     .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", this.Commands)
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands);
+            }
+
             GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
@@ -228,11 +231,10 @@ namespace Entoarox.Framework.Core
 
             switch (command)
             {
-                /* TODO fix bush reset
-                 case "world_bushreset":
+                case "world_bushreset":
                     foreach (GameLocation loc in Game1.locations)
                     {
-                        loc.largeTerrainFeatures = loc.largeTerrainFeatures.FindAll(a => !(a is Bush));
+                        loc.largeTerrainFeatures.Filter(a => !(a is Bush));
                         if ((loc.isOutdoors || loc.name.Equals("BathHouse_Entry") || loc.treatAsOutdoors) && loc.map.GetLayer("Paths") != null)
                         {
                             for (int x = 0; x < loc.map.Layers[0].LayerWidth; ++x)
@@ -263,7 +265,7 @@ namespace Entoarox.Framework.Core
                             }
                         }
                     }
-                    break;*/
+                    break;
                 case "farm_settype":
                     if (args.Length == 0)
                         this.Monitor.Log("Please provide the type you wish to change your farm to.", LogLevel.Error);
@@ -308,10 +310,6 @@ namespace Entoarox.Framework.Core
                         this.Monitor.Log("A error occured trying to warp: ", LogLevel.Error, err);
                     }
 
-                    break;
-                case "world_locations":
-                    foreach (GameLocation location in Game1.locations)
-                        this.Monitor.Log(location.Name, LogLevel.Alert);
                     break;
             }
         }
@@ -381,7 +379,7 @@ namespace Entoarox.Framework.Core
                     this.Serialize(data, chest.items);
             }
 
-            Game1.player.Items = this.Serialize(data, Game1.player.Items);
+            this.Serialize(data, Game1.player.Items);
             FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
 
             if (house.fridge.Value != null)
@@ -400,20 +398,20 @@ namespace Entoarox.Framework.Core
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                    chest.items.Set(this.Deserialize(data, chest.items));
+                    this.Deserialize(data, chest.items);
             }
 
-            Game1.player.Items = this.Deserialize(data, Game1.player.Items);
+            this.Deserialize(data, Game1.player.Items);
             FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-            house.fridge.Value?.items.Set(this.Deserialize(data, house.fridge.Value.items));
+            this.Deserialize(data, house.fridge.Value.items);
             ItemEvents.FireAfterDeserialize();
         }
 
-        private List<Item> Serialize(IDictionary<string, InstanceState> data, IEnumerable<Item> items)
+        private void Serialize(IDictionary<string, InstanceState> data, IList<Item> items)
         {
-            List<Item> output = new List<Item>();
-            foreach (Item item in items)
+            for (int i = 0; i < items.Count; i++)
             {
+                Item item = items[i];
                 if (item is ICustomItem)
                 {
                     string id = Guid.NewGuid().ToString();
@@ -434,63 +432,53 @@ namespace Entoarox.Framework.Core
                         data.Add(id, new InstanceState(pitm.Id, pitm.Data));
                     else
                         data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, this.Serializer)));
-                    output.Add(obj);
-                }
-                else
-                    output.Add(item);
-            }
 
-            return output;
+                    items[i] = obj;
+                }
+            }
         }
 
-        private IList<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
+        private void Deserialize(IDictionary<string, InstanceState> data, IList<Item> items)
         {
-            List<Item> output = new List<Item>();
-            foreach (Item item in items)
+            for (int i = 0; i < items.Count; i++)
             {
-                if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
+                Item item = items[i];
+                if (item is SObject obj && obj.name.Equals("(Entoarox.Framework.ICustomItem)"))
                 {
-                    if (data.ContainsKey(itm.Type))
+                    if (data.ContainsKey(obj.Type))
                     {
-                        string cls = data[itm.Type].Type;
+                        string cls = data[obj.Type].Type;
                         Type type = Type.GetType(cls);
                         if (type == null)
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.Type].Data));
+                            items[i] = new Placeholder(cls, data[obj.Type].Data);
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.Type].Data));
+                            items[i] = new Placeholder(cls, data[obj.Type].Data);
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
-                            output.Add(new Placeholder(cls, data[itm.Type].Data));
+                            items[i] = new Placeholder(cls, data[obj.Type].Data);
                         }
                         else
                             try
                             {
-                                output.Add((Item)data[itm.Type].Data.ToObject(type, this.Serializer));
+                                items[i] = (Item)data[obj.Type].Data.ToObject(type, this.Serializer);
                             }
                             catch (Exception err)
                             {
                                 this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err, LogLevel.Error);
-                                output.Add(new Placeholder(cls, data[itm.Type].Data));
+                                items[i] = new Placeholder(cls, data[obj.Type].Data);
                             }
                     }
                     else
-                    {
-                        output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
-                    }
+                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + obj.Type, LogLevel.Error);
                 }
-                else
-                    output.Add(item);
             }
-
-            return output;
         }
 
         /****

@@ -15,10 +15,10 @@ namespace Entoarox.FurnitureAnywhere
         public AnywhereFurniture(Furniture item)
             : base(item.ParentSheetIndex, item.TileLocation)
         {
-            this.defaultBoundingBox.Set(item.defaultBoundingBox.Value);
-            this.boundingBox.Set(item.boundingBox.Value);
-            this.currentRotation.Set(item.currentRotation.Value);
-            this.rotations.Set(item.rotations.Value);
+            this.defaultBoundingBox.Value = item.defaultBoundingBox.Value;
+            this.boundingBox.Value = item.boundingBox.Value;
+            this.currentRotation.Value = item.currentRotation.Value;
+            this.rotations.Value = item.rotations.Value;
             this.rotate();
             this.rotate();
             this.rotate();
@@ -28,10 +28,10 @@ namespace Entoarox.FurnitureAnywhere
         public Furniture Revert()
         {
             Furniture self = new Furniture(this.ParentSheetIndex, this.TileLocation);
-            self.defaultBoundingBox.Set(this.defaultBoundingBox.Value);
-            self.boundingBox.Set(this.boundingBox.Value);
-            self.currentRotation.Set(this.currentRotation.Value);
-            self.rotations.Set(this.rotations.Value);
+            self.defaultBoundingBox.Value = this.defaultBoundingBox.Value;
+            self.boundingBox.Value = this.boundingBox.Value;
+            self.currentRotation.Value = this.currentRotation.Value;
+            self.rotations.Value = this.rotations.Value;
             self.rotate();
             self.rotate();
             self.rotate();
@@ -61,29 +61,22 @@ namespace Entoarox.FurnitureAnywhere
                 for (int index2 = 0; index2 < this.boundingBox.Height / Game1.tileSize; ++index2)
                 {
                     Vector2 key = tile + new Vector2(index1, index2);
-                    if (!l.Objects.ContainsKey(key)) continue;
-                    if (!(l.objects[key] is Furniture)) return false;
-                    Vector2 vector2 = key * Game1.tileSize - new Vector2(Game1.tileSize / 2);
-                    Furniture furniture = (Furniture)l.objects[key];
-                    if (furniture.furniture_type.Value == 11 && (furniture.getBoundingBox(furniture.TileLocation).Contains((int)vector2.X, (int)vector2.Y) && furniture.heldObject.Value == null && this.getTilesWide() == 1))
-                        return true;
-                    if ((furniture.furniture_type.Value != 12 || this.furniture_type.Value == 12) && furniture.getBoundingBox(furniture.TileLocation).Contains((int)vector2.X, (int)vector2.Y))
+                    if (l.Objects.ContainsKey(key))
+                    {
+                        if (l.objects[key] is Furniture)
+                        {
+                            Vector2 vector2 = key * Game1.tileSize - new Vector2(Game1.tileSize / 2);
+                            Furniture furniture = (Furniture) l.objects[key];
+                            if (furniture.furniture_type.Value == 11 && (furniture.getBoundingBox(furniture.TileLocation).Contains((int) vector2.X, (int) vector2.Y) && furniture.heldObject.Value == null && this.getTilesWide() == 1))
+                                return true;
+                            if ((furniture.furniture_type.Value != 12 || this.furniture_type.Value == 12) && furniture.getBoundingBox(furniture.TileLocation).Contains((int) vector2.X, (int) vector2.Y))
+                                return false;
+                        }
                         return false;
-                    return false;
+                    }
                 }
             }
-            if (this.ParentSheetIndex == 710 &&
-                l.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Water", "Back") != null &&
-                (!l.objects.ContainsKey(tile) &&
-                 l.doesTileHaveProperty((int)tile.X + 1, (int)tile.Y, "Water", "Back") != null) &&
-                l.doesTileHaveProperty((int)tile.X - 1, (int)tile.Y, "Water", "Back") != null ||
-                l.doesTileHaveProperty((int)tile.X, (int)tile.Y + 1, "Water", "Back") != null &&
-                l.doesTileHaveProperty((int)tile.X, (int)tile.Y - 1, "Water", "Back") != null ||
-                (this.ParentSheetIndex == 105 && this.bigCraftable.Value &&
-                 (l.terrainFeatures.ContainsKey(tile) &&
-                  l.terrainFeatures[tile] is StardewValley.TerrainFeatures.Tree) && !l.objects.ContainsKey(tile) ||
-                 this.name != null && this.name.Contains("Bomb") &&
-                 (!l.isTileOccupiedForPlacement(tile, this) || l.isTileOccupiedByFarmer(tile) != null)))
+            if (this.ParentSheetIndex == 710 && l.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Water", "Back") != null && (!l.objects.ContainsKey(tile) && l.doesTileHaveProperty((int)tile.X + 1, (int)tile.Y, "Water", "Back") != null) && l.doesTileHaveProperty((int)tile.X - 1, (int)tile.Y, "Water", "Back") != null || l.doesTileHaveProperty((int)tile.X, (int)tile.Y + 1, "Water", "Back") != null && l.doesTileHaveProperty((int)tile.X, (int)tile.Y - 1, "Water", "Back") != null || (this.ParentSheetIndex == 105 && this.bigCraftable.Value && (l.terrainFeatures.ContainsKey(tile) && l.terrainFeatures[tile] is StardewValley.TerrainFeatures.Tree) && !l.objects.ContainsKey(tile) || this.name != null && this.name.Contains("Bomb") && (!l.isTileOccupiedForPlacement(tile, this) || l.isTileOccupiedByFarmer(tile) != null)))
                 return true;
             return !l.isTileOccupiedForPlacement(tile, this);
         }
@@ -110,7 +103,7 @@ namespace Entoarox.FurnitureAnywhere
                         return false;
                 }
             }
-            this.boundingBox.Set(new Rectangle(x / Game1.tileSize * Game1.tileSize, y / Game1.tileSize * Game1.tileSize, this.boundingBox.Width, this.boundingBox.Height));
+            this.boundingBox.Value = new Rectangle(x / Game1.tileSize * Game1.tileSize, y / Game1.tileSize * Game1.tileSize, this.boundingBox.Width, this.boundingBox.Height);
             foreach (Farmer character in location.farmers)
             {
                 if (character.GetBoundingBox().Intersects(this.boundingBox.Value))
@@ -121,7 +114,9 @@ namespace Entoarox.FurnitureAnywhere
             }
             foreach (KeyValuePair<Vector2, Object> i in location.objects.Pairs)
             {
-                if (!(i.Value is Furniture)) continue;
+                if (!(i.Value is Furniture))
+                    continue;
+
                 Furniture furniture = (Furniture)i.Value;
                 if (furniture.getBoundingBox(furniture.TileLocation).Intersects(this.boundingBox.Value))
                 {
@@ -155,11 +150,11 @@ namespace Entoarox.FurnitureAnywhere
         public override Item getOne()
         {
             AnywhereFurniture furniture = new AnywhereFurniture(this);
-            furniture.drawPosition.Set(this.drawPosition.Value);
-            furniture.defaultBoundingBox.Set(this.defaultBoundingBox.Value);
-            furniture.boundingBox.Set(this.boundingBox.Value);
-            furniture.currentRotation.Set(this.currentRotation.Value);
-            furniture.rotations.Set(this.rotations.Value);
+            furniture.drawPosition.Value = this.drawPosition.Value;
+            furniture.defaultBoundingBox.Value = this.defaultBoundingBox.Value;
+            furniture.boundingBox.Value = this.boundingBox.Value;
+            furniture.currentRotation.Value = this.currentRotation.Value;
+            furniture.rotations.Value = this.rotations.Value;
             furniture.rotate();
             furniture.rotate();
             furniture.rotate();
@@ -177,7 +172,7 @@ namespace Entoarox.FurnitureAnywhere
             if (this.heldObject.Value == null || !who.addItemToInventoryBool(this.heldObject.Value))
                 return false;
             this.heldObject.Value.performRemoveAction(this.TileLocation, who.currentLocation);
-            this.heldObject.Set(null);
+            this.heldObject.Value = null;
             Game1.playSound("coin");
             return true;
         }

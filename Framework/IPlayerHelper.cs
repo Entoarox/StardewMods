@@ -46,6 +46,6 @@ namespace Entoarox.Framework
 
         /// <summary>Returns a list of all pets found.</summary>
         /// <returns>A list of all pets found in the game.</returns>
-        List<Pet> GetAllPets();
+        IEnumerable<Pet> GetAllPets();
     }
 }
