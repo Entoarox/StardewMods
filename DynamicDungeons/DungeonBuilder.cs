@@ -1043,17 +1043,17 @@ namespace Entoarox.DynamicDungeons
 
         private Color[,] GeneratePatch(int width = 7, int height = 7)
         {
-            List<(int, int)> GetAdjacentTiles(ref Color[,] area, int x, int y)
+            List<Point> GetAdjacentTiles(ref Color[,] area, int x, int y)
             {
-                List<(int, int)> points = new List<(int, int)>();
+                List<Point> points = new List<Point>();
                 if (x - 1 >= 0 && area[x - 1, y] != Color.White)
-                    points.Add((x - 1, y));
+                    points.Add(new Point(x - 1, y));
                 if (x + 1 < area.GetLength(0) && area[x + 1, y] != Color.White)
-                    points.Add((x + 1, y));
+                    points.Add(new Point(x + 1, y));
                 if (y - 1 >= 0 && area[x, y - 1] != Color.White)
-                    points.Add((x, y - 1));
+                    points.Add(new Point(x, y - 1));
                 if (y + 1 < area.GetLength(1) && area[x, y + 1] != Color.White)
-                    points.Add((x, y + 1));
+                    points.Add(new Point(x, y + 1));
                 return points;
             }
 
@@ -1092,7 +1092,7 @@ namespace Entoarox.DynamicDungeons
                 for (int y = 0; y < reg.GetLength(1); y++)
                     reg[x, y] = Color.Black;
             reg[width / 2, height / 2] = Color.White;
-            List<(int, int)> pos = new List<(int, int)>();
+            List<Point> pos = new List<Point>();
             for (int c = 0; c < this.Seeder.Next(width * height / 4, width * height / 3); c++)
             {
                 pos.Clear();
@@ -1104,8 +1104,8 @@ namespace Entoarox.DynamicDungeons
                             pos.AddRange(GetAdjacentTiles(ref reg, x, y));
                     }
                 }
-                (int, int) match = pos[this.Seeder.Next(0, pos.Count)];
-                reg[match.Item1, match.Item2] = Color.White;
+                Point match = pos[this.Seeder.Next(0, pos.Count)];
+                reg[match.X, match.Y] = Color.White;
             }
 
             for (int c = 0; c < 10; c++)

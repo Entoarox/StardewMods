@@ -34,7 +34,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -47,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionInfo.cs" />
     <Compile Include="Tiles\AnimatedTile.cs" />
     <Compile Include="ATile.cs" />
     <Compile Include="BookMenu.cs" />
@@ -69,7 +69,6 @@
     <Compile Include="TextPage.cs" />
     <Compile Include="Tiles\Tile.cs" />
     <Compile Include="TitlePage.cs" />
-    <Compile Include="TupleMagic.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\DynamicDungeonsEntrance.tbin">

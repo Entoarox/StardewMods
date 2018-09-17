@@ -19,7 +19,7 @@ namespace Entoarox.Framework.Core.Utilities
         /*********
         ** Fields
         *********/
-        private readonly List<(IContentHelper, Dictionary<TKey, TValue>)> Map = new List<(IContentHelper, Dictionary<TKey, TValue>)>();
+        private readonly List<DictionaryAssetInfo<TKey, TValue>> Map = new List<DictionaryAssetInfo<TKey, TValue>>();
 
 
         /*********
@@ -33,23 +33,23 @@ namespace Entoarox.Framework.Core.Utilities
         *********/
         public void Register(IContentHelper helper, Dictionary<TKey, TValue> data)
         {
-            this.Map.Add((helper, data));
+            this.Map.Add(new DictionaryAssetInfo<TKey, TValue>(helper, data));
         }
 
         public override void ApplyPatches(IAssetData data)
         {
             IDictionary<TKey, TValue> dict = data.AsDictionary<TKey, TValue>().Data;
             Dictionary<TKey, TValue> merge = new Dictionary<TKey, TValue>();
-            foreach ((IContentHelper, Dictionary<TKey, TValue>) patch in this.Map)
+            foreach (DictionaryAssetInfo<TKey, TValue> entry in this.Map)
             {
-                foreach (KeyValuePair<TKey, TValue> pair in patch.Item2)
+                foreach (KeyValuePair<TKey, TValue> pair in entry.Data)
                 {
                     if (dict.ContainsKey(pair.Key) && dict[pair.Key].Equals(pair.Value))
                         continue;
                     if (!merge.ContainsKey(pair.Key))
                         merge.Add(pair.Key, pair.Value);
                     else if (!merge[pair.Key].Equals(pair.Value))
-                        EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(patch.Item1)}` mod tried to modify the `{data.AssetName}` dictionary by setting the `{pair.Key}` key, but another mod has already set it", LogLevel.Warn);
+                        EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(entry.ContentHelper)}` mod tried to modify the `{data.AssetName}` dictionary by setting the `{pair.Key}` key, but another mod has already set it", LogLevel.Warn);
                 }
             }
 

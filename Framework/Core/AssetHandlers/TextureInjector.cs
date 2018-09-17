@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 
@@ -10,7 +9,7 @@ namespace Entoarox.Framework.Core.AssetHandlers
         /*********
         ** Accessors
         *********/
-        internal static Dictionary<string, List<(Texture2D, Rectangle?, Rectangle?)>> Map = new Dictionary<string, List<(Texture2D, Rectangle?, Rectangle?)>>();
+        internal static Dictionary<string, List<TextureInjectorInfo>> Map = new Dictionary<string, List<TextureInjectorInfo>>();
 
 
         /*********
@@ -24,8 +23,8 @@ namespace Entoarox.Framework.Core.AssetHandlers
         public void Edit<T>(IAssetData data)
         {
             IAssetDataForImage img = data.AsImage();
-            foreach ((Texture2D texture, Rectangle? source, Rectangle? destination) in TextureInjector.Map[data.AssetName])
-                img.PatchImage(texture, source, destination, PatchMode.Replace);
+            foreach (TextureInjectorInfo entry in TextureInjector.Map[data.AssetName])
+                img.PatchImage(entry.Texture, entry.Source, entry.Destination, PatchMode.Replace);
         }
     }
 }

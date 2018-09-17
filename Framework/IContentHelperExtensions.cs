@@ -50,8 +50,8 @@ namespace Entoarox.Framework
         {
             assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
             if (!TextureInjector.Map.ContainsKey(assetName))
-                TextureInjector.Map.Add(assetName, new List<(Texture2D, Rectangle?, Rectangle?)>());
-            TextureInjector.Map[assetName].Add((patchAsset, source, destination));
+                TextureInjector.Map.Add(assetName, new List<TextureInjectorInfo>());
+            TextureInjector.Map[assetName].Add(new TextureInjectorInfo(patchAsset, source, destination));
             helper.InvalidateCache(assetName);
         }
 
@@ -110,7 +110,7 @@ namespace Entoarox.Framework
                 EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(helper)}` mod\'s attempt to register a replacement asset for the `{assetName}` asset failed, as another mod has already done so.", LogLevel.Error);
             else
             {
-                XnbLoader.Map.Add(assetName, (helper, replacementAssetName));
+                XnbLoader.Map.Add(assetName, Tuple.Create(helper, replacementAssetName));
                 helper.InvalidateCache(assetName);
             }
         }
@@ -129,7 +129,7 @@ namespace Entoarox.Framework
                     EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(helper)}` mod\'s attempt to register a replacement asset for the `{pair.Key}` asset failed, as another mod has already done so.", LogLevel.Error);
                 else
                 {
-                    XnbLoader.Map.Add(asset, (helper, replacement));
+                    XnbLoader.Map.Add(asset, Tuple.Create(helper, replacement));
                     matchedAssets.Add(asset);
                 }
             }
@@ -145,11 +145,11 @@ namespace Entoarox.Framework
         public static void RegisterLoader<T>(this IContentHelper helper, string assetName, AssetLoader<T> assetLoader)
         {
             assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
-            if (DeferredAssetHandler.LoadMap.ContainsKey((typeof(T), assetName)))
+            if (DeferredAssetHandler.LoadMap.ContainsKey(assetName))
                 EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(helper)}` mod\'s attempt to register a replacement asset for the `{assetName}` asset of type `{typeof(T).FullName}` failed, as another mod has already done so.", LogLevel.Error);
             else
             {
-                DeferredAssetHandler.LoadMap.Add((typeof(T), assetName), assetLoader);
+                DeferredAssetHandler.LoadMap.Add(assetName, new DeferredAssetInfo(typeof(T), assetLoader));
                 helper.InvalidateCache(assetName);
             }
         }
@@ -162,9 +162,9 @@ namespace Entoarox.Framework
         public static void RegisterInjector<T>(this IContentHelper helper, string assetName, AssetInjector<T> assetInjector)
         {
             assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
-            if (!DeferredAssetHandler.EditMap.ContainsKey((typeof(T), assetName)))
-                DeferredAssetHandler.EditMap.Add((typeof(T), assetName), new List<Delegate>());
-            DeferredAssetHandler.EditMap[(typeof(T), assetName)].Add(assetInjector);
+            if (!DeferredAssetHandler.EditMap.ContainsKey(assetName))
+                DeferredAssetHandler.EditMap.Add(assetName, new List<DeferredAssetInfo>());
+            DeferredAssetHandler.EditMap[assetName].Add(new DeferredAssetInfo(typeof(T), assetInjector));
             helper.InvalidateCache(assetName);
         }
 

@@ -12,7 +12,6 @@ using xTile.Dimensions;
 using xTile.ObjectModel;
 using xTile.Tiles;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using SFarmer = StardewValley.Farmer;
 
 namespace Entoarox.DynamicDungeons
 {
@@ -21,7 +20,7 @@ namespace Entoarox.DynamicDungeons
         /*********
         ** Fields
         *********/
-        private (SFarmer player, string action, string[] arguments, Vector2 position)? ActionInfo;
+        private ActionInfo ActionInfo;
         private BookMenu InfoBook;
 
 
@@ -77,7 +76,7 @@ namespace Entoarox.DynamicDungeons
 
         public void ResolveAction()
         {
-            string action = this.ActionInfo?.action ?? string.Empty;
+            string action = this.ActionInfo?.Action ?? string.Empty;
             if (action.Equals("DDEntrance"))
             {
                 ModEntry.GenerateDungeon(10);
@@ -118,7 +117,7 @@ namespace Entoarox.DynamicDungeons
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = (Game1.player, split[0], args, grabTile);
+                    this.ActionInfo = new ActionInfo(Game1.player, split[0], args, grabTile);
                 }
             }
         }
@@ -150,20 +149,21 @@ namespace Entoarox.DynamicDungeons
                 (5, 13, "Buildings", 1, "Custom").ApplyTo(loc.map);
                 (5, 12, "Front", 0, "Custom").ApplyTo(loc.map);
                 */
-                (4, 11, "Front", 0, "Custom").ApplyTo(loc.map);
-                (5, 11, "Front", 1, "Custom").ApplyTo(loc.map);
-                (6, 11, "Front", 2, "Custom").ApplyTo(loc.map);
+                new Tiles.StaticTile(4, 11, "Front", 0, "Custom").Apply(loc.map);
+                new Tiles.StaticTile(4, 11, "Front", 0, "Custom").Apply(loc.map);
+                new Tiles.StaticTile(5, 11, "Front", 1, "Custom").Apply(loc.map);
+                new Tiles.StaticTile(6, 11, "Front", 2, "Custom").Apply(loc.map);
 
-                (4, 12, "Buildings", 4, "Custom").ApplyTo(loc.map);
-                (6, 12, "Buildings", 6, "Custom").ApplyTo(loc.map);
+                new Tiles.StaticTile(4, 12, "Buildings", 4, "Custom").Apply(loc.map);
+                new Tiles.StaticTile(6, 12, "Buildings", 6, "Custom").Apply(loc.map);
 
-                (4, 13, "Buildings", 8, "Custom").ApplyTo(loc.map);
-                (6, 13, "Buildings", 10, "Custom").ApplyTo(loc.map);
+                new Tiles.StaticTile(4, 13, "Buildings", 8, "Custom").Apply(loc.map);
+                new Tiles.StaticTile(6, 13, "Buildings", 10, "Custom").Apply(loc.map);
 
-                (5, 12, "Buildings", new[] { 12, 13, 14, 15, 20, 21, 22, 23 }, "Custom", 250).ApplyTo(loc.map);
-                (5, 13, "Buildings", new[] { 16, 17, 18, 19, 24, 25, 26, 27 }, "Custom", 250).ApplyTo(loc.map);
+                new Tiles.AnimatedTile(5, 12, "Buildings", new[] { 12, 13, 14, 15, 20, 21, 22, 23 }, "Custom", 250).Apply(loc.map);
+                new Tiles.AnimatedTile(5, 13, "Buildings", new[] { 16, 17, 18, 19, 24, 25, 26, 27 }, "Custom", 250).Apply(loc.map);
 
-                (5, 13, "Buildings", "Action", "DDDoor").ApplyTo(loc.map);
+                new Tiles.PropertyTile(5, 13, "Buildings", "Action", "DDDoor").Apply(loc.map);
                 if (Game1.getLocationFromName("DynamicDungeonEntrance") == null)
                 {
                     this.Helper.Content.Load<Map>("assets/DynamicDungeonsEntrance.tbin"); // maps need to be loaded before the game can reference it

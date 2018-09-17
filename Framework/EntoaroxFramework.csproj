@@ -41,7 +41,6 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Harmony, Version=1.0.9.1, Culture=neutral, processorArchitecture=MSIL">
@@ -60,9 +59,11 @@
     <Compile Include="Config\ConfigMinMaxAttribute.cs" />
     <Compile Include="Config\ConfigSliderAttribute.cs" />
     <Compile Include="Core\AssetHandlers\DeferredAssetHandler.cs" />
+    <Compile Include="Core\AssetHandlers\DeferredAssetInfo.cs" />
     <Compile Include="Core\AssetHandlers\DeferredTypeHandler.cs" />
     <Compile Include="Core\AssetHandlers\DictionaryInjector.cs" />
     <Compile Include="Core\AssetHandlers\TextureInjector.cs" />
+    <Compile Include="Core\AssetHandlers\TextureInjectorInfo.cs" />
     <Compile Include="Core\ConditionsHelper.cs" />
     <Compile Include="Core\InterModHelper.cs" />
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Core\Serialization\CustomItem.cs" />
     <Compile Include="Core\Serialization\Placeholder.cs" />
     <Compile Include="Core\Serialization\RectangleConverter.cs" />
+    <Compile Include="Core\Utilities\DictionaryAssetInfo.cs" />
     <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
     <Compile Include="Core\Utilities\Events.cs" />
     <Compile Include="Core\Utilities\Globals.cs" />

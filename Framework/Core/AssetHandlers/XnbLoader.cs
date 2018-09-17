@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using StardewModdingAPI;
 
@@ -8,7 +9,7 @@ namespace Entoarox.Framework.Core.AssetHandlers
         /*********
         ** Accessors
         *********/
-        internal static Dictionary<string, (IContentHelper, string)> Map = new Dictionary<string, (IContentHelper, string)>();
+        internal static Dictionary<string, Tuple<IContentHelper, string>> Map = new Dictionary<string, Tuple<IContentHelper, string>>();
 
 
         /*********

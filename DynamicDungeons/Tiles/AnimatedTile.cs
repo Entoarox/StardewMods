@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using xTile;
 using xTile.Layers;
@@ -10,7 +12,8 @@ namespace Entoarox.DynamicDungeons.Tiles
         /*********
         ** Fields
         *********/
-        private readonly (string sheet, int index)[] Frames;
+        /// <summary>The tilesheet names and animation indexes.</summary>
+        private readonly Tuple<string, int>[] Frames;
         private readonly int Interval;
 
 
@@ -18,9 +21,9 @@ namespace Entoarox.DynamicDungeons.Tiles
         ** Public methods
         *********/
         public AnimatedTile(int x, int y, string layer, int[] frames, string sheet, int interval)
-            : this(x, y, layer, frames.Select(a => (sheet, a)).ToArray(), interval) { }
+            : this(x, y, layer, frames.Select(a => Tuple.Create(sheet, a)).ToArray(), interval) { }
 
-        public AnimatedTile(int x, int y, string layer, (string sheet, int index)[] frames, int interval)
+        public AnimatedTile(int x, int y, string layer, Tuple<string, int>[] frames, int interval)
             : base(x, y, layer)
         {
             this.Frames = frames;
@@ -30,7 +33,20 @@ namespace Entoarox.DynamicDungeons.Tiles
         public override void Apply(int x, int y, Map map)
         {
             Layer layer = map.GetLayer(this.Layer);
-            layer.Tiles[this.X + x, this.Y + y] = new xTile.Tiles.AnimatedTile(layer, this.Frames.Select(a => new xTile.Tiles.StaticTile(layer, map.GetTileSheet(a.sheet), BlendMode.Additive, a.index)).ToArray(), this.Interval);
+            layer.Tiles[this.X + x, this.Y + y] = new xTile.Tiles.AnimatedTile(layer, this.GetFrameTiles(layer, map).ToArray(), this.Interval);
+        }
+
+
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Get the static animation frames.</summary>
+        /// <param name="layer">The layer on which to add it.</param>
+        /// <param name="map">The map for which to add it.</param>
+        private IEnumerable<xTile.Tiles.StaticTile> GetFrameTiles(Layer layer, Map map)
+        {
+            foreach (Tuple<string, int> entry in this.Frames)
+                yield return new xTile.Tiles.StaticTile(layer, map.GetTileSheet(entry.Item1), BlendMode.Additive, entry.Item2);
         }
     }
 }
