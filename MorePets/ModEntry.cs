@@ -61,7 +61,7 @@ namespace Entoarox.MorePetsAndAnimals
             ["Void Chicken"] = new List<int>(),
             ["White Chicken"] = new List<int>(),
             ["White Cow"] = new List<int>(),
-            // Special: MorePets separates baby ducks from baby white chickens (BabyDuck.xnb as a copy of BabyWhite Chicken.xnb is bundled because of this)
+            // Special: MorePets separates baby ducks from baby white chickens (BabyDuck.png as a copy of BabyWhite Chicken.png is bundled because of this)
             ["BabyDuck"] = new List<int>()
         };
         internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
@@ -133,7 +133,7 @@ namespace Entoarox.MorePetsAndAnimals
             foreach (KeyValuePair<string, List<int>> index in ModEntry.Indexes)
                 if (!index.Key.Equals("cat") && !index.Key.Equals("dog"))
                     index.Value.Add(0);
-            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "assets", "skins")).EnumerateFiles("*.xnb"))
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "assets", "skins")).EnumerateFiles("*.png"))
             {
                 if (file.Name.Contains("_"))
                 {
@@ -147,8 +147,8 @@ namespace Entoarox.MorePetsAndAnimals
                     else
                         this.Monitor.Log("Found unexpected file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
                 }
-                else if (!file.Name.Equals("BabyDuck.xnb"))
-                    this.Monitor.Log("Found file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
+                else if (!file.Name.Equals("BabyDuck.png"))
+                    this.Monitor.Log($"Found file `{file.Name}`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
             }
 
             this.Monitor.Log("Skin files found: " + string.Join(", ", skins), LogLevel.Trace);
@@ -163,7 +163,7 @@ namespace Entoarox.MorePetsAndAnimals
             {
                 this.Monitor.Log("Patching bus stop...", LogLevel.Trace);
                 GameLocation bus = Game1.getLocationFromName("BusStop");
-                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, this.Helper.Content.GetActualAssetKey("assets/box"), new Size(2, 2), new Size(16, 16)));
+                bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, this.Helper.Content.GetActualAssetKey("assets/box.png"), new Size(2, 2), new Size(16, 16)));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
                 bus.SetTile(1, 3, "Buildings", 2, "MorePetsTilesheet");
@@ -180,7 +180,7 @@ namespace Entoarox.MorePetsAndAnimals
                     try
                     {
                         string type = npc is Dog ? "dog" : "cat";
-                        npc.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey($"assets/skins/{type}_{npc.Manners}"), 0, 32, 32);
+                        npc.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey($"assets/skins/{type}_{npc.Manners}.png"), 0, 32, 32);
                     }
                     catch
                     {
@@ -207,7 +207,7 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        string assetKey = this.Helper.Content.GetActualAssetKey($"assets/skins/{str}_{animal.meatIndex.Value - 999}");
+                        string assetKey = this.Helper.Content.GetActualAssetKey($"assets/skins/{str}_{animal.meatIndex.Value - 999}.png");
                         if (animal.Sprite.textureName.Value != assetKey)
                             animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
@@ -217,7 +217,7 @@ namespace Entoarox.MorePetsAndAnimals
                         if (str.Equals("BabyDuck"))
                             try
                             {
-                                string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck");
+                                string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck.png");
                                 if (animal.Sprite.textureName.Value != assetKey)
                                     animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                             }
@@ -240,7 +240,7 @@ namespace Entoarox.MorePetsAndAnimals
                 {
                     try
                     {
-                        string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck");
+                        string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck.png");
                         if (animal.Sprite.textureName.Value != assetKey)
                             animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     }
