@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Objects;
@@ -8,11 +7,13 @@ namespace Entoarox.FurnitureAnywhere
 {
     public class AnywhereFurniture : Furniture
     {
-        public AnywhereFurniture()
-        {
+        /*********
+        ** Public methods
+        *********/
+        public AnywhereFurniture() { }
 
-        }
-        public AnywhereFurniture(Furniture item) : base(item.ParentSheetIndex, item.TileLocation)
+        public AnywhereFurniture(Furniture item)
+            : base(item.ParentSheetIndex, item.TileLocation)
         {
             this.defaultBoundingBox.Set(item.defaultBoundingBox.Value);
             this.boundingBox.Set(item.boundingBox.Value);
@@ -23,6 +24,7 @@ namespace Entoarox.FurnitureAnywhere
             this.rotate();
             this.rotate();
         }
+
         public Furniture Revert()
         {
             Furniture self = new Furniture(this.ParentSheetIndex, this.TileLocation);
@@ -36,18 +38,22 @@ namespace Entoarox.FurnitureAnywhere
             self.rotate();
             return self;
         }
+
         public override bool isPassable()
         {
             return this.furniture_type.Value == 12;
         }
+
         public override string getCategoryName()
         {
             return "FurnitureAnywhere";
         }
+
         public override bool performObjectDropInAction(Item dropIn, bool probe, Farmer who)
         {
             return false;
         }
+
         public override bool canBePlacedHere(GameLocation l, Vector2 tile)
         {
             for (int index1 = 0; index1 < this.boundingBox.Width / Game1.tileSize; ++index1)
@@ -67,12 +73,12 @@ namespace Entoarox.FurnitureAnywhere
                 }
             }
             if (this.ParentSheetIndex == 710 &&
-                l.doesTileHaveProperty((int) tile.X, (int) tile.Y, "Water", "Back") != null &&
+                l.doesTileHaveProperty((int)tile.X, (int)tile.Y, "Water", "Back") != null &&
                 (!l.objects.ContainsKey(tile) &&
-                 l.doesTileHaveProperty((int) tile.X + 1, (int) tile.Y, "Water", "Back") != null) &&
-                l.doesTileHaveProperty((int) tile.X - 1, (int) tile.Y, "Water", "Back") != null ||
-                l.doesTileHaveProperty((int) tile.X, (int) tile.Y + 1, "Water", "Back") != null &&
-                l.doesTileHaveProperty((int) tile.X, (int) tile.Y - 1, "Water", "Back") != null ||
+                 l.doesTileHaveProperty((int)tile.X + 1, (int)tile.Y, "Water", "Back") != null) &&
+                l.doesTileHaveProperty((int)tile.X - 1, (int)tile.Y, "Water", "Back") != null ||
+                l.doesTileHaveProperty((int)tile.X, (int)tile.Y + 1, "Water", "Back") != null &&
+                l.doesTileHaveProperty((int)tile.X, (int)tile.Y - 1, "Water", "Back") != null ||
                 (this.ParentSheetIndex == 105 && this.bigCraftable.Value &&
                  (l.terrainFeatures.ContainsKey(tile) &&
                   l.terrainFeatures[tile] is StardewValley.TerrainFeatures.Tree) && !l.objects.ContainsKey(tile) ||
@@ -81,6 +87,7 @@ namespace Entoarox.FurnitureAnywhere
                 return true;
             return !l.isTileOccupiedForPlacement(tile, this);
         }
+
         public override bool placementAction(GameLocation location, int x, int y, Farmer who = null)
         {
             Point point = new Point(x / Game1.tileSize, y / Game1.tileSize);
@@ -104,7 +111,7 @@ namespace Entoarox.FurnitureAnywhere
                 }
             }
             this.boundingBox.Set(new Rectangle(x / Game1.tileSize * Game1.tileSize, y / Game1.tileSize * Game1.tileSize, this.boundingBox.Width, this.boundingBox.Height));
-            foreach (Character character in location.farmers)
+            foreach (Farmer character in location.farmers)
             {
                 if (character.GetBoundingBox().Intersects(this.boundingBox.Value))
                 {
@@ -133,7 +140,7 @@ namespace Entoarox.FurnitureAnywhere
                 {
                     if (location.objects[this.TileLocation].ParentSheetIndex != this.ParentSheetIndex)
                     {
-                        Game1.createItemDebris(location.objects[this.TileLocation], this.TileLocation * Game1.tileSize, Game1.random.Next(4), null);
+                        Game1.createItemDebris(location.objects[this.TileLocation], this.TileLocation * Game1.tileSize, Game1.random.Next(4));
                         location.objects[this.TileLocation] = @object;
                     }
                 }
@@ -144,6 +151,7 @@ namespace Entoarox.FurnitureAnywhere
             Game1.playSound("woodyStep");
             return true;
         }
+
         public override Item getOne()
         {
             AnywhereFurniture furniture = new AnywhereFurniture(this);
@@ -158,12 +166,13 @@ namespace Entoarox.FurnitureAnywhere
             furniture.rotate();
             return furniture;
         }
+
         public override bool clicked(Farmer who)
         {
             Game1.haltAfterCheck = false;
-            if (this.furniture_type.Value == 11 && who.ActiveObject != null && (who.ActiveObject != null && this.heldObject.Value == null))
+            if (this.furniture_type.Value == 11 && who.ActiveObject != null && this.heldObject.Value == null)
                 return false;
-            if (this.heldObject.Value == null && (who.ActiveObject == null || !(who.ActiveObject is Furniture)))
+            if (this.heldObject.Value == null && !(who.ActiveObject is Furniture))
                 return who.addItemToInventoryBool(this.Revert());
             if (this.heldObject.Value == null || !who.addItemToInventoryBool(this.heldObject.Value))
                 return false;

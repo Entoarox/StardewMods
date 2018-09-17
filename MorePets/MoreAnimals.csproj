@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdoptQuestion.cs" />
-    <Compile Include="MoreAnimalsMod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -52,9 +52,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\VersionChecker\MorePets.json">
-      <Link>MorePets.json</Link>
-    </None>
     <None Include="box.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

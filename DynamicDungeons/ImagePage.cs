@@ -4,17 +4,26 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.DynamicDungeons
 {
-    class ImagePage : Page
+    internal class ImagePage : Page
     {
-        private Texture2D Image;
-        private Color Color;
-        private bool Shadow;
-        public ImagePage(Texture2D image, Color? color = null, bool shadow=false)
+        /*********
+        ** Fields
+        *********/
+        private readonly Color Color;
+        private readonly Texture2D Image;
+        private readonly bool Shadow;
+
+
+        /*********
+        ** Public methods
+        *********/
+        public ImagePage(Texture2D image, Color? color = null, bool shadow = false)
         {
             this.Image = image;
             this.Color = color ?? Color.White;
             this.Shadow = shadow;
         }
+
         public override void Draw(SpriteBatch batch, Rectangle region)
         {
             int w = Math.Min(region.Width, this.Image.Width * 2);
@@ -28,6 +37,7 @@ namespace Entoarox.DynamicDungeons
                 batch.Draw(this.Image, new Rectangle(region.X + x, region.Y + y + 2, w, h), c);
                 batch.Draw(this.Image, new Rectangle(region.X + x + 2, region.Y + y + 2, w, h), c);
             }
+
             batch.Draw(this.Image, new Rectangle(region.X + x, region.Y + y, w, h), this.Color);
         }
     }

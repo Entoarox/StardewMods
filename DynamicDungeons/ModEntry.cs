@@ -1,76 +1,86 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-
 using StardewValley;
-using SFarmer = StardewValley.Farmer;
-
+using xTile.Dimensions;
+using xTile.ObjectModel;
 using xTile.Tiles;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using SFarmer = StardewValley.Farmer;
 
 namespace Entoarox.DynamicDungeons
 {
-    public class DynamicDungeonsMod : Mod
+    internal class ModEntry : Mod
     {
-        #region fields
+        /*********
+        ** Fields
+        *********/
+        private (SFarmer player, string action, string[] arguments, Vector2 position)? ActionInfo;
+        private BookMenu InfoBook;
+
+
+        /*********
+        ** Accessors
+        *********/
         internal static IMonitor SMonitor;
         internal static IModHelper SHelper;
         internal static DynamicDungeon Location;
-        private (SFarmer player, string action, string[] arguments, Vector2 position)? ActionInfo;
-        private BookMenu InfoBook;
-        #endregion
-        #region mod
+
+
+        /*********
+        ** Public methods
+        *********/
         public override void Entry(IModHelper helper)
         {
-            SMonitor = this.Monitor;
-            SHelper = this.Helper;
+            ModEntry.SMonitor = this.Monitor;
+            ModEntry.SHelper = this.Helper;
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             helper.ConsoleCommands.Add("dd_fromseed", "dd_fromseed <seed> | Generate a dungeon from a specific seed", this.Command_Fromseed);
-            this.InfoBook = new BookMenu(new List<Page>() {
-                new TitlePage(helper.Translation.Get("Book_Title"),helper.Translation.Get("Book_Subtitle"),helper.Translation.Get("Book_Introduction")),
+            this.InfoBook = new BookMenu(new List<Page>
+            {
+                new TitlePage(helper.Translation.Get("Book_Title"), helper.Translation.Get("Book_Subtitle"), helper.Translation.Get("Book_Introduction")),
                 new TextPage(helper.Translation.Get("Book_Page1")),
                 new TextPage(helper.Translation.Get("Book_Page2")),
                 new PaymentPage(),
-                new ImagePage(helper.Content.Load<Texture2D>("content/book/doodle1.png"),Game1.textColor,true),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle1.png"), Game1.textColor, true),
                 new TitlePage("DickBut", "Dickius Buttius Maximus", "The Dickius Buttius Maximus, better know as the DickBut is a mighty creature of great majesty."),
-                new ImagePage(helper.Content.Load<Texture2D>("content/book/doodle2.png"),Game1.textColor,true),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle2.png"), Game1.textColor, true),
                 new TitlePage("The Lie", "Absolutum Lie-um", "Please turn the page somewhere else, there is nothing to see here."),
-                new ImagePage(helper.Content.Load<Texture2D>("content/book/doodle3.png"),Game1.textColor,true),
-                new TitlePage("PufferChick", "Pufferium Chickate", "Adorable abomination, dont you just want to cuddle it?"),
+                new ImagePage(helper.Content.Load<Texture2D>("assets/content/book/doodle3.png"), Game1.textColor, true),
+                new TitlePage("PufferChick", "Pufferium Chickate", "Adorable abomination, dont you just want to cuddle it?")
             });
         }
+
         public override object GetApi()
         {
             return new DynamicDungeonsAPI();
         }
-        #endregion
-        #region methods
-        internal static void GenerateDungeon(double difficulty, int? seed = null)
+
+        public static void GenerateDungeon(double difficulty, int? seed = null)
         {
-            if (Location != null)
-                Game1.locations.Remove(Location);
-            var watch = new Stopwatch();
-            SMonitor.Log("Generating dungeon...", LogLevel.Alert);
+            if (ModEntry.Location != null)
+                Game1.locations.Remove(ModEntry.Location);
+            Stopwatch watch = new Stopwatch();
+            ModEntry.SMonitor.Log("Generating dungeon...", LogLevel.Alert);
             watch.Start();
-            Location = new DynamicDungeon(difficulty, seed);
+            ModEntry.Location = new DynamicDungeon(difficulty, seed);
             watch.Stop();
-            SMonitor.Log("Generation completed in ["+watch.ElapsedMilliseconds+"] miliseconds", LogLevel.Alert);
-            Game1.locations.Add(Location);
+            ModEntry.SMonitor.Log("Generation completed in [" + watch.ElapsedMilliseconds + "] miliseconds", LogLevel.Alert);
+            Game1.locations.Add(ModEntry.Location);
         }
-        internal void ResolveAction()
+
+        public void ResolveAction()
         {
             string action = this.ActionInfo?.action ?? string.Empty;
             if (action.Equals("DDEntrance"))
             {
-                GenerateDungeon(10);
-                Game1.warpFarmer("DynamicDungeon", Location.EntryPoint.X, Location.EntryPoint.Y, true);
+                ModEntry.GenerateDungeon(10);
+                Game1.warpFarmer("DynamicDungeon", ModEntry.Location.EntryPoint.X, ModEntry.Location.EntryPoint.Y, true);
             }
             else if (action.Equals("DDBook"))
             {
@@ -81,24 +91,28 @@ namespace Entoarox.DynamicDungeons
             {
                 if (Game1.player.hasSkullKey)
                 {
-                    var warp = Game1.getLocationFromName("DynamicDungeonEntrance").warps[0];
+                    Warp warp = Game1.getLocationFromName("DynamicDungeonEntrance").warps[0];
                     Game1.warpFarmer("DynamicDungeonEntrance", warp.X, warp.Y - 1, false);
-
                 }
                 else
-                    Game1.drawObjectDialogue(SHelper.Translation.Get("SkullKeyNeeded"));
+                    Game1.drawObjectDialogue(ModEntry.SHelper.Translation.Get("SkullKeyNeeded"));
             }
         }
+
+
+        /*********
+        ** Protected methods
+        *********/
         private void CheckForAction()
         {
             if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
                 this.ActionInfo = null;
-                Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
+                Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
                     grabTile = Game1.player.GetGrabTile();
-                var tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size) ?? Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)(grabTile.Y + 1) * Game1.tileSize), Game1.viewport.Size);
-                if (tile != null && tile.Properties.TryGetValue("Action", out var propertyValue) && propertyValue!=null)
+                xTile.Tiles.Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size) ?? Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)(grabTile.Y + 1) * Game1.tileSize), Game1.viewport.Size);
+                if (tile != null && tile.Properties.TryGetValue("Action", out PropertyValue propertyValue) && propertyValue != null)
                 {
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
@@ -107,19 +121,19 @@ namespace Entoarox.DynamicDungeons
                 }
             }
         }
-        #endregion
-        #region events
+
         private void Command_Fromseed(string command, string[] arguments)
         {
             try
             {
-                GenerateDungeon(Convert.ToInt32(arguments[0], 16));
+                ModEntry.GenerateDungeon(Convert.ToInt32(arguments[0], 16));
             }
             catch
             {
                 this.Monitor.Log("Input is not a valid seed!", LogLevel.Error);
             }
         }
+
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
             if (Context.IsWorldReady)
@@ -127,8 +141,8 @@ namespace Entoarox.DynamicDungeons
                 GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
                 InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
                 PlayerEvents.Warped += this.PlayerEvents_Warped;
-                var loc = Game1.getLocationFromName("WizardHouse");
-                var sheet = new TileSheet("Custom",loc.map, this.Helper.Content.GetActualAssetKey("door.png"), new xTile.Dimensions.Size(4, 7), new xTile.Dimensions.Size(16, 16));
+                GameLocation loc = Game1.getLocationFromName("WizardHouse");
+                TileSheet sheet = new TileSheet("Custom", loc.map, this.Helper.Content.GetActualAssetKey("assets/door.png"), new Size(4, 7), new Size(16, 16));
                 loc.map.AddTileSheet(sheet);
                 /*
                 loc.setMapTileIndex(5, 13, 112, "Back");
@@ -150,12 +164,13 @@ namespace Entoarox.DynamicDungeons
 
                 (5, 13, "Buildings", "Action", "DDDoor").ApplyTo(loc.map);
                 if (Game1.getLocationFromName("DynamicDungeonEntrance") == null)
-                    Game1.locations.Add(new GameLocation(this.Helper.Content.GetActualAssetKey("DynamicDungeonsEntrance.tbin"), "DynamicDungeonEntrance"));
+                    Game1.locations.Add(new GameLocation(this.Helper.Content.GetActualAssetKey("assets/DynamicDungeonsEntrance.tbin"), "DynamicDungeonEntrance"));
             }
         }
+
         private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
         {
-            if(e.PriorLocation!=null && (e.PriorLocation.name=="DynamicDungeonEntrance" || e.PriorLocation.name == "WizardHouse"))
+            if (e.PriorLocation != null && (e.PriorLocation.name == "DynamicDungeonEntrance" || e.PriorLocation.name == "WizardHouse"))
             {
                 ControlEvents.ControllerButtonPressed -= this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.ControllerButtonReleased -= this.ControlEvents_ControllerButtonReleased;
@@ -163,7 +178,8 @@ namespace Entoarox.DynamicDungeons
                 if (e.PriorLocation.name == "DynamicDungeonEntrance")
                     GraphicsEvents.OnPreRenderHudEvent -= this.GraphicsEvents_OnPreRenderHudEvent;
             }
-            if(e.NewLocation.name=="DynamicDungeonEntrance" || e.NewLocation.name == "WizardHouse")
+
+            if (e.NewLocation.name == "DynamicDungeonEntrance" || e.NewLocation.name == "WizardHouse")
             {
                 ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
@@ -172,50 +188,53 @@ namespace Entoarox.DynamicDungeons
                     GraphicsEvents.OnPreRenderHudEvent += this.GraphicsEvents_OnPreRenderHudEvent;
             }
         }
+
         private void GraphicsEvents_OnPreRenderHudEvent(object s, EventArgs e)
         {
             void Glow(float x, float y)
             {
-                Game1.spriteBatch.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2((x * Game1.tileSize + Game1.tileSize / 2 + Game1.pixelZoom / 2), (y * Game1.tileSize + Game1.tileSize / 4))), new Rectangle?(new Rectangle(88, 1779, 30, 30)), Color.PaleGoldenrod * (Game1.currentLocation.IsOutdoors ? 0.35f : 0.43f), 0f, new Vector2(15f, 15f), Game1.pixelZoom + (float)(Game1.tileSize * Math.Sin((Game1.currentGameTime.TotalGameTime.TotalMilliseconds + (x * Game1.tileSize * 777) + (y * Game1.tileSize * 9746)) % 3140.0 / 1000.0) / 50.0), SpriteEffects.None, 1f);
+                Game1.spriteBatch.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, new Vector2(x * Game1.tileSize + Game1.tileSize / 2 + Game1.pixelZoom / 2, y * Game1.tileSize + Game1.tileSize / 4)), new Rectangle(88, 1779, 30, 30), Color.PaleGoldenrod * (Game1.currentLocation.IsOutdoors ? 0.35f : 0.43f), 0f, new Vector2(15f, 15f), Game1.pixelZoom + (float)(Game1.tileSize * Math.Sin((Game1.currentGameTime.TotalGameTime.TotalMilliseconds + x * Game1.tileSize * 777 + y * Game1.tileSize * 9746) % 3140.0 / 1000.0) / 50.0), SpriteEffects.None, 1f);
             }
+
             Glow(1.30f, 4.50f);
             Glow(5.00f, 2.50f);
             Glow(8.70f, 4.50f);
             Glow(2.25f, 8.50f);
             Glow(7.75f, 8.50f);
         }
+
         private void InputEvents_ButtonReleased(object s, EventArgsInput e)
         {
-            if (!Context.IsWorldReady || (e.Button != SButton.F5 && e.Button != SButton.F6 && e.Button != SButton.F7))
+            if (!Context.IsWorldReady || e.Button != SButton.F5 && e.Button != SButton.F6 && e.Button != SButton.F7)
                 return;
             if (e.Button == SButton.F5)
-            {
                 Game1.warpFarmer("WizardHouse", 5, 14, false);
-            }
         }
+
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
-                CheckForAction();
+                this.CheckForAction();
         }
+
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
             if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
             {
-                ResolveAction();
+                this.ResolveAction();
                 this.ActionInfo = null;
             }
         }
+
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                CheckForAction();
+                this.CheckForAction();
             if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
             {
-                ResolveAction();
+                this.ResolveAction();
                 this.ActionInfo = null;
             }
         }
-        #endregion
     }
 }

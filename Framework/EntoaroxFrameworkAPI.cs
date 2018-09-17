@@ -1,37 +1,50 @@
 using System.Collections.Generic;
 using System.Linq;
+using Entoarox.Framework.Core;
 
 namespace Entoarox.Framework
 {
-    using Core;
     public class EntoaroxFrameworkAPI
     {
+        /*********
+        ** Fields
+        *********/
         private static PlayerModifier Modifier;
-        private static Dictionary<string, int> WalkBoosts = new Dictionary<string, int>();
-        private static Dictionary<string, int> RunBoosts = new Dictionary<string, int>();
-        private static void Recalculate()
-        {
-            if (Modifier == null)
-                Modifier = new PlayerModifier();
-            EntoaroxFrameworkMod.SHelper.Player().Modifiers.Remove(Modifier);
-            Modifier.WalkSpeedModifier = WalkBoosts.Values.Aggregate((total, next) => total + next);
-            Modifier.RunSpeedModifier = RunBoosts.Values.Aggregate((total, next) => total + next);
-            EntoaroxFrameworkMod.SHelper.Player().Modifiers.Add(Modifier);
-        }
+        private static readonly Dictionary<string, int> RunBoosts = new Dictionary<string, int>();
+        private static readonly Dictionary<string, int> WalkBoosts = new Dictionary<string, int>();
 
-        public void AddBoost(string id, int amount, bool forWalking=true, bool forRunning=true)
+
+        /*********
+        ** Public methods
+        *********/
+        public void AddBoost(string id, int amount, bool forWalking = true, bool forRunning = true)
         {
             if (forWalking)
-                WalkBoosts[id] = amount;
+                EntoaroxFrameworkAPI.WalkBoosts[id] = amount;
             if (forRunning)
-                RunBoosts[id] = amount;
-            Recalculate();
+                EntoaroxFrameworkAPI.RunBoosts[id] = amount;
+            EntoaroxFrameworkAPI.Recalculate();
         }
+
         public void RemoveBoost(string id)
         {
-            WalkBoosts.Remove(id);
-            RunBoosts.Remove(id);
-            Recalculate();
+            EntoaroxFrameworkAPI.WalkBoosts.Remove(id);
+            EntoaroxFrameworkAPI.RunBoosts.Remove(id);
+            EntoaroxFrameworkAPI.Recalculate();
+        }
+
+
+        /*********
+        ** Protected methods
+        *********/
+        private static void Recalculate()
+        {
+            if (EntoaroxFrameworkAPI.Modifier == null)
+                EntoaroxFrameworkAPI.Modifier = new PlayerModifier();
+            EntoaroxFrameworkMod.SHelper.Player().Modifiers.Remove(EntoaroxFrameworkAPI.Modifier);
+            EntoaroxFrameworkAPI.Modifier.WalkSpeedModifier = EntoaroxFrameworkAPI.WalkBoosts.Values.Aggregate((total, next) => total + next);
+            EntoaroxFrameworkAPI.Modifier.RunSpeedModifier = EntoaroxFrameworkAPI.RunBoosts.Values.Aggregate((total, next) => total + next);
+            EntoaroxFrameworkMod.SHelper.Player().Modifiers.Add(EntoaroxFrameworkAPI.Modifier);
         }
     }
 }

@@ -1,14 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-
+using Microsoft.Xna.Framework;
 using StardewValley;
 
 namespace Entoarox.Framework.UI
 {
-    class ClickableCancelComponent : ClickableTextureComponent
+    internal class ClickableCancelComponent : ClickableTextureComponent
     {
-        public ClickableCancelComponent(Point position, ClickHandler handler = null) : base(new Rectangle(position.X, position.Y, 16, 16), Game1.mouseCursors, handler, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 47), true)
-        {
-
-        }
+        /*********
+        ** Public methods
+        *********/
+        public ClickableCancelComponent(Point position, ClickHandler handler = null)
+            : base(new Rectangle(position.X, position.Y, 16, 16), Game1.mouseCursors, handler, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 47), true) { }
     }
 }

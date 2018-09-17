@@ -3,8 +3,11 @@ using Newtonsoft.Json;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class ShopConfig
+    internal class ShopConfig
     {
+        /*********
+        ** Accessors
+        *********/
         [JsonIgnore]
         public string Name;
 

@@ -1,17 +1,40 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace Entoarox.Framework.Core.Utilities
 {
-    unsafe internal class UnsafeHelper
+    internal unsafe class UnsafeHelper
     {
+        /*********
+        ** Public methods
+        *********/
+        internal static void ReplaceMethod(MethodBase source, MethodBase dest)
+        {
+            IntPtr srcAdr = UnsafeHelper.GetMethodAddress(source);
+            IntPtr destAdr = UnsafeHelper.GetMethodAddress(dest);
+            if (IntPtr.Size == 8)
+            {
+                ulong* d = (ulong*)destAdr.ToPointer();
+                *d = *(ulong*)srcAdr.ToPointer();
+            }
+            else
+            {
+                uint* d = (uint*)destAdr.ToPointer();
+                *d = *(uint*)srcAdr.ToPointer();
+            }
+        }
+
+
+        /*********
+        ** Protected methods
+        *********/
         private static IntPtr GetMethodAddress(MethodBase method)
         {
-            if ((method is DynamicMethod))
+            if (method is DynamicMethod)
             {
-                byte* ptr = (byte*)GetDynamicMethodRuntimeHandle(method).ToPointer();
+                byte* ptr = (byte*)UnsafeHelper.GetDynamicMethodRuntimeHandle(method).ToPointer();
                 if (IntPtr.Size == 8)
                 {
                     ulong* address = (ulong*)ptr;
@@ -29,8 +52,8 @@ namespace Entoarox.Framework.Core.Utilities
             RuntimeHelpers.PrepareMethod(method.MethodHandle);
             int skip = 10;
 
-            UInt64* location = (UInt64*)(method.MethodHandle.Value.ToPointer());
-            int index = (int)(((*location) >> 32) & 0xFF);
+            ulong* location = (ulong*)method.MethodHandle.Value.ToPointer();
+            int index = (int)((*location >> 32) & 0xFF);
 
             if (IntPtr.Size == 8)
             {
@@ -49,21 +72,6 @@ namespace Entoarox.Framework.Core.Utilities
         private static IntPtr GetDynamicMethodRuntimeHandle(MethodBase method)
         {
             return ((RuntimeMethodHandle)typeof(DynamicMethod).GetField("m_method", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(method)).Value;
-        }
-        internal static void ReplaceMethod(MethodBase source, MethodBase dest)
-        {
-            IntPtr srcAdr = GetMethodAddress(source);
-            IntPtr destAdr = GetMethodAddress(dest);
-            if (IntPtr.Size == 8)
-            {
-                ulong* d = (ulong*)destAdr.ToPointer();
-                *d = *((ulong*)srcAdr.ToPointer());
-            }
-            else
-            {
-                uint* d = (uint*)destAdr.ToPointer();
-                *d = *((uint*)srcAdr.ToPointer());
-            }
         }
     }
 }

@@ -1,9 +1,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Entoarox.CustomBooks
+namespace Entoarox.CustomBooks.Menu
 {
-    public abstract class Page
+    internal abstract class Page
     {
         public bool Editable = false;
         public abstract void Draw(SpriteBatch batch, Rectangle region);

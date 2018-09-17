@@ -1,19 +1,18 @@
-using StardewValley;
-
-using Microsoft.Xna.Framework;
-
 using Harmony;
-
+using Microsoft.Xna.Framework;
+using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Network;
 using StardewValley.Objects;
 
 namespace Entoarox.FurnitureAnywhere
 {
-
     [HarmonyPatch(typeof(GameLocation), "isCollidingPosition", new[] { typeof(Rectangle), typeof(xTile.Dimensions.Rectangle), typeof(bool), typeof(int), typeof(bool), typeof(Character) })]
     public class LocationPatch
     {
+        /*********
+        ** Public methods
+        *********/
         internal static void Prefix(GameLocation __instance, Rectangle position)
         {
             OverlaidDictionary objects = __instance.objects;

@@ -45,11 +45,23 @@
     <Compile Include="ConditionalResolver.cs" />
     <Compile Include="Configs\Compound.cs" />
     <Compile Include="Configs\LoaderVersionConfig.cs" />
+    <Compile Include="Configs\Subclasses\Property.cs" />
+    <Compile Include="Configs\Subclasses\Redirect.cs" />
+    <Compile Include="Configs\Subclasses\Override.cs" />
+    <Compile Include="Configs\Subclasses\Location.cs" />
     <Compile Include="Configs\LocationConfig_1_1.cs" />
     <Compile Include="Configs\LocationConfig1_2.cs" />
+    <Compile Include="Configs\Subclasses\MapFileLink.cs" />
     <Compile Include="Configs\ShopConfig.cs" />
-    <Compile Include="Configs\SubClasses.cs" />
+    <Compile Include="Configs\Subclasses\ShopItem.cs" />
+    <Compile Include="Configs\Subclasses\Conditional.cs" />
     <Compile Include="Configs\ContentPackData.cs" />
+    <Compile Include="Configs\Subclasses\TileInfo.cs" />
+    <Compile Include="Configs\Subclasses\TeleporterDestination.cs" />
+    <Compile Include="Configs\Subclasses\TeleporterList.cs" />
+    <Compile Include="Configs\Subclasses\Tilesheet.cs" />
+    <Compile Include="Configs\Subclasses\Tile.cs" />
+    <Compile Include="Configs\Subclasses\Warp.cs" />
     <Compile Include="ContentPackExtensions.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Processing\ConfigReader.cs" />
@@ -66,10 +78,9 @@
     <Compile Include="TeleportationResolver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Docs\Actions.md" />
+    <None Include="docs\Actions.md" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
-    <None Include="About\update.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\EntoaroxFramework.csproj">
@@ -79,10 +90,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Docs\Manifest.md" />
+    <None Include="docs\Manifest.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="changelog.txt" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

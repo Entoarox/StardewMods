@@ -1,44 +1,45 @@
 using System;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using StardewValley;
 
 namespace Entoarox.Framework.Interface
 {
     public abstract class BaseComponent : IComponent
     {
-        public BaseComponent(string name, Rectangle bounds, int layer)
-        {
-            this.Name = name;
-            this.Layer = layer;
-            this.OuterBounds = bounds;
-        }
+        /*********
+        ** Fields
+        *********/
+        private IComponentContainer _Owner;
+        private bool _Visible;
 
+
+        /*********
+        ** Accessors
+        *********/
         public int Layer { get; set; }
 
-        private bool _Visible;
         public bool Visible
         {
             get => this._Visible;
             set
             {
-                if(value!=this._Visible)
+                if (value != this._Visible)
                 {
                     this._Visible = value;
                     (this._Owner as IVisibilityObserver)?.VisibilityChanged(this);
                 }
             }
         }
+
         public virtual Rectangle OuterBounds { get; set; }
-
-        public string Name { get; private set; }
-        private IComponentContainer _Owner;
+        public string Name { get; }
         public IComponentContainer Owner => this._Owner ?? throw new InvalidOperationException(Strings.ComponentNotAttached);
+        public bool IsAttached { get; private set; }
 
-        public bool IsAttached { get; private set; } = false;
 
+        /*********
+        ** Public methods
+        *********/
         public virtual void Attach(IComponentContainer collection)
         {
             if (this.IsAttached)
@@ -57,9 +58,17 @@ namespace Entoarox.Framework.Interface
 
         public abstract void Draw(Point offset, SpriteBatch batch);
 
-        public virtual void Update(GameTime time)
+        public virtual void Update(GameTime time) { }
+
+
+        /*********
+        ** Protected methods
+        *********/
+        protected BaseComponent(string name, Rectangle bounds, int layer)
         {
-            
+            this.Name = name;
+            this.Layer = layer;
+            this.OuterBounds = bounds;
         }
     }
 }

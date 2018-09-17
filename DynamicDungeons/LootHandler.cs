@@ -1,70 +1,95 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using SObject = StardewValley.Object;
 
 namespace Entoarox.DynamicDungeons
 {
-    class LootHandler
+    internal class LootHandler
     {
+        /*********
+        ** Fields
+        *********/
+        private Dictionary<double, List<object>> LootTable = new Dictionary<double, List<object>>();
+        private readonly Dictionary<int, Random> Randoms = new Dictionary<int, Random>();
+
+
+        /*********
+        ** Accessors
+        *********/
         internal static Dictionary<string, LootHandler> LootTables = new Dictionary<string, LootHandler>();
+
+
+        /*********
+        ** Public methods
+        *********/
+        public LootHandler(Dictionary<double, List<object>> lootTable = null)
+        {
+            this.LootTable = lootTable?.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value) ?? new Dictionary<double, List<object>>();
+        }
+
         static LootHandler()
         {
             // Setup vanilla loot tables
-            LootTables.Add("General", new LootHandler());
-            LootTables.Add("Supplies", new LootHandler());
-            LootTables.Add("Gems", new LootHandler());
-            LootTables.Add("Fishing", new LootHandler());
-            LootTables.Add("Digging", new LootHandler());
+            LootHandler.LootTables.Add("General", new LootHandler());
+            LootHandler.LootTables.Add("Supplies", new LootHandler());
+            LootHandler.LootTables.Add("Gems", new LootHandler());
+            LootHandler.LootTables.Add("Fishing", new LootHandler());
+            LootHandler.LootTables.Add("Digging", new LootHandler());
             // Setup vanilla loot drops
-            LootTables["General"].Add(1, new SObject(93, 1));
-            LootTables["Supplies"].Add(1, new SObject(93, 1));
-            LootTables["Gems"].Add(1, new SObject(80, 1));
-            LootTables["Fishing"].Add(1, new SObject(168, 1));
-            LootTables["Digging"].Add(1, new SObject(330, 1));
+            LootHandler.LootTables["General"].Add(1, new SObject(93, 1));
+            LootHandler.LootTables["Supplies"].Add(1, new SObject(93, 1));
+            LootHandler.LootTables["Gems"].Add(1, new SObject(80, 1));
+            LootHandler.LootTables["Fishing"].Add(1, new SObject(168, 1));
+            LootHandler.LootTables["Digging"].Add(1, new SObject(330, 1));
         }
-        private Dictionary<double, List<object>> _LootTable = new Dictionary<double, List<object>>();
-        private Dictionary<int, Random> _Randoms = new Dictionary<int, Random>();
-        public LootHandler(Dictionary<double, List<object>> lootTable = null)
-        {
-            this._LootTable = lootTable?.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value) ?? new Dictionary<double, List<object>>();
-        }
-        private Random GetRandom(int seed)
-        {
-            if (!this._Randoms.ContainsKey(seed))
-                this._Randoms.Add(seed, new Random(seed));
-            return this._Randoms[seed];
-        }
+
         public void Add(double chancePercentage, SObject itemLoot)
         {
-            if (!this._LootTable.ContainsKey(chancePercentage))
-                this._LootTable.Add(chancePercentage, new List<object>() { itemLoot});
-            this._LootTable=this._LootTable.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value);
+            if (!this.LootTable.ContainsKey(chancePercentage))
+                this.LootTable.Add(chancePercentage, new List<object> { itemLoot });
+            this.LootTable = this.LootTable.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value);
         }
+
         public void Add(double chancePercentage, Func<SObject> itemLootCallback)
         {
-            if (!this._LootTable.ContainsKey(chancePercentage))
-                this._LootTable.Add(chancePercentage, new List<object>() { itemLootCallback });
-            this._LootTable = this._LootTable.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value);
+            if (!this.LootTable.ContainsKey(chancePercentage))
+                this.LootTable.Add(chancePercentage, new List<object> { itemLootCallback });
+            this.LootTable = this.LootTable.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value);
         }
+
         public SObject[] GetDrops(int seed, int count, double chanceModifier)
         {
-            var drops = new SObject[count];
+            SObject[] drops = new SObject[count];
             for (int c = 0; c < count; c++)
                 drops[c] = this.GetDrop(seed, chanceModifier);
             return drops;
         }
+
         public SObject GetDrop(int seed, double chanceModifier)
         {
-            foreach(var option in this._LootTable)
+            foreach (KeyValuePair<double, List<object>> option in this.LootTable)
             {
                 double chance = chanceModifier + option.Key;
                 foreach (object item in option.Value)
+                {
                     if (this.GetRandom(seed).NextDouble() < chance)
-                        return (item as SObject) ?? (item as Func<SObject>)() ?? GetDrop(seed, chanceModifier);
+                        return item as SObject ?? (item as Func<SObject>)() ?? this.GetDrop(seed, chanceModifier);
+                }
             }
+
             return new SObject(93, 1);
+        }
+
+
+        /*********
+        ** Private methods
+        *********/
+        private Random GetRandom(int seed)
+        {
+            if (!this.Randoms.ContainsKey(seed))
+                this.Randoms.Add(seed, new Random(seed));
+            return this.Randoms[seed];
         }
     }
 }

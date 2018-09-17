@@ -1,53 +1,69 @@
 using System;
 using System.Collections.Generic;
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-
-using StardewValley;
-using StardewValley.Menus;
-
 using Entoarox.Framework;
 using Entoarox.Framework.UI;
+using Microsoft.Xna.Framework;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Locations;
+using StardewValley.Menus;
+using xTile.Tiles;
 
 /*
  - Disable travel to a location that is subject of a Festival on the current day
 */
 namespace Entoarox.ExtendedMinecart
 {
-    public class ExtendedMinecartMod : Mod
+    internal class ModEntry : Mod
     {
-        private static List<KeyValuePair<string, string>> DestinationData = new List<KeyValuePair<string, string>>()
+        /*********
+        ** Accessors
+        *********/
+        private static readonly List<KeyValuePair<string, string>> DestinationData = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Farm","Farm"),
-            new KeyValuePair<string, string>("Town","Town"),
-            new KeyValuePair<string, string>("Mine","Mine"),
-            new KeyValuePair<string, string>("BusStop","Bus"),
-            new KeyValuePair<string, string>("Mountain","Quarry"),
-            new KeyValuePair<string, string>("Desert","Desert"),
-            new KeyValuePair<string, string>("Woods","Woods"),
-            new KeyValuePair<string, string>("Beach","Beach"),
-            new KeyValuePair<string, string>("Forest","Wizard")
+            new KeyValuePair<string, string>("Farm", "Farm"),
+            new KeyValuePair<string, string>("Town", "Town"),
+            new KeyValuePair<string, string>("Mine", "Mine"),
+            new KeyValuePair<string, string>("BusStop", "Bus"),
+            new KeyValuePair<string, string>("Mountain", "Quarry"),
+            new KeyValuePair<string, string>("Desert", "Desert"),
+            new KeyValuePair<string, string>("Woods", "Woods"),
+            new KeyValuePair<string, string>("Beach", "Beach"),
+            new KeyValuePair<string, string>("Forest", "Wizard")
         };
+        private static readonly Random Random = new Random();
         private static FrameworkMenu Menu;
         private static Dictionary<string, ButtonFormComponent> Destinations;
-        private static Random Rand = new Random();
-        private Config Config;
         private bool CheckRefuel = true;
+        private ModConfig Config;
+
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-            this.Config = helper.ReadConfig<Config>();
+            this.Config = helper.ReadConfig<ModConfig>();
         }
+
+
+        /*********
+        ** Protected methods
+        *********/
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
-            if (!Game1.hasLoadedGame || Game1.CurrentEvent!=null)
+            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
                 return;
             GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
             MenuEvents.MenuChanged += this.MenuEvents_MenuChanged;
-            Destinations = new Dictionary<string, ButtonFormComponent>();
-            foreach(KeyValuePair<string, string> item in DestinationData)
+            ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
+            foreach (KeyValuePair<string, string> item in ModEntry.DestinationData)
             {
-                switch(item.Key)
+                switch (item.Key)
                 {
                     case "Farm":
                         if (!this.Config.FarmDestinationEnabled)
@@ -70,12 +86,14 @@ namespace Entoarox.ExtendedMinecart
                             continue;
                         break;
                 }
-                Destinations.Add(item.Key, new ButtonFormComponent(new Microsoft.Xna.Framework.Point(-1, 3 + 11 * Destinations.Count),65, item.Value, (t, p, m) => AnswerResolver(item.Key)));
+
+                ModEntry.Destinations.Add(item.Key, new ButtonFormComponent(new Point(-1, 3 + 11 * ModEntry.Destinations.Count), 65, item.Value, (t, p, m) => this.AnswerResolver(item.Key)));
             }
-            Menu = new FrameworkMenu(new Microsoft.Xna.Framework.Point(85, Destinations.Count * 11 + 22));
-            Menu.AddComponent(new LabelComponent(new Microsoft.Xna.Framework.Point(-3, -16), "Choose destination"));
-            foreach (ButtonFormComponent c in Destinations.Values)
-                Menu.AddComponent(c);
+
+            ModEntry.Menu = new FrameworkMenu(new Point(85, ModEntry.Destinations.Count * 11 + 22));
+            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), "Choose destination"));
+            foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
+                ModEntry.Menu.AddComponent(c);
             // # Farm
             if (this.Config.FarmDestinationEnabled && !this.Config.UseCustomFarmDestination)
             {
@@ -123,17 +141,17 @@ namespace Entoarox.ExtendedMinecart
                         farm.SetTile(79, 14, "Back", 175, "untitled tile sheet");
                         farm.SetTile(79, 15, "Back", 175, "untitled tile sheet");
                         // Clean up fence
-                        farm.SetTile(78, 11, "Buildings",436,  "untitled tile sheet");
+                        farm.SetTile(78, 11, "Buildings", 436, "untitled tile sheet");
                         farm.removeTile(78, 14, "Buildings");
                         // Plop down minecart
                         farm.SetTile(78, 12, "Buildings", 933, "untitled tile sheet");
-                        farm.SetTile(78, 13, "Buildings",958,  "untitled tile sheet");
+                        farm.SetTile(78, 13, "Buildings", 958, "untitled tile sheet");
                         farm.SetTileProperty(78, 13, "Buildings", "Action", "MinecartTransport");
                         // Keep exit clear
                         farm.setTileProperty(78, 14, "Back", "NoFurniture", "T");
                     }
                 }
-                catch(Exception err)
+                catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Farm due to a unknown error", LogLevel.Error, err);
                 }
@@ -144,8 +162,8 @@ namespace Entoarox.ExtendedMinecart
                 {
                     // # Desert
                     GameLocation desert = Game1.getLocationFromName("Desert");
-                    xTile.Tiles.TileSheet parent = Game1.getLocationFromName("Mountain").map.GetTileSheet("outdoors");
-                    desert.map.AddTileSheet(new xTile.Tiles.TileSheet("z_path_objects_custom_sheet", desert.map, parent.ImageSource, parent.SheetSize, parent.TileSize));
+                    TileSheet parent = Game1.getLocationFromName("Mountain").map.GetTileSheet("outdoors");
+                    desert.map.AddTileSheet(new TileSheet("z_path_objects_custom_sheet", desert.map, parent.ImageSource, parent.SheetSize, parent.TileSize));
                     desert.map.DisposeTileSheets(Game1.mapDisplayDevice);
                     desert.map.LoadTileSheets(Game1.mapDisplayDevice);
                     if (this.Config.AlternateDesertMinecart)
@@ -199,7 +217,7 @@ namespace Entoarox.ExtendedMinecart
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Could not patch the Desert due to a unknown error",LogLevel.Error,  err);
+                    this.Monitor.Log("Could not patch the Desert due to a unknown error", LogLevel.Error, err);
                 }
             }
             if (this.Config.WoodsDestinationEnabled)
@@ -214,10 +232,10 @@ namespace Entoarox.ExtendedMinecart
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Could not patch the Woods due to a unknown error",LogLevel.Error,  err);
+                    this.Monitor.Log("Could not patch the Woods due to a unknown error", LogLevel.Error, err);
                 }
             }
-            if(this.Config.WizardDestinationEnabled)
+            if (this.Config.WizardDestinationEnabled)
             {
                 try
                 {
@@ -241,23 +259,23 @@ namespace Entoarox.ExtendedMinecart
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Could not patch the Forest due to a unknown error",LogLevel.Error,  err);
+                    this.Monitor.Log("Could not patch the Forest due to a unknown error", LogLevel.Error, err);
                 }
             }
-            if(this.Config.BeachDestinationEnabled)
+            if (this.Config.BeachDestinationEnabled)
             {
                 try
                 {
                     // # Beach
                     GameLocation beach = Game1.getLocationFromName("Beach");
-                    xTile.Tiles.TileSheet parent = Game1.getLocationFromName("Mountain").map.GetTileSheet("outdoors");
-                    beach.map.AddTileSheet(new xTile.Tiles.TileSheet("z_path_objects_custom_sheet", beach.map, parent.ImageSource, parent.SheetSize, parent.TileSize));
+                    TileSheet parent = Game1.getLocationFromName("Mountain").map.GetTileSheet("outdoors");
+                    beach.map.AddTileSheet(new TileSheet("z_path_objects_custom_sheet", beach.map, parent.ImageSource, parent.SheetSize, parent.TileSize));
                     beach.map.DisposeTileSheets(Game1.mapDisplayDevice);
                     beach.map.LoadTileSheets(Game1.mapDisplayDevice);
                     beach.RemoveTile(67, 2, "Buildings");
                     beach.RemoveTile(67, 5, "Buildings");
                     beach.RemoveTile(67, 4, "Buildings");
-                    beach.SetTile(67, 2,"Buildings", 933, "z_path_objects_custom_sheet");
+                    beach.SetTile(67, 2, "Buildings", 933, "z_path_objects_custom_sheet");
                     beach.SetTile(67, 3, "Buildings", 958, "z_path_objects_custom_sheet");
                     beach.SetTileProperty(67, 3, "Buildings", "Action", "MinecartTransport");
                 }
@@ -265,52 +283,57 @@ namespace Entoarox.ExtendedMinecart
                 {
                     this.Monitor.Log("Could not patch the Beach due to a unknown error", LogLevel.Error, err);
                 }
+            }
         }
-        }
+
         private void MenuEvents_MenuChanged(object s, EventArgs e)
         {
-            if (Game1.activeClickableMenu == null || !(Game1.activeClickableMenu is DialogueBox) || !Context.IsWorldReady || Game1.player==null || Game1.currentLocation==null || Game1.currentLocation.lastQuestionKey==null || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
+            if (!(Game1.activeClickableMenu is DialogueBox dialogueBox) || !Context.IsWorldReady || Game1.player == null || Game1.currentLocation == null || Game1.currentLocation.lastQuestionKey == null || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
                 return;
-            (Game1.activeClickableMenu as DialogueBox)?.closeDialogue();
+            dialogueBox.closeDialogue();
             Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;
             Game1.player.CanMove = true;
             if (this.Config.RefuelingEnabled)
             {
-                if (this.CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && Rand.NextDouble() < 0.05)
+                if (this.CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && ModEntry.Random.NextDouble() < 0.05)
                     Game1.player.mailReceived.Add("MinecartNeedsRefuel");
                 if (Game1.player.mailReceived.Contains("MinecartNeedsRefuel"))
                 {
                     if (Game1.player.hasItemInInventory(382, 5))
+                    {
                         Game1.currentLocation.createQuestionDialogue("The mincart has run out of fuel, use 5 coal to refuel it?", new Response[2] { new Response("Yes", "Yes"), new Response("No", "No") }, (a, b) =>
-                        {
-                            if (b == "Yes")
-                            {
-                                a.removeItemsFromInventory(382, 5);
-                                a.mailReceived.Remove("MinecartNeedsRefuel");
-                            }
-                        });
+                          {
+                              if (b == "Yes")
+                              {
+                                  a.removeItemsFromInventory(382, 5);
+                                  a.mailReceived.Remove("MinecartNeedsRefuel");
+                              }
+                          });
+                    }
                     else
                         Game1.drawObjectDialogue("The minecart is out of fuel and requires 5 coal to be refueled.");
                     return;
                 }
             }
-            foreach (KeyValuePair<string, ButtonFormComponent> item in Destinations)
-                item.Value.Disabled = (item.Key.Equals(Game1.currentLocation.Name) || (Game1.isFestival() && item.Key.Equals(Game1.whereIsTodaysFest)));
+
+            foreach (KeyValuePair<string, ButtonFormComponent> item in ModEntry.Destinations)
+                item.Value.Disabled = item.Key.Equals(Game1.currentLocation.Name) || Game1.isFestival() && item.Key.Equals(Game1.whereIsTodaysFest);
             if (!Game1.player.mailReceived.Contains("ccCraftsRoom"))
-                Destinations["Mountain"].Disabled = true;
+                ModEntry.Destinations["Mountain"].Disabled = true;
             if (this.Config.DesertDestinationEnabled && !Game1.player.mailReceived.Contains("ccVault"))
-                Destinations["Desert"].Disabled = true;
+                ModEntry.Destinations["Desert"].Disabled = true;
             if (this.Config.WoodsDestinationEnabled && !Game1.player.mailReceived.Contains("beenToWoods"))
-                Destinations["Woods"].Disabled = true;
-            if (this.Config.BeachDestinationEnabled && !(Game1.getLocationFromName("Beach") as StardewValley.Locations.Beach).bridgeFixed.Value)
-                Destinations["Beach"].Disabled = true;
+                ModEntry.Destinations["Woods"].Disabled = true;
+            if (this.Config.BeachDestinationEnabled && !(Game1.getLocationFromName("Beach") as Beach).bridgeFixed.Value)
+                ModEntry.Destinations["Beach"].Disabled = true;
             this.CheckRefuel = false;
-            Game1.activeClickableMenu = Menu;
+            Game1.activeClickableMenu = ModEntry.Menu;
         }
+
         private void AnswerResolver(string answer)
         {
-            Menu?.ExitMenu();
+            ModEntry.Menu?.ExitMenu();
             this.CheckRefuel = true;
             switch (answer)
             {
@@ -318,7 +341,7 @@ namespace Entoarox.ExtendedMinecart
                     Game1.warpFarmer("Mountain", 124, 12, 2);
                     break;
                 case "BusStop":
-                    if(Game1.currentLocation.Name.Equals("Desert"))
+                    if (Game1.currentLocation.Name.Equals("Desert"))
                         Game1.warpFarmer("Woods", 46, 5, 1);
                     Game1.warpFarmer("BusStop", 4, 4, 2);
                     break;
@@ -337,7 +360,7 @@ namespace Entoarox.ExtendedMinecart
                         Game1.warpFarmer("Farm", 78, 14, 1);
                     break;
                 case "Desert":
-                    if(Game1.currentLocation.Name.Equals("BusStop"))
+                    if (Game1.currentLocation.Name.Equals("BusStop"))
                         Game1.warpFarmer("Woods", 46, 5, 1);
                     if (this.Config.AlternateDesertMinecart)
                         Game1.warpFarmer("Desert", 34, 5, 1);

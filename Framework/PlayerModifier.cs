@@ -1,99 +1,112 @@
-﻿using System;
+using System;
 
 namespace Entoarox.Framework
 {
     public class PlayerModifier
     {
+        /*********
+        ** Fields
+        *********/
+        private float Combat = 1;
+        private float Farming = 1;
+        private float Fishing = 1;
+        private float Foraging = 1;
+        private float Mining = 1;
+
+
+        /*********
+        ** Accessors
+        *********/
         internal bool Unlocked;
+
+        /// <summary>Additive, multiple modifiers will stack.</summary>
+        public int MagnetRange { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack.</summary>
+        public int WalkSpeedModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack.</summary>
+        public int RunSpeedModifier { get; set; } = 0;
+
+        /// <summary>Not additive, largest modifier used.</summary>
+        public float GlowDistance { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float StaminaRegenModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float HealthRegenModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float AttackIncreaseModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float KnockbackModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float CritChanceModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float CritPowerModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float WeaponSpeedModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        public float WeaponPrecisionModifier { get; set; } = 0;
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
+        public float ExperienceModifierFarming
+        {
+            get => this.Unlocked ? this.Farming : Math.Min(5f, Math.Max(-1f, this.Farming));
+            set => this.Farming = value;
+        }
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
+        public float ExperienceModifierFishing
+        {
+            get => this.Unlocked ? this.Fishing : Math.Min(5f, Math.Max(-1f, this.Fishing));
+            set => this.Fishing = value;
+        }
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
+        public float ExperienceModifierForaging
+        {
+            get => this.Unlocked ? this.Foraging : Math.Min(5f, Math.Max(-1f, this.Foraging));
+            set => this.Foraging = value;
+        }
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
+        public float ExperienceModifierMining
+        {
+            get => this.Unlocked ? this.Mining : Math.Min(5f, Math.Max(-1f, this.Mining));
+            set => this.Mining = value;
+        }
+
+        /// <summary>Additive, multiple modifiers will stack</summary>
+        [Obsolete("This API member is not yet functional in the current development build.")]
+        public float ExperienceModifierCombat
+        {
+            get => this.Unlocked ? this.Combat : Math.Min(5f, Math.Max(-1f, this.Farming));
+            set => this.Combat = value;
+        }
+
+
+        /*********
+        ** Public methods
+        *********/
         internal PlayerModifier(bool unlocked)
         {
             this.Unlocked = unlocked;
         }
+
         public PlayerModifier()
         {
             this.Unlocked = false;
         }
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public int MagnetRange { get; set; } = 0;
-
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public int WalkSpeedModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public int RunSpeedModifier { get; set; } = 0;
-
-        /**
-         * <summary>Not additive, largest modifier used</summary>
-         */
-        public float GlowDistance { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float StaminaRegenModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float HealthRegenModifier { get; set; } = 0;
-
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float AttackIncreaseModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float KnockbackModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float CritChanceModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float CritPowerModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float WeaponSpeedModifier { get; set; } = 0;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        public float WeaponPrecisionModifier { get; set; } = 0;
-
-        private float _Farming = 1;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierFarming { get { return this.Unlocked ? this._Farming : Math.Min(5f,Math.Max(-1f, this._Farming)); } set { this._Farming = value; } }
-        private float _Fishing = 1;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierFishing { get { return this.Unlocked ? this._Fishing : Math.Min(5f, Math.Max(-1f, this._Fishing)); } set { this._Fishing = value; } }
-        private float _Foraging = 1;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierForaging { get { return this.Unlocked ? this._Foraging : Math.Min(5f, Math.Max(-1f, this._Foraging)); } set { this._Foraging = value; } }
-        private float _Mining = 1;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierMining { get { return this.Unlocked ? this._Mining : Math.Min(5f, Math.Max(-1f, this._Mining)); } set { this._Mining = value; } }
-        private float _Combat = 1;
-        /**
-         * <summary>Additive, multiple modifiers will stack</summary>
-         */
-        [Obsolete("This API member is not yet functional in the current development build.")]
-        public float ExperienceModifierCombat { get { return this.Unlocked ? this._Combat : Math.Min(5f, Math.Max(-1f, this._Farming)); } set { this._Combat = value; } }
     }
 }

@@ -38,10 +38,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reference.cs" />
-    <Compile Include="ShopExpanderConfig.cs" />
+    <Compile Include="ModConfig.cs" />
     <Compile Include="SObject.cs" />
   </ItemGroup>
   <ItemGroup>

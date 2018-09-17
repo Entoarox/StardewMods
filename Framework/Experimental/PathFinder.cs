@@ -1,50 +1,28 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using Microsoft.Xna.Framework;
-
 using StardewValley;
+using xTile.Layers;
 
 namespace Entoarox.Framework.Experimental
 {
-    static class PathFinderExtension
+    internal static class PathFinderExtension
     {
-        public class Node
+        /*********
+        ** Public methods
+        *********/
+        public static List<PathNode> FindPath(this GameLocation location, Point start, Point end)
         {
-            public Node Parent;
-            public int X;
-            public int Y;
-
-            public Node(int x, int y, Node parent = null)
-            {
-                this.Parent = parent;
-                this.X = x;
-                this.Y = y;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Node node && node.X == this.X && node.Y == this.Y;
-            }
-            public override int GetHashCode()
-            {
-                return this.X << 8 | this.Y;
-            }
-        }
-        public static List<Node> FindPath(this GameLocation location, Point start, Point end)
-        {
-            var layer = location.map.GetLayer("Back");
-            List<Node> nodes = new List<Node>();
-            Node finish=null;
+            Layer layer = location.map.GetLayer("Back");
+            List<PathNode> nodes = new List<PathNode>();
+            PathNode finish = null;
             bool finished = false;
-            void LookNext(Node node)
+
+            void LookNext(PathNode node)
             {
                 if (finished)
                     return;
-                if(!nodes.Contains(node))
+                if (!nodes.Contains(node))
                 {
                     if (!location.isTileLocationTotallyClearAndPlaceable(node.X, node.Y))
                         return;
@@ -55,27 +33,31 @@ namespace Entoarox.Framework.Experimental
                         finish = node;
                     }
                 }
-                if(!finished)
+
+                if (!finished)
                 {
-                    Task[] tasks ={
-                        Task.Run(() => {LookNext(new Node(node.X - 1, node.Y, node));}),
-                        Task.Run(() => {LookNext(new Node(node.X + 1, node.Y, node));}),
-                        Task.Run(() => {LookNext(new Node(node.X, node.Y - 1, node));}),
-                        Task.Run(() => {LookNext(new Node(node.X, node.Y + 1, node));})
+                    Task[] tasks =
+                    {
+                        Task.Run(() => { LookNext(new PathNode(node.X - 1, node.Y, node)); }),
+                        Task.Run(() => { LookNext(new PathNode(node.X + 1, node.Y, node)); }),
+                        Task.Run(() => { LookNext(new PathNode(node.X, node.Y - 1, node)); }),
+                        Task.Run(() => { LookNext(new PathNode(node.X, node.Y + 1, node)); })
                     };
                     Task.WaitAll(tasks);
                 }
             }
-            LookNext(new Node(start.X, start.Y));
-            List<Node> points = new List<Node>();
+
+            LookNext(new PathNode(start.X, start.Y));
+            List<PathNode> points = new List<PathNode>();
             if (finish == null)
                 return null;
             points.Add(finish);
-            while(finish.Parent!=null)
+            while (finish.Parent != null)
             {
                 finish = finish.Parent;
                 points.Add(finish);
             }
+
             return points;
         }
     }

@@ -1,16 +1,16 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 
-namespace Entoarox.CustomBooks
+namespace Entoarox.CustomBooks.Menu
 {
-    class InsertPage : SystemPage
+    internal class InsertPage : SystemPage
     {
-        public InsertPage(BookMenu menu)
-        {
+        /*********
+        ** Public methods
+        *********/
+        public InsertPage(BookMenu menu) { }
 
-        }
         public override void Draw(SpriteBatch batch, Rectangle region)
         {
             Utility.drawTextWithShadow(batch, "Add Page", Game1.dialogueFont, new Vector2(region.X, region.Y + 16), Game1.textColor, 1);
@@ -24,9 +24,6 @@ namespace Entoarox.CustomBooks
             return null;
         }
 
-        public override void Click(Rectangle region, int x, int y)
-        {
-            
-        }
+        public override void Click(Rectangle region, int x, int y) { }
     }
 }

@@ -1,21 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace Entoarox.Framework.Core.Utilities
 {
-    static class ModuleProvider
+    internal static class ModuleProvider
     {
+        /*********
+        ** Fields
+        *********/
         private static AssemblyBuilder AssemblyBuilder;
+
+
+        /*********
+        ** Public methods
+        *********/
         public static ModuleBuilder GetModuleBuilder(string namespacePath)
         {
-            if (AssemblyBuilder == null)
-                AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("Entoarox.Framework.Dynamic"), AssemblyBuilderAccess.Run);
-            return AssemblyBuilder.DefineDynamicModule(namespacePath);
+            if (ModuleProvider.AssemblyBuilder == null)
+                ModuleProvider.AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("Entoarox.Framework.Dynamic"), AssemblyBuilderAccess.Run);
+            return ModuleProvider.AssemblyBuilder.DefineDynamicModule(namespacePath);
         }
     }
 }

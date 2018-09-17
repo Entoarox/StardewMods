@@ -1,18 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace Entoarox.Framework.UI.Containers
+namespace Entoarox.Framework.UI
 {
-    class BookComponent : IComponentContainer
+    internal class BookComponent : IComponentContainer
     {
+        /*********
+        ** Accessors
+        *********/
         public Rectangle EventRegion => throw new NotImplementedException();
-
         public Rectangle ZoomEventRegion => throw new NotImplementedException();
 
+
+        /*********
+        ** Public methods
+        *********/
         public FrameworkMenu GetAttachedMenu()
         {
             throw new NotImplementedException();

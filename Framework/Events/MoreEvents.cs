@@ -1,28 +1,31 @@
 using System;
-
-using StardewModdingAPI;
+using EntoEvents = Entoarox.Framework.Core.Utilities.Events;
 
 namespace Entoarox.Framework.Events
 {
-    using Core.Utilities;
     public static class MoreEvents
     {
-        /// <summary>
-        /// Triggered whenever a action tile is activated by the player
-        /// </summary>
+        /*********
+        ** Accessors
+        *********/
+        /// <summary>Triggered whenever a action tile is activated by the player.</summary>
         public static event EventHandler<EventArgsActionTriggered> ActionTriggered;
-        /// <summary>
-        /// Triggered whenever a action tile is first walked onto by the player
-        /// </summary>
+
+        /// <summary>Triggered whenever a action tile is first walked onto by the player.</summary>
         public static event EventHandler<EventArgsActionTriggered> TouchActionTriggered;
 
+
+        /*********
+        ** Public methods
+        *********/
         internal static void FireActionTriggered(EventArgsActionTriggered eventArgs)
         {
-            Events.FireEventSafely("ActionTriggered", ActionTriggered, eventArgs);
+            EntoEvents.FireEventSafely("ActionTriggered", ActionTriggered, eventArgs);
         }
+
         internal static void FireTouchActionTriggered(EventArgsActionTriggered eventArgs)
         {
-            Events.FireEventSafely("TouchActionTriggered", TouchActionTriggered, eventArgs);
+            EntoEvents.FireEventSafely("TouchActionTriggered", TouchActionTriggered, eventArgs);
         }
     }
 }

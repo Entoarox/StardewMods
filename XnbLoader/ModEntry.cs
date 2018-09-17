@@ -1,16 +1,18 @@
-using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Entoarox.Framework;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace Entoarox.XnbLoader
 {
-    public class XnbLoaderMod : Mod
+    internal class ModEntry : Mod
     {
         /*********
         ** Properties
         *********/
+        private readonly Dictionary<string, string> Cache = new Dictionary<string, string>();
+
         /// <summary>The name of the mod folder which contains the files to load.</summary>
         private readonly string ContentFolderName = "ModContent";
 
@@ -37,7 +39,6 @@ namespace Entoarox.XnbLoader
             "TileSheets"
         };
 
-        private Dictionary<string, string> Cache = new Dictionary<string, string>();
 
         /*********
         ** Public methods
@@ -50,7 +51,7 @@ namespace Entoarox.XnbLoader
 
             // prepare directory structure
             string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
-            foreach(string path in this.PathsToCreate)
+            foreach (string path in this.PathsToCreate)
                 Directory.CreateDirectory(Path.Combine(contentPath, path));
 
             // load files
@@ -91,7 +92,7 @@ namespace Entoarox.XnbLoader
                     string from = filePath.Replace(root + Path.DirectorySeparatorChar, "");
                     if (!this.Cache.ContainsKey(from))
                     {
-                        if (!File.Exists(Path.Combine(StardewValley.Game1.content.RootDirectory, from) + ".xnb"))
+                        if (!File.Exists(Path.Combine(Game1.content.RootDirectory, from) + ".xnb"))
                             this.Monitor.Log($"Found a file that does not exist in the vanilla content, if this is intentional you can ignore this warning: {from}.xnb", LogLevel.Warn);
                         this.Cache.Add(from, Path.Combine("ModContent", from));
                         files++;
@@ -105,10 +106,11 @@ namespace Entoarox.XnbLoader
             }
             return files;
         }
+
         private void PatchFiles()
         {
-            this.Monitor.Log("Redirect list:",LogLevel.Trace);
-            foreach(KeyValuePair<string, string> entry in this.Cache)
+            this.Monitor.Log("Redirect list:", LogLevel.Trace);
+            foreach (KeyValuePair<string, string> entry in this.Cache)
                 this.Monitor.Log($"  {entry.Key} ~> {entry.Value}.xnb", LogLevel.Trace);
             foreach (KeyValuePair<string, string> entry in this.Cache)
                 this.Helper.Content.RegisterXnbReplacement(entry.Key, entry.Value);

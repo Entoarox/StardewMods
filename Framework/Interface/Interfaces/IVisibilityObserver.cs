@@ -1,7 +1,10 @@
 namespace Entoarox.Framework.Interface
 {
-    interface IVisibilityObserver : IComponentContainer
+    internal interface IVisibilityObserver : IComponentContainer
     {
+        /*********
+        ** Methods
+        *********/
         void VisibilityChanged(IComponent component);
     }
 }

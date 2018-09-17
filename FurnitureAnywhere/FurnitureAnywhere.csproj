@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="AnywhereFurniture.cs" />
     <Compile Include="LocationPatch.cs" />
-    <Compile Include="FurnitureAnywhereMod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

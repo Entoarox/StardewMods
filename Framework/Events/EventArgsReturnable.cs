@@ -1,9 +1,18 @@
-﻿namespace Entoarox.Framework.Events
+namespace Entoarox.Framework.Events
 {
     public class EventArgsReturnable<TReturn> : EventArgsArguments
     {
-        internal bool ReturnSet = false;
+        /*********
+        ** Fields
+        *********/
         private TReturn _Value;
+
+
+        /*********
+        ** Accessors
+        *********/
+        internal bool ReturnSet;
+
         public TReturn Value
         {
             set
@@ -11,14 +20,14 @@
                 this.ReturnSet = true;
                 this._Value = value;
             }
-            get
-            {
-                return this._Value;
-            }
+            get => this._Value;
         }
-        public EventArgsReturnable(object[] arguments = null) : base(arguments)
-        {
 
-        }
+
+        /*********
+        ** Public methods
+        *********/
+        public EventArgsReturnable(object[] arguments = null)
+            : base(arguments) { }
     }
 }

@@ -9,14 +9,17 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Events
     {
-        internal static void TimeEvents_AfterDayStarted(object s, EventArgs e)
+        /*********
+        ** Public methods
+        *********/
+        public static void TimeEvents_AfterDayStarted(object s, EventArgs e)
         {
             ModEntry.UpdateConditionalEdits();
             if (Game1.dayOfMonth == 1)
                 ModEntry.UpdateTilesheets();
         }
 
-        internal static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
+        public static void MoreEvents_ActionTriggered(object s, EventArgsActionTriggered e)
         {
             try
             {
@@ -51,6 +54,7 @@ namespace Entoarox.AdvancedLocationLoader
                     default:
                         return;
                 }
+
                 ModEntry.Logger.Log("ActionTriggered(" + e.Action + ")", LogLevel.Trace);
             }
             catch (Exception err)
@@ -58,9 +62,10 @@ namespace Entoarox.AdvancedLocationLoader
                 ModEntry.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened", err);
             }
         }
-        internal static void PlayerEvents_Warped(object s, EventArgs e)
+
+        public static void PlayerEvents_Warped(object s, EventArgs e)
         {
-            PlayerEvents.Warped -= PlayerEvents_Warped;
+            PlayerEvents.Warped -= Events.PlayerEvents_Warped;
             ModEntry.UpdateConditionalEdits();
         }
     }

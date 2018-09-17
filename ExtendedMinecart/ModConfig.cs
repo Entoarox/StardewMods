@@ -2,8 +2,11 @@ using Microsoft.Xna.Framework;
 
 namespace Entoarox.ExtendedMinecart
 {
-    internal class Config
+    internal class ModConfig
     {
+        /*********
+        ** Accessors
+        *********/
         public bool RefuelingEnabled = true;
         public bool AlternateDesertMinecart = false;
         public bool AlternateFarmMinecart = false;

@@ -1,19 +1,18 @@
 using System;
 using System.Collections.Generic;
-
 using StardewModdingAPI;
 
 namespace Entoarox.Framework.Core
 {
-    class FakeManifest : IManifest
+    internal class FakeManifest : IManifest
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public string Description => throw new NotImplementedException();
 
         public string Author => throw new NotImplementedException();
 
-        public ISemanticVersion Version { get; private set; }
+        public ISemanticVersion Version { get; }
 
         public ISemanticVersion MinimumApiVersion => throw new NotImplementedException();
 
@@ -25,7 +24,11 @@ namespace Entoarox.Framework.Core
 
         public IManifestDependency[] Dependencies => throw new NotImplementedException();
 
-        public string[] UpdateKeys { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string[] UpdateKeys
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
 
         public IDictionary<string, object> ExtraFields => throw new NotImplementedException();
 

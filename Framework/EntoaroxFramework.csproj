@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Advanced\PolyTupleHelper.cs" />
     <Compile Include="Config\ConfigAttribute.cs" />
     <Compile Include="Config\ConfigCustomAttribute.cs" />
     <Compile Include="Config\ConfigDropdownAttribute.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Events\EventArgsReturnable.cs" />
     <Compile Include="Events\ItemEvents.cs" />
     <Compile Include="Experimental\PathFinder.cs" />
+    <Compile Include="Experimental\PathNode.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="Extensions\IListExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -97,7 +99,7 @@
     <Compile Include="IContentHelperExtensions.cs" />
     <Compile Include="Events\EventArgsActiveItemChanged.cs" />
     <Compile Include="Events\EventArgsActionTriggered.cs" />
-    <Compile Include="Core\FrameworkConfig.cs" />
+    <Compile Include="Core\ModConfig.cs" />
     <Compile Include="ICustomItem.cs" />
     <Compile Include="IHookedLocation.cs" />
     <Compile Include="IInterModHelper.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="Indev\IProfession.cs" />
     <Compile Include="Indev\ISkill.cs" />
     <Compile Include="Indev\ISkillHelper.cs" />
+    <Compile Include="Indev\PlayerSkillInfo.cs" />
     <Compile Include="Indev\RecipeComponent.cs" />
     <Compile Include="Indev\SkillData.cs" />
     <Compile Include="Indev\SkillHelper.cs" />
@@ -198,11 +201,11 @@
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="About\ConditionDocumentation.md" />
+    <None Include="docs\ConditionDocumentation.md" />
     <None Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="About\Changelog.txt" />
+    <Content Include="docs\Changelog.txt" />
     <Content Include="Content\placeholder.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

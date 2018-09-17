@@ -1,6 +1,6 @@
-﻿namespace Entoarox.SeasonalImmersion
+namespace Entoarox.SeasonalImmersion
 {
-    enum ContentMode
+    internal enum ContentMode
     {
         Directory,
         Zipped,

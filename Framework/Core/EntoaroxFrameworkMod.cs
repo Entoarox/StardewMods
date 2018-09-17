@@ -1,51 +1,128 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-
-using StardewValley;
-using StardewValley.Characters;
-using StardewValley.Monsters;
-using StardewValley.Quests;
-using StardewValley.Objects;
-using StardewValley.TerrainFeatures;
-using SObject = StardewValley.Object;
-
+using Entoarox.Framework.Core.AssetHandlers;
+using Entoarox.Framework.Core.Serialization;
+using Entoarox.Framework.Events;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-
-using xTile.Tiles;
-using xTile.ObjectModel;
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
+using StardewValley.Characters;
+using StardewValley.Locations;
+using StardewValley.Menus;
+using StardewValley.Monsters;
+using StardewValley.Objects;
+using StardewValley.Quests;
+using StardewValley.TerrainFeatures;
+using xTile.Dimensions;
+using xTile.ObjectModel;
+using xTile.Tiles;
+using SObject = StardewValley.Object;
 
 namespace Entoarox.Framework.Core
 {
-    using Events;
-    using Core.AssetHandlers;
-    using Serialization;
-
     internal class EntoaroxFrameworkMod : Mod
     {
-        #region References
-        internal static FrameworkConfig Config;
+        /*********
+        ** Fields
+        *********/
+        private static readonly List<string> Farms = new List<string> { "standard", "river", "forest", "hilltop", "wilderniss" };
+        private static string Verify;
+        private static bool CreditsDone;
+        private JsonSerializer Serializer;
+        private EventArgsActionTriggered ActionInfo;
+        private Item PrevItem;
+        private static Vector2? LastTouchAction;
+
+        /****
+        ** Serializer
+        ****/
+        public static bool SerializerInjected;
+        public static List<Type> SerializerTypes = new List<Type>();
+        private XmlSerializer MainSerializer;
+        private XmlSerializer FarmerSerializer;
+        private XmlSerializer LocationSerializer;
+        private static readonly Type[] SerialiserTypes = new Type[]
+        {
+            typeof(Tool),
+            typeof(GameLocation),
+            typeof(Duggy),
+            typeof(Bug),
+            typeof(BigSlime),
+            typeof(Ghost),
+            typeof(Child),
+            typeof(Pet),
+            typeof(Dog),
+            typeof(Cat),
+            typeof(Horse),
+            typeof(GreenSlime),
+            typeof(LavaCrab),
+            typeof(RockCrab),
+            typeof(ShadowGuy),
+            typeof(SquidKid),
+            typeof(Grub),
+            typeof(Fly),
+            typeof(DustSpirit),
+            typeof(Quest),
+            typeof(MetalHead),
+            typeof(ShadowGirl),
+            typeof(Monster),
+            typeof(JunimoHarvester),
+            typeof(TerrainFeature)
+        };
+        private static readonly Type[] FarmerTypes = new Type[]
+        {
+            typeof(Tool)
+        };
+        private static readonly Type[] LocationTypes = new Type[]
+        {
+            typeof(Tool),
+            typeof(Duggy),
+            typeof(Ghost),
+            typeof(GreenSlime),
+            typeof(LavaCrab),
+            typeof(RockCrab),
+            typeof(ShadowGuy),
+            typeof(Child),
+            typeof(Pet),
+            typeof(Dog),
+            typeof(Cat),
+            typeof(Horse),
+            typeof(SquidKid),
+            typeof(Grub),
+            typeof(Fly),
+            typeof(DustSpirit),
+            typeof(Bug),
+            typeof(BigSlime),
+            typeof(BreakableContainer),
+            typeof(MetalHead),
+            typeof(ShadowGirl),
+            typeof(Monster),
+            typeof(JunimoHarvester),
+            typeof(TerrainFeature)
+        };
+
+
+        /*********
+        ** Accessors
+        *********/
+        internal static ModConfig Config;
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
         internal static bool SkipCredits = false;
-        private static List<string> Farms = new List<string>() { "standard", "river", "forest", "hilltop", "wilderniss" };
-        private static string Verify;
-        private static bool CreditsDone = false;
-        private JsonSerializer Serializer;
-        private EventArgsActionTriggered ActionInfo;
-        private Item prevItem = null;
-        private static Vector2? LastTouchAction = null;
-        #endregion
-        #region Mod
+
+
+        /*********
+        ** Public methods
+        *********/
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.Serializer = new JsonSerializer();
@@ -54,41 +131,52 @@ namespace Entoarox.Framework.Core
             this.Serializer.NullValueHandling = NullValueHandling.Ignore;
             this.Serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
             this.Serializer.ContractResolver = new ReadonlyContractResolver();
-            var TypeHandler = new DeferredAssetHandler();
-            helper.Content.AssetEditors.Add(TypeHandler);
-            helper.Content.AssetEditors.Add(TypeHandler);
+            DeferredAssetHandler typeHandler = new DeferredAssetHandler();
+            helper.Content.AssetEditors.Add(typeHandler);
+            helper.Content.AssetEditors.Add(typeHandler);
             helper.Content.AssetEditors.Add(new DeferredTypeHandler());
             helper.Content.AssetLoaders.Add(new XnbLoader());
             helper.Content.AssetEditors.Add(new TextureInjector());
             helper.Content.AssetEditors.Add(new DictionaryInjector());
-            SHelper = this.Helper;
-            Logger = this.Monitor;
-            Config = this.Helper.ReadConfig<FrameworkConfig>();
+            EntoaroxFrameworkMod.SHelper = this.Helper;
+            EntoaroxFrameworkMod.Logger = this.Monitor;
+            EntoaroxFrameworkMod.Config = this.Helper.ReadConfig<ModConfig>();
             this.PrepareCustomEvents();
             //this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
-            if (Config.TrainerCommands)
+            if (EntoaroxFrameworkMod.Config.TrainerCommands)
                 helper.ConsoleCommands
-                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", Farms), this.Commands)
+                    .Add("farm_settype", "farm_settype <type> | Enables you to change your farm type to any of the following: " + string.Join(",", EntoaroxFrameworkMod.Farms), this.Commands)
                     .Add("farm_clear", "farm_clear | Removes ALL objects from your farm, this cannot be undone!", this.Commands)
-
-                    .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands)
-                ;
+                    .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands);
             GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
             SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
             SaveEvents.AfterSave += this.SaveEvents_AfterSave;
         }
+
         public override object GetApi()
         {
             return new EntoaroxFrameworkAPI();
         }
-        #endregion
-        #region Events
+
+
+        /*********
+        ** Protected methods
+        *********/
+        private void PrepareCustomEvents()
+        {
+            ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
+            ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
+            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+        }
+
         private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
         {
             if (e.ButtonPressed == Buttons.A)
-                CheckForAction();
+                this.CheckForAction();
         }
+
         private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
         {
             if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
@@ -97,28 +185,29 @@ namespace Entoarox.Framework.Core
                 this.ActionInfo = null;
             }
         }
+
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                CheckForAction();
+                this.CheckForAction();
             if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
             {
                 MoreEvents.FireActionTriggered(this.ActionInfo);
                 this.ActionInfo = null;
             }
         }
+
         private void CheckForAction()
         {
             if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
                 this.ActionInfo = null;
-                Vector2 grabTile = new Vector2((Game1.getOldMouseX() + Game1.viewport.X), (Game1.getOldMouseY() + Game1.viewport.Y)) / Game1.tileSize;
+                Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
                     grabTile = Game1.player.GetGrabTile();
-                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new xTile.Dimensions.Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
+                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
                 PropertyValue propertyValue = null;
-                if (tile != null)
-                    tile.Properties.TryGetValue("Action", out propertyValue);
+                tile?.Properties.TryGetValue("Action", out propertyValue);
                 if (propertyValue != null)
                 {
                     string[] split = ((string)propertyValue).Split(' ');
@@ -128,13 +217,15 @@ namespace Entoarox.Framework.Core
                 }
             }
         }
+
         private void Commands(string command, string[] args)
         {
             if (!Game1.hasLoadedGame)
             {
-                Logger.Log("You need to load a game before you can use this command.", LogLevel.Error);
+                EntoaroxFrameworkMod.Logger.Log("You need to load a game before you can use this command.", LogLevel.Error);
                 return;
             }
+
             switch (command)
             {
                 /* TODO fix bush reset
@@ -176,33 +267,33 @@ namespace Entoarox.Framework.Core
                 case "farm_settype":
                     if (args.Length == 0)
                         this.Monitor.Log("Please provide the type you wish to change your farm to.", LogLevel.Error);
-                    else if (Farms.Contains(args[0]))
+                    else if (EntoaroxFrameworkMod.Farms.Contains(args[0]))
                     {
-                        Game1.whichFarm = Farms.IndexOf(args[0]);
-                        Logger.Log($"Changed farm type to `{args[0]}`, please sleep in a bed then quit&restart to finalize this change.", LogLevel.Alert);
+                        Game1.whichFarm = EntoaroxFrameworkMod.Farms.IndexOf(args[0]);
+                        EntoaroxFrameworkMod.Logger.Log($"Changed farm type to `{args[0]}`, please sleep in a bed then quit&restart to finalize this change.", LogLevel.Alert);
                     }
                     else
-                        Logger.Log("Unknown farm type: " + args[0], LogLevel.Error);
+                        EntoaroxFrameworkMod.Logger.Log("Unknown farm type: " + args[0], LogLevel.Error);
+
                     break;
                 case "farm_clear":
-                    if (Verify == null && args.Length == 0)
+                    if (EntoaroxFrameworkMod.Verify == null && args.Length == 0)
                     {
-                        Verify = new Random().Next().ToString("XXX");
-                        Logger.Log($"This will remove all objects, natural and user-made from your farm, use `farm_clear {Verify}` to verify that you actually want to do this.", LogLevel.Alert);
-                        return;
+                        EntoaroxFrameworkMod.Verify = new Random().Next().ToString("XXX");
+                        EntoaroxFrameworkMod.Logger.Log($"This will remove all objects, natural and user-made from your farm, use `farm_clear {EntoaroxFrameworkMod.Verify}` to verify that you actually want to do this.", LogLevel.Alert);
                     }
-                    else if (!args[0].Equals(Verify))
+                    else if (!args[0].Equals(EntoaroxFrameworkMod.Verify))
                     {
-                        Verify = null;
-                        Logger.Log($"Verification failed, attempt to remove objects has been cancelled.", LogLevel.Error);
-                        return;
+                        EntoaroxFrameworkMod.Verify = null;
+                        EntoaroxFrameworkMod.Logger.Log("Verification failed, attempt to remove objects has been cancelled.", LogLevel.Error);
                     }
                     else
                     {
-                        Verify = null;
+                        EntoaroxFrameworkMod.Verify = null;
                         Farm farm = Game1.getFarm();
                         farm.objects.Clear();
                     }
+
                     break;
                 case "player_warp":
                     try
@@ -216,21 +307,21 @@ namespace Entoarox.Framework.Core
                     {
                         this.Monitor.Log("A error occured trying to warp: ", LogLevel.Error, err);
                     }
+
                     break;
                 case "world_locations":
                     foreach (GameLocation location in Game1.locations)
-                    {
                         this.Monitor.Log(location.Name, LogLevel.Alert);
-                    }
                     break;
             }
         }
+
         private void GameEvents_FirstUpdateTick(object s, EventArgs e)
         {
             GameEvents.UpdateTick -= this.GameEvents_FirstUpdateTick;
-            if (Config.SkipCredits || SkipCredits)
+            if (EntoaroxFrameworkMod.Config.SkipCredits || EntoaroxFrameworkMod.SkipCredits)
             {
-                if (CreditsDone || !(Game1.activeClickableMenu is StardewValley.Menus.TitleMenu) || Game1.activeClickableMenu == null)
+                if (EntoaroxFrameworkMod.CreditsDone || !(Game1.activeClickableMenu is TitleMenu) || Game1.activeClickableMenu == null)
                     return;
                 Game1.playSound("bigDeSelect");
                 this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
@@ -243,31 +334,34 @@ namespace Entoarox.Framework.Core
                 this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
                 this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
                 Game1.changeMusicTrack("MainTheme");
-                CreditsDone = true;
+                EntoaroxFrameworkMod.CreditsDone = true;
             }
-            SetupSerializer();
-            Core.UpdateHandler.DoUpdateChecks();
+
+            this.SetupSerializer();
+            UpdateHandler.DoUpdateChecks();
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
         }
+
         private void GameEvents_UpdateTick(object s, EventArgs e)
         {
-            EnforceSerializer();
+            this.EnforceSerializer();
             if (!Context.IsWorldReady)
                 return;
-            if ((Game1.player.CurrentItem == null && this.prevItem != null) || (Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.prevItem)))
+            if (Game1.player.CurrentItem == null && this.PrevItem != null || Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.PrevItem))
             {
-                ItemEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.prevItem, Game1.player.CurrentItem));
-                this.prevItem = Game1.player.CurrentItem;
+                ItemEvents.FireActiveItemChanged(new EventArgsActiveItemChanged(this.PrevItem, Game1.player.CurrentItem));
+                this.PrevItem = Game1.player.CurrentItem;
             }
-            PlayerModifierHelper._UpdateModifiers();
+
+            PlayerModifierHelper.UpdateModifiers();
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
-            if (LastTouchAction!=playerPos)
+            if (EntoaroxFrameworkMod.LastTouchAction != playerPos)
             {
                 string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
-                LastTouchAction = playerPos;
+                EntoaroxFrameworkMod.LastTouchAction = playerPos;
                 if (text != null)
                 {
-                    string[] split = (text).Split(' ');
+                    string[] split = text.Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
                     this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
@@ -275,50 +369,49 @@ namespace Entoarox.Framework.Core
                 }
             }
         }
+
         private void SaveEvents_BeforeSave(object s, EventArgs e)
         {
             this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
-            var data = new Dictionary<string, InstanceState>();
+            Dictionary<string, InstanceState> data = new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                {
-                    Serialize(data, chest.items);
-                }
+                    this.Serialize(data, chest.items);
             }
-            Game1.player.Items = Serialize(data, Game1.player.Items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
+
+            Game1.player.Items = this.Serialize(data, Game1.player.Items);
+            FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
 
             if (house.fridge.Value != null)
-                Serialize(data, house.fridge.Value.items);
+                this.Serialize(data, house.fridge.Value.items);
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
             this.Helper.WriteJsonFile(path, data);
             ItemEvents.FireAfterSerialize();
         }
+
         private void SaveEvents_AfterSave(object s, EventArgs e)
         {
             this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
             string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
-            var data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
+            Dictionary<string, InstanceState> data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                {
-                    chest.items.Set(Deserialize(data, chest.items));
-                }
+                    chest.items.Set(this.Deserialize(data, chest.items));
             }
-            Game1.player.Items = Deserialize(data, Game1.player.Items);
-            var house = (Game1.getLocationFromName("FarmHouse") as StardewValley.Locations.FarmHouse);
+
+            Game1.player.Items = this.Deserialize(data, Game1.player.Items);
+            FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
             house.fridge.Value?.items.Set(this.Deserialize(data, house.fridge.Value.items));
             ItemEvents.FireAfterDeserialize();
         }
-        #endregion
-        #region Functions
+
         private List<Item> Serialize(IDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            var output = new List<Item>();
+            List<Item> output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is ICustomItem)
@@ -329,13 +422,13 @@ namespace Entoarox.Framework.Core
                         id = Guid.NewGuid().ToString();
                     if (counter >= 25)
                         throw new TimeoutException("Unable to assign a GUID to all items!");
-                    SObject obj = new SObject()
+                    SObject obj = new SObject
                     {
                         Stack = item.getStack(),
                         ParentSheetIndex = 0,
                         Type = id,
                         name = "(Entoarox.Framework.ICustomItem)",
-                        Price = item.salePrice(),
+                        Price = item.salePrice()
                     };
                     if (item is Placeholder pitm)
                         data.Add(id, new InstanceState(pitm.Id, pitm.Data));
@@ -346,11 +439,13 @@ namespace Entoarox.Framework.Core
                 else
                     output.Add(item);
             }
+
             return output;
         }
+
         private IList<Item> Deserialize(IReadOnlyDictionary<string, InstanceState> data, IEnumerable<Item> items)
         {
-            var output = new List<Item>();
+            List<Item> output = new List<Item>();
             foreach (Item item in items)
             {
                 if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
@@ -363,33 +458,27 @@ namespace Entoarox.Framework.Core
                         {
                             this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
                             output.Add(new Placeholder(cls, data[itm.Type].Data));
-                            continue;
                         }
                         else if (!typeof(Item).IsAssignableFrom(type))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
                             output.Add(new Placeholder(cls, data[itm.Type].Data));
-                            continue;
                         }
                         else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
                         {
                             this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
                             output.Add(new Placeholder(cls, data[itm.Type].Data));
-                            continue;
                         }
                         else
-                        {
                             try
                             {
                                 output.Add((Item)data[itm.Type].Data.ToObject(type, this.Serializer));
                             }
                             catch (Exception err)
                             {
-                                this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err.ToString(), LogLevel.Error);
+                                this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err, LogLevel.Error);
                                 output.Add(new Placeholder(cls, data[itm.Type].Data));
-                                continue;
                             }
-                        }
                     }
                     else
                     {
@@ -400,98 +489,27 @@ namespace Entoarox.Framework.Core
                 else
                     output.Add(item);
             }
+
             return output;
         }
-        #endregion
-        #region Serializer
-        public static bool SerializerInjected = false;
-        public static List<Type> SerializerTypes = new List<Type>();
-        private XmlSerializer MainSerializer;
-        private XmlSerializer FarmerSerializer;
-        private XmlSerializer LocationSerializer;
-        private static Type[] _serialiserTypes = new Type[25]
-        {
-            typeof (Tool),
-            typeof (GameLocation),
-            typeof (Duggy),
-            typeof (Bug),
-            typeof (BigSlime),
-            typeof (Ghost),
-            typeof (Child),
-            typeof (Pet),
-            typeof (Dog),
-            typeof (Cat),
-            typeof (Horse),
-            typeof (GreenSlime),
-            typeof (LavaCrab),
-            typeof (RockCrab),
-            typeof (ShadowGuy),
-            typeof (SquidKid),
-            typeof (Grub),
-            typeof (Fly),
-            typeof (DustSpirit),
-            typeof (Quest),
-            typeof (MetalHead),
-            typeof (ShadowGirl),
-            typeof (Monster),
-            typeof (JunimoHarvester),
-            typeof (TerrainFeature)
-        };
 
-        private static Type[] _farmerTypes = new Type[1] {
-            typeof (Tool)
-        };
-
-        private static Type[] _locationTypes = new Type[24]
-        {
-            typeof (Tool),
-            typeof (Duggy),
-            typeof (Ghost),
-            typeof (GreenSlime),
-            typeof (LavaCrab),
-            typeof (RockCrab),
-            typeof (ShadowGuy),
-            typeof (Child),
-            typeof (Pet),
-            typeof (Dog),
-            typeof (Cat),
-            typeof (Horse),
-            typeof (SquidKid),
-            typeof (Grub),
-            typeof (Fly),
-            typeof (DustSpirit),
-            typeof (Bug),
-            typeof (BigSlime),
-            typeof (BreakableContainer),
-            typeof (MetalHead),
-            typeof (ShadowGirl),
-            typeof (Monster),
-            typeof (JunimoHarvester),
-            typeof (TerrainFeature)
-        };
+        /****
+        ** Serializer
+        ****/
         private void SetupSerializer()
         {
-            this.MainSerializer = new XmlSerializer(typeof(SaveGame), _serialiserTypes.Concat(SerializerTypes).ToArray());
-            this.FarmerSerializer = new XmlSerializer(typeof(StardewValley.Farmer), _farmerTypes.Concat(SerializerTypes).ToArray());
-            this.LocationSerializer = new XmlSerializer(typeof(GameLocation), _locationTypes.Concat(SerializerTypes).ToArray());
-            SerializerInjected = true;
-            EnforceSerializer();
+            this.MainSerializer = new XmlSerializer(typeof(SaveGame), EntoaroxFrameworkMod.SerialiserTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
+            this.FarmerSerializer = new XmlSerializer(typeof(Farmer), EntoaroxFrameworkMod.FarmerTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
+            this.LocationSerializer = new XmlSerializer(typeof(GameLocation), EntoaroxFrameworkMod.LocationTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
+            EntoaroxFrameworkMod.SerializerInjected = true;
+            this.EnforceSerializer();
         }
+
         private void EnforceSerializer()
         {
             SaveGame.serializer = this.MainSerializer;
             SaveGame.farmerSerializer = this.FarmerSerializer;
             SaveGame.locationSerializer = this.LocationSerializer;
         }
-        #endregion
-        #region Misc
-        private void PrepareCustomEvents()
-        {
-            ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
-            ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
-            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-        }
-        #endregion
     }
 }

@@ -38,13 +38,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XnbLoaderMod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\VersionChecker\XnbLoader.json">
-      <Link>XnbLoader.json</Link>
-    </None>
     <None Include="manifest.json" />
     <None Include="update.json" />
   </ItemGroup>

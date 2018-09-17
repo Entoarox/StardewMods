@@ -47,7 +47,7 @@
   <ItemGroup>
     <Compile Include="ContentMode.cs" />
     <Compile Include="ContentPackManifest.cs" />
-    <Compile Include="SeasonalImmersionMod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeasonalTextureLoader.cs" />
   </ItemGroup>
