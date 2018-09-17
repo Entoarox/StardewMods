@@ -336,7 +336,6 @@ namespace Entoarox.Framework.Core
             }
 
             this.SetupSerializer();
-            UpdateHandler.DoUpdateChecks();
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
         }
 
