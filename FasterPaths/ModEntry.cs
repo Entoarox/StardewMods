@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Entoarox.Framework;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -8,6 +9,7 @@ using StardewValley.TerrainFeatures;
 
 namespace Entoarox.FasterPaths
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {
         /*********

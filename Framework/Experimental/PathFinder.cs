@@ -13,7 +13,6 @@ namespace Entoarox.Framework.Experimental
         *********/
         public static List<PathNode> FindPath(this GameLocation location, Point start, Point end)
         {
-            Layer layer = location.map.GetLayer("Back");
             List<PathNode> nodes = new List<PathNode>();
             PathNode finish = null;
             bool finished = false;

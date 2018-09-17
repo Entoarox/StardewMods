@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
     internal class Warp : TileInfo
@@ -7,8 +5,6 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         /*********
         ** Accessors
         *********/
-        [JsonIgnore] public new bool Optional;
-
         public string TargetName;
         public int TargetX;
         public int TargetY;

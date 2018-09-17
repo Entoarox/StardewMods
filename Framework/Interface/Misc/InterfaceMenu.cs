@@ -267,7 +267,7 @@ namespace Entoarox.Framework.Interface
         public override void performHoverAction(int x, int y)
         {
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(x / Game1.pixelZoom, y / Game1.pixelZoom);
-            if (this.GetTarget(offset, position, out IDynamicComponent component, out bool floating))
+            if (this.GetTarget(offset, position, out IDynamicComponent component, out _))
             {
                 if (component == this.HoverComponent)
                     component.HoverOver(offset, position);
@@ -307,7 +307,7 @@ namespace Entoarox.Framework.Interface
         {
             MouseState state = Mouse.GetState();
             Point offset = new Point(this.InnerBounds.X, this.InnerBounds.Y), position = new Point(state.X / Game1.pixelZoom, state.Y / Game1.pixelZoom);
-            if (this.GetTarget(offset, position, out IDynamicComponent component, out bool floating))
+            if (this.GetTarget(offset, position, out IDynamicComponent component, out _))
                 component.Scroll(offset, position, direction);
         }
 

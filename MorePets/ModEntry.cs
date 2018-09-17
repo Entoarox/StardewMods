@@ -274,15 +274,6 @@ namespace Entoarox.MorePetsAndAnimals
                 this.CheckForAction();
         }
 
-        private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
-        {
-            if (this.TriggerAction && e.ButtonReleased == Buttons.A)
-            {
-                this.TriggerAction = false;
-                this.DoAction();
-            }
-        }
-
         private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
         {
             if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)

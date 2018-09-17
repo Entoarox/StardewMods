@@ -14,7 +14,6 @@ namespace Entoarox.CustomBooks
         ** Accessors
         *********/
         public static Bookshelf Shelf;
-        public string SavePath => "";
         public static IModHelper SHelper;
 
 

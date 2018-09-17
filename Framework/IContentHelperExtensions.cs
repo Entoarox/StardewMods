@@ -85,7 +85,7 @@ namespace Entoarox.Framework
         {
             try
             {
-                Dictionary<TKey, TValue> check = Game1.content.Load<Dictionary<TKey, TValue>>(assetName);
+                //Dictionary<TKey, TValue> check = Game1.content.Load<Dictionary<TKey, TValue>>(assetName);
                 assetName = helper.GetActualAssetKey(assetName, ContentSource.GameContent);
                 if (!DictionaryInjector.Map.ContainsKey(assetName))
                     DictionaryInjector.Map.Add(assetName, new DictionaryWrapper<TKey, TValue>());

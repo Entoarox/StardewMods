@@ -38,7 +38,6 @@ namespace Entoarox.CustomBooks
             *********/
             public List<Page> Pages;
             public string Name;
-            public bool Editable = true;
             public Color Color;
 
             public enum PageType

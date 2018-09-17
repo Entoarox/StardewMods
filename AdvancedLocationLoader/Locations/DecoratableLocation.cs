@@ -29,7 +29,6 @@ namespace Entoarox.AdvancedLocationLoader.Locations
             base.cleanupBeforePlayerExit();
             for (int c = 0; c < Game1.player.items.Count; c++)
             {
-                Item i = Game1.player.items[c];
                 if (Game1.player.items[c] is FakeWallpaper)
                     Game1.player.items[c] = ((FakeWallpaper)Game1.player.items[c]).Restore();
             }
@@ -53,7 +52,6 @@ namespace Entoarox.AdvancedLocationLoader.Locations
                 furniture.resetOnPlayerEntry(this);
             for (int c = 0; c < Game1.player.items.Count; c++)
             {
-                Item i = Game1.player.items[c];
                 if (Game1.player.items[c] is Wallpaper)
                     Game1.player.items[c] = new FakeWallpaper((Wallpaper)Game1.player.items[c]);
             }

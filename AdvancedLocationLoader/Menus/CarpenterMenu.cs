@@ -318,8 +318,6 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                 {
                     if (buildingAt == null || !((BuildableGameLocation)Game1.getLocationFromName(this.TargetLocation)).destroyStructure(buildingAt))
                         return;
-                    int num1 = buildingAt.tileY;
-                    int num2 = buildingAt.tilesHigh;
                     Game1.flashAlpha = 1f;
                     buildingAt.showDestroyedAnimation(Game1.getLocationFromName(this.TargetLocation));
                     Game1.playSound("explosion");

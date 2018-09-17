@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
 using Microsoft.Xna.Framework;
@@ -13,6 +14,7 @@ using SObject = StardewValley.Object;
 
 namespace Entoarox.FurnitureAnywhere
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {
         /*********

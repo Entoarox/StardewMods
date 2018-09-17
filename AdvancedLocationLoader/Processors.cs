@@ -4,7 +4,6 @@ using System.IO;
 using Entoarox.AdvancedLocationLoader.Configs;
 using Entoarox.AdvancedLocationLoader.Locations;
 using Entoarox.Framework;
-using Entoarox.Framework.Extensions;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;

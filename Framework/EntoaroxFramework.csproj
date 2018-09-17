@@ -75,8 +75,6 @@
     <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
     <Compile Include="Core\Utilities\Events.cs" />
     <Compile Include="Core\Utilities\Globals.cs" />
-    <Compile Include="Core\Utilities\ModuleProvider.cs" />
-    <Compile Include="Core\Utilities\UnsafeHelper.cs" />
     <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
     <Compile Include="CustomObject.cs" />
     <Compile Include="Delegates.cs" />

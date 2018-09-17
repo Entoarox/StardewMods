@@ -8,12 +8,8 @@ namespace Entoarox.Framework.Core
         /*********
         ** Fields
         *********/
-        private static string[] FarmTypes = { "farmDefault", "farmFishing", "farmForest", "farmHilltop", "farmWilderness" };
-        private static string[] Seasons = { "spring", "summer", "fall", "winter" };
-        private static string[] SeasonsInverted = { "!spring", "!summer", "!fall", "!winter" };
         private static readonly string[] WeatherTypes = { "weatherWedding", "weatherFestival", "weatherSun", "weatherSummerDebris", "weatherRain", "weatherStorm", "weatherFallDebris", "weatherSnow" };
         private static readonly string[] Weekdays = { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
-        private static string[] WeekdaysInverted = { "!sunday", "!monday", "!tuesday", "!wednesday", "!thursday", "!friday", "!saturday" };
 
 
         /*********

@@ -139,7 +139,6 @@ namespace Entoarox.Framework.Core.Skills
         {
             _ValidateFarmer(player);
             _ValidateSkill(skillName);
-            ISkill skill = GetSkillInfo(skillName);
             return this._SkillData[player.uniqueMultiplayerID].Skills[skillName].Experience;
         }
 

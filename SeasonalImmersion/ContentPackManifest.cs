@@ -7,6 +7,5 @@ namespace Entoarox.SeasonalImmersion
         public string Name;
         public string Author;
         public Version Version;
-        public string Description;
     }
 }

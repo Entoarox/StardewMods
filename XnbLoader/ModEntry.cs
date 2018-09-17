@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Entoarox.Framework;
 using StardewModdingAPI;
@@ -6,6 +7,7 @@ using StardewValley;
 
 namespace Entoarox.XnbLoader
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {
         /*********

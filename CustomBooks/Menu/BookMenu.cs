@@ -108,7 +108,6 @@ namespace Entoarox.CustomBooks.Menu
             b.Draw(this.Background, p, null, Color.White, 0, Vector2.Zero, 2f, SpriteEffects.None, 0);
             */
             Vector2 p = this.Origin;
-            Point origin = new Point((int)p.X, (int)p.Y);
             b.Draw(this.Binder, p, null, ModEntry.Shelf.Books[this.Id].Color, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
             b.Draw(this.Content, p, null, Color.White, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
 
