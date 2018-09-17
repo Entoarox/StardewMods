@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using xTile;
 using xTile.Dimensions;
 using xTile.ObjectModel;
 using xTile.Tiles;
@@ -164,7 +165,10 @@ namespace Entoarox.DynamicDungeons
 
                 (5, 13, "Buildings", "Action", "DDDoor").ApplyTo(loc.map);
                 if (Game1.getLocationFromName("DynamicDungeonEntrance") == null)
+                {
+                    this.Helper.Content.Load<Map>("assets/DynamicDungeonsEntrance.tbin"); // maps need to be loaded before the game can reference it
                     Game1.locations.Add(new GameLocation(this.Helper.Content.GetActualAssetKey("assets/DynamicDungeonsEntrance.tbin"), "DynamicDungeonEntrance"));
+                }
             }
         }
 
