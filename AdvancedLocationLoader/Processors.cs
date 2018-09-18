@@ -122,7 +122,7 @@ namespace Entoarox.AdvancedLocationLoader
             }
         }
 
-        public static void ApplyTilesheet(IContentHelper coreContentHelper, IContentPack contentPack, Tilesheet tilesheet)
+        public static void ApplyTilesheet(IContentHelper coreContentHelper, IContentPack contentPack, Tilesheet tilesheet, Map map)
         {
             int stage = 0;
             int branch = 0;
@@ -130,8 +130,6 @@ namespace Entoarox.AdvancedLocationLoader
             try
             {
                 stage++; // 1
-                GameLocation location = Game1.getLocationFromName(tilesheet.MapName);
-                stage++; // 2
                 if (tilesheet.FileName == null)
                     skip = 1;
                 else
@@ -140,7 +138,7 @@ namespace Entoarox.AdvancedLocationLoader
                     string fakepath = Path.Combine("AdvancedLocationLoader/FakePath_paths_objects", tilesheet.FileName);
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
-                    stage++; // 3
+                    stage++; // 2
                     if (!Processors.MappingCache.Contains(tilesheet.FileName))
                     {
                         string toAssetPath = contentPack.GetRelativePath(
@@ -151,24 +149,24 @@ namespace Entoarox.AdvancedLocationLoader
                         Processors.MappingCache.Add(tilesheet.FileName);
                     }
 
-                    stage++; // 4
-                    if (location.map.GetTileSheet(tilesheet.SheetId) != null)
+                    stage++; // 3
+                    if (map.GetTileSheet(tilesheet.SheetId) != null)
                     {
                         branch = 1;
-                        location.map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
+                        map.GetTileSheet(tilesheet.SheetId).ImageSource = fakepath;
                     }
                     else
                     {
                         branch = 2;
                         Texture2D sheet = Game1.content.Load<Texture2D>(fakepath);
-                        location.map.AddTileSheet(new TileSheet(tilesheet.SheetId, location.map, fakepath, new Size((int)Math.Ceiling(sheet.Width / 16.0), (int)Math.Ceiling(sheet.Height / 16.0)), new Size(16, 16)));
+                        map.AddTileSheet(new TileSheet(tilesheet.SheetId, map, fakepath, new Size((int)Math.Ceiling(sheet.Width / 16.0), (int)Math.Ceiling(sheet.Height / 16.0)), new Size(16, 16)));
                     }
                 }
 
-                stage++; // 5 (skip 3)
+                stage++; // 4 (skip 2)
                 if (tilesheet.Properties.Count > 0)
                 {
-                    TileSheet sheet = location.map.GetTileSheet(tilesheet.SheetId);
+                    TileSheet sheet = map.GetTileSheet(tilesheet.SheetId);
                     foreach (string prop in tilesheet.Properties.Keys)
                         sheet.Properties[prop] = tilesheet.Properties[prop];
                 }

@@ -76,7 +76,8 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 foreach (Tilesheet tilesheet in pair.Value)
                 {
-                    Processors.ApplyTilesheet(ModEntry.SHelper.Content, pair.Key, tilesheet);
+                    GameLocation location = Game1.getLocationFromName(tilesheet.MapName);
+                    Processors.ApplyTilesheet(ModEntry.SHelper.Content, pair.Key, tilesheet, location.map);
                     if (!locations.Contains(tilesheet.MapName))
                         locations.Add(tilesheet.MapName);
                 }

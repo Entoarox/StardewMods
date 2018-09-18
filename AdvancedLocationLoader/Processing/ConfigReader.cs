@@ -101,7 +101,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                 case "1.2":
                     return this.ReadConfig_1_2(contentPack, configPath);
                 default:
-                    this.Monitor.Log($"Skipped {contentPack.Manifest.Name}: config file format {formatVersion} isn't supported.", LogLevel.Error);
+                    this.Monitor.Log($"Skipped {contentPack.Manifest.Name}: config file format {formatVersion} isn't supported, must be 1.1 or 1.2.", LogLevel.Error);
                     return null;
             }
         }
