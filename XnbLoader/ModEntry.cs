@@ -41,6 +41,9 @@ namespace Entoarox.XnbLoader
             "TileSheets"
         };
 
+        /// <summary>The mod configuration options.</summary>
+        private ModConfig Config;
+
 
         /*********
         ** Public methods
@@ -49,16 +52,20 @@ namespace Entoarox.XnbLoader
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            this.Config = helper.ReadConfig<ModConfig>();
+
             // prepare directory structure
             string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
             foreach (string path in this.PathsToCreate)
                 Directory.CreateDirectory(Path.Combine(contentPath, path));
 
             // load files
-            this.Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Info);
+            if (this.Config.VerboseLog)
+                this.Monitor.Log("Parsing `ModContent` for files to redirect the content manager to...", LogLevel.Trace);
             int overrides = this.LoadOverrides(contentPath, contentPath);
             this.PatchFiles();
-            this.Monitor.Log($"Parsing complete, found and redirected [{overrides}] files", LogLevel.Info);
+            if (this.Config.VerboseLog)
+                this.Monitor.Log($"Found and redirected [{overrides}] files", LogLevel.Info);
         }
 
 
@@ -76,7 +83,8 @@ namespace Entoarox.XnbLoader
             {
                 string pathSeparator = Path.DirectorySeparatorChar.ToString();
                 string relativePath = path.Replace(root + pathSeparator, pathSeparator).Replace(root, pathSeparator);
-                this.Monitor.Log($"Looking for files and directories in {relativePath}", LogLevel.Trace);
+                if (this.Config.VerboseLog)
+                    this.Monitor.Log($"Looking for files and directories in {relativePath}", LogLevel.Trace);
             }
 
             // load subfolders
