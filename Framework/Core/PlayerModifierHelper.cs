@@ -17,14 +17,7 @@ namespace Entoarox.Framework.Core
         private static readonly int MyUnique = (int)DateTime.Now.Ticks;
         private static readonly FieldInfo BuffAttributes = typeof(Buff).GetField("buffAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
         private static float HealthOverflow;
-        private static PlayerModifier Compound = new PlayerModifier(true)
-        {
-            ExperienceModifierCombat = 1,
-            ExperienceModifierFarming = 1,
-            ExperienceModifierFishing = 1,
-            ExperienceModifierForaging = 1,
-            ExperienceModifierMining = 1
-        };
+        private static PlayerModifier Compound = new PlayerModifier();
 
 
         /*********
@@ -130,14 +123,7 @@ namespace Entoarox.Framework.Core
         private void _UpdateCompound()
         {
             this.ResetModifiers();
-            PlayerModifierHelper.Compound = new PlayerModifier(true)
-            {
-                ExperienceModifierCombat = 1,
-                ExperienceModifierFarming = 1,
-                ExperienceModifierFishing = 1,
-                ExperienceModifierForaging = 1,
-                ExperienceModifierMining = 1
-            };
+            PlayerModifierHelper.Compound = new PlayerModifier();
             foreach (PlayerModifier mod in PlayerModifierHelper.Modifiers)
             {
                 PlayerModifierHelper.Compound.MagnetRange += mod.MagnetRange;
@@ -152,15 +138,7 @@ namespace Entoarox.Framework.Core
                 PlayerModifierHelper.Compound.CritPowerModifier += mod.CritPowerModifier;
                 PlayerModifierHelper.Compound.WeaponSpeedModifier += mod.WeaponSpeedModifier;
                 PlayerModifierHelper.Compound.WeaponPrecisionModifier += mod.WeaponPrecisionModifier;
-
-                PlayerModifierHelper.Compound.ExperienceModifierCombat += mod.ExperienceModifierCombat;
-                PlayerModifierHelper.Compound.ExperienceModifierFarming += mod.ExperienceModifierFarming;
-                PlayerModifierHelper.Compound.ExperienceModifierFishing += mod.ExperienceModifierFishing;
-                PlayerModifierHelper.Compound.ExperienceModifierForaging += mod.ExperienceModifierForaging;
-                PlayerModifierHelper.Compound.ExperienceModifierMining += mod.ExperienceModifierMining;
             }
-
-            PlayerModifierHelper.Compound.Unlocked = false;
             this.ApplyModifiers();
         }
 
