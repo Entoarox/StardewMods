@@ -1,4 +1,12 @@
 ## Release notes
+## 1.1.11
+Upcoming release. (Thanks to Pathoschild!)
+
+* Updated for Stardew Valley 1.3.
+* Fixed Linux/Mac compatibility.
+* Removed custom update checks; replaced by standard SMAPI update alerts.
+* Refactored internally.
+
 ## 1.1.10
 Released 26 January 2018.
 

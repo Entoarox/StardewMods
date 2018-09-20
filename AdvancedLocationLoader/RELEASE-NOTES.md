@@ -1,4 +1,12 @@
 ## Release notes
+## 1.4.4
+Upcoming release. (Thanks to Pathoschild!)
+
+* Updated for Stardew Valley 1.3.
+* Fixed Linux/Mac compatibility.
+* Removed custom update checks; replaced by standard SMAPI update alerts.
+* Refactored internally.
+
 ## 1.4.3
 Released 30 April 2018.
 

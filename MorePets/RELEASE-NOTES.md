@@ -1,4 +1,13 @@
 ## Release notes
+## 2.0.5
+Upcoming release. (Thanks to Pathoschild and Slamerz!)
+
+* Updated for Stardew Valley 1.3.
+* Fixed Linux/Mac compatibility.
+* Moved assets into conventional `assets` subfolder and unpacked XNB files into normal PNG images.
+* Removed custom update checks; replaced by standard SMAPI update alerts.
+* Refactored internally.
+
 ## 2.0.4
 Released 14 March 2018.
 
