@@ -200,6 +200,7 @@
   <ItemGroup>
     <None Include="docs\ConditionDocumentation.md" />
     <None Include="manifest.json" />
+    <None Include="RELEASE-NOTES.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="docs\Changelog.txt" />

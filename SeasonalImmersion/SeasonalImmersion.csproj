@@ -55,6 +55,7 @@
   <ItemGroup>
     <EmbeddedResource Include="ContentPack\manifest.json" />
     <None Include="manifest.json" />
+    <None Include="RELEASE-NOTES.md" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ContentPack\fall\Barn.png" />
