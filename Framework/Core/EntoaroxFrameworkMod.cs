@@ -350,7 +350,7 @@ namespace Entoarox.Framework.Core
                 this.PrevItem = Game1.player.CurrentItem;
             }
 
-            PlayerModifierHelper.UpdateModifiers();
+            IModHelperExtensions.PlayerModifierHelper.UpdateTick();
             Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
             if (EntoaroxFrameworkMod.LastTouchAction != playerPos)
             {

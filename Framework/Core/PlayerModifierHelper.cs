@@ -13,178 +13,194 @@ namespace Entoarox.Framework.Core
         /*********
         ** Fields
         *********/
-        private static readonly List<PlayerModifier> Modifiers = new List<PlayerModifier>();
-        private static readonly int MyUnique = (int)DateTime.Now.Ticks;
-        private static readonly FieldInfo BuffAttributes = typeof(Buff).GetField("buffAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static float HealthOverflow;
-        private static PlayerModifier Compound = new PlayerModifier();
+        /// <summary>The player stat modifiers to apply.</summary>
+        private readonly PlayerModifierList Mods = new PlayerModifierList();
+
+        /// <summary>The last speed boost applied to <see cref="Character.addedSpeed"/>.</summary>
+        private int LastMoveBoost = 0;
+
+        /// <summary>The unique ID for the glow light source.</summary>
+        private readonly int GlowID = (int)DateTime.Now.Ticks;
+
+        /// <summary>The current vanilla buff values.</summary>
+        private readonly FieldInfo BuffAttributes = typeof(Buff).GetField("buffAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        /// <summary>The health regen remainder after applying the integer amount.</summary>
+        private float HealthRegenRemainder;
 
 
         /*********
         ** Accessors
         *********/
-        public int Count => PlayerModifierHelper.Modifiers.Count;
+        public int Count => this.Mods.Count;
 
 
         /*********
         ** Public methods
         *********/
-        internal void ApplyModifiers()
+        /// <summary>Apply any updates needed on update tick.</summary>
+        public void UpdateTick()
         {
-            if (!Context.IsWorldReady)
-                return;
-            Game1.player.attackIncreaseModifier += PlayerModifierHelper.Compound.AttackIncreaseModifier;
-            Game1.player.knockbackModifier += PlayerModifierHelper.Compound.KnockbackModifier;
-            Game1.player.critChanceModifier += PlayerModifierHelper.Compound.CritChanceModifier;
-            Game1.player.critPowerModifier += PlayerModifierHelper.Compound.CritPowerModifier;
-            Game1.player.weaponSpeedModifier += PlayerModifierHelper.Compound.WeaponSpeedModifier;
-            Game1.player.weaponPrecisionModifier += PlayerModifierHelper.Compound.WeaponPrecisionModifier;
-            Game1.player.MagneticRadius += PlayerModifierHelper.Compound.MagnetRange;
-            if (PlayerModifierHelper.Compound.GlowDistance > 0)
-                Game1.currentLightSources.Add(new LightSource(LightSource.lantern, new Vector2(Game1.player.position.X + Game1.tileSize / 3, Game1.player.position.Y + Game1.tileSize), PlayerModifierHelper.Compound.GlowDistance, new Color(0, 30, 150), PlayerModifierHelper.MyUnique));
-        }
-
-        public static void UpdateModifiers()
-        {
+            // walk/run speed
             if (Game1.currentLocation.currentEvent != null)
-                Game1.player.addedSpeed = 0;
-            else
-                Game1.player.addedSpeed = PlayerModifierHelper.GetVanillaSpeedBoost() + (Game1.player.running ? PlayerModifierHelper.Compound.RunSpeedModifier : PlayerModifierHelper.Compound.WalkSpeedModifier);
-            if (PlayerModifierHelper.Compound.HealthRegenModifier != 0 && Game1.player.health < Game1.player.maxHealth)
             {
-                PlayerModifierHelper.HealthOverflow += PlayerModifierHelper.Compound.HealthRegenModifier;
-                int HealthChange = (int)PlayerModifierHelper.HealthOverflow;
-                PlayerModifierHelper.HealthOverflow -= HealthChange;
-                Game1.player.health = Math.Min(Game1.player.health + HealthChange, Game1.player.maxHealth);
+                Game1.player.addedSpeed = 0;
+                this.LastMoveBoost = 0;
+            }
+            else
+            {
+                this.ClearMoveBoost();
+                this.LastMoveBoost = Game1.player.running ? this.Mods.RunSpeed : this.Mods.WalkSpeed;
+                if (this.LastMoveBoost != 0)
+                    Game1.player.addedSpeed = this.GetVanillaSpeedBoost() + this.LastMoveBoost;
             }
 
-            if (PlayerModifierHelper.Compound.StaminaRegenModifier != 0 && Game1.player.stamina < Game1.player.MaxStamina)
-                Game1.player.stamina = Math.Min(Game1.player.stamina + PlayerModifierHelper.Compound.StaminaRegenModifier, Game1.player.MaxStamina);
-            LightSource lightSource = Utility.getLightSource(PlayerModifierHelper.MyUnique);
+            // health regen
+            if (this.Mods.HealthRegen != 0 && Game1.player.health < Game1.player.maxHealth)
+            {
+                this.HealthRegenRemainder += this.Mods.HealthRegen;
+                Game1.player.health = Math.Min(Game1.player.health + (int)this.HealthRegenRemainder, Game1.player.maxHealth);
+                this.HealthRegenRemainder %= 1;
+            }
+
+            // stamina regen
+            if (this.Mods.StaminaRegen != 0 && Game1.player.stamina < Game1.player.MaxStamina)
+                Game1.player.stamina = Math.Min(Game1.player.stamina + this.Mods.StaminaRegen, Game1.player.MaxStamina);
+
+            // glow distance
+            LightSource lightSource = Utility.getLightSource(this.GlowID);
             if (lightSource != null)
-                if (PlayerModifierHelper.Compound.GlowDistance == 0)
+            {
+                if (this.Mods.GlowDistance == 0)
                     Game1.currentLightSources.Remove(lightSource);
                 else
                 {
                     Game1.currentLightSources.Remove(lightSource);
-                    lightSource = new LightSource(1, new Vector2(Game1.player.position.X + Game1.tileSize / 3, Game1.player.position.Y), PlayerModifierHelper.Compound.GlowDistance);
+                    lightSource = new LightSource(1, new Vector2(Game1.player.position.X + Game1.tileSize / 3, Game1.player.position.Y), this.Mods.GlowDistance);
                 }
+            }
         }
 
         public void Add(PlayerModifier modifier)
         {
-            PlayerModifierHelper.Modifiers.Add(modifier);
-            this._UpdateCompound();
+            this.Mods.Add(modifier);
+            this.OnModifiersChanged();
         }
 
         public void AddRange(IEnumerable<PlayerModifier> modifiers)
         {
-            PlayerModifierHelper.Modifiers.AddRange(modifiers);
-            this._UpdateCompound();
+            this.Mods.AddRange(modifiers);
+            this.OnModifiersChanged();
         }
 
         public void Remove(PlayerModifier modifier)
         {
-            PlayerModifierHelper.Modifiers.Remove(modifier);
-            this._UpdateCompound();
+            this.Mods.Remove(modifier);
+            this.OnModifiersChanged();
         }
 
         public void RemoveAll(Predicate<PlayerModifier> predicate)
         {
-            PlayerModifierHelper.Modifiers.RemoveAll(predicate);
-            this._UpdateCompound();
+            this.Mods.RemoveAll(predicate);
+            this.OnModifiersChanged();
         }
 
         public void Clear()
         {
-            PlayerModifierHelper.Modifiers.Clear();
-            this._UpdateCompound();
+            this.Mods.Clear();
+            this.OnModifiersChanged();
         }
 
         public bool Contains(PlayerModifier modifier)
         {
-            return PlayerModifierHelper.Modifiers.Contains(modifier);
+            return this.Mods.Contains(modifier);
         }
 
         public bool Exists(Predicate<PlayerModifier> predicate)
         {
-            return PlayerModifierHelper.Modifiers.Exists(predicate);
+            return this.Mods.Exists(predicate);
         }
 
         public bool TrueForAll(Predicate<PlayerModifier> predicate)
         {
-            return PlayerModifierHelper.Modifiers.TrueForAll(predicate);
+            return this.Mods.TrueForAll(predicate);
         }
 
 
         /*********
         ** Protected methods
         *********/
-        private void _UpdateCompound()
+        /// <summary>Update the compound modifiers when the list of applied modifiers has changed.</summary>
+        private void OnModifiersChanged()
         {
-            this.ResetModifiers();
-            PlayerModifierHelper.Compound = new PlayerModifier();
-            foreach (PlayerModifier mod in PlayerModifierHelper.Modifiers)
+            // reset
+            if (Context.IsWorldReady)
             {
-                PlayerModifierHelper.Compound.MagnetRange += mod.MagnetRange;
-                PlayerModifierHelper.Compound.GlowDistance = Math.Max(PlayerModifierHelper.Compound.GlowDistance, mod.GlowDistance);
-                PlayerModifierHelper.Compound.StaminaRegenModifier += mod.StaminaRegenModifier;
-                PlayerModifierHelper.Compound.HealthRegenModifier += mod.HealthRegenModifier;
-                PlayerModifierHelper.Compound.WalkSpeedModifier += mod.WalkSpeedModifier;
-                PlayerModifierHelper.Compound.RunSpeedModifier += mod.RunSpeedModifier;
-                PlayerModifierHelper.Compound.AttackIncreaseModifier += mod.AttackIncreaseModifier;
-                PlayerModifierHelper.Compound.KnockbackModifier += mod.KnockbackModifier;
-                PlayerModifierHelper.Compound.CritChanceModifier += mod.CritChanceModifier;
-                PlayerModifierHelper.Compound.CritPowerModifier += mod.CritPowerModifier;
-                PlayerModifierHelper.Compound.WeaponSpeedModifier += mod.WeaponSpeedModifier;
-                PlayerModifierHelper.Compound.WeaponPrecisionModifier += mod.WeaponPrecisionModifier;
+                Game1.player.attackIncreaseModifier -= this.Mods.Attack;
+                Game1.player.knockbackModifier -= this.Mods.Knockback;
+                Game1.player.critChanceModifier -= this.Mods.CritChance;
+                Game1.player.critPowerModifier -= this.Mods.CritPower;
+                Game1.player.weaponSpeedModifier -= this.Mods.WeaponSpeed;
+                Game1.player.weaponPrecisionModifier -= this.Mods.WeaponPrecision;
+                Game1.player.MagneticRadius -= this.Mods.MagnetRange;
+                this.ClearMoveBoost();
+                this.HealthRegenRemainder = 0;
+                if (this.Mods.GlowDistance == 0)
+                    Utility.removeLightSource(this.GlowID);
             }
-            this.ApplyModifiers();
+
+            // recalculate aggregates
+            this.Mods.Recalculate();
+
+            // reapply
+            if (Context.IsWorldReady)
+            {
+                Game1.player.attackIncreaseModifier += this.Mods.Attack;
+                Game1.player.knockbackModifier += this.Mods.Knockback;
+                Game1.player.critChanceModifier += this.Mods.CritChance;
+                Game1.player.critPowerModifier += this.Mods.CritPower;
+                Game1.player.weaponSpeedModifier += this.Mods.WeaponSpeed;
+                Game1.player.weaponPrecisionModifier += this.Mods.WeaponPrecision;
+                Game1.player.MagneticRadius += this.Mods.MagnetRange;
+                if (this.Mods.GlowDistance > 0)
+                    Game1.currentLightSources.Add(new LightSource(LightSource.lantern, new Vector2(Game1.player.position.X + Game1.tileSize / 3, Game1.player.position.Y + Game1.tileSize), this.Mods.GlowDistance, new Color(0, 30, 150), this.GlowID));
+            }
         }
 
-        /// <summary>This method calculates vanilla speed boost and returns it.</summary>
-        private static int GetVanillaSpeedBoost()
+        /// <summary>Remove the previously-applied speed boost.</summary>
+        private void ClearMoveBoost()
+        {
+            if (this.LastMoveBoost != 0)
+                Game1.player.addedSpeed = this.GetVanillaSpeedBoost();
+            this.LastMoveBoost = 0;
+        }
+
+        /// <summary>Get the speed boost for all vanilla buffs.</summary>
+        private int GetVanillaSpeedBoost()
         {
             int boost = 0, v = 0;
             foreach (Buff b in Game1.buffsDisplay.otherBuffs)
             {
-                v = (PlayerModifierHelper.BuffAttributes.GetValue(b) as int[])[9];
+                v = ((int[])this.BuffAttributes.GetValue(b))[9];
                 if (v != 0)
                     boost += v;
             }
 
             if (Game1.buffsDisplay.food != null)
             {
-                v = (PlayerModifierHelper.BuffAttributes.GetValue(Game1.buffsDisplay.food) as int[])[9];
+                v = ((int[])this.BuffAttributes.GetValue(Game1.buffsDisplay.food))[9];
                 if (v != 0)
                     boost += v;
             }
 
             if (Game1.buffsDisplay.drink != null)
             {
-                v = (PlayerModifierHelper.BuffAttributes.GetValue(Game1.buffsDisplay.drink) as int[])[9];
+                v = ((int[])this.BuffAttributes.GetValue(Game1.buffsDisplay.drink))[9];
                 if (v != 0)
                     boost += v;
             }
 
             return boost;
-        }
-
-        private void ResetModifiers()
-        {
-            if (!Context.IsWorldReady)
-                return;
-            Game1.player.attackIncreaseModifier -= PlayerModifierHelper.Compound.AttackIncreaseModifier;
-            Game1.player.knockbackModifier -= PlayerModifierHelper.Compound.KnockbackModifier;
-            Game1.player.critChanceModifier -= PlayerModifierHelper.Compound.CritChanceModifier;
-            Game1.player.critPowerModifier -= PlayerModifierHelper.Compound.CritPowerModifier;
-            Game1.player.weaponSpeedModifier -= PlayerModifierHelper.Compound.WeaponSpeedModifier;
-            Game1.player.weaponPrecisionModifier -= PlayerModifierHelper.Compound.WeaponPrecisionModifier;
-            Game1.player.MagneticRadius -= PlayerModifierHelper.Compound.MagnetRange;
-            if (PlayerModifierHelper.Compound.GlowDistance == 0)
-                Utility.removeLightSource(PlayerModifierHelper.MyUnique);
-            Game1.player.addedSpeed = 0;
-            PlayerModifierHelper.HealthOverflow = 0;
         }
     }
 }

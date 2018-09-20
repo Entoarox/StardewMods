@@ -16,6 +16,12 @@ namespace Entoarox.Framework
 
 
         /*********
+        ** Accessors
+        *********/
+        internal static PlayerModifierHelper PlayerModifierHelper { get; } = new PlayerModifierHelper();
+
+
+        /*********
         ** Public methods
         *********/
         /// <summary>Allows you to request a hotkey with the given label.</summary>
@@ -65,7 +71,7 @@ namespace Entoarox.Framework
         public static IPlayerHelper Player(this IModHelper helper)
         {
             if (IModHelperExtensions.PlayerHelper == null)
-                IModHelperExtensions.PlayerHelper = new PlayerHelper();
+                IModHelperExtensions.PlayerHelper = new PlayerHelper(IModHelperExtensions.PlayerModifierHelper);
             return IModHelperExtensions.PlayerHelper;
         }
 

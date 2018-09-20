@@ -11,12 +11,17 @@ namespace Entoarox.Framework.Core
         /*********
         ** Accessors
         *********/
-        public IPlayerModifierHelper Modifiers { get; } = new PlayerModifierHelper();
+        public IPlayerModifierHelper Modifiers { get; }
 
 
         /*********
         ** Public methods
         *********/
+        public PlayerHelper(IPlayerModifierHelper modifiers)
+        {
+            this.Modifiers = modifiers;
+        }
+
         public void MoveTo(int x, int y)
         {
             Game1.warpFarmer(Game1.player.currentLocation.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure.Value);

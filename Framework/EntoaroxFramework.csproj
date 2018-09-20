@@ -64,6 +64,7 @@
     <Compile Include="Core\AssetHandlers\DictionaryInjector.cs" />
     <Compile Include="Core\AssetHandlers\TextureInjector.cs" />
     <Compile Include="Core\AssetHandlers\TextureInjectorInfo.cs" />
+    <Compile Include="Core\PlayerModifierList.cs" />
     <Compile Include="Core\ConditionsHelper.cs" />
     <Compile Include="Core\InterModHelper.cs" />
     <Compile Include="Core\Injection\HookedLocationBuilder.cs" />

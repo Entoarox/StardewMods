@@ -4,6 +4,7 @@ Upcoming release. (Thanks to Pathoschild and Slamerz!)
 
 * Updated for Stardew Valley 1.3.
 * Fixed Linux/Mac compatibility.
+* Fixed compatibility with other mods which change player speed. These will now work so long as you don't also install a mod which changes player speed through the Entoarox Framework API.
 * Removed custom update checks; replaced by standard SMAPI update alerts.
 * Refactored internally.
 
