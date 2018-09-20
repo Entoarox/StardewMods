@@ -4,6 +4,7 @@ Upcoming release. (Thanks to Pathoschild!)
 
 * Updated for Stardew Valley 1.3.
 * Fixed Linux/Mac compatibility.
+* Fixed error loading content packs which specify a format version like `1.2.9` instead of `1.2`.
 * Removed custom update checks; replaced by standard SMAPI update alerts.
 * Refactored internally.
 

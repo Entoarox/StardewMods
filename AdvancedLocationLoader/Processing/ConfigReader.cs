@@ -77,15 +77,16 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             }
 
             // get format version
-            string formatVersion;
+            ISemanticVersion formatVersion;
             try
             {
-                formatVersion = contentPack.ReadJsonFile<LoaderVersionConfig>(configPath)?.LoaderVersion;
-                if (formatVersion == null)
+                string rawVersion = contentPack.ReadJsonFile<LoaderVersionConfig>(configPath)?.LoaderVersion;
+                if (rawVersion == null)
                 {
                     this.Monitor.Log($"   Skipped: config doesn't specify a {nameof(LoaderVersionConfig.LoaderVersion)} field.", LogLevel.Error);
                     return null;
                 }
+                formatVersion = new SemanticVersion(rawVersion);
             }
             catch (Exception ex)
             {
@@ -94,7 +95,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             }
 
             // read data
-            switch (formatVersion)
+            switch ($"{formatVersion.MajorVersion}.{formatVersion.MinorVersion}")
             {
                 case "1.1":
                     return this.ReadConfig_1_1(contentPack, configPath);
