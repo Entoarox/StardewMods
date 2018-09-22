@@ -3,8 +3,12 @@
 Upcoming release. (Thanks to Pathoschild and Slamerz!)
 
 * Updated for Stardew Valley 1.3.
+* Overhauled skin loading:
+  * moved into conventional `assets` subfolder;
+  * switched to PNG images by default (XNB files will still work);
+  * rewrote skin logic to be more robust and handle more cases;
+  * improved error messages;
 * Fixed Linux/Mac compatibility.
-* Moved assets into conventional `assets` subfolder and unpacked XNB files into normal PNG images.
 * Removed custom update checks; replaced by standard SMAPI update alerts.
 * Refactored internally.
 

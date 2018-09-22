@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Entoarox.Framework;
+using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
@@ -20,8 +22,19 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Fields
         *********/
-        private static bool ReplaceBus = true;
+        /// <summary>Whether to replace the bus on the next opportunity.</summary>
+        private bool ReplaceBus = true;
         private bool TriggerAction;
+
+        /// <summary>The file extensions recognised by the mod.</summary>
+        private readonly HashSet<string> ValidExtensions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            ".png",
+            ".xnb"
+        };
+
+        /// <summary>The RNG used for assigning a skin to an existing animal.</summary>
+        private readonly Random SkinRandom = new Random();
 
 
         /*********
@@ -30,40 +43,8 @@ namespace Entoarox.MorePetsAndAnimals
         internal static Random Random;
         internal static ModConfig Config;
         internal static IModHelper SHelper;
-        internal static Dictionary<string, List<int>> Indexes = new Dictionary<string, List<int>>
-        {
-            ["BabyBlue Chicken"] = new List<int>(),
-            ["BabyBrown Chicken"] = new List<int>(),
-            ["BabyBrown Cow"] = new List<int>(),
-            ["BabyCow"] = new List<int>(),
-            ["BabyGoat"] = new List<int>(),
-            ["BabyPig"] = new List<int>(),
-            ["BabyRabbit"] = new List<int>(),
-            ["BabySheep"] = new List<int>(),
-            ["BabyVoid Chicken"] = new List<int>(),
-            ["BabyWhite Chicken"] = new List<int>(),
-            ["BabyWhite Cow"] = new List<int>(),
-            ["Blue Chicken"] = new List<int>(),
-            ["Brown Chicken"] = new List<int>(),
-            ["Brown Cow"] = new List<int>(),
-            ["cat"] = new List<int>(),
-            ["Cow"] = new List<int>(),
-            ["Dinosaur"] = new List<int>(),
-            ["dog"] = new List<int>(),
-            ["Duck"] = new List<int>(),
-            ["Goat"] = new List<int>(),
-            // There can only be 1 horse in the vanilla game anyhow, and this mod currently does not provide a way to get more due to the functionality behind horses and potential issues with other mods
-            //["horse"] = new List<int>(),
-            ["Pig"] = new List<int>(),
-            ["Rabbit"] = new List<int>(),
-            ["ShearedSheep"] = new List<int>(),
-            ["Sheep"] = new List<int>(),
-            ["Void Chicken"] = new List<int>(),
-            ["White Chicken"] = new List<int>(),
-            ["White Cow"] = new List<int>(),
-            // Special: MorePets separates baby ducks from baby white chickens (BabyDuck.png as a copy of BabyWhite Chicken.png is bundled because of this)
-            ["BabyDuck"] = new List<int>()
-        };
+
+        internal static Dictionary<AnimalType, AnimalSkin[]> Indexes = new Dictionary<AnimalType, AnimalSkin[]>();
         internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
 
 
@@ -77,37 +58,53 @@ namespace Entoarox.MorePetsAndAnimals
             // init
             ModEntry.Config = helper.ReadConfig<ModConfig>();
             ModEntry.SHelper = helper;
-            // load textures
-            this.LoadPetSkins();
-            List<string> partial = new List<string>
-            {
-                "Statistics:", Environment.NewLine,
-                "  Config:", Environment.NewLine,
-                "    AdoptionPrice: " + ModEntry.Config.AdoptionPrice, Environment.NewLine,
-                "    RepeatedAdoptionPenality: " + ModEntry.Config.RepeatedAdoptionPenality, Environment.NewLine,
-                "    UseMaxAdoptionLimit: " + ModEntry.Config.UseMaxAdoptionLimit, Environment.NewLine,
-                "    MaxAdoptionLimit: " + ModEntry.Config.MaxAdoptionLimit, Environment.NewLine,
-                "    AnimalsOnly: " + ModEntry.Config.AnimalsOnly, Environment.NewLine,
-                "  Skins:"
-            };
-            foreach (KeyValuePair<string, List<int>> pair in ModEntry.Indexes)
-            {
-                if (pair.Value.Count > 1)
-                    partial.Add($"{Environment.NewLine}    {pair.Key.PadRight(20)}: {pair.Value.Count - 1} skins");
-            }
-            this.Monitor.Log(string.Join("", partial), LogLevel.Trace);
+
+            // add commands
             helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using this mod, you monster", this.CommandFired_KillPets);
-            if (ModEntry.Config.AnimalsOnly)
-                ModEntry.ReplaceBus = false;
-            if (ModEntry.ReplaceBus && !ModEntry.Indexes["dog"].Any() && !ModEntry.Indexes["cat"].Any())
+
+            // load textures
+            AnimalSkin[] skins = this.LoadSkins().ToArray();
+            ModEntry.Indexes = skins.GroupBy(skin => skin.AnimalType).ToDictionary(group => group.Key, group => group.ToArray());
+            foreach (AnimalType type in Enum.GetValues(typeof(AnimalType)))
             {
-                ModEntry.ReplaceBus = false;
-                this.Monitor.Log("The `AnimalsOnly` config option is set to `false`, yet no dog or cat skins have been found!", LogLevel.Error);
+                if (!ModEntry.Indexes.ContainsKey(type))
+                    ModEntry.Indexes[type] = new AnimalSkin[0];
+            }
+
+            // print skin summary
+            {
+                StringBuilder summary = new StringBuilder();
+                summary.AppendLine(
+                    "Statistics:\n"
+                    + "  Config:\n"
+                    + $"    AdoptionPrice: {ModEntry.Config.AdoptionPrice}\n"
+                    + $"    RepeatedAdoptionPenality: {ModEntry.Config.RepeatedAdoptionPenality}\n"
+                    + $"    UseMaxAdoptionLimit: {ModEntry.Config.UseMaxAdoptionLimit}\n"
+                    + $"    MaxAdoptionLimit: {ModEntry.Config.MaxAdoptionLimit}\n"
+                    + $"    AnimalsOnly: {ModEntry.Config.AnimalsOnly}\n"
+                    + "  Skins:"
+                );
+                foreach (KeyValuePair<AnimalType, AnimalSkin[]> pair in ModEntry.Indexes)
+                {
+                    if (pair.Value.Length > 1)
+                        summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetName)).OrderBy(p => p))})");
+                }
+
+                this.Monitor.Log(summary.ToString(), LogLevel.Trace);
+            }
+
+            // configure bus replacement
+            if (ModEntry.Config.AnimalsOnly)
+                this.ReplaceBus = false;
+            if (this.ReplaceBus && !ModEntry.Indexes[AnimalType.Dog].Any() && !ModEntry.Indexes[AnimalType.Cat].Any())
+            {
+                this.ReplaceBus = false;
+                this.Monitor.Log($"The `{nameof(ModConfig.AnimalsOnly)}` config option is set to false, but no dog or cat skins were found!", LogLevel.Error);
             }
 
             // hook events
             GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-            if (ModEntry.ReplaceBus)
+            if (this.ReplaceBus)
             {
                 ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
                 ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
@@ -118,6 +115,7 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Protected methods
         *********/
+        /// <summary>Get all pets in the game.</summary>
         private IEnumerable<Pet> GetAllPets()
         {
             foreach (NPC npc in Utility.getAllCharacters())
@@ -127,31 +125,47 @@ namespace Entoarox.MorePetsAndAnimals
             }
         }
 
-        private void LoadPetSkins()
+        /// <summary>Get all farm animals in the game.</summary>
+        private IEnumerable<FarmAnimal> GetFarmAnimals()
         {
-            List<string> skins = new List<string>();
-            foreach (KeyValuePair<string, List<int>> index in ModEntry.Indexes)
-                if (!index.Key.Equals("cat") && !index.Key.Equals("dog"))
-                    index.Value.Add(0);
-            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "assets", "skins")).EnumerateFiles("*.png"))
-            {
-                if (file.Name.Contains("_"))
-                {
-                    string name = Path.GetFileNameWithoutExtension(file.Name);
-                    string[] split = name.Split('_');
-                    if (ModEntry.Indexes.ContainsKey(split[0]))
-                    {
-                        skins.Add(name);
-                        ModEntry.Indexes[split[0]].Add(Convert.ToInt32(split[1]));
-                    }
-                    else
-                        this.Monitor.Log("Found unexpected file `" + file.Name + "`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
-                }
-                else if (!file.Name.Equals("BabyDuck.png"))
-                    this.Monitor.Log($"Found file `{file.Name}`, if this is meant to be a skin file it has incorrect naming", LogLevel.Warn);
-            }
+            Farm farm = Game1.getFarm();
+            if (farm == null)
+                yield break;
 
-            this.Monitor.Log("Skin files found: " + string.Join(", ", skins), LogLevel.Trace);
+            foreach (FarmAnimal animal in farm.getAllFarmAnimals())
+                yield return animal;
+        }
+
+        private IEnumerable<AnimalSkin> LoadSkins()
+        {
+            foreach (FileInfo file in new DirectoryInfo(Path.Combine(this.Helper.DirectoryPath, "assets", "skins")).EnumerateFiles())
+            {
+                // check extension
+                string extension = Path.GetExtension(file.Name);
+                if (!this.ValidExtensions.Contains(extension))
+                {
+                    this.Monitor.Log($"Ignored skin `assets/skins/{file.Name}` with invalid extension (must be one of {string.Join(", ", this.ValidExtensions)}).", LogLevel.Warn);
+                    continue;
+                }
+
+                // parse name
+                string[] parts = Path.GetFileNameWithoutExtension(file.Name).Split(new[] { '_' }, 2);
+                if (!AnimalSkin.TryParseType(parts[0], out AnimalType type))
+                {
+                    this.Monitor.Log($"Ignored skin `assets/skins/{file.Name}` with invalid naming convention (can't parse '{parts[0]}' as an animal type, expected one of {string.Join(", ", Enum.GetNames(typeof(AnimalType)))}).", LogLevel.Warn);
+                    continue;
+                }
+                int index = 0;
+                if (parts.Length == 2 && !int.TryParse(parts[1], out index))
+                {
+                    this.Monitor.Log($"Ignored skin `assets/skins/{file.Name}` with invalid naming convention (can't parse '{parts[1]}' as a number).", LogLevel.Warn);
+                    continue;
+                }
+
+                // yield
+                string assetName = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", file.Name));
+                yield return new AnimalSkin(type, index, assetName);
+            }
         }
 
         private void GameEvents_UpdateTick(object s, EventArgs e)
@@ -159,7 +173,8 @@ namespace Entoarox.MorePetsAndAnimals
             if (!Context.IsWorldReady)
                 return;
 
-            if (ModEntry.ReplaceBus && Game1.getLocationFromName("BusStop") != null)
+            // patch bus stop
+            if (this.ReplaceBus && Game1.getLocationFromName("BusStop") != null)
             {
                 this.Monitor.Log("Patching bus stop...", LogLevel.Trace);
                 GameLocation bus = Game1.getLocationFromName("BusStop");
@@ -170,89 +185,90 @@ namespace Entoarox.MorePetsAndAnimals
                 bus.SetTile(2, 3, "Buildings", 3, "MorePetsTilesheet");
                 bus.SetTileProperty(1, 3, "Buildings", "Action", "MorePetsAdoption");
                 bus.SetTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
-                ModEntry.ReplaceBus = false;
+                this.ReplaceBus = false;
             }
 
-            foreach (Pet npc in this.GetAllPets())
+            // set pet skins
+            foreach (Pet pet in this.GetAllPets())
             {
-                if (npc.Manners > 0 && npc.updatedDialogueYet == false)
+                if (pet.Manners > 0 && !pet.updatedDialogueYet)
                 {
-                    try
+                    AnimalSkin skin = this.GetSkin(pet);
+                    if (skin != null)
                     {
-                        string type = npc is Dog ? "dog" : "cat";
-                        npc.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey($"assets/skins/{type}_{npc.Manners}.png"), 0, 32, 32);
+                        pet.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey(skin.AssetName), 0, 32, 32);
+                        pet.Manners = skin.ID;
                     }
-                    catch
-                    {
-                        this.Monitor.Log("Pet with unknown skin number found, using default: " + npc.Manners, LogLevel.Error);
-                    }
-
-                    npc.updatedDialogueYet = true;
+                    pet.updatedDialogueYet = true;
                 }
             }
 
-            if (Game1.getFarm() == null)
-                return;
-            Random random = new Random();
-            foreach (FarmAnimal animal in Game1.getFarm().getAllFarmAnimals())
+            // set farm animal skins
+            foreach (FarmAnimal animal in this.GetFarmAnimals())
             {
-                string str = animal.type.Value;
-                if (animal.age.Value < animal.ageWhenMature.Value)
-                    str = "Baby" + animal.type.Value;
-                else if (animal.showDifferentTextureWhenReadyForHarvest.Value && animal.currentProduce.Value <= 0)
-                    str = "Sheared" + animal.type.Value;
-                if (animal.meatIndex.Value < 999)
-                    animal.meatIndex.Value = ModEntry.Indexes[str][random.Next(0, ModEntry.Indexes[str].Count)] + 999;
-                else if (animal.meatIndex.Value > 999)
+                AnimalSkin skin = this.GetSkin(animal);
+                if (skin != null && animal.Sprite.textureName.Value != skin.AssetName)
                 {
-                    try
-                    {
-                        string assetKey = this.Helper.Content.GetActualAssetKey($"assets/skins/{str}_{animal.meatIndex.Value - 999}.png");
-                        if (animal.Sprite.textureName.Value != assetKey)
-                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                    }
-                    catch
-                    {
-                        this.Monitor.Log("Animal with unknown skin number found, using default instead: " + (animal.meatIndex.Value - 999), LogLevel.Error);
-                        if (str.Equals("BabyDuck"))
-                            try
-                            {
-                                string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck.png");
-                                if (animal.Sprite.textureName.Value != assetKey)
-                                    animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                            }
-                            catch
-                            {
-                                this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                                string assetKey = this.Helper.Content.GetActualAssetKey("Animals\\BabyWhite Chicken", ContentSource.GameContent);
-                                if (animal.Sprite.textureName.Value != assetKey)
-                                    animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                            }
-                        else
-                        {
-                            string assetKey = this.Helper.Content.GetActualAssetKey($"Animals\\{str}", ContentSource.GameContent);
-                            if (animal.Sprite.textureName.Value != assetKey)
-                                animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                        }
-                    }
-                }
-                else if (animal.type.Value == "Duck" && animal.age.Value < animal.ageWhenMature.Value)
-                {
-                    try
-                    {
-                        string assetKey = this.Helper.Content.GetActualAssetKey("assets/skins/BabyDuck.png");
-                        if (animal.Sprite.textureName.Value != assetKey)
-                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                    }
-                    catch
-                    {
-                        this.Monitor.Log("Encounted a issue trying to override the default texture for baby ducks with the custom one, using vanilla.", LogLevel.Error);
-                        string assetKey = this.Helper.Content.GetActualAssetKey("Animals\\BabyWhite Chicken", ContentSource.GameContent);
-                        if (animal.Sprite.textureName.Value != assetKey)
-                            animal.Sprite = new AnimatedSprite(assetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
-                    }
+                    animal.Sprite = new AnimatedSprite(skin.AssetName, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                    animal.meatIndex.Value = skin.ID + 999;
                 }
             }
+        }
+
+        /// <summary>Get the skin to apply for an animal.</summary>
+        /// <param name="npc">The animal to check.</param>
+        private AnimalSkin GetSkin(Character npc)
+        {
+            switch (npc)
+            {
+                case Pet pet:
+                    return this.GetSkin(type: pet is Dog ? AnimalType.Dog : AnimalType.Cat, index: pet.Manners);
+
+                case FarmAnimal animal:
+                    {
+                        // get type
+                        string typeStr = animal.type.Value;
+                        if (animal.age.Value < animal.ageWhenMature.Value)
+                            typeStr = $"Baby{animal.type.Value}";
+                        else if (animal.showDifferentTextureWhenReadyForHarvest.Value && animal.currentProduce.Value <= 0)
+                            typeStr = $"Sheared{animal.type.Value}";
+                        if (!AnimalSkin.TryParseType(typeStr, out AnimalType type))
+                            return null;
+
+                        // get index
+                        int index = animal.meatIndex.Value > 999
+                            ? animal.meatIndex.Value - 999
+                            : -1;
+
+                        // get skin
+                        return this.GetSkin(type: type, index: index);
+                    }
+
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>Get the skin to apply for an animal.</summary>
+        /// <param name="type">The animal type.</param>
+        /// <param name="index">The animal index.</param>
+        private AnimalSkin GetSkin(AnimalType type, int index)
+        {
+            if (!ModEntry.Indexes.TryGetValue(type, out AnimalSkin[] skins) || !skins.Any())
+                return null;
+
+            // get assigned skin
+            if (index >= 0)
+            {
+                AnimalSkin skin = skins.FirstOrDefault(p => p.ID == index);
+                if (skin != null)
+                    return skin;
+
+                this.Monitor.Log($"Found animal type {type} with index {index}, but there's no matching file. Reassigning a random skin to that animal.");
+            }
+
+            // get random skin
+            return skins[this.SkinRandom.Next(skins.Length)];
         }
 
         private void CommandFired_KillPets(string name, string[] args)
@@ -296,9 +312,9 @@ namespace Entoarox.MorePetsAndAnimals
                     grabTile = Game1.player.GetGrabTile();
                 Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
                 PropertyValue propertyValue = null;
-                if (tile != null)
-                    tile.Properties.TryGetValue("Action", out propertyValue);
-                if (propertyValue != null && "MorePetsAdoption".Equals(propertyValue)) this.TriggerAction = true;
+                tile?.Properties.TryGetValue("Action", out propertyValue);
+                if (propertyValue != null && propertyValue == "MorePetsAdoption")
+                    this.TriggerAction = true;
             }
         }
 

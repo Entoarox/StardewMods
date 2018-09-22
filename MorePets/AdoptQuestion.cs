@@ -1,4 +1,5 @@
 using System;
+using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
@@ -37,8 +38,8 @@ namespace Entoarox.MorePetsAndAnimals
         {
             Random random = ModEntry.Random;
 
-            int catLimit = ModEntry.Indexes["cat"].Count;
-            int dogLimit = ModEntry.Indexes["dog"].Count;
+            int catLimit = ModEntry.Indexes[AnimalType.Cat].Length;
+            int dogLimit = ModEntry.Indexes[AnimalType.Dog].Length;
 
             bool cat = catLimit != 0 && (dogLimit == 0 || random.NextDouble() < 0.5);
             AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit));
