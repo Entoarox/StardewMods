@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="manifest.json" />
+    <None Include="README.md" />
     <None Include="RELEASE-NOTES.md" />
   </ItemGroup>
   <ItemGroup>

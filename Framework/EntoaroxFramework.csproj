@@ -197,6 +197,7 @@
   <ItemGroup>
     <None Include="docs\ConditionDocumentation.md" />
     <None Include="manifest.json" />
+    <None Include="README.md" />
     <None Include="RELEASE-NOTES.md" />
   </ItemGroup>
   <ItemGroup>
