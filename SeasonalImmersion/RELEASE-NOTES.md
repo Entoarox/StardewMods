@@ -1,6 +1,6 @@
 ## Release notes
 ## 1.12.1
-Upcoming release. (Thanks to Pathoschild!)
+Not yet released. (Thanks to Pathoschild!)
 
 * Updated for Stardew Valley 1.3.
 * Removed custom update checks; replaced by standard SMAPI update alerts.

@@ -1,6 +1,6 @@
 ## Release notes
 ## 2.0.5
-Upcoming release. (Thanks to Pathoschild and Slamerz!)
+Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)
 
 * Updated for Stardew Valley 1.3.
 * Overhauled skin loading:

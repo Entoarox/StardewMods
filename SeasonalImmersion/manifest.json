@@ -1,7 +1,7 @@
 {
   "Name": "Seasonal Immersion",
   "Author": "Entoarox",
-  "Version": "1.12.0",
+  "Version": "1.12.1",
   "Description": "Immerse yourself in a more seasonal world!",
   "UniqueID": "Entoarox.SeasonalImmersion",
   "EntryDll": "SeasonalImmersion.dll",

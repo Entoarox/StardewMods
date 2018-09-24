@@ -1,6 +1,6 @@
 ## Release notes
 ## 2.4.1
-Upcoming release. (Thanks to Pathoschild and Slamerz!)
+Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)
 
 * Updated for Stardew Valley 1.3.
 * Fixed Linux/Mac compatibility.
