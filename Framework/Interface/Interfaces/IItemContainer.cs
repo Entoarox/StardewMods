@@ -2,10 +2,17 @@ using StardewValley;
 
 namespace Entoarox.Framework.Interface
 {
-    interface IItemContainer
+    internal interface IItemContainer
     {
-        bool AcceptsItem(Item item);
+        /*********
+        ** Accessors
+        *********/
         Item CurrentItem { get; set; }
         bool IsGhostSlot { get; }
+
+        /*********
+        ** Methods
+        *********/
+        bool AcceptsItem(Item item);
     }
 }

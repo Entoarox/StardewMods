@@ -4,13 +4,22 @@ using StardewValley;
 
 namespace Entoarox.DynamicDungeons
 {
-    class TextPage : Page
+    internal class TextPage : Page
     {
-        private string Text;
+        /*********
+        ** Fields
+        *********/
+        private readonly string Text;
+
+
+        /*********
+        ** Public methods
+        *********/
         public TextPage(string text)
         {
             this.Text = text;
         }
+
         public override void Draw(SpriteBatch batch, Rectangle region)
         {
             string text = Game1.parseText(this.Text, Game1.smallFont, region.Width);

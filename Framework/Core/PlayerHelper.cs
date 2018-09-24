@@ -1,6 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-
 using StardewValley;
 using StardewValley.Characters;
 
@@ -8,50 +8,59 @@ namespace Entoarox.Framework.Core
 {
     internal class PlayerHelper : IPlayerHelper
     {
-        private IPlayerModifierHelper _Modifiers;
-        public IPlayerModifierHelper Modifiers
+        /*********
+        ** Accessors
+        *********/
+        public IPlayerModifierHelper Modifiers { get; }
+
+
+        /*********
+        ** Public methods
+        *********/
+        public PlayerHelper(IPlayerModifierHelper modifiers)
         {
-            get
-            {
-                if (this._Modifiers == null)
-                    this._Modifiers = new PlayerModifierHelper();
-                return this._Modifiers;
-            }
+            this.Modifiers = modifiers;
         }
+
         public void MoveTo(int x, int y)
         {
-            Game1.warpFarmer(Game1.player.currentLocation, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure);
+            Game1.warpFarmer(Game1.player.currentLocation.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, Game1.player.currentLocation.isStructure.Value);
         }
+
         public void MoveTo(string location, int x, int y)
         {
             GameLocation loc = Game1.getLocationFromName(location);
             if (loc == null)
                 throw new ArgumentNullException(nameof(location));
-            MoveTo(loc, x, y);
+            this.MoveTo(loc, x, y);
         }
+
         public void MoveTo(GameLocation location, int x, int y)
         {
-            Game1.warpFarmer(location, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, location.isStructure);
+            Game1.warpFarmer(location.Name, Convert.ToInt32(x), Convert.ToInt32(y), Game1.player.facingDirection, location.isStructure.Value);
         }
+
         public bool HasPet(bool vanillaOnly)
         {
-            var matches = Utility.getAllCharacters().Where(a => a is Pet);
-            if (vanillaOnly)
-                return matches.Any(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.manners == 0 && a.age == 0);
-            else
-                return matches.Any();
+            Pet[] pets = this.GetAllPets().ToArray();
+            return vanillaOnly
+                ? pets.Any(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0)
+                : pets.Any();
         }
+
         public Pet GetPet()
         {
-            var matches = Utility.getAllCharacters().Where(a => a is Pet).Cast<Pet>();
-            Pet pet = matches.First(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.manners == 0 && a.age == 0);
-            if (pet == null && matches.Any())
-                pet = matches.First();
-            return pet;
+            Pet[] pets = this.GetAllPets().ToArray();
+            return pets.FirstOrDefault(a => (Game1.player.catPerson ? a is Cat : a is Dog) && a.Manners == 0 && a.Age == 0);
         }
-        public Pet[] GetAllPets()
+
+        public IEnumerable<Pet> GetAllPets()
         {
-            return Utility.getAllCharacters().Where(a => a is Pet).Cast<Pet>().ToArray();
+            foreach (NPC npc in Utility.getAllCharacters())
+            {
+                if (npc is Pet pet)
+                    yield return pet;
+            }
         }
     }
 }

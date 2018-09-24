@@ -1,96 +1,104 @@
-﻿using System;
-
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 
 namespace Entoarox.Framework.UI
 {
     public class TextboxFormComponent : BaseKeyboardFormComponent
     {
+        /*********
+        ** Fields
+        *********/
+        protected string _Value;
         protected static Texture2D Box;
+        protected int CaretSize = (int)Game1.smallFont.MeasureString("|").Y;
+        protected string OldValue;
+        protected Predicate<string> Validator = e => true;
+
+
+        /*********
+        ** Accessors
+        *********/
         public string Value
         {
-            get
-            {
-                return this._Value;
-            }
-            set
-            {
-                this._Value = value;
-            }
+            get => this._Value;
+            set => this._Value = value;
         }
+
         public event ValueChanged<string> Handler;
         public Func<TextboxFormComponent, FrameworkMenu, string, string> TabPressed;
         public Func<TextboxFormComponent, FrameworkMenu, string, string> EnterPressed;
-        protected string _Value;
-        protected Predicate<string> Validator = (e) => true;
-        protected string OldValue;
-        public TextboxFormComponent(Point position, ValueChanged<string> handler = null) : this(position, 75, null, handler)
-        {
 
-        }
-        public TextboxFormComponent(Point position, Predicate<string> validator, ValueChanged<string> handler = null) : this(position, 75, validator, handler)
-        {
 
-        }
-        public TextboxFormComponent(Point position, int width, ValueChanged<string> handler=null) : this(position, width, null, handler)
-        {
+        /*********
+        ** Public methods
+        *********/
+        public TextboxFormComponent(Point position, ValueChanged<string> handler = null)
+            : this(position, 75, null, handler) { }
 
-        }
-        public TextboxFormComponent(Point position, int width=75, Predicate<string> validator=null, ValueChanged<string> handler=null)
+        public TextboxFormComponent(Point position, Predicate<string> validator, ValueChanged<string> handler = null)
+            : this(position, 75, validator, handler) { }
+
+        public TextboxFormComponent(Point position, int width, ValueChanged<string> handler = null)
+            : this(position, width, null, handler) { }
+
+        public TextboxFormComponent(Point position, int width = 75, Predicate<string> validator = null, ValueChanged<string> handler = null)
         {
-            if(Box==null)
-                Box=Game1.content.Load<Texture2D>("LooseSprites\\textBox");
-            SetScaledArea(new Rectangle(position.X, position.Y, width, Box.Height/Game1.pixelZoom));
+            if (TextboxFormComponent.Box == null)
+                TextboxFormComponent.Box = Game1.content.Load<Texture2D>("LooseSprites\\textBox");
+            this.SetScaledArea(new Rectangle(position.X, position.Y, width, TextboxFormComponent.Box.Height / Game1.pixelZoom));
             if (validator != null)
                 this.Validator = validator;
             if (handler != null)
-                Handler += handler;
+                this.Handler += handler;
             this.Value = "";
             this.OldValue = this.Value;
         }
+
         public override void FocusLost()
         {
             if (this.Disabled || this.OldValue.Equals(this.Value))
                 return;
             this.OldValue = this.Value;
-            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu(), this.Value);
+            this.Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu(), this.Value);
         }
+
         public override void FocusGained()
         {
             if (this.Disabled)
                 return;
             this.Selected = true;
         }
-        protected int CaretSize = (int)Game1.smallFont.MeasureString("|").Y;
+
         public override void Draw(SpriteBatch b, Point o)
         {
             if (!this.Visible)
                 return;
             bool flag = DateTime.Now.Millisecond % 1000 >= 500;
             string text = this.Value;
-            b.Draw(Box, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, zoom4, this.Area.Height), new Rectangle(Game1.pixelZoom, 0, zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
-            b.Draw(Box, new Rectangle(this.Area.X+o.X + zoom4, this.Area.Y+o.Y, this.Area.Width - zoom8, this.Area.Height), new Rectangle(zoom4, 0, 4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
-            b.Draw(Box, new Rectangle(this.Area.X+o.X + this.Area.Width - zoom4, this.Area.Y+o.Y, zoom4, this.Area.Height), new Rectangle(Box.Bounds.Width - zoom4, 0, zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
+            b.Draw(TextboxFormComponent.Box, new Rectangle(this.Area.X + o.X, this.Area.Y + o.Y, BaseMenuComponent.Zoom4, this.Area.Height), new Rectangle(Game1.pixelZoom, 0, BaseMenuComponent.Zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
+            b.Draw(TextboxFormComponent.Box, new Rectangle(this.Area.X + o.X + BaseMenuComponent.Zoom4, this.Area.Y + o.Y, this.Area.Width - BaseMenuComponent.Zoom8, this.Area.Height), new Rectangle(BaseMenuComponent.Zoom4, 0, 4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
+            b.Draw(TextboxFormComponent.Box, new Rectangle(this.Area.X + o.X + this.Area.Width - BaseMenuComponent.Zoom4, this.Area.Y + o.Y, BaseMenuComponent.Zoom4, this.Area.Height), new Rectangle(TextboxFormComponent.Box.Bounds.Width - BaseMenuComponent.Zoom4, 0, BaseMenuComponent.Zoom4, this.Area.Height), Color.White * (this.Disabled ? 0.33f : 1));
             Vector2 v;
-            for (v = Game1.smallFont.MeasureString(text); v.X > this.Area.Width - Game1.pixelZoom*5; v = Game1.smallFont.MeasureString(text))
+            for (v = Game1.smallFont.MeasureString(text); v.X > this.Area.Width - Game1.pixelZoom * 5; v = Game1.smallFont.MeasureString(text))
                 text = text.Substring(1);
             if (flag && this.Selected)
-                b.Draw(Game1.staminaRect, new Rectangle(this.Area.X+o.X + zoom3 + zoom05 + (int)v.X, this.Area.Y+o.Y + 8, zoom05, this.CaretSize), Game1.textColor);
-            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(this.Area.X+o.X + zoom4, this.Area.Y+o.Y+zoom3), Game1.textColor * (this.Disabled ? 0.33f : 1));
+                b.Draw(Game1.staminaRect, new Rectangle(this.Area.X + o.X + BaseMenuComponent.Zoom3 + BaseMenuComponent.Zoom05 + (int)v.X, this.Area.Y + o.Y + 8, BaseMenuComponent.Zoom05, this.CaretSize), Game1.textColor);
+            Utility.drawTextWithShadow(b, text, Game1.smallFont, new Vector2(this.Area.X + o.X + BaseMenuComponent.Zoom4, this.Area.Y + o.Y + BaseMenuComponent.Zoom3), Game1.textColor * (this.Disabled ? 0.33f : 1));
         }
+
         public override void TextReceived(char chr)
         {
             if (this.Disabled || !Game1.smallFont.Characters.Contains(chr) || !this.Validator(chr.ToString()))
                 return;
             Game1.playSound("cowboy_monsterhit");
-            this.Value = this.Value +chr.ToString();
+            this.Value = this.Value + chr;
         }
+
         public override void TextReceived(string str)
         {
-            foreach(char c in str)
+            foreach (char c in str)
                 if (!Game1.smallFont.Characters.Contains(c))
                     return;
             if (this.Disabled || !this.Validator(str))
@@ -98,11 +106,12 @@ namespace Entoarox.Framework.UI
             Game1.playSound("coin");
             this.Value = this.Value + str;
         }
+
         public override void CommandReceived(char cmd)
         {
             if (this.Disabled)
                 return;
-            switch((int)cmd)
+            switch ((int)cmd)
             {
                 case 8:
                     if (this.Value.Length <= 0)
@@ -116,25 +125,28 @@ namespace Entoarox.Framework.UI
                         this.Value = this.TabPressed(this, this.Parent.GetAttachedMenu(), this.Value);
                         return;
                     }
+
                     if (!(this.Parent is IComponentCollection))
                         return;
-                    bool Next = false;
-                    IInteractiveMenuComponent first=null;
-                    foreach(IInteractiveMenuComponent imc in (this.Parent as IComponentCollection).InteractiveComponents)
+                    bool next = false;
+                    IInteractiveMenuComponent first = null;
+                    foreach (IInteractiveMenuComponent imc in ((IComponentCollection)this.Parent).InteractiveComponents)
                     {
                         if (first == null && imc is TextboxFormComponent)
                             first = imc;
                         if (imc == this)
                         {
-                            Next = true;
+                            next = true;
                             continue;
                         }
-                        if (Next && imc is TextboxFormComponent)
+
+                        if (next && imc is TextboxFormComponent)
                         {
                             this.Parent.GiveFocus(imc);
                             return;
                         }
                     }
+
                     this.Parent.GiveFocus(first);
                     return;
                 case 13:

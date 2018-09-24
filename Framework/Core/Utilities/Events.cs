@@ -1,20 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using StardewModdingAPI;
 
 namespace Entoarox.Framework.Core.Utilities
 {
-    static class Events
+    internal static class Events
     {
+        /*********
+        ** Public methods
+        *********/
         public static void FireEventSafely<TArgs>(string name, Delegate evt, TArgs args, bool obsolete = false) where TArgs : EventArgs
         {
             if (evt == null)
                 return;
-            foreach (var handler in evt.GetInvocationList())
+            foreach (Delegate handler in evt.GetInvocationList())
                 try
                 {
                     if (typeof(TArgs) == typeof(EventArgs))

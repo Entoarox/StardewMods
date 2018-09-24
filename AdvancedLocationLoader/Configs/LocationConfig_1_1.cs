@@ -2,8 +2,11 @@ using System.Collections.Generic;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class LocationConfig_1_1
+    internal class LocationConfig_1_1
     {
+        /*********
+        ** Accessors
+        *********/
         public IList<IDictionary<string, string>> Locations { get; set; }
         public IList<IDictionary<string, string>> Overrides { get; set; }
         public IDictionary<string, IDictionary<string, IList<string>>> Minecarts { get; set; }

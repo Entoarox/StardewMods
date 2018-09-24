@@ -3,16 +3,16 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{AE355745-73FE-45C6-BA17-DE56744BB3D6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Entoarox.DynamicDungeons</RootNamespace>
     <AssemblyName>DynamicDungeons</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,8 +22,9 @@
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -33,11 +34,11 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,12 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionInfo.cs" />
+    <Compile Include="Tiles\AnimatedTile.cs" />
     <Compile Include="ATile.cs" />
     <Compile Include="BookMenu.cs" />
     <Compile Include="DungeonBuilder.cs" />
     <Compile Include="DynamicDungeon.cs" />
     <Compile Include="DynamicDungeonsAPI.cs" />
-    <Compile Include="DynamicDungeonsMod.cs" />
+    <Compile Include="ModEntry.cs" />
     <Compile Include="DynamicDungeonsSavefile.cs" />
     <Compile Include="ImagePage.cs" />
     <Compile Include="ITile.cs" />
@@ -60,89 +63,87 @@
     <Compile Include="PathFinder.cs" />
     <Compile Include="PaymentPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tiles\PropertyTile.cs" />
     <Compile Include="PTile.cs" />
+    <Compile Include="Tiles\StaticTile.cs" />
     <Compile Include="STile.cs" />
     <Compile Include="TextPage.cs" />
-    <Compile Include="Tile.cs" />
+    <Compile Include="Tiles\Tile.cs" />
     <Compile Include="TitlePage.cs" />
-    <Compile Include="TupleMagic.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DynamicDungeonsEntrance.tbin">
+    <None Include="assets\DynamicDungeonsEntrance.tbin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="assets\unused\merged.xcf" />
+    <None Include="assets\unused\sheet_info.xcf" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="book.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\book.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\book.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\book\doodle1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\door.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\book\doodle2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\entrance.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\book\doodle3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="credits.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\unused\DoorSpriteSheet.png" />
+    <Content Include="assets\unused\door_anim.png" />
+    <Content Include="assets\unused\door_anim2.png" />
+    <Content Include="assets\unused\door_wall.png" />
+    <Content Include="assets\unused\probably_old_robot_thingy.png" />
+    <Content Include="assets\unused\pufferchick.png" />
+    <Content Include="assets\dungeon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\dungeon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\entrance.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\book\doodle1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\door.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\book\doodle2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_boulder.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="content\book\doodle3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_cavein.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="door.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_dwarfvendor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_boulder.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_info.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_cavein.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_stalagmite1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_dwarfvendor.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_stalagmite2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_info.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_statue.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_stalagmite1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_tracks.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_stalagmite2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\sheet_walls.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_statue.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\unused\robot_head_animation.png" />
+    <Content Include="assets\unused\sheet_light.png" />
+    <Content Include="assets\unused\sheet_walls2.png" />
+    <Content Include="assets\zDynamicDungeonsEntrance_tiles.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sheet_tracks.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sheet_walls.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="zDynamicDungeonsEntrance_tiles.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="assets\credits.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Pathoschild.Stardew.ModBuildConfig.2.0.2\build\Pathoschild.Stardew.ModBuildConfig.targets'))" />
-  </Target>
 </Project>

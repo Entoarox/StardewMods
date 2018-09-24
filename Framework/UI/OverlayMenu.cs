@@ -1,12 +1,9 @@
-﻿using System;
-
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 using StardewModdingAPI.Events;
 using StardewValley;
-
 using Rectangle = xTile.Dimensions.Rectangle;
 
 /*
@@ -19,16 +16,16 @@ namespace Entoarox.Framework.UI
     public abstract class BaseOverlay : IDisposable
     {
         /*********
-        ** Properties
+        ** Fields
         *********/
+        /// <summary>Indicates whether to keep the overlay active. If <c>null</c>, the overlay is kept until explicitly disposed.</summary>
+        private readonly Func<bool> KeepAliveCheck;
+
         /// <summary>The last mouse state.</summary>
         private MouseState LastMouseState;
 
         /// <summary>The last viewport bounds.</summary>
         private Rectangle LastViewport;
-
-        /// <summary>Indicates whether to keep the overlay active. If <c>null</c>, the overlay is kept until explicitly disposed.</summary>
-        private readonly Func<bool> KeepAliveCheck;
 
 
         /*********
@@ -94,7 +91,7 @@ namespace Entoarox.Framework.UI
         protected virtual void ReceiveGameWindowResized(Rectangle oldBounds, Rectangle newBounds) { }
 
         /// <summary>Draw the mouse cursor.</summary>
-        /// <remarks>Derived from <see cref="StardewValley.Menus.IClickableMenu.drawMouse"/>.</remarks>
+        /// <remarks>Derived from <see cref="StardewValley.Menus.IClickableMenu.drawMouse" />.</remarks>
         protected void DrawCursor()
         {
             if (Game1.options.hardwareCursor)

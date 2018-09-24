@@ -1,22 +1,28 @@
 using System.Collections.Generic;
-
+using Entoarox.Framework.Core.Utilities;
 using StardewModdingAPI;
-
 
 namespace Entoarox.Framework.Core.AssetHandlers
 {
-    using Utilities;
-    class DictionaryInjector : IAssetEditor
+    internal class DictionaryInjector : IAssetEditor
     {
-        internal static Dictionary<string, DictionaryWrapper> _Map = new Dictionary<string, DictionaryWrapper>();
+        /*********
+        ** Accessors
+        *********/
+        internal static Dictionary<string, DictionaryWrapper> Map = new Dictionary<string, DictionaryWrapper>();
+
+
+        /*********
+        ** Public methods
+        *********/
         public bool CanEdit<T>(IAssetInfo info)
         {
-            return _Map.ContainsKey(info.AssetName) && _Map[info.AssetName].DataType == typeof(T);
+            return DictionaryInjector.Map.ContainsKey(info.AssetName) && DictionaryInjector.Map[info.AssetName].DataType == typeof(T);
         }
 
         public void Edit<T>(IAssetData data)
         {
-            _Map[data.AssetName].ApplyPatches(data);
+            DictionaryInjector.Map[data.AssetName].ApplyPatches(data);
         }
     }
 }

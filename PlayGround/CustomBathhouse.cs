@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using StardewValley;
+using xTile.Layers;
 
 namespace PlayGround
 {
@@ -17,11 +18,13 @@ namespace PlayGround
     {
         private Vector2 SteamPosition;
         private Texture2D SteamAnimation;
-        public CustomBathhouse(Map map, string name, Texture2D steam=null) : base(map, name)
+        public CustomBathhouse(string mapPath, string name, Texture2D steam=null)
+            : base(mapPath, name)
         {
             this.SteamAnimation = steam;
         }
-        public override void resetForPlayerEntry()
+
+        protected override void resetLocalState()
         {
             base.resetForPlayerEntry();
             Game1.changeMusicTrack("pool_ambient");
@@ -86,6 +89,11 @@ namespace PlayGround
         public override void UpdateWhenCurrentLocation(GameTime time)
         {
             base.UpdateWhenCurrentLocation(time);
+
+            Layer alwaysFrontLayer = this.Map.GetLayer("AlwaysFront");
+            if (alwaysFrontLayer != null)
+                this.Map.RemoveLayer(alwaysFrontLayer);
+
             this.SteamPosition.Y = this.SteamPosition.Y - time.ElapsedGameTime.Milliseconds * 0.1f;
             this.SteamPosition.Y = this.SteamPosition.Y % -256f;
             if (this.SteamPosition.X < -32f || this.SteamPosition.X > 32f)

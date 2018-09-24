@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{174275E7-3AE4-41A6-9884-9E08A07D1101}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Entoarox.Framework</RootNamespace>
+    <AssemblyName>EntoaroxFramework</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <FileAlignment>1024</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <NoWarn>CS0618</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Harmony, Version=1.0.9.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Advanced\PolyTupleHelper.cs" />
+    <Compile Include="Config\ConfigAttribute.cs" />
+    <Compile Include="Config\ConfigCustomAttribute.cs" />
+    <Compile Include="Config\ConfigDropdownAttribute.cs" />
+    <Compile Include="Config\ConfigMinMaxAttribute.cs" />
+    <Compile Include="Config\ConfigSliderAttribute.cs" />
+    <Compile Include="Core\AssetHandlers\DeferredAssetHandler.cs" />
+    <Compile Include="Core\AssetHandlers\DeferredAssetInfo.cs" />
+    <Compile Include="Core\AssetHandlers\DeferredTypeHandler.cs" />
+    <Compile Include="Core\AssetHandlers\DictionaryInjector.cs" />
+    <Compile Include="Core\AssetHandlers\TextureInjector.cs" />
+    <Compile Include="Core\AssetHandlers\TextureInjectorInfo.cs" />
+    <Compile Include="Core\PlayerModifierList.cs" />
+    <Compile Include="Core\ConditionsHelper.cs" />
+    <Compile Include="Core\InterModHelper.cs" />
+    <Compile Include="Core\Injection\HookedLocationBuilder.cs" />
+    <Compile Include="Core\PlayerHelper.cs" />
+    <Compile Include="Core\PlayerModifierHelper.cs" />
+    <Compile Include="Core\Serialization\ReadonlyContractResolver.cs" />
+    <Compile Include="Core\Serialization\CustomItem.cs" />
+    <Compile Include="Core\Serialization\Placeholder.cs" />
+    <Compile Include="Core\Serialization\RectangleConverter.cs" />
+    <Compile Include="Core\Utilities\DictionaryAssetInfo.cs" />
+    <Compile Include="Core\Utilities\DictionaryWrapper.cs" />
+    <Compile Include="Core\Utilities\Events.cs" />
+    <Compile Include="Core\Utilities\Globals.cs" />
+    <Compile Include="Core\AssetHandlers\XnbLoader.cs" />
+    <Compile Include="CustomObject.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="EntoaroxFrameworkAPI.cs" />
+    <Compile Include="Events\EventArgsArguments.cs" />
+    <Compile Include="Events\EventArgsEditable.cs" />
+    <Compile Include="Events\EventArgsReturnable.cs" />
+    <Compile Include="Events\ItemEvents.cs" />
+    <Compile Include="Experimental\PathFinder.cs" />
+    <Compile Include="Experimental\PathNode.cs" />
+    <Compile Include="Extensions\PointExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="GameLocationExtensions.cs" />
+    <Compile Include="IAugmentedLocation.cs" />
+    <Compile Include="IConditionHelper.cs" />
+    <Compile Include="IContentHandler.cs" />
+    <Compile Include="IContentHelperExtensions.cs" />
+    <Compile Include="Events\EventArgsActiveItemChanged.cs" />
+    <Compile Include="Events\EventArgsActionTriggered.cs" />
+    <Compile Include="Core\ModConfig.cs" />
+    <Compile Include="ICustomItem.cs" />
+    <Compile Include="IHookedLocation.cs" />
+    <Compile Include="IInterModHelper.cs" />
+    <Compile Include="IMessageHelper.cs" />
+    <Compile Include="Core\Message.cs" />
+    <Compile Include="Core\Injection\Crop_newDay.cs" />
+    <Compile Include="Core\Injection\HoeDirt_canPlantThisSeedHere.cs" />
+    <Compile Include="Indev\CustomAdditionAttribute.cs" />
+    <Compile Include="Experimental\ListExtensions.cs" />
+    <Compile Include="Indev\IProfession.cs" />
+    <Compile Include="Indev\ISkill.cs" />
+    <Compile Include="Indev\ISkillHelper.cs" />
+    <Compile Include="Indev\PlayerSkillInfo.cs" />
+    <Compile Include="Indev\RecipeComponent.cs" />
+    <Compile Include="Indev\SkillData.cs" />
+    <Compile Include="Indev\SkillHelper.cs" />
+    <Compile Include="Indev\VanillaProfession.cs" />
+    <Compile Include="Indev\VanillaSkill.cs" />
+    <Compile Include="Interface\Base\BaseClickableComponent.cs" />
+    <Compile Include="Interface\Base\BaseComponentContainer.cs" />
+    <Compile Include="Interface\Base\BaseInputComponent.cs" />
+    <Compile Include="Interface\Base\BaseComponentCollection.cs" />
+    <Compile Include="Interface\Base\BaseComponent.cs" />
+    <Compile Include="Interface\Base\BaseDynamicComponent.cs" />
+    <Compile Include="Interface\Base\BaseItemslotComponent.cs" />
+    <Compile Include="Interface\Containers\GenericComponentCollection.cs" />
+    <Compile Include="Interface\Interfaces\IControllerComponent.cs" />
+    <Compile Include="Interface\Interfaces\IItemContainer.cs" />
+    <Compile Include="Interface\Interfaces\IVisibilityObserver.cs" />
+    <Compile Include="Interface\Misc\Utilities.cs" />
+    <Compile Include="Interface\Containers\ScrollableComponentCollection.cs" />
+    <Compile Include="Interface\Static\GradientComponent.cs" />
+    <Compile Include="Interface\Interfaces\IFloatComponent.cs" />
+    <Compile Include="Interface\Interfaces\IHotkeyComponent.cs" />
+    <Compile Include="Interface\Interfaces\IComponentContainer.cs" />
+    <Compile Include="Interface\Interfaces\IComponent.cs" />
+    <Compile Include="Interface\Interfaces\IComponentCollection.cs" />
+    <Compile Include="Interface\Interfaces\IDynamicComponent.cs" />
+    <Compile Include="Interface\Interfaces\IInputComponent.cs" />
+    <Compile Include="Interface\Misc\InterfaceMenu.cs" />
+    <Compile Include="Interface\Misc\KeyboardResolver.cs" />
+    <Compile Include="Interface\Misc\Strings.cs" />
+    <Compile Include="Interface\Static\TextComponent.cs" />
+    <Compile Include="Interface\Static\TextureComponent.cs" />
+    <Compile Include="IPlayerHelper.cs" />
+    <Compile Include="IPlayerModifierHelper.cs" />
+    <Compile Include="Core\Utilities\TextureHelper.cs" />
+    <Compile Include="Core\ConditionHelper.cs" />
+    <Compile Include="Core\EntoaroxFrameworkMod.cs" />
+    <Compile Include="Core\MessageHelper.cs" />
+    <Compile Include="Events\MoreEvents.cs" />
+    <Compile Include="IModHelperExtensions.cs" />
+    <Compile Include="IMonitorExtensions.cs" />
+    <Compile Include="PlayerModifier.cs" />
+    <Compile Include="Advanced\PolyTuple.cs" />
+    <Compile Include="Advanced\TupleSyntax.cs" />
+    <Compile Include="UI\Containers\BookComponent.cs" />
+    <Compile Include="UI\OverlayMenu.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StackableShopObject.cs" />
+    <Compile Include="UI\Base\BaseFormComponent.cs" />
+    <Compile Include="UI\Base\BaseInteractiveMenuComponent.cs" />
+    <Compile Include="UI\Base\BaseKeyboardFormComponent.cs" />
+    <Compile Include="UI\Base\BaseMenuComponent.cs" />
+    <Compile Include="UI\Containers\ClickableCollectionComponent.cs" />
+    <Compile Include="UI\Containers\FormCollectionComponent.cs" />
+    <Compile Include="UI\Containers\GenericCollectionComponent.cs" />
+    <Compile Include="UI\Containers\ScrollableCollectionComponent.cs" />
+    <Compile Include="UI\Containers\TablistComponent.cs" />
+    <Compile Include="UI\Form\ButtonFormComponent.cs" />
+    <Compile Include="UI\Form\CheckboxFormComponent.cs" />
+    <Compile Include="UI\Form\DropdownFormComponent.cs" />
+    <Compile Include="UI\Form\PlusMinusFormComponent.cs" />
+    <Compile Include="UI\Form\SliderFormComponent.cs" />
+    <Compile Include="UI\Form\TextboxFormComponent.cs" />
+    <Compile Include="UI\FrameworkMenu.cs" />
+    <Compile Include="UI\Generic\AnimatedComponent.cs" />
+    <Compile Include="UI\Generic\ClickableAnimatedComponent.cs" />
+    <Compile Include="UI\Generic\ClickableHeartsComponent.cs" />
+    <Compile Include="UI\Generic\ClickableTextComponent.cs" />
+    <Compile Include="UI\Generic\ClickableTextureComponent.cs" />
+    <Compile Include="UI\Generic\ColoredRectangleComponent.cs" />
+    <Compile Include="UI\Generic\FrameComponent.cs" />
+    <Compile Include="UI\Generic\HeartsComponent.cs" />
+    <Compile Include="UI\Generic\LabelComponent.cs" />
+    <Compile Include="UI\Generic\ProgressbarComponent.cs" />
+    <Compile Include="UI\Generic\TextComponent.cs" />
+    <Compile Include="UI\Generic\TextureComponent.cs" />
+    <Compile Include="UI\Interfaces\IComponentCollection.cs" />
+    <Compile Include="UI\Interfaces\IComponentContainer.cs" />
+    <Compile Include="UI\Interfaces\IIinteractiveMenuComponent.cs" />
+    <Compile Include="UI\Interfaces\IKeyboardComponent.cs" />
+    <Compile Include="UI\Interfaces\IMenuComponent.cs" />
+    <Compile Include="UI\KeyboardInputResolver.cs" />
+    <Compile Include="UI\KeyboardSubscriberProxy.cs" />
+    <Compile Include="UI\Wrapper\ClickableCancelComponent.cs" />
+    <Compile Include="UI\Wrapper\ClickableConfirmComponent.cs" />
+    <Compile Include="UI\Wrapper\ClickableObjectComponent.cs" />
+    <Compile Include="UI\Wrapper\ObjectComponent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="docs\ConditionDocumentation.md" />
+    <None Include="manifest.json" />
+    <None Include="README.md" />
+    <None Include="RELEASE-NOTES.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="docs\Changelog.txt" />
+    <Content Include="Content\placeholder.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

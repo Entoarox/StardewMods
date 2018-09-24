@@ -1,126 +1,145 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading;
+using Entoarox.AdvancedLocationLoader.Configs;
+using Entoarox.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
+using StardewModdingAPI;
 using StardewValley;
-
-using Entoarox.Framework;
-
 using StardewValley.Menus;
+using xTile.Layers;
+using xTile.ObjectModel;
+using SObject = StardewValley.Object;
+using Tile = xTile.Tiles.Tile;
 
 namespace Entoarox.AdvancedLocationLoader
 {
     internal static class Actions
     {
-        internal static Random _Random = new Random();
-        internal static void Shift(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+        /*********
+        ** Fields
+        *********/
+        internal static Random Random = new Random();
+
+
+        /*********
+        ** Public methods
+        *********/
+        public static void Shift(Farmer who, string[] arguments, Vector2 tile)
         {
-            Game1.warpFarmer(who.currentLocation, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]),who.facingDirection,who.currentLocation.isStructure);
+            Game1.warpFarmer(who.currentLocation.Name, Convert.ToInt32(arguments[0]), Convert.ToInt32(arguments[1]), who.facingDirection, who.currentLocation.isStructure.Value);
         }
-        internal static void Message(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void Message(Farmer who, string[] arguments, Vector2 tile)
         {
             Game1.drawDialogueNoTyping(ModEntry.Strings.Get(arguments[0] + ":" + arguments[1]));
         }
-        internal static void RawMessage(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void RawMessage(Farmer who, string[] arguments, Vector2 tile)
         {
             Game1.drawDialogueNoTyping(string.Join(" ", arguments));
         }
-        internal static void RandomMessage(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void RandomMessage(Farmer who, string[] arguments, Vector2 tile)
         {
             string[] opts = string.Join(" ", arguments).Split('|');
-            Game1.drawObjectDialogue(opts[_Random.Next(opts.Length)]);
+            Game1.drawObjectDialogue(opts[Actions.Random.Next(opts.Length)]);
         }
-        internal static void React(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void React(Farmer who, string[] arguments, Vector2 tile)
         {
             int interval = Convert.ToInt32(arguments[0]);
             int[] indexes = arguments[1].Split(',').Select(e => Convert.ToInt32(e)).ToArray();
-            var layer = who.currentLocation.Map.GetLayer("Buildings");
-            var source = layer.Tiles[(int)tile.X, (int)tile.Y];
-            xTile.ObjectModel.PropertyValue property = who.currentLocation.GetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action");
+            Layer layer = who.currentLocation.Map.GetLayer("Buildings");
+            Tile source = layer.Tiles[(int)tile.X, (int)tile.Y];
+            PropertyValue property = who.currentLocation.GetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action");
             int delay = interval * indexes.Length;
             who.currentLocation.SetTile((int)tile.X, (int)tile.Y, "Buildings", indexes, interval, source.TileSheet.Id);
-            System.Threading.Timer timer = null;
-            timer = new System.Threading.Timer((obj) =>
-            {
-                who.currentLocation.SetTile((int)tile.X, (int)tile.Y, "Buildings", source.TileIndex, source.TileSheet.Id);
-                who.currentLocation.SetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action",property);
-                timer.Dispose();
-            },
-            null, delay, System.Threading.Timeout.Infinite);
+            Timer timer = null;
+            timer = new Timer(obj =>
+                {
+                    who.currentLocation.SetTile((int)tile.X, (int)tile.Y, "Buildings", source.TileIndex, source.TileSheet.Id);
+                    who.currentLocation.SetTileProperty((int)tile.X, (int)tile.Y, "Buildings", "Action", property);
+                    timer.Dispose();
+                },
+                null, delay, Timeout.Infinite
+            );
         }
-        internal static void Teleporter(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void Teleporter(Farmer who, string[] arguments, Vector2 tile)
         {
-            if(ModEntry.PatchData.Teleporters.Any(e => e.ListName.Equals(arguments[0].Trim())))
+            if (ModEntry.PatchData.Teleporters.Any(e => e.ListName.Equals(arguments[0].Trim())))
                 TeleportationResolver.Request(arguments[0]).Init();
             else
             {
-                ModEntry.Logger.Log("Teleporter does not exist: "+arguments[0],StardewModdingAPI.LogLevel.Error);
-                List<string> lists = new List<string>();
-                foreach (var list in ModEntry.PatchData.Teleporters)
+                ModEntry.Logger.Log("Teleporter does not exist: " + arguments[0], LogLevel.Error);
+                IList<string> lists = new List<string>();
+                foreach (TeleporterList list in ModEntry.PatchData.Teleporters)
                     lists.Add(list.ListName);
-                ModEntry.Logger.Log("Known lists: " + string.Join(",", lists), StardewModdingAPI.LogLevel.Trace);
+                ModEntry.Logger.Log("Known lists: " + string.Join(",", lists), LogLevel.Trace);
                 Game1.drawObjectDialogue(ModEntry.Strings.Get("sparkle"));
             }
         }
-        internal static void Conditional(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void Conditional(Farmer who, string[] arguments, Vector2 tile)
         {
-            if(!who.mailReceived.Contains("ALLCondition_"+arguments[0]) && ModEntry.PatchData.Conditionals.Any(e => e.Name==arguments[0]))
+            if (!who.mailReceived.Contains("ALLCondition_" + arguments[0]) && ModEntry.PatchData.Conditionals.Any(e => e.Name == arguments[0]))
                 ConditionalResolver.Request(arguments[0]).Init();
             else
             {
-                if(who.mailReceived.Contains("ALLCondition_"+arguments[0]))
-                    ModEntry.Logger.Log("Conditional has already been completed: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                if (who.mailReceived.Contains("ALLCondition_" + arguments[0]))
+                    ModEntry.Logger.Log("Conditional has already been completed: " + arguments[0], LogLevel.Error);
                 else
-                    ModEntry.Logger.Log("Conditional does not exist: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                    ModEntry.Logger.Log("Conditional does not exist: " + arguments[0], LogLevel.Error);
                 Game1.drawObjectDialogue(ModEntry.Strings.Get("sparkle"));
             }
         }
-        internal static void Shop(StardewValley.Farmer who, string[] arguments, Vector2 tile)
+
+        public static void Shop(Farmer who, string[] arguments, Vector2 tile)
         {
             try
             {
                 if (!ModEntry.PatchData.Shops.Any(p => p.Name == arguments[0]))
                 {
-                    Game1.activeClickableMenu = new ShopMenu(new List<Item>(), 0, null);
-                    ModEntry.Logger.Log("Unable to open shop, shop not found: " + arguments[0], StardewModdingAPI.LogLevel.Error);
+                    Game1.activeClickableMenu = new ShopMenu(new List<Item>());
+                    ModEntry.Logger.Log("Unable to open shop, shop not found: " + arguments[0], LogLevel.Error);
                 }
                 else
                 {
-                    Configs.ShopConfig shop = ModEntry.PatchData.Shops.First(p => p.Name == arguments[0]);
+                    ShopConfig shop = ModEntry.PatchData.Shops.First(p => p.Name == arguments[0]);
                     List<Item> stock = new List<Item>();
-                    NPC portrait = new NPC();
-                    portrait.Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait);
-                    portrait.name = shop.Owner;
-                    foreach (Configs.ShopItem item in shop.Items)
+                    NPC portrait = new NPC
+                    {
+                        Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait),
+                        Name = shop.Owner
+                    };
+                    foreach (ShopItem item in shop.Items)
                     {
                         if (!string.IsNullOrEmpty(item.Conditions) && !ModEntry.SHelper.Conditions().ValidateConditions(item.Conditions))
                             continue;
-                        StardewValley.Object result;
-                        if (item.Price != null)
-                            result = new StardewValley.Object(item.Id, item.Stock, false, (int)item.Price);
-                        else
-                            result = new StardewValley.Object(item.Id, item.Stock, false, -1);
-                        if (item.Stack > 1)
-                        {
-                            stock.Add(new StackableShopObject(result, item.Stack));
-                        }
-                        else
-                            stock.Add(result);
+                        SObject result = item.Price != null
+                            ? new SObject(item.Id, item.Stock, false, (int)item.Price)
+                            : new SObject(item.Id, item.Stock);
+                        stock.Add(item.Stack > 1
+                            ? new StackableShopObject(result, item.Stack)
+                            : result
+                        );
                     }
+
                     if (stock.Count == 0)
-                        ModEntry.Logger.Log("No stock: " + arguments[0] + ", if this is intended this message can be ignored.", StardewModdingAPI.LogLevel.Warn);
-                    ShopMenu menu = new ShopMenu(stock);
-                    menu.portraitPerson = portrait;
-                    menu.potraitPersonDialogue = shop.Messages[_Random.Next(shop.Messages.Count)];
-                    Game1.activeClickableMenu = menu;
+                        ModEntry.Logger.Log("No stock: " + arguments[0] + ", if this is intended this message can be ignored.", LogLevel.Warn);
+                    Game1.activeClickableMenu = new ShopMenu(stock)
+                    {
+                        portraitPerson = portrait,
+                        potraitPersonDialogue = shop.Messages[Actions.Random.Next(shop.Messages.Count)]
+                    };
                 }
             }
             catch (Exception err)
             {
-                ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", StardewModdingAPI.LogLevel.Error, err);
+                ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", LogLevel.Error, err);
             }
         }
     }

@@ -1,37 +1,42 @@
-﻿using System.Collections.Generic;
-
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.UI
 {
-    class ClickableCollectionComponent : GenericCollectionComponent
+    internal class ClickableCollectionComponent : GenericCollectionComponent
     {
+        /*********
+        ** Accessors
+        *********/
         public event ClickHandler Handler;
-        public ClickableCollectionComponent(Point size, ClickHandler handler = null, List<IMenuComponent> components = null) : base(size, components)
+
+
+        /*********
+        ** Public methods
+        *********/
+        public ClickableCollectionComponent(Point size, ClickHandler handler = null, List<IMenuComponent> components = null)
+            : base(size, components)
         {
             if (handler != null)
-                Handler += handler;
+                this.Handler += handler;
         }
-        public ClickableCollectionComponent(Rectangle area, ClickHandler handler = null, List<IMenuComponent> components = null) : base(area, components)
+
+        public ClickableCollectionComponent(Rectangle area, ClickHandler handler = null, List<IMenuComponent> components = null)
+            : base(area, components)
         {
             if (handler != null)
-                Handler += handler;
+                this.Handler += handler;
         }
-        public override void LeftHeld(Point p, Point o)
-        {
-            
-        }
-        public override void LeftUp(Point p, Point o)
-        {
-            
-        }
+
+        public override void LeftHeld(Point p, Point o) { }
+
+        public override void LeftUp(Point p, Point o) { }
+
         public override void LeftClick(Point p, Point o)
         {
-            Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
+            this.Handler?.Invoke(this, this.Parent, this.Parent.GetAttachedMenu());
         }
-        public override void RightClick(Point p, Point o)
-        {
-            
-        }
+
+        public override void RightClick(Point p, Point o) { }
     }
 }

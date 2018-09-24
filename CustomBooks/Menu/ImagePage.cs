@@ -2,29 +2,39 @@ using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewValley;
 using StardewModdingAPI;
+using StardewValley;
 
-namespace Entoarox.CustomBooks
+namespace Entoarox.CustomBooks.Menu
 {
-    class ImagePage : Page
+    internal class ImagePage : Page
     {
-        private Texture2D Image;
-        private string Guid;
-        private string Book;
-        private string FilePath => Path.Combine(Constants.CurrentSavePath,"Entoarox.CustomBooks",this.Book, this.Guid + ".png");
+        /*********
+        ** Fields
+        *********/
+        private string FilePath => Path.Combine(Constants.CurrentSavePath, "Entoarox.CustomBooks", this.Book, this.Guid + ".png");
+        private readonly string Book;
+        private readonly string Guid;
+        private readonly Texture2D Image;
+
+
+        /*********
+        ** Public methods
+        *********/
         public ImagePage(string book)
         {
             this.Image = new Texture2D(Game1.graphics.GraphicsDevice, 140, 245);
             this.Guid = System.Guid.NewGuid().ToString();
             this.Book = book;
         }
+
         public ImagePage(string book, string guid)
         {
             this.Book = book;
             this.Guid = guid;
             this.Image = Texture2D.FromStream(Game1.graphics.GraphicsDevice, File.OpenRead(this.FilePath));
         }
+
         public override void Draw(SpriteBatch batch, Rectangle region)
         {
             int w = Math.Min(region.Width, this.Image.Width * 2);
@@ -37,18 +47,19 @@ namespace Entoarox.CustomBooks
             batch.Draw(this.Image, new Rectangle(region.X + x + 2, region.Y + y + 2, w, h), c);
             batch.Draw(this.Image, new Rectangle(region.X + x, region.Y + y, w, h), Game1.textColor);
         }
+
         public void Delete()
         {
             if (File.Exists(this.FilePath))
                 File.Delete(this.FilePath);
         }
+
         public override Bookshelf.Book.Page Serialize()
         {
             using (FileStream stream = File.Create(this.FilePath))
-            {
                 this.Image.SaveAsPng(stream, 150, 245);
-            }
-            var page = new Bookshelf.Book.Page
+
+            Bookshelf.Book.Page page = new Bookshelf.Book.Page
             {
                 Type = Bookshelf.Book.PageType.Image,
                 Content = this.Guid
@@ -56,19 +67,10 @@ namespace Entoarox.CustomBooks
             return page;
         }
 
-        public override void Click(Rectangle region, int x, int y)
-        {
+        public override void Click(Rectangle region, int x, int y) { }
 
-        }
+        public override void Release(Rectangle region, int x, int y) { }
 
-        public override void Release(Rectangle region, int x, int y)
-        {
-
-        }
-
-        public override void Hover(Rectangle region, int x, int y)
-        {
-            
-        }
+        public override void Hover(Rectangle region, int x, int y) { }
     }
 }

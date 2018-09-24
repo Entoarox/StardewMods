@@ -1,9 +1,10 @@
 {
   "Name": "Seasonal Immersion",
   "Author": "Entoarox",
-  "Version": "1.11.0",
-  "MinimumApiVersion": "2.1",
+  "Version": "1.12.1",
   "Description": "Immerse yourself in a more seasonal world!",
   "UniqueID": "Entoarox.SeasonalImmersion",
-  "EntryDll": "SeasonalImmersion.dll"
+  "EntryDll": "SeasonalImmersion.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": [ "Nexus:2273" ]
 }

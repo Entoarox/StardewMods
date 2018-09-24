@@ -1,6 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 using StardewValley.Menus;
 
@@ -8,16 +7,24 @@ namespace Entoarox.Framework.UI
 {
     public class FrameComponent : BaseMenuComponent
     {
-        protected bool Chrome = false;
-        public FrameComponent(Rectangle area, Texture2D texture, Rectangle? crop=null) : base(area,texture,crop)
-        {
+        /*********
+        ** Fields
+        *********/
+        protected bool Chrome;
 
-        }
+
+        /*********
+        ** Public methods
+        *********/
+        public FrameComponent(Rectangle area, Texture2D texture, Rectangle? crop = null)
+            : base(area, texture, crop) { }
+
         public FrameComponent(Rectangle area)
         {
             this.Chrome = true;
-            SetScaledArea(area);
+            this.SetScaledArea(area);
         }
+
         public override void Draw(SpriteBatch b, Point o)
         {
             if (!this.Visible)

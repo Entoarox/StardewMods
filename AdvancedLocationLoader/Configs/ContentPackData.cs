@@ -4,10 +4,12 @@ using StardewModdingAPI;
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
     /// <summary>The loaded data for a content pack.</summary>
-    public class ContentPackData
+    internal class ContentPackData
     {
+        /*********
+        ** Accessors
+        *********/
         public IContentPack ContentPack { get; set; }
-
         public IList<Location> Locations { get; set; } = new List<Location>();
         public IList<Override> Overrides { get; set; } = new List<Override>();
         public IList<Redirect> Redirects { get; set; } = new List<Redirect>();

@@ -1,26 +1,34 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 
 namespace Entoarox.DynamicDungeons
 {
-    class TitlePage : Page
+    internal class TitlePage : Page
     {
-        private string Title;
-        private string Subtitle;
-        private string Introduction;
+        /*********
+        ** Fields
+        *********/
+        private readonly string Introduction;
+        private readonly string Subtitle;
+        private readonly string Title;
+
+
+        /*********
+        ** Public methods
+        *********/
         public TitlePage(string title, string subtitle, string introduction)
         {
             this.Title = title;
             this.Subtitle = subtitle;
             this.Introduction = introduction;
         }
+
         public override void Draw(SpriteBatch batch, Rectangle region)
         {
             string introduction = Game1.parseText(this.Introduction, Game1.smallFont, region.Width);
-            var titleSize = Game1.dialogueFont.MeasureString(this.Title);
-            var subtitleSize = Game1.dialogueFont.MeasureString(this.Subtitle) * 0.8f;
+            Vector2 titleSize = Game1.dialogueFont.MeasureString(this.Title);
+            Vector2 subtitleSize = Game1.dialogueFont.MeasureString(this.Subtitle) * 0.8f;
             float titlePos = region.X + (region.Width - titleSize.X) / 2;
             float subtitlePos = region.X + (region.Width - subtitleSize.X) / 2;
             Utility.drawTextWithShadow(batch, this.Title, Game1.dialogueFont, new Vector2(titlePos, region.Y + 32), Game1.textColor, 1);

@@ -4,8 +4,11 @@ using StardewModdingAPI;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class Compound
+    internal class Compound
     {
+        /*********
+        ** Accessors
+        *********/
         public IDictionary<IContentPack, Tilesheet[]> SeasonalTilesheets { get; }
         public Tile[] DynamicTiles { get; }
         public Property[] DynamicProperties { get; }
@@ -14,6 +17,10 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         public TeleporterList[] Teleporters { get; }
         public ShopConfig[] Shops { get; }
 
+
+        /*********
+        ** Public methods
+        *********/
         public Compound(IDictionary<IContentPack, Tilesheet[]> seasonalTilesheets, IEnumerable<Tile> dynamicTiles, IEnumerable<Property> dynamicProperties, IEnumerable<Warp> dynamicWarps, IEnumerable<Conditional> conditionals, IEnumerable<TeleporterList> teleporters, IEnumerable<ShopConfig> shops)
         {
             this.SeasonalTilesheets = seasonalTilesheets;

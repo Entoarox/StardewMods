@@ -14,8 +14,17 @@ namespace Entoarox.AdvancedLocationLoader.Processing
     internal class ConfigReader
     {
         /*********
-        ** Properties
+        ** Fields
         *********/
+        /// <summary>The condition names that are already taken.</summary>
+        private readonly HashSet<string> AddedConditionNames = new HashSet<string>();
+
+        /// <summary>The teleporters which have already been added.</summary>
+        private readonly List<TeleporterList> AddedTeleporters = new List<TeleporterList>();
+
+        /// <summary>The affected locations.</summary>
+        private readonly HashSet<string> AffectedLocations = new HashSet<string>();
+
         /// <summary>The valid location types.</summary>
         private readonly HashSet<string> LocationTypes = new HashSet<string> { "Default", "Cellar", "Greenhouse", "Sewer", "BathHousePool", "Desert", "Decoratable" };
 
@@ -24,15 +33,6 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
         /// <summary>Writes messages to the log.</summary>
         private readonly IMonitor Monitor;
-
-        /// <summary>The affected locations.</summary>
-        private readonly HashSet<string> AffectedLocations = new HashSet<string>();
-
-        /// <summary>The condition names that are already taken.</summary>
-        private readonly HashSet<string> AddedConditionNames = new HashSet<string>();
-
-        /// <summary>The teleporters which have already been added.</summary>
-        private readonly List<TeleporterList> AddedTeleporters = new List<TeleporterList>();
 
 
         /*********
@@ -58,7 +58,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
 
         /*********
-        ** Private methods
+        ** Protected methods
         *********/
         /// <summary>Read config data from a content pack.</summary>
         /// <param name="contentPack">The content pack to load.</param>
@@ -77,15 +77,16 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             }
 
             // get format version
-            string formatVersion;
+            ISemanticVersion formatVersion;
             try
             {
-                formatVersion = contentPack.ReadJsonFile<LoaderVersionConfig>(configPath)?.LoaderVersion;
-                if (formatVersion == null)
+                string rawVersion = contentPack.ReadJsonFile<LoaderVersionConfig>(configPath)?.LoaderVersion;
+                if (rawVersion == null)
                 {
                     this.Monitor.Log($"   Skipped: config doesn't specify a {nameof(LoaderVersionConfig.LoaderVersion)} field.", LogLevel.Error);
                     return null;
                 }
+                formatVersion = new SemanticVersion(rawVersion);
             }
             catch (Exception ex)
             {
@@ -94,14 +95,14 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             }
 
             // read data
-            switch (formatVersion)
+            switch ($"{formatVersion.MajorVersion}.{formatVersion.MinorVersion}")
             {
                 case "1.1":
                     return this.ReadConfig_1_1(contentPack, configPath);
                 case "1.2":
                     return this.ReadConfig_1_2(contentPack, configPath);
                 default:
-                    this.Monitor.Log($"Skipped {contentPack.Manifest.Name}: config file format {formatVersion} isn't supported.", LogLevel.Error);
+                    this.Monitor.Log($"Skipped {contentPack.Manifest.Name}: config file format {formatVersion} isn't supported, must be 1.1 or 1.2.", LogLevel.Error);
                     return null;
             }
         }
@@ -129,6 +130,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                             this.Monitor.Log($"   Skipped {location}: that map is already being modified.", LogLevel.Error);
                             continue;
                         }
+
                         if (!this.LocationTypes.Contains(location.Type))
                         {
                             this.Monitor.Log($"   Location {location} has unknown type, using 'Default' instead.", LogLevel.Warn);
@@ -168,6 +170,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                             this.Monitor.Log($"   Skipped {redirect}: file {redirect.FromFile}.xnb doesn't exist in the game's content folder.", LogLevel.Error);
                             continue;
                         }
+
                         if (!this.AssertFileExists(contentPack, "redirect", redirect.ToFile))
                             continue;
 
@@ -253,11 +256,13 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                             this.Monitor.Log($"   Skipped {condition}, references null item.", LogLevel.Error);
                             continue;
                         }
+
                         if (condition.Amount < 1)
                         {
                             this.Monitor.Log($"   Skipped {condition}, item amount can't be less then 1.", LogLevel.Error);
                             continue;
                         }
+
                         if (!this.AddedConditionNames.Add(condition.Name))
                         {
                             this.Monitor.Log($"   Skipped {condition.Name}, another condition with this name already exists.", LogLevel.Error);
@@ -511,7 +516,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             try
             {
                 // read raw data
-                var config = contentPack.ReadJsonFile<LocationConfig>(configPath);
+                LocationConfig config = contentPack.ReadJsonFile<LocationConfig>(configPath);
 
                 // load child config
                 if (config.Includes.Any())
@@ -532,25 +537,25 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                         }
 
                         // add data to parent config
-                        foreach (var entry in childConfig.Conditionals)
+                        foreach (Conditional entry in childConfig.Conditionals)
                             config.Conditionals.Add(entry);
-                        foreach (var entry in childConfig.Locations)
+                        foreach (Location entry in childConfig.Locations)
                             config.Locations.Add(entry);
-                        foreach (var entry in childConfig.Overrides)
+                        foreach (Override entry in childConfig.Overrides)
                             config.Overrides.Add(entry);
-                        foreach (var entry in childConfig.Properties)
+                        foreach (Property entry in childConfig.Properties)
                             config.Properties.Add(entry);
-                        foreach (var entry in childConfig.Redirects)
+                        foreach (Redirect entry in childConfig.Redirects)
                             config.Redirects.Add(entry);
-                        foreach (var entry in childConfig.Shops)
+                        foreach (string entry in childConfig.Shops)
                             config.Shops.Add(entry);
-                        foreach (var entry in childConfig.Teleporters)
+                        foreach (TeleporterList entry in childConfig.Teleporters)
                             config.Teleporters.Add(entry);
-                        foreach (var entry in childConfig.Tiles)
+                        foreach (Tile entry in childConfig.Tiles)
                             config.Tiles.Add(entry);
-                        foreach (var entry in childConfig.Tilesheets)
+                        foreach (Tilesheet entry in childConfig.Tilesheets)
                             config.Tilesheets.Add(entry);
-                        foreach (var entry in childConfig.Warps)
+                        foreach (Warp entry in childConfig.Warps)
                             config.Warps.Add(entry);
                     }
                 }

@@ -6,6 +6,9 @@ namespace Entoarox.AdvancedLocationLoader
 {
     internal static class ContentPackExtensions
     {
+        /*********
+        ** Public methods
+        *********/
         public static string GetRelativePath(this IContentPack contentPack, string fromAbsolutePath, string toLocalPath)
         {
             Uri fromUri = new Uri(fromAbsolutePath + Path.DirectorySeparatorChar);

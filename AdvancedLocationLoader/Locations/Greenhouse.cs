@@ -1,24 +1,25 @@
-﻿using System.Xml.Serialization;
+using System.Xml.Serialization;
+using StardewValley;
 
 namespace Entoarox.AdvancedLocationLoader.Locations
 {
     [XmlType("ALLGreenhouse")]
-    public class Greenhouse : StardewValley.GameLocation
+    public class Greenhouse : GameLocation
     {
-        public Greenhouse()
-        {
+        /*********
+        ** Public methods
+        *********/
+        public Greenhouse() { }
 
-        }
-        public Greenhouse(xTile.Map map, string name) : base(map,name)
-        {
+        public Greenhouse(string mapPath, string name)
+            : base(mapPath, name) { }
 
-        }
         public override void DayUpdate(int dayOfMonth)
         {
-            string realName = this.name;
-            this.name = "Greenhouse";
+            string realName = this.Name;
+            this.name.Value = "Greenhouse";
             base.DayUpdate(dayOfMonth);
-            this.name = realName;
+            this.name.Value = realName;
         }
     }
 }

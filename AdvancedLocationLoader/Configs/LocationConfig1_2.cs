@@ -2,8 +2,11 @@ using System.Collections.Generic;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
 {
-    public class LocationConfig
+    internal class LocationConfig
     {
+        /*********
+        ** Accessors
+        *********/
         /// <summary>The secondary location configs to read. This is ignored on a secondary location config.</summary>
         public IList<string> Includes { get; set; } = new List<string>();
 

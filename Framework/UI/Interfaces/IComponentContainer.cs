@@ -1,13 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 
 namespace Entoarox.Framework.UI
 {
     public interface IComponentContainer
     {
-        void ResetFocus();
-        void GiveFocus(IInteractiveMenuComponent component);
+        /*********
+        ** Accessors
+        *********/
         Rectangle EventRegion { get; }
         Rectangle ZoomEventRegion { get; }
+
+
+        /*********
+        ** Methods
+        *********/
+        void ResetFocus();
+        void GiveFocus(IInteractiveMenuComponent component);
         FrameworkMenu GetAttachedMenu();
     }
 }

@@ -1,38 +1,38 @@
-﻿using System;
-
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 
 namespace Entoarox.Framework.UI
 {
     public class TextComponent : BaseMenuComponent
     {
+        /*********
+        ** Fields
+        *********/
         protected string _Label;
-        protected SpriteFont Font;
         protected float _Scale;
+        protected SpriteFont Font;
+
+
+        /*********
+        ** Accessors
+        *********/
         public float Scale
         {
-            get
-            {
-                return this._Scale;
-            }
+            get => this._Scale;
             set
             {
-
                 this._Scale = value;
                 Vector2 size = this.Font.MeasureString(this.Label) * value;
                 this.Area.Width = (int)Math.Ceiling(size.X);
                 this.Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
+
         public string Label
         {
-            get
-            {
-                return this._Label;
-            }
+            get => this._Label;
             set
             {
                 this._Label = value;
@@ -41,24 +41,25 @@ namespace Entoarox.Framework.UI
                 this.Area.Height = (int)Math.Ceiling(size.Y);
             }
         }
+
         public Color Color;
         public bool Shadow;
-        public TextComponent(Point position, string label, bool shadow=true, float scale=1, Color? color=null, SpriteFont font=null)
+
+
+        /*********
+        ** Public methods
+        *********/
+        public TextComponent(Point position, string label, bool shadow = true, float scale = 1, Color? color = null, SpriteFont font = null)
         {
-            if (color == null)
-                this.Color = Game1.textColor;
-            else
-                this.Color = (Color)color;
-            if (font == null)
-                this.Font = Game1.smallFont;
-            else
-                this.Font = font;
+            this.Color = color ?? Game1.textColor;
+            this.Font = font ?? Game1.smallFont;
             this.Shadow = shadow;
             this._Scale = scale;
             this._Label = label;
             Vector2 size = this.Font.MeasureString(label) / Game1.pixelZoom * scale;
-            SetScaledArea(new Rectangle(position.X, position.Y,(int)Math.Ceiling(size.X),(int)Math.Ceiling(size.Y)));
+            this.SetScaledArea(new Rectangle(position.X, position.Y, (int)Math.Ceiling(size.X), (int)Math.Ceiling(size.Y)));
         }
+
         public override void Draw(SpriteBatch b, Point o)
         {
             if (!this.Visible)

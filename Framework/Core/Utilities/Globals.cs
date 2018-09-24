@@ -2,11 +2,14 @@ using StardewModdingAPI;
 
 namespace Entoarox.Framework.Core.Utilities
 {
-    static class Globals
+    internal static class Globals
     {
+        /*********
+        ** Public methods
+        *********/
         public static string GetModName(IModLinked mod)
         {
-            return EntoaroxFrameworkMod.SHelper.ModRegistry.Get(mod.ModID).Name;
+            return EntoaroxFrameworkMod.SHelper.ModRegistry.Get(mod.ModID).Manifest.Name;
         }
     }
 }

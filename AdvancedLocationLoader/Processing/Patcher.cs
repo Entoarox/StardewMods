@@ -5,8 +5,12 @@ using System.Linq;
 using Entoarox.AdvancedLocationLoader.Configs;
 using Entoarox.Framework;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using xTile;
+using xTile.Tiles;
+using Tile = Entoarox.AdvancedLocationLoader.Configs.Tile;
 using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
 
 namespace Entoarox.AdvancedLocationLoader.Processing
@@ -15,19 +19,16 @@ namespace Entoarox.AdvancedLocationLoader.Processing
     internal class Patcher
     {
         /*********
-        ** Properties
+        ** Fields
         *********/
-        /// <summary>Writes messages to the log.</summary>
-        private readonly IMonitor Monitor;
+        /// <summary>The content helper to use when interacting with the game's content files.</summary>
+        private readonly IContentHelper CoreContentHelper;
 
         /// <summary>The content pack data to apply.</summary>
         private readonly ContentPackData[] Data;
 
-        /// <summary>The content helper to use when interacting with the game's content files.</summary>
-        private readonly IContentHelper CoreContentHelper;
-
-        //private List<string> Conditionals = new List<string>();
-        //private SecondaryLocationManifest1_2 Compound = new SecondaryLocationManifest1_2();
+        /// <summary>Writes messages to the log.</summary>
+        private readonly IMonitor Monitor;
 
 
         /*********
@@ -49,17 +50,17 @@ namespace Entoarox.AdvancedLocationLoader.Processing
         public void ApplyPatches(out Compound compoundData)
         {
             // track info
-            var seasonalTilesheetsByContentPack = new Dictionary<IContentPack, Tilesheet[]>();
-            var customLocationNames = new HashSet<string>();
-            var mapSizes = new Dictionary<string, Point>();
-            var mapCache = new Dictionary<string, xTile.Map>();
-            var tilesheetCache = new Dictionary<string, List<string>>();
-            var dynamicTiles = new List<Tile>();
-            var dynamicProperties = new List<Property>();
-            var dynamicWarps = new List<Warp>();
-            var conditionals = new List<Conditional>();
-            var teleporters = new List<TeleporterList>();
-            var shops = new List<ShopConfig>();
+            Dictionary<IContentPack, Tilesheet[]> seasonalTilesheetsByContentPack = new Dictionary<IContentPack, Tilesheet[]>();
+            HashSet<string> customLocationNames = new HashSet<string>();
+            Dictionary<string, Point> mapSizes = new Dictionary<string, Point>();
+            Dictionary<string, Map> mapCache = new Dictionary<string, Map>();
+            Dictionary<string, List<string>> tilesheetCache = new Dictionary<string, List<string>>();
+            List<Tile> dynamicTiles = new List<Tile>();
+            List<Property> dynamicProperties = new List<Property>();
+            List<Warp> dynamicWarps = new List<Warp>();
+            List<Conditional> conditionals = new List<Conditional>();
+            List<TeleporterList> teleporters = new List<TeleporterList>();
+            List<ShopConfig> shops = new List<ShopConfig>();
 
             // apply content packs
             foreach (ContentPackData pack in this.Data)
@@ -68,32 +69,69 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                 string stage = "entry";
                 try
                 {
-                    // apply locations
+                    // collect tilesheet info
+                    IDictionary<string, Tilesheet[]> tilesheetQueue = pack.Tilesheets
+                        .GroupBy(p => p.MapName)
+                        .ToDictionary(p => p.Key, p => p.ToArray(), StringComparer.InvariantCultureIgnoreCase);
+                    IList<Tilesheet> seasonalTilesheets = new List<Tilesheet>();
+
+                    // apply custom locations
                     stage = "locations";
-                    foreach (Location obj in pack.Locations)
+                    foreach (Location location in pack.Locations)
                     {
-                        if (Game1.getLocationFromName(obj.MapName) != null)
+                        if (Game1.getLocationFromName(location.MapName) != null)
                         {
-                            this.Monitor.Log($"  Can't add location {obj.MapName}, it already exists.", LogLevel.Warn);
+                            this.Monitor.Log($"  Can't add location {location.MapName}, it already exists.", LogLevel.Warn);
                             continue;
                         }
 
                         try
                         {
                             // cache info
-                            xTile.Map map = pack.ContentPack.LoadAsset<xTile.Map>(obj.FileName);
-                            mapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
-                            mapCache.Add(obj.MapName, map);
-                            customLocationNames.Add(obj.MapName);
+                            Map map = pack.ContentPack.LoadAsset<Map>(location.FileName);
+                            mapSizes.Add(location.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
+                            mapCache.Add(location.MapName, map);
+                            customLocationNames.Add(location.MapName);
 
-                            Processors.ApplyLocation(pack.ContentPack, obj);
+                            // preload tilesheets
+                            if (tilesheetQueue.TryGetValue(location.MapName, out Tilesheet[] tilesheets))
+                            {
+                                tilesheetQueue.Remove(location.MapName);
+                                foreach (Tilesheet tilesheet in tilesheets)
+                                {
+                                    Processors.ApplyTilesheet(this.CoreContentHelper, pack.ContentPack, tilesheet, map);
+                                    if (tilesheet.Seasonal)
+                                        seasonalTilesheets.Add(tilesheet);
+                                }
+                            }
+
+                            // load location
+                            Processors.ApplyLocation(pack.ContentPack, location);
                         }
                         catch (Exception err)
                         {
-                            this.Monitor.Log($"   Can't add location {obj.MapName}, an error occurred.", LogLevel.Error,
+                            this.Monitor.Log($"   Can't add location {location.MapName}, an error occurred.", LogLevel.Error,
                                 err);
                         }
                     }
+
+                    // apply remaining tilesheets
+                    stage = "tilesheets";
+                    foreach (Tilesheet obj in tilesheetQueue.Values.SelectMany(p => p))
+                    {
+                        GameLocation location = Game1.getLocationFromName(obj.MapName);
+                        if (location == null)// && !customLocationNames.Contains(obj.MapName))
+                        {
+                            this.Monitor.Log($"   Can't apply tilesheet '{obj.SheetId}', location '{obj.MapName}' doesn't exist.", LogLevel.Error);
+                            continue;
+                        }
+
+                        Processors.ApplyTilesheet(this.CoreContentHelper, pack.ContentPack, obj, location.map);
+                        if (obj.Seasonal)
+                            seasonalTilesheets.Add(obj);
+                    }
+                    if (seasonalTilesheets.Any())
+                        seasonalTilesheetsByContentPack[pack.ContentPack] = seasonalTilesheets.ToArray();
 
                     // apply overrides
                     stage = "overrides";
@@ -108,7 +146,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
                         try
                         {
-                            xTile.Map map = pack.ContentPack.LoadAsset<xTile.Map>(obj.FileName);
+                            Map map = pack.ContentPack.LoadAsset<Map>(obj.FileName);
                             mapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
 
                             Processors.ApplyOverride(pack.ContentPack, obj);
@@ -127,31 +165,12 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                         {
                             if (!redirCache.Contains(obj.ToFile))
                             {
-                                string toAssetPath = pack.ContentPack.GetRelativePath(fromAbsolutePath: ModEntry.SHelper.DirectoryPath, toLocalPath: obj.ToFile);
+                                string toAssetPath = pack.ContentPack.GetRelativePath(ModEntry.SHelper.DirectoryPath, obj.ToFile);
                                 this.CoreContentHelper.RegisterXnbReplacement(obj.FromFile, toAssetPath);
                                 redirCache.Add(obj.ToFile);
                             }
                         }
                     }
-
-                    // apply tilesheets
-                    stage = "tilesheets";
-                    IList<Tilesheet> seasonalTilesheets = new List<Tilesheet>();
-                    foreach (Tilesheet obj in pack.Tilesheets)
-                    {
-                        if (Game1.getLocationFromName(obj.MapName) == null &&
-                            !customLocationNames.Contains(obj.MapName))
-                        {
-                            this.Monitor.Log($"   Can't apply tilesheet '{obj.SheetId}', location '{obj.MapName}' doesn't exist.", LogLevel.Error);
-                            continue;
-                        }
-
-                        Processors.ApplyTilesheet(this.CoreContentHelper, pack.ContentPack, obj);
-                        if (obj.Seasonal)
-                            seasonalTilesheets.Add(obj);
-                    }
-                    if (seasonalTilesheets.Any())
-                        seasonalTilesheetsByContentPack[pack.ContentPack] = seasonalTilesheets.ToArray();
 
                     // apply tiles
                     stage = "tiles";
@@ -165,7 +184,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
                         else if (obj.SheetId != null && (!tilesheetCache.ContainsKey(obj.MapName) || !tilesheetCache[obj.MapName].Contains(obj.SheetId)))
                         {
-                            xTile.Map map = mapCache.ContainsKey(obj.MapName)
+                            Map map = mapCache.ContainsKey(obj.MapName)
                                 ? mapCache[obj.MapName]
                                 : Game1.getLocationFromName(obj.MapName).map;
 
@@ -225,7 +244,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
                     // save shops
                     stage = "shops";
-                    foreach(ShopConfig obj in pack.Shops)
+                    foreach (ShopConfig obj in pack.Shops)
                         shops.Add(obj);
                 }
                 catch (Exception ex)
@@ -238,7 +257,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             try
             {
                 NPC.populateRoutesFromLocationToLocationList();
-                VerifyGameIntegrity();
+                this.VerifyGameIntegrity();
                 this.Monitor.Log("Patches applied!", LogLevel.Debug);
             }
             catch (Exception ex)
@@ -252,7 +271,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
 
         /*********
-        ** Private methods
+        ** Protected methods
         *********/
         private bool PreprocessTile(TileInfo info, HashSet<string> customLocationNames, IDictionary<string, Point> mapSizes, out string error)
         {
@@ -268,13 +287,14 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             Point size;
             if (!customLocationNames.Contains(info.MapName))
             {
-                xTile.Map map = Game1.getLocationFromName(info.MapName).map;
+                Map map = Game1.getLocationFromName(info.MapName).map;
                 size = new Point(map.DisplayWidth, map.DisplayHeight);
                 customLocationNames.Add(info.MapName);
                 mapSizes[info.MapName] = size;
             }
             else
                 size = mapSizes[info.MapName];
+
             int minX = 0;
             int minY = 0;
             int maxX = size.X;
@@ -301,9 +321,9 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             string[] seasons = { "spring", "summer", "fall", "winter" };
             foreach (GameLocation loc in Game1.locations)
             {
-                if (loc.isOutdoors && !loc.Name.Equals("Desert"))
+                if (loc.IsOutdoors && !loc.Name.Equals("Desert"))
                 {
-                    foreach (xTile.Tiles.TileSheet sheet in loc.map.TileSheets)
+                    foreach (TileSheet sheet in loc.map.TileSheets)
                     {
                         if (!sheet.ImageSource.Contains("path") && !sheet.ImageSource.Contains("object"))
                         {
@@ -314,7 +334,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                             {
                                 try
                                 {
-                                    Game1.content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>(Path.Combine("Maps", season + "_" + path[1]));
+                                    Game1.content.Load<Texture2D>(Path.Combine("Maps", season + "_" + path[1]));
                                 }
                                 catch
                                 {

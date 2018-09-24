@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Entoarox.Framework.UI;
 
-namespace Entoarox.Framework.Indev//.UI
+namespace Entoarox.Framework.Indev //.UI
 {
-    using UI;
-    class RecipeComponent : BaseInteractiveMenuComponent
+    internal class RecipeComponent : BaseInteractiveMenuComponent
     {
-        public RecipeComponent(int item, bool craftable=true)
-        {
-
-        }
+        /*********
+        ** Public methods
+        *********/
+        public RecipeComponent(int item, bool craftable = true) { }
     }
 }

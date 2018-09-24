@@ -1,35 +1,48 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Entoarox.Framework.Core
 {
-    class InterModHelper : IInterModHelper
+    internal class InterModHelper : IInterModHelper
     {
-        private static Dictionary<string, InterModHelper> _Cache = new Dictionary<string, InterModHelper>();
-        private static Dictionary<string, List<ReceiveMessage>> _Map = new Dictionary<string, List<ReceiveMessage>>();
-        internal static IInterModHelper Get(string modID)
+        /*********
+        ** Fields
+        *********/
+        private static readonly Dictionary<string, InterModHelper> Cache = new Dictionary<string, InterModHelper>();
+        private static readonly Dictionary<string, List<ReceiveMessage>> Map = new Dictionary<string, List<ReceiveMessage>>();
+        private readonly string ModID;
+
+
+        /*********
+        ** Public methods
+        *********/
+        public InterModHelper(string modID)
         {
-            if (!_Cache.ContainsKey(modID))
-                _Cache.Add(modID, new InterModHelper(modID));
-            return _Cache[modID];
+            this.ModID = modID;
         }
 
-        private string ModID;
-        internal InterModHelper(string modID) => ModID=modID;
-        
+        public static IInterModHelper Get(string modID)
+        {
+            if (!InterModHelper.Cache.ContainsKey(modID))
+                InterModHelper.Cache.Add(modID, new InterModHelper(modID));
+            return InterModHelper.Cache[modID];
+        }
+
         public void Subscribe(string channel, ReceiveMessage handler)
         {
-            if (!_Map.ContainsKey(channel))
-                _Map.Add(channel, new List<ReceiveMessage>());
-            _Map[channel].Add(handler);
+            if (!InterModHelper.Map.ContainsKey(channel))
+                InterModHelper.Map.Add(channel, new List<ReceiveMessage>());
+            InterModHelper.Map[channel].Add(handler);
         }
+
         public void Subscribe(ReceiveMessage handler)
         {
-            Subscribe(this.ModID, handler);
+            this.Subscribe(this.ModID, handler);
         }
+
         public void Publish(string channel, string message)
         {
-            if (_Map.ContainsKey(channel))
-                foreach (ReceiveMessage handler in _Map[channel])
+            if (InterModHelper.Map.ContainsKey(channel))
+                foreach (ReceiveMessage handler in InterModHelper.Map[channel])
                     handler(this.ModID, channel, message, false);
         }
     }

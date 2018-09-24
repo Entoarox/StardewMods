@@ -1,23 +1,24 @@
-﻿namespace Entoarox.Framework.UI
+using Microsoft.Xna.Framework.Input;
+
+namespace Entoarox.Framework.UI
 {
-    abstract public class BaseKeyboardFormComponent : BaseFormComponent, IKeyboardComponent
+    public abstract class BaseKeyboardFormComponent : BaseFormComponent, IKeyboardComponent
     {
-        public bool Selected {get; set; }
-        public virtual void TextReceived(char chr)
-        {
+        /*********
+        ** Accessors
+        *********/
+        public bool Selected { get; set; }
 
-        }
-        public virtual void TextReceived(string str)
-        {
 
-        }
-        public virtual void CommandReceived(char cmd)
-        {
+        /*********
+        ** Public methods
+        *********/
+        public virtual void TextReceived(char chr) { }
 
-        }
-        public virtual void SpecialReceived(Microsoft.Xna.Framework.Input.Keys key)
-        {
+        public virtual void TextReceived(string str) { }
 
-        }
+        public virtual void CommandReceived(char cmd) { }
+
+        public virtual void SpecialReceived(Keys key) { }
     }
 }
