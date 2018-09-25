@@ -1,4 +1,9 @@
 ## Release notes
+## 1.4.5
+Released 25 September 2018. (Thanks to Pathoschild!)
+
+* Fixed crash due to seasonal tilesheet check not updated for Stardew Valley 1.3.
+
 ## 1.4.4
 Released 23 September 2018. (Thanks to Pathoschild!)
 
