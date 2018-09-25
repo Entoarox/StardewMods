@@ -1,76 +1,78 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-
+using System.Linq;
+using Entoarox.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-
 using StardewValley;
 using StardewValley.Menus;
 
 namespace Entoarox.CustomPaths
 {
-    using Framework;
     public class CustomPathsMod : Mod
     {
         public static Dictionary<string, CustomPathInfo> Map = new Dictionary<string, CustomPathInfo>();
-        private static string[] Seasons = new[] {"spring","summer","fall","winter"};
+        private static readonly string[] Seasons = { "spring", "summer", "fall", "winter" };
         private PlayerModifier Modifier;
+
         public override void Entry(IModHelper helper)
         {
-            foreach (var pack in helper.GetContentPacks())
+            foreach (IContentPack pack in helper.GetContentPacks())
             {
-                foreach(var path in pack.ReadJsonFile<List<CustomPathConfig>>("paths.json"))
+                foreach (CustomPathConfig path in pack.ReadJsonFile<List<CustomPathConfig>>("paths.json"))
                 {
                     string key = pack.Manifest.UniqueID + "<" + path.Name + ">";
-                    if (Map.ContainsKey(key))
+                    if (CustomPathsMod.Map.ContainsKey(key))
                     {
                         this.Monitor.Log("Encountered duplicate path name `" + path.Name + "` in the `" + pack.Manifest.UniqueID + "` Content Pack, duplicate is being skipped", LogLevel.Warn);
                         continue;
                     }
+
                     if (path.Seasonal)
                     {
                         Dictionary<string, Texture2D> textures = new Dictionary<string, Texture2D>();
-                        foreach(string season in Seasons)
+                        foreach (string season in CustomPathsMod.Seasons)
                             textures.Add(season, pack.LoadAsset<Texture2D>(path.File + "_" + season + ".png"));
-                        Map.Add(key, new CustomPathInfo(textures, path));
+                        CustomPathsMod.Map.Add(key, new CustomPathInfo(textures, path));
                     }
                     else
-                    {
-                        Map.Add(key, new CustomPathInfo(pack.LoadAsset<Texture2D>(path.File + ".png"), path));
-                    }
+                        CustomPathsMod.Map.Add(key, new CustomPathInfo(pack.LoadAsset<Texture2D>(path.File + ".png"), path));
+
                     this.Monitor.Log("Path added: " + key, LogLevel.Trace);
                 }
             }
-            if (Map.Any(a => !string.IsNullOrEmpty(a.Value.Salesman)))
+
+            if (CustomPathsMod.Map.Any(a => !string.IsNullOrEmpty(a.Value.Salesman)))
             {
                 this.Monitor.Log("One or more paths are for sale, enabling menu hook", LogLevel.Trace);
                 MenuEvents.MenuChanged += this.Event_MenuChanged;
             }
-            if(Map.Any(a => a.Value.Speed>0))
+
+            if (CustomPathsMod.Map.Any(a => a.Value.Speed > 0))
             {
                 this.Monitor.Log("One or more paths give a speed boost, enabling update hook", LogLevel.Trace);
                 GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             }
         }
+
         public void GameEvents_UpdateTick(object s, EventArgs e)
         {
             if (!Context.IsWorldReady)
                 return;
             Vector2 pos = Game1.player.getTileLocation();
-            if (Game1.currentLocation.terrainFeatures.ContainsKey(pos) && Game1.currentLocation.terrainFeatures!=null && Game1.currentLocation.terrainFeatures[pos] is CustomPath path)
+            if (Game1.currentLocation.terrainFeatures.ContainsKey(pos) && Game1.currentLocation.terrainFeatures != null && Game1.currentLocation.terrainFeatures[pos] is CustomPath path)
             {
-                int boost = Map[path.Id].Speed;
+                int boost = CustomPathsMod.Map[path.Id].Speed;
                 if (this.Modifier != null)
                 {
                     if (this.Modifier.RunSpeedModifier == boost)
                         return;
                     this.Helper.Player().Modifiers.Remove(this.Modifier);
                 }
-                this.Modifier = new PlayerModifier()
+
+                this.Modifier = new PlayerModifier
                 {
                     RunSpeedModifier = boost,
                     WalkSpeedModifier = boost
@@ -83,6 +85,7 @@ namespace Entoarox.CustomPaths
                 this.Modifier = null;
             }
         }
+
         private void Event_MenuChanged(object sender, EventArgs e)
         {
             if (Game1.activeClickableMenu is ShopMenu)
@@ -100,7 +103,6 @@ namespace Entoarox.CustomPaths
                         shopOwner = "ClintUpgrade";
                 }
                 else
-                {
                     switch (Game1.currentLocation.Name)
                     {
                         case "Forest":
@@ -109,7 +111,8 @@ namespace Entoarox.CustomPaths
                             else
                             {
                                 // The merchant is a bit harder to determine then the mouse
-                                List<string> matches = new List<string>{
+                                List<string> matches = new List<string>
+                                {
                                     "I've got a little bit of everything. Take a look!",
                                     "I smuggled these goods out of the Gotoro Empire. Why do you think they're so expensive?",
                                     "I'll have new items every week, so make sure to come back!",
@@ -120,6 +123,7 @@ namespace Entoarox.CustomPaths
                                 if (matches.Contains(menu.potraitPersonDialogue) || menu.potraitPersonDialogue.Substring(0, matches[4].Length) == matches[4])
                                     shopOwner = "Traveler";
                             }
+
                             break;
                         case "Hospital":
                             shopOwner = "Hospital";
@@ -131,23 +135,24 @@ namespace Entoarox.CustomPaths
                             shopOwner = "Joja";
                             break;
                     }
-                }
-                if (Map.Any(a => a.Value.Salesman.Equals(shopOwner)))
+
+                if (CustomPathsMod.Map.Any(a => a.Value.Salesman.Equals(shopOwner)))
                 {
-                    var RefStock = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(Game1.activeClickableMenu, "itemPriceAndStock", true);
-                    var RefSale = this.Helper.Reflection.GetField<List<Item>>(Game1.activeClickableMenu, "forSale", true);
+                    IReflectedField<Dictionary<Item, int[]>> refStock = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(Game1.activeClickableMenu, "itemPriceAndStock");
+                    IReflectedField<List<Item>> refSale = this.Helper.Reflection.GetField<List<Item>>(Game1.activeClickableMenu, "forSale");
                     this.Monitor.Log("Shop owned by `" + shopOwner + "` gets edited, adding paths", LogLevel.Trace);
-                    var stock = RefStock.GetValue();
-                    var sale = RefSale.GetValue();
+                    Dictionary<Item, int[]> stock = refStock.GetValue();
+                    List<Item> sale = refSale.GetValue();
                     // Add our custom items to the shop
-                    foreach(var item in Map.Where(a => a.Value.Salesman.Equals(shopOwner) && (string.IsNullOrEmpty(a.Value.Requirements) || this.Helper.Conditions().ValidateConditions(a.Value.Requirements))))
+                    foreach (KeyValuePair<string, CustomPathInfo> item in CustomPathsMod.Map.Where(a => a.Value.Salesman.Equals(shopOwner) && (string.IsNullOrEmpty(a.Value.Requirements) || this.Helper.Conditions().ValidateConditions(a.Value.Requirements))))
                     {
-                        var obj = new CustomPathObject(item.Key) { stack = int.MaxValue };
-                        stock.Add(obj, new int[] { item.Value.Price * 2, int.MaxValue });
+                        CustomPathObject obj = new CustomPathObject(item.Key) { stack = int.MaxValue };
+                        stock.Add(obj, new[] { item.Value.Price * 2, int.MaxValue });
                         sale.Add(obj);
                     }
-                    RefStock.SetValue(stock);
-                    RefSale.SetValue(sale);
+
+                    refStock.SetValue(stock);
+                    refSale.SetValue(sale);
                 }
                 else
                 {

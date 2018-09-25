@@ -1,14 +1,29 @@
+using Entoarox.Framework;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewValley;
 
 namespace Entoarox.CustomPaths
 {
-    using Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using StardewValley;
-
-    class CustomPathObject : Object, ICustomItem, IDeserializationHandler
+    internal class CustomPathObject : Object, ICustomItem, IDeserializationHandler
     {
+        /*********
+        ** Accessors
+        *********/
         public string Id;
+
+        public override string DisplayName
+        {
+            get => CustomPathsMod.Map[this.Id].Name;
+            set => base.DisplayName = value;
+        }
+
+
+        /*********
+        ** Public methods
+        *********/
+        public CustomPathObject() { }
+
         public CustomPathObject(string id)
         {
             this.Id = id;
@@ -16,33 +31,29 @@ namespace Entoarox.CustomPaths
             this.Price = CustomPathsMod.Map[this.Id].Price * 2;
             this.CanBeSetDown = true;
         }
-        public CustomPathObject()
-        {
-
-        }
 
         public bool ShouldDelete()
         {
             return !CustomPathsMod.Map.ContainsKey(this.Id);
         }
 
-        public override string DisplayName { get => CustomPathsMod.Map[this.Id].Name; set => base.DisplayName = value; }
-
         public override string getCategoryName()
         {
             return "Path";
         }
+
         public override string getDescription()
         {
             if (CustomPathsMod.Map[this.Id].Speed > 0)
                 return "+" + CustomPathsMod.Map[this.Id].Speed + " speed when walking on this path.";
-            else
-                return "Decorative path for you to populate stardew with.";
+            return "Decorative path for you to populate stardew with.";
         }
+
         public override Color getCategoryColor()
         {
             return new Color(148, 61, 40);
         }
+
         public override int maximumStackSize()
         {
             return 999;
@@ -52,10 +63,12 @@ namespace Entoarox.CustomPaths
         {
             return false;
         }
+
         public override bool canBeDropped()
         {
             return false;
         }
+
         public override bool canBeTrashed()
         {
             return true;
@@ -65,6 +78,7 @@ namespace Entoarox.CustomPaths
         {
             return CustomPathsMod.Map[this.Id].Price;
         }
+
         public override Item getOne()
         {
             return new CustomPathObject(this.Id);
@@ -74,6 +88,7 @@ namespace Entoarox.CustomPaths
         {
             return !l.terrainFeatures.ContainsKey(tile) && !l.isTileOccupiedForPlacement(tile);
         }
+
         public override bool isPlaceable()
         {
             return true;
@@ -81,16 +96,17 @@ namespace Entoarox.CustomPaths
 
         public override bool placementAction(GameLocation location, int x, int y, Farmer who = null)
         {
-            Vector2 vector = new Vector2((x / Game1.tileSize), (y / Game1.tileSize));
+            Vector2 vector = new Vector2(x / Game1.tileSize, y / Game1.tileSize);
             if (location.terrainFeatures.ContainsKey(vector))
                 return false;
-            var path = new CustomPath(this.Id);
+            CustomPath path = new CustomPath(this.Id);
             location.terrainFeatures.Add(vector, path);
             path.MakeConnection(vector);
             path.UpdateNeighbors(vector, false);
             Game1.playSound("thudStep");
             return true;
         }
+
         public override bool isPassable()
         {
             return true;
@@ -98,20 +114,22 @@ namespace Entoarox.CustomPaths
 
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
         {
-            var texture = CustomPathsMod.Map[this.Id].GetTexture();
-            spriteBatch.Draw(texture, location + new Vector2((int)(Game1.tileSize / 2 * scaleSize), (int)(Game1.tileSize / 2 * scaleSize)), new Rectangle(0,0, 16, 16), Color.White * transparency, 0f, new Vector2(8f, 8f) * scaleSize, Game1.pixelZoom * scaleSize, SpriteEffects.None, layerDepth);
+            Texture2D texture = CustomPathsMod.Map[this.Id].GetTexture();
+            spriteBatch.Draw(texture, location + new Vector2((int)(Game1.tileSize / 2 * scaleSize), (int)(Game1.tileSize / 2 * scaleSize)), new Rectangle(0, 0, 16, 16), Color.White * transparency, 0f, new Vector2(8f, 8f) * scaleSize, Game1.pixelZoom * scaleSize, SpriteEffects.None, layerDepth);
             if (drawStackNumber && this.maximumStackSize() > 1 && scaleSize > 0.3 && this.Stack != 2147483647 && this.Stack > 1)
                 Utility.drawTinyDigits(this.Stack, spriteBatch, location + new Vector2((Game1.tileSize - Utility.getWidthOfTinyDigitString(this.Stack, 3f * scaleSize)) + 3f * scaleSize, Game1.tileSize - 18f * scaleSize + 2f), 3f * scaleSize, 1f, Color.White);
         }
+
         public override void draw(SpriteBatch spriteBatch, int x, int y, float alpha = 1)
         {
-            var texture = CustomPathsMod.Map[this.Id].GetTexture();
-            var vector = Game1.GlobalToLocal(Game1.viewport, new Vector2((x * Game1.tileSize + Game1.tileSize / 2 + ((this.shakeTimer > 0) ? Game1.random.Next(-1, 2) : 0)), (y * Game1.tileSize + Game1.tileSize / 2 + ((this.shakeTimer > 0) ? Game1.random.Next(-1, 2) : 0))));
+            Texture2D texture = CustomPathsMod.Map[this.Id].GetTexture();
+            Vector2 vector = Game1.GlobalToLocal(Game1.viewport, new Vector2((x * Game1.tileSize + Game1.tileSize / 2 + (this.shakeTimer > 0 ? Game1.random.Next(-1, 2) : 0)), (y * Game1.tileSize + Game1.tileSize / 2 + (this.shakeTimer > 0 ? Game1.random.Next(-1, 2) : 0))));
             spriteBatch.Draw(texture, vector, new Rectangle(0, 0, 16, 16), Color.White * alpha, 0f, new Vector2(8f, 8f), Game1.pixelZoom, SpriteEffects.None, 0);
         }
-        public override void drawWhenHeld(SpriteBatch spriteBatch, Vector2 objectPosition, StardewValley.Farmer f)
+
+        public override void drawWhenHeld(SpriteBatch spriteBatch, Vector2 objectPosition, Farmer f)
         {
-            var texture = CustomPathsMod.Map[this.Id].GetTexture();
+            Texture2D texture = CustomPathsMod.Map[this.Id].GetTexture();
             spriteBatch.Draw(texture, objectPosition, new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, Game1.pixelZoom, SpriteEffects.None, 1);
         }
     }

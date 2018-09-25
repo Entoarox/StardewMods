@@ -1,20 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Entoarox.CustomPaths
 {
-    class CustomPathConfig
+    internal class CustomPathConfig
     {
-        public string File="";
-        public bool Seasonal = false;
+        /*********
+        ** Accessors
+        *********/
         public int Alternatives = 0;
-        public string Name="";
-        public string Salesman="";
+        public string File = "";
+        public string Name = "";
+        public int Price = 0;
         public string Requirements = null;
-        public int Price=0;
+        public string Salesman = "";
+        public bool Seasonal = false;
         public int SpeedBoost = 0;
     }
 }

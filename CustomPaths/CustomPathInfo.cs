@@ -1,27 +1,36 @@
-using System;
 using System.Collections.Generic;
-
 using Microsoft.Xna.Framework.Graphics;
-
 using StardewValley;
 
 namespace Entoarox.CustomPaths
 {
     public class CustomPathInfo
     {
-        private Dictionary<string, Texture2D> Textures;
+        /*********
+        ** Fields
+        *********/
+        private readonly bool Seasonal;
+        private readonly Dictionary<string, Texture2D> Textures;
 
-        private bool Seasonal;
-        public string Name;
+
+        /*********
+        ** Accessors
+        *********/
         public int Alternates;
+        public string Name;
         public int Price;
-        public string Salesman;
         public string Requirements;
+        public string Salesman;
         public int Speed;
+
+
+        /*********
+        ** Public methods
+        *********/
         internal CustomPathInfo(Texture2D texture, CustomPathConfig config)
         {
             this.Seasonal = false;
-            this.Textures = new Dictionary<string, Texture2D>() { { "default", texture } };
+            this.Textures = new Dictionary<string, Texture2D> { { "default", texture } };
             this.Name = config.Name;
             this.Alternates = config.Alternatives;
             this.Price = config.Price;
@@ -30,7 +39,7 @@ namespace Entoarox.CustomPaths
             this.Speed = config.SpeedBoost;
         }
 
-        internal CustomPathInfo(Dictionary<string,Texture2D> textures, CustomPathConfig config)
+        internal CustomPathInfo(Dictionary<string, Texture2D> textures, CustomPathConfig config)
         {
             this.Seasonal = false;
             this.Textures = textures;
