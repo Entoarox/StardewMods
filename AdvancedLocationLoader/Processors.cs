@@ -20,12 +20,19 @@ namespace Entoarox.AdvancedLocationLoader
         /*********
         ** Fields
         *********/
-        private static readonly List<string> MappingCache = new List<string>();
+        private static readonly IDictionary<string, string> MappingCache = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
 
         /*********
         ** Public methods
         *********/
+        public static string GetFakePath(TileSheet tilesheet)
+        {
+            return Processors.MappingCache.TryGetValue(tilesheet.ImageSource, out string fakePath)
+                ? fakePath
+                : null;
+        }
+
         public static void ApplyTile(Tile tile)
         {
             int stage = 0;
@@ -139,14 +146,14 @@ namespace Entoarox.AdvancedLocationLoader
                     if (tilesheet.Seasonal)
                         fakepath = fakepath.Replace("all_sheet_paths_objects", Path.Combine("all_sheet_paths_objects", Game1.currentSeason));
                     stage++; // 2
-                    if (!Processors.MappingCache.Contains(tilesheet.FileName))
+                    if (!Processors.MappingCache.ContainsKey(tilesheet.FileName))
                     {
                         string toAssetPath = contentPack.GetRelativePath(
                             fromAbsolutePath: ModEntry.SHelper.DirectoryPath,
                             toLocalPath: tilesheet.Seasonal ? ($"{tilesheet.FileName}_{Game1.currentSeason}") : tilesheet.FileName
                         );
                         coreContentHelper.RegisterXnbReplacement(fakepath, toAssetPath);
-                        Processors.MappingCache.Add(tilesheet.FileName);
+                        Processors.MappingCache[tilesheet.FileName] = fakepath;
                     }
 
                     stage++; // 3
@@ -227,7 +234,7 @@ namespace Entoarox.AdvancedLocationLoader
                     GameLocation location = Game1.locations[i];
                     if (location.Name == obj.MapName)
                     {
-                        Game1.locations[i] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.LoadAsset<Map>(obj.FileName), obj.MapName);
+                        Game1.locations[i] = (GameLocation)Activator.CreateInstance(Game1.getLocationFromName(obj.MapName).GetType(), contentPack.GetActualAssetKey(obj.FileName), obj.MapName);
                         break;
                     }
                 }

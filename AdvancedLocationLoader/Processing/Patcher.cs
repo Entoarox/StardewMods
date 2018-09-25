@@ -146,9 +146,19 @@ namespace Entoarox.AdvancedLocationLoader.Processing
 
                         try
                         {
+                            // load map
                             Map map = pack.ContentPack.LoadAsset<Map>(obj.FileName);
                             mapSizes.Add(obj.MapName, new Point(map.DisplayWidth, map.DisplayHeight));
 
+                            // fix custom tilesheet paths
+                            foreach (TileSheet tilesheet in map.TileSheets)
+                            {
+                                string fakePath = Processors.GetFakePath(tilesheet);
+                                if (fakePath != null)
+                                    tilesheet.ImageSource = fakePath;
+                            }
+
+                            // apply location override
                             Processors.ApplyOverride(pack.ContentPack, obj);
                         }
                         catch (Exception err)
@@ -337,7 +347,7 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                         {
                             try
                             {
-                                Game1.content.Load<Texture2D>(Path.Combine(path, $"{season}_{fileName.Split(new[] {'_'}, 2)[1]}"));
+                                Game1.content.Load<Texture2D>(Path.Combine(path, $"{season}_{fileName.Split(new[] { '_' }, 2)[1]}"));
                             }
                             catch
                             {
