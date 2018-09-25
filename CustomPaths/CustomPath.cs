@@ -79,6 +79,7 @@ namespace Entoarox.CustomPaths
         ** Public methods
         *********/
         public CustomPath()
+            : base(needsTick: false)
         {
             this.DrawHandler = this.DrawHandlerSetup;
         }
