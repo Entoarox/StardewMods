@@ -1,0 +1,16 @@
+{
+  "Name": "Custom Paths",
+  "Author": "Entoarox",
+  "Version": "1.1.2",
+  "Description": "Enables adding custom paths to the game using Content Packs!",
+  "UniqueID": "Entoarox.CustomPaths",
+  "EntryDll": "CustomPaths.dll",
+  "MinimumApiVersion": "2.8-beta",
+  "UpdateKeys": [ "Nexus:2272" ],
+  "Dependencies": [
+    {
+      "UniqueID": "Entoarox.EntoaroxFramework",
+      "MinimumVersion": "2.4.1"
+    }
+  ]
+}

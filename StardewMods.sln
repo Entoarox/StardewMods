@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayGround", "PlayGround\Pl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomBooks", "CustomBooks\CustomBooks.csproj", "{AE56920C-7F17-4E17-B703-6586B190EF04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomPaths", "CustomPaths\CustomPaths.csproj", "{19A8DB34-7A24-4576-B50F-7EB02D09E465}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -87,6 +89,10 @@ Global
 		{AE56920C-7F17-4E17-B703-6586B190EF04}.Debug|x86.Build.0 = Debug|x86
 		{AE56920C-7F17-4E17-B703-6586B190EF04}.Release|x86.ActiveCfg = Release|x86
 		{AE56920C-7F17-4E17-B703-6586B190EF04}.Release|x86.Build.0 = Release|x86
+		{19A8DB34-7A24-4576-B50F-7EB02D09E465}.Debug|x86.ActiveCfg = Debug|x86
+		{19A8DB34-7A24-4576-B50F-7EB02D09E465}.Debug|x86.Build.0 = Debug|x86
+		{19A8DB34-7A24-4576-B50F-7EB02D09E465}.Release|x86.ActiveCfg = Release|x86
+		{19A8DB34-7A24-4576-B50F-7EB02D09E465}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
