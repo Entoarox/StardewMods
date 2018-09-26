@@ -1,6 +1,6 @@
 ## Release notes
 ## 1.4.5
-Released 25 September 2018. (Thanks to Pathoschild!)
+Released 26 September 2018. (Thanks to Pathoschild!)
 
 * Fixed error validating non-seasonal tilesheets in Stardew Valley 1.3.
 * Fixed error overriding in-game locations.

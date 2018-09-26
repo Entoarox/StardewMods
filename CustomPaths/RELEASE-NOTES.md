@@ -1,6 +1,6 @@
 ## Release notes
 ## 1.1.3
-Released 25 September 2018. (Thanks to Pathoschild!)
+Not yet released. (Thanks to Pathoschild!)
 
 * Updated for Stardew Valley 1.3.
 * Fixed Linux/Mac compatibility.
