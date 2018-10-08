@@ -195,7 +195,7 @@
     <Compile Include="UI\Wrapper\ObjectComponent.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="docs\ConditionDocumentation.md" />
+    <None Include="docs\conditions.md" />
     <None Include="manifest.json" />
     <None Include="README.md" />
     <None Include="RELEASE-NOTES.md" />

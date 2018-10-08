@@ -1,6 +1,6 @@
-﻿ALL Docs
+ALL Docs
 ==============
-[Introduction](Introduction.md) / [Content Pack Format](Manifest.md) / **Custom Actions** / [Miscellaneous](Misc.md)
+~~Introduction~~ / [Content Pack Format](manifest.md) / **Custom Actions** / ~~Miscellaneous~~
 
 ---------------------------------------------------------------------------------------------------------
 Custom Actions
@@ -18,6 +18,6 @@ Actions that only work for location mods have a `*` at the end, this is not part
 | `ALLRawMessage`     | `ALLRawMessage <Message>`                   | Displays the raw text as given rather then looking up a translated message.                                                                         |
 | `ALLRandomMessage`  | `ALLRandomMessage <Msg1>\|<Msg2>\|<...>`    | Displays one of the `\|` separated messages at random each time it is activated, *Localization not supported*.                                      |
 | `ALLMessage`*       | `ALLMessage <ModID> <MessageKey>`           | Displays the localized message identified by the `ModID` of the location mod and `MessageKey` which matches the translation key in your i18n files. |
-| `ALLShop`*          | `ALLShop <ShopID>`                          | Displays the shop for the `ShopID` given, or a empty shop if none exists. ([More info](Manifest.md))                                                    |
-| `ALLTeleporter`*    | `ALLTeleporter <TeleporterID>`              | Displays the teleport destination menu for `TeleporterID` given. ([More info](Manifest.md))                                                         |
-| `ALLConditional`*   | `ALLConditional <ConditionalID>`            | Displays the conditional completion menu for the `ConditionalID` given, if not already completed. ([More info](Manifest.md))                        |
+| `ALLShop`*          | `ALLShop <ShopID>`                          | Displays the shop for the `ShopID` given, or a empty shop if none exists. ([More info](manifest.md))                                                    |
+| `ALLTeleporter`*    | `ALLTeleporter <TeleporterID>`              | Displays the teleport destination menu for `TeleporterID` given. ([More info](manifest.md))                                                         |
+| `ALLConditional`*   | `ALLConditional <ConditionalID>`            | Displays the conditional completion menu for the `ConditionalID` given, if not already completed. ([More info](manifest.md))                        |

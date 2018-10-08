@@ -78,7 +78,7 @@
     <Compile Include="TeleportationResolver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="docs\Actions.md" />
+    <None Include="docs\actions.md" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="README.md" />
@@ -92,7 +92,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="docs\Manifest.md" />
+    <None Include="docs\manifest.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
