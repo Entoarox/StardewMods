@@ -1,4 +1,9 @@
 ## Release notes
+## 2.0.6
+Released 03 November 2018. (Thanks to Pathoschild!)
+
+* Fixed asset path error in 2.0.5.
+
 ## 2.0.5
 Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)
 
