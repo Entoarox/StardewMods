@@ -3,6 +3,7 @@
 Released 03 November 2018. (Thanks to Pathoschild!)
 
 * Fixed asset path error in 2.0.5.
+* Fixed pets showing `Cat` or `Dog` as their display name.
 
 ## 2.0.5
 Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)
