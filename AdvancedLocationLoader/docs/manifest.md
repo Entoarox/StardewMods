@@ -1,6 +1,6 @@
 ALL Docs
 ==============
-[Introduction](Introduction.md) / **Content Pack Format** / [Custom Actions](Actions.md) / [Miscellaneous](Misc.md)
+~~Introduction~~ / **Content Pack Format** / [Custom Actions](actions.md) / ~~Miscellaneous~~
 
 ---------------------------------------------------------------------------------------------------------
 Content Pack Format
@@ -10,7 +10,7 @@ Each ALL content pack must have two files:
 * a `locations.json` which describes the location changes.
 
 This `locations.json` contains the basic layouts for both custom locations and shops.
-For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](../../Framework/Docs/Conditions.md) over in the Entoarox Framework github.
+For a list of valid conditions that are usable in the various "Conditions" fields see [the Custom Condition System documentation](../../Framework/docs/conditions.md) over in the Entoarox Framework github.
 
 To use a `Conditional` in your conditions, use the name of the conditional prefixed with `ALLCondition_`.
 

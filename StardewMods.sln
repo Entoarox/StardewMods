@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FurnitureAnywhere", "Furnit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedMinecart", "ExtendedMinecart\ExtendedMinecart.csproj", "{CA467BEA-932F-4133-ACA0-D634670C2488}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreAnimals", "MorePets\MoreAnimals.csproj", "{3710E6E1-296C-481D-B577-4BA6CCAF2E94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreAnimals", "MoreAnimals\MoreAnimals.csproj", "{3710E6E1-296C-481D-B577-4BA6CCAF2E94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopExpander", "ShopExpander\ShopExpander.csproj", "{99F3DE47-D310-4FD1-ACC6-8362D9D35CD7}"
 EndProject

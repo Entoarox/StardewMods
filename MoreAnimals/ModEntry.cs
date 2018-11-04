@@ -87,7 +87,7 @@ namespace Entoarox.MorePetsAndAnimals
                 foreach (KeyValuePair<AnimalType, AnimalSkin[]> pair in ModEntry.Indexes)
                 {
                     if (pair.Value.Length > 1)
-                        summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetName)).OrderBy(p => p))})");
+                        summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetKey)).OrderBy(p => p))})");
                 }
 
                 this.Monitor.Log(summary.ToString(), LogLevel.Trace);
@@ -163,8 +163,8 @@ namespace Entoarox.MorePetsAndAnimals
                 }
 
                 // yield
-                string assetName = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", file.Name));
-                yield return new AnimalSkin(type, index, assetName);
+                string assetKey = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", file.Name));
+                yield return new AnimalSkin(type, index, assetKey);
             }
         }
 
@@ -196,7 +196,7 @@ namespace Entoarox.MorePetsAndAnimals
                     AnimalSkin skin = this.GetSkin(pet);
                     if (skin != null)
                     {
-                        pet.Sprite = new AnimatedSprite(this.Helper.Content.GetActualAssetKey(skin.AssetName), 0, 32, 32);
+                        pet.Sprite = new AnimatedSprite(skin.AssetKey, 0, 32, 32);
                         pet.Manners = skin.ID;
                     }
                     pet.updatedDialogueYet = true;
@@ -207,9 +207,9 @@ namespace Entoarox.MorePetsAndAnimals
             foreach (FarmAnimal animal in this.GetFarmAnimals())
             {
                 AnimalSkin skin = this.GetSkin(animal);
-                if (skin != null && animal.Sprite.textureName.Value != skin.AssetName)
+                if (skin != null && animal.Sprite.textureName.Value != skin.AssetKey)
                 {
-                    animal.Sprite = new AnimatedSprite(skin.AssetName, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
+                    animal.Sprite = new AnimatedSprite(skin.AssetKey, 0, animal.frontBackSourceRect.Width, animal.frontBackSourceRect.Height);
                     animal.meatIndex.Value = skin.ID + 999;
                 }
             }

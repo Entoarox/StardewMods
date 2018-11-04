@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0-beta-20180819" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -78,7 +78,7 @@
     <Compile Include="TeleportationResolver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="docs\Actions.md" />
+    <None Include="docs\actions.md" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="README.md" />
@@ -92,7 +92,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="docs\Manifest.md" />
+    <None Include="docs\manifest.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -104,6 +104,7 @@ namespace Entoarox.MorePetsAndAnimals
             }
 
             pet.Name = petName;
+            pet.displayName = petName;
             pet.Manners = this.Skin;
             pet.Age = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
             pet.Position = Game1.player.position;

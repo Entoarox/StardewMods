@@ -12,7 +12,7 @@ greenhouse warps or in-location warp lighting glitches).
 
 ## Instructions for modders
 A location mod consists of a folder containing a manifest.json file (see [documented
-example](docs/Manifest.md)), and XNB files for the custom map data.
+example](docs/manifest.md)), and XNB files for the custom map data.
 
 This mod adds three new tile actions you can use in maps:
 
@@ -27,8 +27,8 @@ This mod adds three new tile actions you can use in maps:
   the tile is restored to what it was before activation. Can be used as a Buildingstile action.
 
 See also:
-* [content pack format](docs/Manifest.md)
-* [custom actions](docs/Manifest.md)
+* [content pack format](docs/manifest.md)
+* [custom actions](docs/actions.md)
 
 ## Compatibility
 * For Stardew Valley 1.3.30 or later.
