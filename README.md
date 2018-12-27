@@ -14,11 +14,9 @@ Active:
 * **[More Animals](https://www.nexusmods.com/stardewvalley/mods/2274)** <small>([source](MorePets))</small>
 * **[Shop Expander](https://www.nexusmods.com/stardewvalley/mods/2278)** <small>([source](ShopExpander))</small>
 
-
 No longer maintained:
 * **[Seasonal Immersion](https://www.nexusmods.com/stardewvalley/mods/2273)** <small>([source](SeasonalImmersion))</small>
 * **[XNB Loader](https://www.nexusmods.com/stardewvalley/mods/2275)** <small>([source](XnbLoader))</small>
-
 
 Not released yet:
 * **Custom Books** <small>([source](CustomBooks))</small>
