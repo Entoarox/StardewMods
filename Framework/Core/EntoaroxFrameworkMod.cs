@@ -323,18 +323,21 @@ namespace Entoarox.Framework.Core
             }
 
             IModHelperExtensions.PlayerModifierHelper.UpdateTick();
-            Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
-            if (EntoaroxFrameworkMod.LastTouchAction != playerPos)
+            if (Context.IsPlayerFree)
             {
-                string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
-                EntoaroxFrameworkMod.LastTouchAction = playerPos;
-                if (text != null)
+                Vector2 playerPos = new Vector2(Game1.player.getStandingX() / Game1.tileSize, Game1.player.getStandingY() / Game1.tileSize);
+                if (EntoaroxFrameworkMod.LastTouchAction != playerPos)
                 {
-                    string[] split = text.Split(' ');
-                    string[] args = new string[split.Length - 1];
-                    Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
-                    MoreEvents.FireTouchActionTriggered(this.ActionInfo);
+                    string text = Game1.currentLocation.doesTileHaveProperty((int)playerPos.X, (int)playerPos.Y, "TouchAction", "Back");
+                    EntoaroxFrameworkMod.LastTouchAction = playerPos;
+                    if (text != null)
+                    {
+                        string[] split = text.Split(' ');
+                        string[] args = new string[split.Length - 1];
+                        Array.Copy(split, 1, args, 0, args.Length);
+                        this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, playerPos);
+                        MoreEvents.FireTouchActionTriggered(this.ActionInfo);
+                    }
                 }
             }
         }

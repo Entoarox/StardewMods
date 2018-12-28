@@ -174,7 +174,7 @@ namespace Entoarox.MorePetsAndAnimals
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady)
+            if (!Context.IsPlayerFree)
                 return;
 
             // patch bus stop

@@ -55,7 +55,7 @@ namespace Entoarox.FasterPaths
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, EventArgs e)
         {
-            if (!Game1.hasLoadedGame)
+            if (!Context.IsPlayerFree)
                 return;
             Vector2 pos = Game1.player.getTileLocation();
             if (Game1.currentLocation.terrainFeatures.TryGetValue(pos, out TerrainFeature terrainFeature) && terrainFeature is Flooring flooring)
@@ -83,7 +83,7 @@ namespace Entoarox.FasterPaths
 
         private void CommandInfo(string name, string[] args)
         {
-            if (Game1.currentLocation.terrainFeatures.TryGetValue(Game1.player.getTileLocation(), out TerrainFeature terrainFeature) && terrainFeature is Flooring floor)
+            if (Context.IsPlayerFree && Game1.currentLocation.terrainFeatures.TryGetValue(Game1.player.getTileLocation(), out TerrainFeature terrainFeature) && terrainFeature is Flooring floor)
                 this.Monitor.Log($"Floor ID for current tile's floor: {floor.whichFloor.Value}", LogLevel.Alert);
             else
                 this.Monitor.Log("No path in the current tile", LogLevel.Alert);
