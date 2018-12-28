@@ -348,20 +348,24 @@ namespace Entoarox.Framework.Core
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             // read data
-            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
-            ItemEvents.FireBeforeDeserialize();
-            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
-            if (data == null)
+            if (Context.IsMainPlayer)
             {
-                // read from legacy mod file
-                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
-                if (legacyFile.Exists)
-                    data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
+                this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
+                ItemEvents.FireBeforeDeserialize();
+                IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
+                if (data == null)
+                {
+                    // read from legacy mod file
+                    FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
+                    if (legacyFile.Exists)
+                        data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
+                }
+
+                if (data == null)
+                    data = new Dictionary<string, InstanceState>();
+                this.RestoreItems(data);
+                ItemEvents.FireAfterDeserialize();
             }
-            if (data == null)
-                data = new Dictionary<string, InstanceState>();
-            this.RestoreItems(data);
-            ItemEvents.FireAfterDeserialize();
         }
 
         /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
@@ -369,22 +373,25 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnSaving(object sender, SavingEventArgs e)
         {
-            this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
-            ItemEvents.FireBeforeSerialize();
-            Dictionary<string, InstanceState> data = new Dictionary<string, InstanceState>();
-            foreach (GameLocation loc in Game1.locations)
+            if (Context.IsMainPlayer)
             {
-                foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                    this.Serialize(data, chest.items);
+                this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
+                ItemEvents.FireBeforeSerialize();
+                Dictionary<string, InstanceState> data = new Dictionary<string, InstanceState>();
+                foreach (GameLocation loc in Game1.locations)
+                {
+                    foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
+                        this.Serialize(data, chest.items);
+                }
+
+                this.Serialize(data, Game1.player.Items);
+                FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
+
+                if (house.fridge.Value != null)
+                    this.Serialize(data, house.fridge.Value.items);
+                this.Helper.Data.WriteSaveData("custom-items", data);
+                ItemEvents.FireAfterSerialize();
             }
-
-            this.Serialize(data, Game1.player.Items);
-            FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-
-            if (house.fridge.Value != null)
-                this.Serialize(data, house.fridge.Value.items);
-            this.Helper.Data.WriteSaveData("custom-items", data);
-            ItemEvents.FireAfterSerialize();
         }
 
         /// <summary>Raised after the game finishes writing data to the save file (except the initial save creation).</summary>
