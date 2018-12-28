@@ -46,20 +46,25 @@ namespace Entoarox.ExtendedMinecart
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             this.Config = helper.ReadConfig<ModConfig>();
+
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
 
 
         /*********
         ** Protected methods
         *********/
-        private void GameEvents_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, EventArgs e)
         {
             if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
                 return;
-            GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
-            MenuEvents.MenuChanged += this.MenuEvents_MenuChanged;
+
+            this.Helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
             ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
             foreach (KeyValuePair<string, string> item in ModEntry.DestinationData)
             {
@@ -286,10 +291,14 @@ namespace Entoarox.ExtendedMinecart
             }
         }
 
-        private void MenuEvents_MenuChanged(object s, EventArgs e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            if (!(Game1.activeClickableMenu is DialogueBox dialogueBox) || !Context.IsWorldReady || Game1.player == null || Game1.currentLocation == null || Game1.currentLocation.lastQuestionKey == null || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
+            if (!(e.NewMenu is DialogueBox dialogueBox) || !Context.IsWorldReady || Game1.currentLocation?.lastQuestionKey != "Minecart")
                 return;
+
             dialogueBox.closeDialogue();
             Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;

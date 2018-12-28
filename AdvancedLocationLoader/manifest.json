@@ -5,11 +5,9 @@
   "Description": "Get your content into stardew without replacing any xnb files.",
   "UniqueID": "Entoarox.AdvancedLocationLoader",
   "EntryDll": "AdvancedLocationLoader.dll",
-  "MinimumApiVersion": "2.8-beta",
+  "MinimumApiVersion": "2.9.3",
   "UpdateKeys": [ "Nexus:2270" ],
   "Dependencies": [
-    {
-      "UniqueID": "Entoarox.EntoaroxFramework"
-    }
+    { "UniqueID": "Entoarox.EntoaroxFramework" }
   ]
 }

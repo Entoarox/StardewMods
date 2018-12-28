@@ -63,7 +63,6 @@
     <Compile Include="Configs\Subclasses\Tile.cs" />
     <Compile Include="Configs\Subclasses\Warp.cs" />
     <Compile Include="ContentPackExtensions.cs" />
-    <Compile Include="Events.cs" />
     <Compile Include="Processing\ConfigReader.cs" />
     <Compile Include="Processing\Patcher.cs" />
     <Compile Include="Locations\DecoratableLocation.cs" />

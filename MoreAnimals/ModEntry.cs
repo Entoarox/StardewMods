@@ -6,7 +6,6 @@ using System.Text;
 using Entoarox.Framework;
 using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -103,11 +102,11 @@ namespace Entoarox.MorePetsAndAnimals
             }
 
             // hook events
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             if (this.ReplaceBus)
             {
-                ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
-                ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+                helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+                helper.Events.Input.ButtonReleased += this.OnButtonReleased;
             }
         }
 
@@ -168,7 +167,10 @@ namespace Entoarox.MorePetsAndAnimals
             }
         }
 
-        private void GameEvents_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             if (!Context.IsWorldReady)
                 return;
@@ -284,17 +286,21 @@ namespace Entoarox.MorePetsAndAnimals
             this.Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
         }
 
-        private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.ButtonPressed == Buttons.A)
+            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
                 this.CheckForAction();
         }
 
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                this.CheckForAction();
-            if (this.TriggerAction && e.NewState.RightButton == ButtonState.Released)
+            if (this.TriggerAction && !e.IsDown(SButton.MouseRight))
             {
                 this.TriggerAction = false;
                 this.DoAction();
@@ -326,7 +332,7 @@ namespace Entoarox.MorePetsAndAnimals
             if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || ModEntry.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.Age == seed) != -1)
                 Game1.drawObjectDialogue("Just an empty box.");
             else
-                AdoptQuestion.Show();
+                AdoptQuestion.Show(this.Helper.Events);
         }
     }
 }

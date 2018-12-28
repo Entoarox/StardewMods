@@ -7,7 +7,6 @@ using Entoarox.Framework.Core.AssetHandlers;
 using Entoarox.Framework.Core.Serialization;
 using Entoarox.Framework.Events;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StardewModdingAPI;
@@ -141,7 +140,7 @@ namespace Entoarox.Framework.Core
             EntoaroxFrameworkMod.SHelper = this.Helper;
             EntoaroxFrameworkMod.Logger = this.Monitor;
             EntoaroxFrameworkMod.Config = this.Helper.ReadConfig<ModConfig>();
-            this.PrepareCustomEvents();
+
             this.Helper.ConsoleCommands.Add("world_bushreset", "Resets bushes in the whole game, use this if you installed a map mod and want to keep using your old save.", this.Commands);
             if (EntoaroxFrameworkMod.Config.TrainerCommands)
             {
@@ -151,10 +150,13 @@ namespace Entoarox.Framework.Core
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands);
             }
 
-            GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
-            SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
-            SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
-            SaveEvents.AfterSave += this.SaveEvents_AfterSave;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.Saving += this.OnSaving;
+            helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
         }
 
         public override object GetApi()
@@ -166,34 +168,21 @@ namespace Entoarox.Framework.Core
         /*********
         ** Protected methods
         *********/
-        private void PrepareCustomEvents()
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
-            ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
-            ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
-        }
-
-        private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
-        {
-            if (e.ButtonPressed == Buttons.A)
+            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
                 this.CheckForAction();
         }
 
-        private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
-        }
-
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
-        {
-            if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                this.CheckForAction();
-            if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
+            if (this.ActionInfo != null && (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight))
             {
                 MoreEvents.FireActionTriggered(this.ActionInfo);
                 this.ActionInfo = null;
@@ -314,9 +303,11 @@ namespace Entoarox.Framework.Core
             }
         }
 
-        private void GameEvents_FirstUpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
-            GameEvents.UpdateTick -= this.GameEvents_FirstUpdateTick;
             if (EntoaroxFrameworkMod.Config.SkipCredits || EntoaroxFrameworkMod.SkipCredits)
             {
                 if (EntoaroxFrameworkMod.CreditsDone || !(Game1.activeClickableMenu is TitleMenu) || Game1.activeClickableMenu == null)
@@ -336,10 +327,12 @@ namespace Entoarox.Framework.Core
             }
 
             this.SetupSerializer();
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
         }
 
-        private void GameEvents_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             this.EnforceSerializer();
             if (!Context.IsWorldReady)
@@ -367,7 +360,32 @@ namespace Entoarox.Framework.Core
             }
         }
 
-        private void SaveEvents_BeforeSave(object s, EventArgs e)
+        /// <summary>Raised after the player loads a save slot and the world is initialised.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            // read data
+            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
+            ItemEvents.FireBeforeDeserialize();
+            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
+            if (data == null)
+            {
+                // read from legacy mod file
+                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
+                if (legacyFile.Exists)
+                    data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
+            }
+            if (data == null)
+                data = new Dictionary<string, InstanceState>();
+            this.RestoreItems(data);
+            ItemEvents.FireAfterDeserialize();
+        }
+
+        /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaving(object sender, SavingEventArgs e)
         {
             this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeSerialize();
@@ -387,26 +405,10 @@ namespace Entoarox.Framework.Core
             ItemEvents.FireAfterSerialize();
         }
 
-        private void SaveEvents_AfterLoad(object s, EventArgs e)
-        {
-            // read data
-            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
-            ItemEvents.FireBeforeDeserialize();
-            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
-            if (data == null)
-            {
-                // read from legacy mod file
-                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
-                if (legacyFile.Exists)
-                    data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
-            }
-            if (data == null)
-                data = new Dictionary<string, InstanceState>();
-            this.RestoreItems(data);
-            ItemEvents.FireAfterDeserialize();
-        }
-
-        private void SaveEvents_AfterSave(object s, EventArgs e)
+        /// <summary>Raised after the game finishes writing data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaved(object sender, SavedEventArgs e)
         {
             // delete legacy mod data (migrated into save file by this point)
             {

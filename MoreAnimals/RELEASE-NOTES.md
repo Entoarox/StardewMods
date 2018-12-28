@@ -1,4 +1,7 @@
 ## Release notes
+## Upcoming release
+* Updated for the upcoming SMAPI 3.0.
+
 ## 2.0.6
 Released 03 November 2018. (Thanks to Pathoschild!)
 
