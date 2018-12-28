@@ -1,6 +1,7 @@
 ## Release notes
 ## Upcoming release
 * Updated for the upcoming SMAPI 3.0.
+* Added `abandon_pet` command to remove a specific pet, and renamed `kill_pets` to `abandon_all_pets` to match.
 
 ## 2.0.6
 Released 03 November 2018. (Thanks to Pathoschild!)
