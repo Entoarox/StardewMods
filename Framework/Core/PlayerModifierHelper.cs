@@ -42,7 +42,7 @@ namespace Entoarox.Framework.Core
         public void UpdateTick()
         {
             // walk/run speed
-            if (Game1.currentLocation.currentEvent != null)
+            if (Game1.currentLocation?.currentEvent != null)
             {
                 Game1.player.addedSpeed = 0;
                 this.LastMoveBoost = 0;

@@ -1,15 +1,13 @@
 {
   "Name": "Extended Minecart",
   "Author": "Entoarox",
-  "Version": "1.7.3",
+  "Version": "1.8.0",
   "Description": "More destinations for your minecart needs!",
   "UniqueID": "Entoarox.ExtendedMinecart",
   "EntryDll": "ExtendedMinecart.dll",
-  "MinimumApiVersion": "2.8-beta",
+  "MinimumApiVersion": "2.9.3",
   "UpdateKeys": [ "Nexus:2271" ],
   "Dependencies": [
-    {
-      "UniqueID": "Entoarox.EntoaroxFramework"
-    }
+    { "UniqueID": "Entoarox.EntoaroxFramework" }
   ]
 }

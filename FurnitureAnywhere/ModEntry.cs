@@ -25,12 +25,11 @@ namespace Entoarox.FurnitureAnywhere
         public override void Entry(IModHelper helper)
         {
             ItemEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
-            PlayerEvents.Warped += this.TriggerItemChangedEvent;
-            MenuEvents.MenuChanged += this.TriggerItemChangedEvent;
-            MenuEvents.MenuClosed += this.TriggerItemChangedEvent;
-            SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
-            SaveEvents.AfterSave += this.SaveEvents_AfterSave_AfterLoad;
-            SaveEvents.AfterLoad += this.SaveEvents_AfterSave_AfterLoad;
+            helper.Events.Player.Warped += this.OnWarped;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            helper.Events.GameLoop.Saving += this.OnSaving;
+            helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             this.Helper.Content.RegisterSerializerType<AnywhereFurniture>();
         }
 
@@ -71,18 +70,49 @@ namespace Entoarox.FurnitureAnywhere
             }
         }
 
-        private void TriggerItemChangedEvent(object s, EventArgs e)
+        /// <summary>Raised after a player warps to a new location.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWarped(object sender, WarpedEventArgs e)
+        {
+            this.TriggerItemChangedEvent();
+        }
+
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
+        {
+            this.TriggerItemChangedEvent();
+        }
+
+        private void TriggerItemChangedEvent()
         {
             this.MoreEvents_ActiveItemChanged(null, new EventArgsActiveItemChanged(Game1.player.CurrentItem, Game1.player.CurrentItem));
         }
 
-        private void SaveEvents_BeforeSave(object s, EventArgs e)
+        /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaving(object sender, SavingEventArgs e)
         {
             this.Monitor.Log("Packaging furniture...");
             this.IterateFurniture(this.SleepFurniture);
         }
 
-        private void SaveEvents_AfterSave_AfterLoad(object s, EventArgs e)
+        /// <summary>Raised after the game finishes writing data to the save file (except the initial save creation).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaved(object sender, SavedEventArgs e)
+        {
+            this.Monitor.Log("Restoring furniture...");
+            this.IterateFurniture(this.WakeupFurniture);
+        }
+
+        /// <summary>Raised after the player loads a save slot and the world is initialised.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnSaveLoaded(object sender, EventArgs e)
         {
             this.Monitor.Log("Restoring furniture...");
             this.IterateFurniture(this.WakeupFurniture);

@@ -31,13 +31,6 @@ namespace Entoarox.Framework
         [Obsolete("This API member is not yet functional in the current development build.")]
         public static void RequestHotkey(this IModHelper helper, string label, Keys key, Action handler) { }
 
-        /// <summary>When called, this triggers API code in Entoarox Framework that makes it so the intro credits are skipped.</summary>
-        /// <param name="helper">The <see cref="IModHelper" /> of the mod calling this method</param>
-        public static void RequestCreditsSkip(this IModHelper helper)
-        {
-            EntoaroxFrameworkMod.SkipCredits = true;
-        }
-
         /// <summary>This registers the given instance as a dynamic config. Dynamic configs can be edited in the main menu using EntoaroxFramework's config editing menu.</summary>
         /// <typeparam name="T">The type of the config class</typeparam>
         /// <param name="helper">The <see cref="IModHelper" /> of the mod calling this method</param>

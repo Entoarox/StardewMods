@@ -1,4 +1,12 @@
 ## Release notes
+## 1.4.6
+Released 28 December 2018. (Thanks to Pathoschild!)
+
+* Updated for the upcoming SMAPI 3.0.
+* Updated translations. Thanks to Nanogamer7 (added German)!
+* Fixed error loading shop portraits from content packs.
+* Fixed typo.
+
 ## 1.4.5
 Released 26 September 2018. (Thanks to Pathoschild!)
 

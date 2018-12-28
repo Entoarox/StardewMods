@@ -46,11 +46,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\EntoaroxFramework.csproj">
       <Project>{174275e7-3ae4-41a6-9884-9e08a07d1101}</Project>
-      <Name>Framework</Name>
+      <Name>EntoaroxFramework</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="README.md" />
     <None Include="RELEASE-NOTES.md" />

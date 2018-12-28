@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2003
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28407.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeasonalImmersion", "SeasonalImmersion\SeasonalImmersion.csproj", "{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7}"
 EndProject
@@ -34,6 +34,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomBooks", "CustomBooks\CustomBooks.csproj", "{AE56920C-7F17-4E17-B703-6586B190EF04}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomPaths", "CustomPaths\CustomPaths.csproj", "{19A8DB34-7A24-4576-B50F-7EB02D09E465}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inactive", "Inactive", "{17A2E74C-37E0-4E64-9F6D-0E7560415BD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +98,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7AD206DC-A3A3-4DFF-9C8A-FF7F8F849DF7} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
+		{3DBFB980-B11C-4171-AAD6-C39DD0AD312F} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
+		{AE355745-73FE-45C6-BA17-DE56744BB3D6} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
+		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
+		{AE56920C-7F17-4E17-B703-6586B190EF04} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
+		{19A8DB34-7A24-4576-B50F-7EB02D09E465} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71BE6CBB-13AD-4DAC-8B44-35F22FBE1E8F}

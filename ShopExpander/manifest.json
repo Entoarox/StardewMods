@@ -1,15 +1,13 @@
 {
   "Name": "Shop Expander",
   "Author": "Entoarox",
-  "Version": "1.6.1",
+  "Version": "1.6.2",
   "Description": "Adds bulk options for wood & stone to the carpenter.",
   "UniqueID": "Entoarox.ShopExpander",
   "EntryDll": "ShopExpander.dll",
-  "MinimumApiVersion": "2.8-beta",
+  "MinimumApiVersion": "2.9.3",
   "UpdateKeys": [ "Nexus:2278" ],
   "Dependencies": [
-    {
-      "UniqueID": "Entoarox.EntoaroxFramework"
-    }
+    { "UniqueID": "Entoarox.EntoaroxFramework" }
   ]
 }

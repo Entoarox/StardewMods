@@ -34,20 +34,24 @@ namespace Entoarox.ShopExpander
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            GameEvents.UpdateTick += this.Event_UpdateTick;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
 
         /*********
         ** Protected methods
         *********/
-        private void Event_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, EventArgs e)
         {
             if (this.SkippedTicks > 1)
             {
-                MenuEvents.MenuChanged += this.Event_MenuChanged;
                 this.Config = this.Helper.ReadConfig<ModConfig>();
-                GameEvents.UpdateTick -= this.Event_UpdateTick;
+
+                this.Helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
                 foreach (Reference obj in this.Config.Objects)
                 {
                     try
@@ -56,7 +60,7 @@ namespace Entoarox.ShopExpander
                     }
                     catch (Exception err)
                     {
-                        this.Monitor.Log("Object failed to generate: " + obj, LogLevel.Error, err);
+                        this.Monitor.Log($"Object failed to generate: {obj}", LogLevel.Error, err);
                     }
                 }
             }
@@ -95,26 +99,22 @@ namespace Entoarox.ShopExpander
             }
         }
 
-        // If the inventory changes while this even is hooked, we need to check if any SObject instances are in it, so we can replace them
-        private void Event_InventoryChanged(object send, EventArgs e)
+        /// <summary>Raised after items are added or removed to a player's inventory.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnInventoryChanged(object sender, InventoryChangedEventArgs e)
         {
-            for (int c = 0; c < Game1.player.Items.Count; c++)
+            // If the inventory changes while this even is hooked, we need to check if any SObject instances are in it, so we can replace them
+            if (e.IsLocalPlayer)
             {
-                if (Game1.player.Items[c] is SObject)
+                for (int c = 0; c < Game1.player.Items.Count; c++)
                 {
-                    SObject obj = (SObject)Game1.player.Items[c];
-                    this.Monitor.Log("Reverting object: " + obj.Name + ':' + obj.Stack, LogLevel.Trace);
-                    Game1.player.Items[c] = obj.Revert();
+                    if (Game1.player.Items[c] is SObject obj)
+                    {
+                        this.Monitor.Log($"Reverting object: {obj.Name}:{obj.Stack}", LogLevel.Trace);
+                        Game1.player.Items[c] = obj.Revert();
+                    }
                 }
-            }
-        }
-        // When the menu closes, remove the hook for the inventory changed event
-        private void Event_MenuClosed(object send, EventArgsClickableMenuClosed e)
-        {
-            if (e.PriorMenu is ShopMenu && this.EventsActive)
-            {
-                PlayerEvents.InventoryChanged -= this.Event_InventoryChanged;
-                MenuEvents.MenuClosed -= this.Event_MenuClosed;
             }
         }
 
@@ -149,14 +149,22 @@ namespace Entoarox.ShopExpander
             }
         }
 
-        // Listen to the MenuChanged event so I can check if the current menu is that for a shop
-        private void Event_MenuChanged(object sender, EventArgs e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            if (Game1.activeClickableMenu is ShopMenu)
+            // when the menu closes, remove the hook for the inventory changed event
+            if (e.OldMenu is ShopMenu && this.EventsActive)
+            {
+                this.Helper.Events.Player.InventoryChanged -= this.OnInventoryChanged;
+            }
+
+            // check if the current menu is that for a shop
+            if (e.NewMenu is ShopMenu menu)
             {
                 // When it is a shop menu, I need to perform some logic to identify the HatMouse, Traveler or ClintUpgrade shops as I cannot simply use their owner for that
                 this.Monitor.Log("Shop Menu active, checking for expansion", LogLevel.Trace);
-                ShopMenu menu = (ShopMenu)Game1.activeClickableMenu;
                 string shopOwner = "???";
                 // There are by default two shops in the forest, and neither has a owner, so we need to manually resolve the shop owner
                 if (menu.portraitPerson != null)
@@ -206,8 +214,7 @@ namespace Entoarox.ShopExpander
                     this.Monitor.Log($"Shop owned by `{shopOwner}` gets modified, doing so now", LogLevel.Trace);
                     // Register to inventory changes so we can immediately replace bought stacks
                     this.EventsActive = true;
-                    MenuEvents.MenuClosed += this.Event_MenuClosed;
-                    PlayerEvents.InventoryChanged += this.Event_InventoryChanged;
+                    this.Helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
                     // Reflect the required fields to be able to edit a shops stock
                     this.ItemPriceAndStock = (Dictionary<Item, int[]>)this.Stock.GetValue(Game1.activeClickableMenu);
                     this.ForSale = (List<Item>)this.Sale.GetValue(Game1.activeClickableMenu);

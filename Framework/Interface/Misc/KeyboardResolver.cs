@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Entoarox.Framework.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI.Events;
@@ -47,7 +48,7 @@ namespace Entoarox.Framework.Interface
         static KeyboardResolver()
         {
             // Shared logic - hook the update
-            GameEvents.UpdateTick += KeyboardResolver.Update;
+            EntoaroxFrameworkMod.SHelper.Events.GameLoop.UpdateTicked += KeyboardResolver.OnUpdateTicked;
             // MonoGame logic
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
                 typeof(GameWindow).GetEvent("TextInput").AddEventHandler(Game1.game1.Window, (Action<object, EventArgs>)KeyboardResolver.TextInputHandler);
@@ -64,8 +65,10 @@ namespace Entoarox.Framework.Interface
         /*********
         ** Protected methods
         *********/
-        /// <summary>The method responsible for handling the update.</summary>
-        private static void Update(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private static void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             KeyboardState New = Keyboard.GetState();
             Keys[] oldDown = KeyboardResolver.Old.GetPressedKeys();

@@ -1,15 +1,13 @@
 {
   "Name": "Furniture Anywhere",
   "Author": "Entoarox",
-  "Version": "1.1.6",
+  "Version": "1.1.7",
   "Description": "Lets you place furniture anywhere you can place chests or machines!",
   "UniqueID": "Entoarox.FurnitureAnywhere",
   "EntryDll": "FurnitureAnywhere.dll",
-  "MinimumApiVersion": "2.8-beta",
+  "MinimumApiVersion": "2.9.3",
   "UpdateKeys": [ "Nexus:2276" ],
   "Dependencies": [
-    {
-      "UniqueID": "Entoarox.EntoaroxFramework"
-    }
+    { "UniqueID": "Entoarox.EntoaroxFramework" }
   ]
 }

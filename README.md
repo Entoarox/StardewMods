@@ -14,15 +14,29 @@ Active:
 * **[More Animals](https://www.nexusmods.com/stardewvalley/mods/2274)** <small>([source](MorePets))</small>
 * **[Shop Expander](https://www.nexusmods.com/stardewvalley/mods/2278)** <small>([source](ShopExpander))</small>
 
-
 No longer maintained:
+* **[Custom Paths](https://www.nexusmods.com/stardewvalley/mods/2272)** <small>([source](CustomPaths))</small>
 * **[Seasonal Immersion](https://www.nexusmods.com/stardewvalley/mods/2273)** <small>([source](SeasonalImmersion))</small>
 * **[XNB Loader](https://www.nexusmods.com/stardewvalley/mods/2275)** <small>([source](XnbLoader))</small>
-
 
 Not released yet:
 * **Custom Books** <small>([source](CustomBooks))</small>
 * **Dynamic Dungeons** <small>([source](DynamicDungeons))</small>
+
+## Translating the mods
+The mods can be [translated into any language supported by the game](https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Translation),
+and SMAPI will automatically use the right translations.
+
+(❑ = untranslated, ↻ = partly translated, ✓ = fully translated)
+
+&nbsp;     | Advanced Location Loader                  | Extended Minecart
+---------- | :---------------------------------------- | :-----------------------------------
+Chinese    | ❑                                        | ❑
+German     | [✓](AdvancedLocationLoader/i18n/de.json) | ❑
+Japanese   | ❑                                        | ❑
+Portuguese | ❑                                        | ❑
+Russian    | ❑                                        | ❑
+Spanish    | ❑                                        | ❑
 
 ## Licensing
 ### Copyright

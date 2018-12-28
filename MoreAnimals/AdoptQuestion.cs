@@ -14,6 +14,7 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Fields
         *********/
+        private readonly IModEvents Events;
         private readonly bool Cat;
         private readonly int Skin;
         private readonly AnimatedSprite Sprite;
@@ -23,10 +24,11 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Public methods
         *********/
-        public AdoptQuestion(bool cat, int skin)
+        public AdoptQuestion(bool cat, int skin, IModEvents events)
         {
             this.Cat = cat;
             this.Skin = skin;
+            this.Events = events;
 
             this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{(cat ? "cat" : "dog")}_{skin}.png"), 28, 32, 32)
             {
@@ -34,7 +36,7 @@ namespace Entoarox.MorePetsAndAnimals
             };
         }
 
-        public static void Show()
+        public static void Show(IModEvents events)
         {
             Random random = ModEntry.Random;
 
@@ -42,8 +44,8 @@ namespace Entoarox.MorePetsAndAnimals
             int dogLimit = ModEntry.Indexes[AnimalType.Dog].Length;
 
             bool cat = catLimit != 0 && (dogLimit == 0 || random.NextDouble() < 0.5);
-            AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit));
-            GraphicsEvents.OnPostRenderHudEvent += q.Display;
+            AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit), events);
+            events.Display.RenderedHud += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
                 $"Oh dear, it looks like someone has abandoned a poor {(cat ? "Cat" : "Dog")} here! Perhaps you should pay Marnie {ModEntry.Config.AdoptionPrice} gold to give it a checkup so you can adopt it?",
@@ -72,12 +74,12 @@ namespace Entoarox.MorePetsAndAnimals
                 this.Sprite.Animate(Game1.currentGameTime, 28, 2, 500);
             }
             else
-                GraphicsEvents.OnPostRenderHudEvent -= this.Display;
+                this.Events.Display.RenderedHud -= this.Display;
         }
 
         public void Resolver(Farmer who, string answer)
         {
-            GraphicsEvents.OnPostRenderHudEvent -= this.Display;
+            this.Events.Display.RenderedHud -= this.Display;
             if (answer == "n")
                 return;
             this.Who = who;

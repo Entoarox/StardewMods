@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Entoarox.AdvancedLocationLoader.Configs;
 using Entoarox.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
@@ -319,6 +320,19 @@ namespace Entoarox.AdvancedLocationLoader.Processing
                                 continue;
                             }
                             shopConfig.Name = shop;
+                            if (!string.IsNullOrWhiteSpace(shopConfig.Portrait))
+                            {
+                                try
+                                {
+                                    shopConfig.PortraitTexture = contentPack.LoadAsset<Texture2D>(shopConfig.Portrait);
+                                }
+                                catch (Exception ex)
+                                {
+                                    this.Monitor.Log($"Can't load texture '{shopConfig.Portrait}' from content pack {contentPack.Manifest.Name}.", LogLevel.Error);
+                                    this.Monitor.Log(ex.ToString());
+                                }
+                            }
+
                             data.Shops.Add(shopConfig);
                         }
                         catch (Exception ex)

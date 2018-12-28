@@ -1,10 +1,10 @@
 {
   "Name": "Entoarox Framework",
   "Author": "Entoarox",
-  "Version": "2.4.1",
+  "Version": "2.4.2",
   "Description": "A collection of APIs to make modding easier.",
   "UniqueID": "Entoarox.EntoaroxFramework",
   "EntryDll": "EntoaroxFramework.dll",
-  "MinimumApiVersion": "2.8-beta",
+  "MinimumApiVersion": "2.9.3",
   "UpdateKeys": [ "Nexus:2269" ]
 }

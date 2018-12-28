@@ -1,4 +1,12 @@
 ## Release notes
+## 2.4.2
+Released 28 December 2018. (Thanks to Pathoschild!)
+
+* Updated for the upcoming SMAPI 3.0.
+* Removed unused `SkipCredits` feature (see [Skip Intro](https://www.nexusmods.com/stardewvalley/mods/533) instead).
+* Fixed EF event marked obsolete when EF itself still uses it.
+* Fixed error when warping in multiplayer.
+
 ## 2.4.1
 Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)
 

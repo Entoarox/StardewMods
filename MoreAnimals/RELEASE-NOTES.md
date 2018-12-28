@@ -1,4 +1,11 @@
 ## Release notes
+## 2.1
+Released 28 December 2018. (Thanks to Pathoschild!)
+
+* Added `abandon_pet` command to remove a specific pet, and renamed `kill_pets` to `abandon_all_pets` to match.
+* Updated for the upcoming SMAPI 3.0.
+* Fixed error when warping in multiplayer.
+
 ## 2.0.6
 Released 03 November 2018. (Thanks to Pathoschild!)
 

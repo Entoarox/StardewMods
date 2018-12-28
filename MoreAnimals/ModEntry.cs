@@ -6,11 +6,11 @@ using System.Text;
 using Entoarox.Framework;
 using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Characters;
+using StardewValley.Locations;
 using xTile.Dimensions;
 using xTile.ObjectModel;
 using xTile.Tiles;
@@ -60,7 +60,8 @@ namespace Entoarox.MorePetsAndAnimals
             ModEntry.SHelper = helper;
 
             // add commands
-            helper.ConsoleCommands.Add("kill_pets", "Kills all the pets you adopted using this mod, you monster", this.CommandFired_KillPets);
+            helper.ConsoleCommands.Add("abandon_pet", "Remove a pet with the given name.", this.OnCommandReceived);
+            helper.ConsoleCommands.Add("abandon_all_pets", "Remove all pets adopted using this mod, you monster.", this.OnCommandReceived);
 
             // load textures
             AnimalSkin[] skins = this.LoadSkins().ToArray();
@@ -103,11 +104,11 @@ namespace Entoarox.MorePetsAndAnimals
             }
 
             // hook events
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             if (this.ReplaceBus)
             {
-                ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
-                ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+                helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+                helper.Events.Input.ButtonReleased += this.OnButtonReleased;
             }
         }
 
@@ -168,9 +169,12 @@ namespace Entoarox.MorePetsAndAnimals
             }
         }
 
-        private void GameEvents_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            if (!Context.IsWorldReady)
+            if (!Context.IsPlayerFree)
                 return;
 
             // patch bus stop
@@ -271,30 +275,73 @@ namespace Entoarox.MorePetsAndAnimals
             return skins[this.SkinRandom.Next(skins.Length)];
         }
 
-        private void CommandFired_KillPets(string name, string[] args)
+        /// <summary>Raised after the player enters a command for this mod in the SMAPI console.</summary>
+        /// <param name="command">The command name.</param>
+        /// <param name="args">The command arguments.</param>
+        private void OnCommandReceived(string command, string[] args)
         {
-            GameLocation farm = Game1.getLocationFromName("Farm");
-            GameLocation house = Game1.getLocationFromName("FarmHouse");
-            foreach (Pet pet in this.GetAllPets())
-                if (pet.Age > 0)
-                    if (farm.characters.Contains(pet))
-                        farm.characters.Remove(pet);
-                    else
-                        house.characters.Remove(pet);
-            this.Monitor.Log("You actually killed them.. you FAT monster!", LogLevel.Alert);
+            switch (command)
+            {
+                case "abandon_pet":
+                case "abandon_all_pets":
+                    {
+                        // validate
+                        if (command == "abandon_pet" && args.Length == 0)
+                        {
+                            this.Monitor.Log("You must specify a pet name to remove.", LogLevel.Warn);
+                            return;
+                        }
+
+                        // get pet selector
+                        Func<Pet, bool> removePet = pet => pet.Age > 0;
+                        if (command == "abandon_pet")
+                            removePet = pet => string.Equals(pet.Name, args[0], StringComparison.InvariantCultureIgnoreCase);
+
+                        // remove matching pet
+                        int found = 0;
+                        foreach (GameLocation location in Game1.locations)
+                        {
+                            if (location is Farm || location is FarmHouse)
+                            {
+                                location.characters.Filter(npc =>
+                                {
+                                    bool remove = npc is Pet pet && removePet(pet);
+                                    if (remove)
+                                    {
+                                        this.Monitor.Log($"Removing {npc.Name}...", LogLevel.Info);
+                                        found++;
+                                    }
+
+                                    return !remove;
+                                });
+                            }
+                        }
+
+                        this.Monitor.Log(found > 0 ? $"Done! Removed {found} pets." : "No matching pets found.", LogLevel.Info);
+                    }
+                    break;
+
+                default:
+                    this.Monitor.Log($"Unknown command '{command}'.", LogLevel.Error);
+                    break;
+            }
         }
 
-        private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.ButtonPressed == Buttons.A)
+            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
                 this.CheckForAction();
         }
 
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
+        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                this.CheckForAction();
-            if (this.TriggerAction && e.NewState.RightButton == ButtonState.Released)
+            if (this.TriggerAction && !e.IsDown(SButton.MouseRight))
             {
                 this.TriggerAction = false;
                 this.DoAction();
@@ -326,7 +373,7 @@ namespace Entoarox.MorePetsAndAnimals
             if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || ModEntry.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.Age == seed) != -1)
                 Game1.drawObjectDialogue("Just an empty box.");
             else
-                AdoptQuestion.Show();
+                AdoptQuestion.Show(this.Helper.Events);
         }
     }
 }

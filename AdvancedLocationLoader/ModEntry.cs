@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,9 +44,9 @@ namespace Entoarox.AdvancedLocationLoader
             ModEntry.SHelper = helper;
             ModEntry.Strings = helper.Translation;
 
-            MoreEvents.ActionTriggered += Events.MoreEvents_ActionTriggered;
-            SpecialisedEvents.UnvalidatedUpdateTick += this.InitAfterLoad;
-            PlayerEvents.Warped += Events.PlayerEvents_Warped;
+            MoreEvents.ActionTriggered += this.OnActionTriggered;
+            helper.Events.Specialised.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
+            helper.Events.Player.Warped += this.OnWarped;
 
             this.Helper.Content.RegisterSerializerType<Greenhouse>();
             this.Helper.Content.RegisterSerializerType<Sewer>();
@@ -108,12 +108,15 @@ namespace Entoarox.AdvancedLocationLoader
             }
         }
 
-        private void InitAfterLoad(object sender, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second), regardless of normal SMAPI validation. This event is not thread-safe and may be invoked while game logic is running asynchronously. Changes to game state in this method may crash the game or corrupt an in-progress save. Do not use this event unless you're fully aware of the context in which your code will be run. Mods using this event will trigger a stability warning in the SMAPI console.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUnvalidatedUpdateTick(object sender, UnvalidatedUpdateTickedEventArgs e)
         {
             // wait until game loaded
             if (!this.IsSaveLoaded)
                 return;
-            SpecialisedEvents.UnvalidatedUpdateTick -= this.InitAfterLoad;
+            this.Helper.Events.Specialised.UnvalidatedUpdateTicked -= this.OnUnvalidatedUpdateTick;
 
             // apply patcher
             this.Patcher.ApplyPatches(out Compound compoundData);
@@ -123,14 +126,83 @@ namespace Entoarox.AdvancedLocationLoader
             if (compoundData.DynamicTiles.Any() || compoundData.DynamicProperties.Any() || compoundData.DynamicWarps.Any() || compoundData.SeasonalTilesheets.Any())
             {
                 this.Monitor.Log("Dynamic content detected, preparing dynamic update logic...", LogLevel.Info);
-                TimeEvents.AfterDayStarted += Events.TimeEvents_AfterDayStarted;
+                this.Helper.Events.GameLoop.DayStarted += ModEntry.OnDayStarted;
+            }
+        }
+
+        /// <summary>Raised after the game begins a new day (including when the player loads a save).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private static void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            ModEntry.UpdateConditionalEdits();
+            if (Game1.dayOfMonth == 1)
+                ModEntry.UpdateTilesheets();
+        }
+
+        /// <summary>Raised after a map action is triggered.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnActionTriggered(object sender, EventArgsActionTriggered e)
+        {
+            try
+            {
+                switch (e.Action)
+                {
+                    case "ALLMessage":
+                        Actions.Message(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLRawMessage":
+                        Actions.RawMessage(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLShift":
+                        Actions.Shift(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLReact":
+                        Actions.React(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLRandomMessage":
+                        Actions.RandomMessage(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLMinecart":
+                    case "ALLTeleporter":
+                        Actions.Teleporter(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLCondition":
+                    case "ALLConditional":
+                        Actions.Conditional(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLShop":
+                        Actions.Shop(e.Who, e.Arguments, e.Position);
+                        break;
+                    default:
+                        return;
+                }
+
+                ModEntry.Logger.Log($"ActionTriggered({e.Action})", LogLevel.Trace);
+            }
+            catch (Exception err)
+            {
+                ModEntry.Logger.ExitGameImmediately("Could not fire appropriate action response, a unexpected error happened", err);
+            }
+        }
+
+        /// <summary>Raised after a player warps to a new location.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnWarped(object sender, WarpedEventArgs e)
+        {
+            if (e.IsLocalPlayer)
+            {
+                this.Helper.Events.Player.Warped -= this.OnWarped;
+                ModEntry.UpdateConditionalEdits();
             }
         }
 
         private IEnumerable<IContentPack> GetAllContentPacks()
         {
             // read SMAPI content packs
-            foreach (IContentPack contentPack in this.Helper.GetContentPacks())
+            foreach (IContentPack contentPack in this.Helper.ContentPacks.GetOwned())
                 yield return contentPack;
 
             // read legacy content packs
@@ -183,9 +255,7 @@ namespace Entoarox.AdvancedLocationLoader
                     string version = about.GetValue("Version", StringComparison.InvariantCultureIgnoreCase)?.Value<string>() ?? "1.0.0";
 
                     // create content pack
-#pragma warning disable CS0618 // Type or member is obsolete
-                    contentPack = this.Helper.CreateTransitionalContentPack(dir, id, name, description, author, new SemanticVersion(version));
-#pragma warning restore CS0618 // Type or member is obsolete
+                    contentPack = this.Helper.ContentPacks.CreateTemporary(dir, id, name, description, author, new SemanticVersion(version));
                 }
                 catch (Exception ex)
                 {

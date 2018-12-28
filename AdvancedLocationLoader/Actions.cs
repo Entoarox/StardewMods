@@ -112,7 +112,7 @@ namespace Entoarox.AdvancedLocationLoader
                     List<Item> stock = new List<Item>();
                     NPC portrait = new NPC
                     {
-                        Portrait = ModEntry.SHelper.Content.Load<Texture2D>(shop.Portrait),
+                        Portrait = shop.PortraitTexture,
                         Name = shop.Owner
                     };
                     foreach (ShopItem item in shop.Items)

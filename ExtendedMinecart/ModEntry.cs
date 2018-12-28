@@ -46,20 +46,25 @@ namespace Entoarox.ExtendedMinecart
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
             this.Config = helper.ReadConfig<ModConfig>();
+
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
         }
 
 
         /*********
         ** Protected methods
         *********/
-        private void GameEvents_UpdateTick(object s, EventArgs e)
+        /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnUpdateTicked(object sender, EventArgs e)
         {
             if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
                 return;
-            GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
-            MenuEvents.MenuChanged += this.MenuEvents_MenuChanged;
+
+            this.Helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
             ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
             foreach (KeyValuePair<string, string> item in ModEntry.DestinationData)
             {
@@ -91,7 +96,7 @@ namespace Entoarox.ExtendedMinecart
             }
 
             ModEntry.Menu = new FrameworkMenu(new Point(85, ModEntry.Destinations.Count * 11 + 22));
-            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), "Choose destination"));
+            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), this.Helper.Translation.Get("choose-destination")));
             foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
                 ModEntry.Menu.AddComponent(c);
             // # Farm
@@ -286,10 +291,14 @@ namespace Entoarox.ExtendedMinecart
             }
         }
 
-        private void MenuEvents_MenuChanged(object s, EventArgs e)
+        /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            if (!(Game1.activeClickableMenu is DialogueBox dialogueBox) || !Context.IsWorldReady || Game1.player == null || Game1.currentLocation == null || Game1.currentLocation.lastQuestionKey == null || !Game1.currentLocation.lastQuestionKey.Equals("Minecart"))
+            if (!(e.NewMenu is DialogueBox dialogueBox) || !Context.IsWorldReady || Game1.currentLocation?.lastQuestionKey != "Minecart")
                 return;
+
             dialogueBox.closeDialogue();
             Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;
@@ -302,17 +311,17 @@ namespace Entoarox.ExtendedMinecart
                 {
                     if (Game1.player.hasItemInInventory(382, 5))
                     {
-                        Game1.currentLocation.createQuestionDialogue("The mincart has run out of fuel, use 5 coal to refuel it?", new Response[2] { new Response("Yes", "Yes"), new Response("No", "No") }, (a, b) =>
+                        Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("needs-refuel.question"), Game1.currentLocation.createYesNoResponses(), (farmer, choice) =>
                           {
-                              if (b == "Yes")
+                              if (choice == "Yes")
                               {
-                                  a.removeItemsFromInventory(382, 5);
-                                  a.mailReceived.Remove("MinecartNeedsRefuel");
+                                  farmer.removeItemsFromInventory(382, 5);
+                                  farmer.mailReceived.Remove("MinecartNeedsRefuel");
                               }
                           });
                     }
                     else
-                        Game1.drawObjectDialogue("The minecart is out of fuel and requires 5 coal to be refueled.");
+                        Game1.drawObjectDialogue(this.Helper.Translation.Get("needs-refuel.no-coal"));
                     return;
                 }
             }
