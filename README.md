@@ -15,6 +15,7 @@ Active:
 * **[Shop Expander](https://www.nexusmods.com/stardewvalley/mods/2278)** <small>([source](ShopExpander))</small>
 
 No longer maintained:
+* **[Custom Paths](https://www.nexusmods.com/stardewvalley/mods/2272)** <small>([source](CustomPaths))</small>
 * **[Seasonal Immersion](https://www.nexusmods.com/stardewvalley/mods/2273)** <small>([source](SeasonalImmersion))</small>
 * **[XNB Loader](https://www.nexusmods.com/stardewvalley/mods/2275)** <small>([source](XnbLoader))</small>
 
