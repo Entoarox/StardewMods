@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="docs\actions.md" />
+    <None Include="i18n\de.json" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="README.md" />
