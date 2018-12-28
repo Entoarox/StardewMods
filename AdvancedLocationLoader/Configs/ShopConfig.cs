@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace Entoarox.AdvancedLocationLoader.Configs
@@ -10,6 +11,9 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         *********/
         [JsonIgnore]
         public string Name;
+
+        [JsonIgnore]
+        public Texture2D PortraitTexture;
 
         public int ParserVersion;
         public string Portrait;

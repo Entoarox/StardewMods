@@ -2,6 +2,7 @@
 ## Upcoming release
 * Updated for the upcoming SMAPI 3.0.
 * Updated translations. Thanks to Nanogamer7 (added German)!
+* Fixed error loading shop portraits from content packs.
 * Fixed typo.
 
 ## 1.4.5
