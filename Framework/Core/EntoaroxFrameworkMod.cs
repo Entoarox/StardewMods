@@ -14,7 +14,6 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Locations;
-using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Objects;
 using StardewValley.Quests;
@@ -33,7 +32,6 @@ namespace Entoarox.Framework.Core
         *********/
         private static readonly List<string> Farms = new List<string> { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
-        private static bool CreditsDone;
         private JsonSerializer Serializer;
         private EventArgsActionTriggered ActionInfo;
         private Item PrevItem;
@@ -114,7 +112,6 @@ namespace Entoarox.Framework.Core
         internal static ModConfig Config;
         internal static IMonitor Logger;
         internal static IModHelper SHelper;
-        internal static bool SkipCredits = false;
 
 
         /*********
@@ -308,24 +305,6 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
-            if (EntoaroxFrameworkMod.Config.SkipCredits || EntoaroxFrameworkMod.SkipCredits)
-            {
-                if (EntoaroxFrameworkMod.CreditsDone || !(Game1.activeClickableMenu is TitleMenu) || Game1.activeClickableMenu == null)
-                    return;
-                Game1.playSound("bigDeSelect");
-                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "logoFadeTimer").SetValue(0);
-                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "fadeFromWhiteTimer").SetValue(0);
-                Game1.delayedActions.Clear();
-                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "pauseBeforeViewportRiseTimer").SetValue(0);
-                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "viewportY").SetValue(-999);
-                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "viewportDY").SetValue(-0.01f);
-                this.Helper.Reflection.GetField<List<TemporaryAnimatedSprite>>(Game1.activeClickableMenu, "birds").GetValue().Clear();
-                this.Helper.Reflection.GetField<float>(Game1.activeClickableMenu, "logoSwipeTimer").SetValue(-1);
-                this.Helper.Reflection.GetField<int>(Game1.activeClickableMenu, "chuckleFishTimer").SetValue(0);
-                Game1.changeMusicTrack("MainTheme");
-                EntoaroxFrameworkMod.CreditsDone = true;
-            }
-
             this.SetupSerializer();
         }
 

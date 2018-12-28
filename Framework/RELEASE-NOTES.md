@@ -1,6 +1,7 @@
 ## Release notes
 ## Upcoming release
 * Updated for the upcoming SMAPI 3.0.
+* Removed `SkipCredits` option (see [Skip Intro](https://www.nexusmods.com/stardewvalley/mods/533) instead).
 
 ## 2.4.1
 Released 23 September 2018. (Thanks to Pathoschild and Slamerz!)

@@ -5,9 +5,6 @@ namespace Entoarox.Framework.Core
         /*********
         ** Accessors
         *********/
-        /// <summary>When true, the game will skip past the credits and straight to the main menu.</summary>
-        public bool SkipCredits = false;
-
         /// <summary>If extra, possibly somewhat cheaty console commands should be enabled.</summary>
         public bool TrainerCommands = true;
 
