@@ -1,0 +1,9 @@
+{
+  "sparkle": "Trotz des Funkeln, welches du gesehen hast,sieht es so aus als wäre nicht da.",
+  "gold": "Gold",
+  "yesCost": "Ja, das kostet {{amount}} {{itemName}}",
+  "no": "Nein",
+  "notEnough": "Du hast nicht genug {{itemName}} dafür.",
+  "cancel": "Abbruch",
+  "teleporter": "Wähle einen Zielort:"
+}
