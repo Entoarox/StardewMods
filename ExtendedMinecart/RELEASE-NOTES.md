@@ -1,5 +1,6 @@
 ## Release notes
 ## Upcoming release
+* Added translation support.
 * Updated for the upcoming SMAPI 3.0.
 
 ## 1.7.3

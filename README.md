@@ -23,6 +23,21 @@ Not released yet:
 * **Custom Books** <small>([source](CustomBooks))</small>
 * **Dynamic Dungeons** <small>([source](DynamicDungeons))</small>
 
+## Translating the mods
+The mods can be [translated into any language supported by the game](https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Translation),
+and SMAPI will automatically use the right translations.
+
+(❑ = untranslated, ↻ = partly translated, ✓ = fully translated)
+
+&nbsp;     | Advanced Location Loader                  | Extended Minecart
+---------- | :---------------------------------------- | :-----------------------------------
+Chinese    | ❑                                        | ❑
+German     | [✓](AdvancedLocationLoader/i18n/de.json) | ❑
+Japanese   | ❑                                        | ❑
+Portuguese | ❑                                        | ❑
+Russian    | ❑                                        | ❑
+Spanish    | ❑                                        | ❑
+
 ## Licensing
 ### Copyright
 All copyright for unique code remains mine as of this time, as a citizen of the Netherlands, even

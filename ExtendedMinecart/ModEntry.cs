@@ -96,7 +96,7 @@ namespace Entoarox.ExtendedMinecart
             }
 
             ModEntry.Menu = new FrameworkMenu(new Point(85, ModEntry.Destinations.Count * 11 + 22));
-            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), "Choose destination"));
+            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), this.Helper.Translation.Get("choose-destination")));
             foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
                 ModEntry.Menu.AddComponent(c);
             // # Farm
@@ -311,17 +311,17 @@ namespace Entoarox.ExtendedMinecart
                 {
                     if (Game1.player.hasItemInInventory(382, 5))
                     {
-                        Game1.currentLocation.createQuestionDialogue("The mincart has run out of fuel, use 5 coal to refuel it?", new Response[2] { new Response("Yes", "Yes"), new Response("No", "No") }, (a, b) =>
+                        Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("needs-refuel.question"), Game1.currentLocation.createYesNoResponses(), (farmer, choice) =>
                           {
-                              if (b == "Yes")
+                              if (choice == "Yes")
                               {
-                                  a.removeItemsFromInventory(382, 5);
-                                  a.mailReceived.Remove("MinecartNeedsRefuel");
+                                  farmer.removeItemsFromInventory(382, 5);
+                                  farmer.mailReceived.Remove("MinecartNeedsRefuel");
                               }
                           });
                     }
                     else
-                        Game1.drawObjectDialogue("The minecart is out of fuel and requires 5 coal to be refueled.");
+                        Game1.drawObjectDialogue(this.Helper.Translation.Get("needs-refuel.no-coal"));
                     return;
                 }
             }
