@@ -153,7 +153,7 @@ namespace Entoarox.Framework.Core
 
             GameEvents.UpdateTick += this.GameEvents_FirstUpdateTick;
             SaveEvents.BeforeSave += this.SaveEvents_BeforeSave;
-            SaveEvents.AfterLoad += this.SaveEvents_AfterSave;
+            SaveEvents.AfterLoad += this.SaveEvents_AfterLoad;
             SaveEvents.AfterSave += this.SaveEvents_AfterSave;
         }
 
@@ -383,17 +383,52 @@ namespace Entoarox.Framework.Core
 
             if (house.fridge.Value != null)
                 this.Serialize(data, house.fridge.Value.items);
-            string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
-            this.Helper.WriteJsonFile(path, data);
+            this.Helper.Data.WriteSaveData("custom-items", data);
             ItemEvents.FireAfterSerialize();
+        }
+
+        private void SaveEvents_AfterLoad(object s, EventArgs e)
+        {
+            // read data
+            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
+            ItemEvents.FireBeforeDeserialize();
+            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
+            if (data == null)
+            {
+                // read from legacy mod file
+                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
+                if (legacyFile.Exists)
+                    data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
+            }
+            if (data == null)
+                data = new Dictionary<string, InstanceState>();
+            this.RestoreItems(data);
+            ItemEvents.FireAfterDeserialize();
         }
 
         private void SaveEvents_AfterSave(object s, EventArgs e)
         {
+            // delete legacy mod data (migrated into save file by this point)
+            {
+                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
+                if (legacyFile.Exists)
+                    legacyFile.Delete();
+
+                DirectoryInfo legacyDir = new DirectoryInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework"));
+                if (legacyDir.Exists && !legacyDir.GetFileSystemInfos().Any())
+                    legacyDir.Delete();
+            }
+
+            // read data
             this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
-            string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json");
-            Dictionary<string, InstanceState> data = this.Helper.ReadJsonFile<Dictionary<string, InstanceState>>(path) ?? new Dictionary<string, InstanceState>();
+            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items") ?? new Dictionary<string, InstanceState>();
+            this.RestoreItems(data);
+            ItemEvents.FireAfterDeserialize();
+        }
+
+        private void RestoreItems(IDictionary<string, InstanceState> data)
+        {
             foreach (GameLocation loc in Game1.locations)
             {
                 foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
@@ -403,7 +438,6 @@ namespace Entoarox.Framework.Core
             FarmHouse house = (FarmHouse)Game1.getLocationFromName("FarmHouse");
             this.Deserialize(data, Game1.player.Items);
             this.Deserialize(data, house.fridge.Value.items);
-            ItemEvents.FireAfterDeserialize();
         }
 
         private void Serialize(IDictionary<string, InstanceState> data, IList<Item> items)
