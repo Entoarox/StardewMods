@@ -49,7 +49,7 @@ namespace Entoarox.Framework.Events
 
         internal static void FireActiveItemChanged(EventArgsActiveItemChanged eventArgs)
         {
-            EntoEvents.FireEventSafely("ActiveItemChanged", ActiveItemChanged, eventArgs, true);
+            EntoEvents.FireEventSafely("ActiveItemChanged", ActiveItemChanged, eventArgs);
         }
     }
 }
