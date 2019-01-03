@@ -5,7 +5,7 @@
   "Description": "Lets you adopt more pets, with skins of your choice! - Now also includes randomised animal skins!",
   "UniqueID": "Entoarox.MoreAnimals",
   "EntryDll": "MoreAnimals.dll",
-  "MinimumApiVersion": "2.9.3",
+  "MinimumApiVersion": "2.10.2",
   "UpdateKeys": [ "Nexus:2274" ],
   "Dependencies": [
     { "UniqueID": "Entoarox.EntoaroxFramework" }

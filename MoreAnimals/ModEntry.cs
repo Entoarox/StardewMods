@@ -5,14 +5,12 @@ using System.Linq;
 using System.Text;
 using Entoarox.Framework;
 using Entoarox.MorePetsAndAnimals.Framework;
-using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Locations;
 using xTile.Dimensions;
-using xTile.ObjectModel;
 using xTile.Tiles;
 
 namespace Entoarox.MorePetsAndAnimals
@@ -24,7 +22,6 @@ namespace Entoarox.MorePetsAndAnimals
         *********/
         /// <summary>Whether to replace the bus on the next opportunity.</summary>
         private bool ReplaceBus = true;
-        private bool TriggerAction;
 
         /// <summary>The file extensions recognised by the mod.</summary>
         private readonly HashSet<string> ValidExtensions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
@@ -108,7 +105,6 @@ namespace Entoarox.MorePetsAndAnimals
             if (this.ReplaceBus)
             {
                 helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-                helper.Events.Input.ButtonReleased += this.OnButtonReleased;
             }
         }
 
@@ -332,40 +328,12 @@ namespace Entoarox.MorePetsAndAnimals
         /// <param name="e">The event arguments.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
-                this.CheckForAction();
+            if (Context.IsPlayerFree && e.Button.IsActionButton() && Game1.currentLocation.doesTileHaveProperty((int)e.Cursor.GrabTile.X, (int)e.Cursor.GrabTile.Y, "Action", "Buildings") == "MorePetsAdoption")
+                this.InteractWithBox();
         }
 
-        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
-        {
-            if (this.TriggerAction && !e.IsDown(SButton.MouseRight))
-            {
-                this.TriggerAction = false;
-                this.DoAction();
-            }
-        }
-
-        private void CheckForAction()
-        {
-            if (!Game1.hasLoadedGame)
-                return;
-            if (!Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
-            {
-                Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
-                if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
-                    grabTile = Game1.player.GetGrabTile();
-                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
-                PropertyValue propertyValue = null;
-                tile?.Properties.TryGetValue("Action", out propertyValue);
-                if (propertyValue != null && propertyValue == "MorePetsAdoption")
-                    this.TriggerAction = true;
-            }
-        }
-
-        private void DoAction()
+        /// <summary>Handle user interaction with the adoption box.</summary>
+        private void InteractWithBox()
         {
             int seed = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
             ModEntry.Random = new Random(seed);

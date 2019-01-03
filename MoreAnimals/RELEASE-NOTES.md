@@ -1,4 +1,7 @@
 ## Release notes
+## Upcoming release
+* Fixed adoption box not working correctly when using a controller.
+
 ## 2.1
 Released 28 December 2018. (Thanks to Pathoschild!)
 
