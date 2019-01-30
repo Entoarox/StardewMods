@@ -341,7 +341,7 @@ namespace Entoarox.MorePetsAndAnimals
             if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || ModEntry.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.Age == seed) != -1)
                 Game1.drawObjectDialogue("Just an empty box.");
             else
-                AdoptQuestion.Show(this.Helper.Events);
+                AdoptQuestion.Show(this.Helper.Events, this.GetAllPets().ToArray());
         }
     }
 }

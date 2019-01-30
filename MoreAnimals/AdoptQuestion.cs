@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -36,19 +38,27 @@ namespace Entoarox.MorePetsAndAnimals
             };
         }
 
-        public static void Show(IModEvents events)
+        /// <summary>Select a pet for adoption (if any) and show the adoption UI.</summary>
+        /// <param name="events">The available mod events.</param>
+        /// <param name="currentPets">The pets already owned by the player.</param>
+        public static void Show(IModEvents events, Pet[] currentPets)
         {
-            Random random = ModEntry.Random;
+            // choose pet & skin
+            AnimalType type = AdoptQuestion.GetNextPet(currentPets);
+            bool isCat = type == AnimalType.Cat;
+            int skin = AdoptQuestion.GetNextSkin(isCat, currentPets);
+            if (skin <= 0)
+            {
+                Game1.drawObjectDialogue("Just an empty box.");
+                return;
+            }
 
-            int catLimit = ModEntry.Indexes[AnimalType.Cat].Length;
-            int dogLimit = ModEntry.Indexes[AnimalType.Dog].Length;
-
-            bool cat = catLimit != 0 && (dogLimit == 0 || random.NextDouble() < 0.5);
-            AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit), events);
+            // show adoption UI
+            AdoptQuestion q = new AdoptQuestion(isCat, skin, events);
             events.Display.RenderedHud += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
-                $"Oh dear, it looks like someone has abandoned a poor {(cat ? "Cat" : "Dog")} here! Perhaps you should pay Marnie {ModEntry.Config.AdoptionPrice} gold to give it a checkup so you can adopt it?",
+                $"Oh dear, it looks like someone has abandoned a poor {type} here! Perhaps you should pay Marnie {ModEntry.Config.AdoptionPrice} gold to give it a checkup so you can adopt it?",
                 Game1.player.money < ModEntry.Config.AdoptionPrice
                     ? new[]
                     {
@@ -113,6 +123,56 @@ namespace Entoarox.MorePetsAndAnimals
             Game1.currentLocation.addCharacter(pet);
             pet.warpToFarmHouse(this.Who);
             Game1.drawObjectDialogue($"Marnie will bring {petName} to your house once they have their shots and been given a grooming.");
+        }
+
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Randomly choose a cat or dog, balanced to prefer the least allocated pet type.</summary>
+        /// <param name="currentPets">The current pets in the game.</param>
+        private static AnimalType GetNextPet(Pet[] currentPets)
+        {
+            int catSkins = ModEntry.Indexes[AnimalType.Cat].Length;
+            int dogSkins = ModEntry.Indexes[AnimalType.Dog].Length;
+
+            // choose whichever has skins
+            if (catSkins == 0 || dogSkins == 0)
+                return catSkins != 0 ? AnimalType.Cat : AnimalType.Dog;
+
+            // else choose based on allocation
+            int catCount = currentPets.OfType<Cat>().Count();
+            int dogCount = currentPets.OfType<Dog>().Count();
+            if (catCount < dogCount)
+                return AnimalType.Cat;
+            if (dogCount < catCount)
+                return AnimalType.Dog;
+
+            // else choose randomly
+            return ModEntry.Random.NextDouble() < 0.5 ? AnimalType.Cat : AnimalType.Dog;
+        }
+
+        /// <summary>Randomly choose an animal skin, balanced to prefer the least allocated skins.</summary>
+        /// <param name="isCat">Whether to get a cat skin (else dog).</param>
+        /// <param name="currentPets">The current pets in the game.</param>
+        private static int GetNextSkin(bool isCat, Pet[] currentPets)
+        {
+            // get available skins
+            AnimalSkin[] skins = ModEntry.Indexes[isCat ? AnimalType.Cat : AnimalType.Dog];
+            if (!skins.Any())
+                return 0;
+
+            // choose based on allocations
+            IDictionary<int, int> allocations = skins.ToDictionary(p => p.ID, p => 0);
+            foreach (Pet pet in currentPets)
+            {
+                if (isCat ? pet is Cat : pet is Dog && allocations.TryGetValue(pet.Manners, out int count))
+                    allocations[pet.Manners]++;
+            }
+
+            // randomly choose from least allocated skins
+            int minCount = allocations.Values.Min();
+            int[] possibleSkins = allocations.Where(p => p.Value == minCount).Select(p => p.Key).ToArray();
+            return possibleSkins[ModEntry.Random.Next(0, possibleSkins.Length)];
         }
     }
 }
