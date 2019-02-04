@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Entoarox.MorePetsAndAnimals.Framework;
 using Microsoft.Xna.Framework;
@@ -16,16 +15,29 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Fields
         *********/
+        /// <summary>The available SMAPI events.</summary>
         private readonly IModEvents Events;
+
+        /// <summary>Whether to adopt a cat (else a dog).</summary>
         private readonly bool Cat;
+
+        /// <summary>The skin ID to display.</summary>
         private readonly int Skin;
+
+        /// <summary>The pet sprite to render.</summary>
         private readonly AnimatedSprite Sprite;
+
+        /// <summary>The player adopting the pet.</summary>
         private Farmer Who;
 
 
         /*********
         ** Public methods
         *********/
+        /// <summary>Construct an instance.</summary>
+        /// <param name="cat">Whether to adopt a cat (else a dog).</param>
+        /// <param name="skin">The skin ID to display.</param>
+        /// <param name="events">The available SMAPI events.</param>
         public AdoptQuestion(bool cat, int skin, IModEvents events)
         {
             this.Cat = cat;
@@ -41,12 +53,13 @@ namespace Entoarox.MorePetsAndAnimals
         /// <summary>Select a pet for adoption (if any) and show the adoption UI.</summary>
         /// <param name="events">The available mod events.</param>
         /// <param name="currentPets">The pets already owned by the player.</param>
-        public static void Show(IModEvents events, Pet[] currentPets)
+        /// <param name="chooser">Handles choosing from a set of available values.</param>
+        public static void Show(IModEvents events, Pet[] currentPets, Chooser chooser)
         {
             // choose pet & skin
-            AnimalType type = AdoptQuestion.GetNextPet(currentPets);
+            AnimalType type = AdoptQuestion.GetNextPet(currentPets, chooser);
             bool isCat = type == AnimalType.Cat;
-            int skin = AdoptQuestion.GetNextSkin(isCat, currentPets);
+            int skin = AdoptQuestion.GetNextSkin(isCat, currentPets, chooser);
             if (skin <= 0)
             {
                 Game1.drawObjectDialogue("Just an empty box.");
@@ -130,49 +143,39 @@ namespace Entoarox.MorePetsAndAnimals
         *********/
         /// <summary>Randomly choose a cat or dog, balanced to prefer the least allocated pet type.</summary>
         /// <param name="currentPets">The current pets in the game.</param>
-        private static AnimalType GetNextPet(Pet[] currentPets)
+        /// <param name="chooser">Handles choosing from a set of available values.</param>
+        private static AnimalType GetNextPet(Pet[] currentPets, Chooser chooser)
         {
-            int catSkins = ModEntry.Indexes[AnimalType.Cat].Length;
-            int dogSkins = ModEntry.Indexes[AnimalType.Dog].Length;
+            int catSkins = ModEntry.Skins[AnimalType.Cat].Length;
+            int dogSkins = ModEntry.Skins[AnimalType.Dog].Length;
 
             // choose whichever has skins
             if (catSkins == 0 || dogSkins == 0)
                 return catSkins != 0 ? AnimalType.Cat : AnimalType.Dog;
 
-            // else choose based on allocation
-            int catCount = currentPets.OfType<Cat>().Count();
-            int dogCount = currentPets.OfType<Dog>().Count();
-            if (catCount < dogCount)
-                return AnimalType.Cat;
-            if (dogCount < catCount)
-                return AnimalType.Dog;
-
             // else choose randomly
-            return ModEntry.Random.NextDouble() < 0.5 ? AnimalType.Cat : AnimalType.Dog;
+            return chooser.Choose(
+                options: new[] { AnimalType.Cat, AnimalType.Dog },
+                previous: () => currentPets.Select(p => p is Cat ? AnimalType.Cat : AnimalType.Dog)
+            );
         }
 
         /// <summary>Randomly choose an animal skin, balanced to prefer the least allocated skins.</summary>
         /// <param name="isCat">Whether to get a cat skin (else dog).</param>
         /// <param name="currentPets">The current pets in the game.</param>
-        private static int GetNextSkin(bool isCat, Pet[] currentPets)
+        /// <param name="chooser">Handles choosing from a set of available values.</param>
+        private static int GetNextSkin(bool isCat, Pet[] currentPets, Chooser chooser)
         {
             // get available skins
-            AnimalSkin[] skins = ModEntry.Indexes[isCat ? AnimalType.Cat : AnimalType.Dog];
+            AnimalSkin[] skins = ModEntry.Skins[isCat ? AnimalType.Cat : AnimalType.Dog];
             if (!skins.Any())
                 return 0;
 
-            // choose based on allocations
-            IDictionary<int, int> allocations = skins.ToDictionary(p => p.ID, p => 0);
-            foreach (Pet pet in currentPets)
-            {
-                if (isCat ? pet is Cat : pet is Dog && allocations.TryGetValue(pet.Manners, out int count))
-                    allocations[pet.Manners]++;
-            }
-
-            // randomly choose from least allocated skins
-            int minCount = allocations.Values.Min();
-            int[] possibleSkins = allocations.Where(p => p.Value == minCount).Select(p => p.Key).ToArray();
-            return possibleSkins[ModEntry.Random.Next(0, possibleSkins.Length)];
+            // choose randomly
+            return chooser.Choose(
+                options: skins.Select(p => p.ID).ToArray(),
+                previous: () => currentPets.Select(p => p.Manners)
+            );
         }
     }
 }

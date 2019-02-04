@@ -42,6 +42,7 @@
     <Compile Include="AdoptQuestion.cs" />
     <Compile Include="Framework\AnimalSkin.cs" />
     <Compile Include="Framework\AnimalType.cs" />
+    <Compile Include="Framework\Chooser.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
