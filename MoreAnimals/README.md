@@ -58,6 +58,21 @@ assets/
       Rabbit_3.png
 ```
 
+## Configure
+The mod creates a `config.json` file in its mod folder the first time you run it. You can open that
+file in a text editor to configure the mod.
+
+These are the available settings:
+
+setting                    | what it affects
+-------------------------- | -------------------
+`AnimalsOnly`              | True to disable the pet adoption box. Default false.
+`AdoptionPrice`            | The gold you must pay to adopt a pet. Default 500, minimum 100.
+`MaxAdoptionLimit`         | If `UseMaxAdoptionLimit` is true, the maximum number of pets you can adopt (including the original pet). Default 10.
+`UseMaxAdoptionLimit`      | Whether to apply the `MaxAdoptionLimit` limit. Default false.
+`RepeatedAdoptionPenality` | A penalty which reduces the chance of a pet in the adoption box based on the number of pets you already have. (The default pet-in-box chance is 90%.) For example, `0.1` represents a 10% penalty per pet; after 5 pets, the chance is 90% - 50% or 40%. Note that this won't reduce the pet-in-box chance lower 10%. Default 0.1, must be 0–0.9 inclusive.
+`UseBalancedDistribution`  | Whether to try to assign an even distribution of skins and pet types, if possible. Default false.
+
 ## Compatibility
 * For Stardew Valley 1.3.30 or later.
 * Compatible with Linux, Mac, or Windows.
