@@ -36,5 +36,8 @@ namespace Entoarox.MorePetsAndAnimals
 
         /// <summary>True to disable the pet adoption box.</summary>
         public bool AnimalsOnly = false;
+
+        /// <summary>Whether to ensure an even distribution of skins and pet types, if possible.</summary>
+        public bool UseBalancedDistribution = false;
     }
 }

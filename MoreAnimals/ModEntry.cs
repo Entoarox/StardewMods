@@ -54,7 +54,7 @@ namespace Entoarox.MorePetsAndAnimals
             // init
             ModEntry.Config = helper.ReadConfig<ModConfig>();
             ModEntry.SHelper = helper;
-            this.Chooser = new Chooser();
+            this.Chooser = new Chooser(ModEntry.Config.UseBalancedDistribution);
 
             // add commands
             helper.ConsoleCommands.Add("abandon_pet", "Remove a pet with the given name.", this.OnCommandReceived);
