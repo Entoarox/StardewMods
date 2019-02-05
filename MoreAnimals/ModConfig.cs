@@ -8,7 +8,7 @@ namespace Entoarox.MorePetsAndAnimals
         ** Fields
         *********/
         private int _AdoptionPrice = 500;
-        private double _RepeatedAdoptionPenality = 0.1;
+        private double _RepeatedAdoptionPenalty = 0.1;
 
 
         /*********
@@ -22,10 +22,10 @@ namespace Entoarox.MorePetsAndAnimals
         }
 
         /// <summary>A penalty which reduces the chance of a pet in the adoption box based on the number of pets the player already has.</summary>
-        public double RepeatedAdoptionPenality
+        public double RepeatedAdoptionPenalty
         {
-            get => this._RepeatedAdoptionPenality;
-            set => this._RepeatedAdoptionPenality = Math.Max(0.0, Math.Min(0.9, value));
+            get => this._RepeatedAdoptionPenalty;
+            set => this._RepeatedAdoptionPenalty = Math.Max(0.0, Math.Min(0.9, value));
         }
 
         /// <summary>Whether to apply the <see cref="MaxAdoptionLimit"/> limit.</summary>

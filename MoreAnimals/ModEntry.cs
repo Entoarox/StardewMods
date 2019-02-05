@@ -76,7 +76,7 @@ namespace Entoarox.MorePetsAndAnimals
                     "Statistics:\n"
                     + "  Config:\n"
                     + $"    AdoptionPrice: {ModEntry.Config.AdoptionPrice}\n"
-                    + $"    RepeatedAdoptionPenality: {ModEntry.Config.RepeatedAdoptionPenality}\n"
+                    + $"    RepeatedAdoptionPenalty: {ModEntry.Config.RepeatedAdoptionPenalty}\n"
                     + $"    UseMaxAdoptionLimit: {ModEntry.Config.UseMaxAdoptionLimit}\n"
                     + $"    MaxAdoptionLimit: {ModEntry.Config.MaxAdoptionLimit}\n"
                     + $"    AnimalsOnly: {ModEntry.Config.AnimalsOnly}\n"
@@ -404,7 +404,7 @@ namespace Entoarox.MorePetsAndAnimals
             int seed = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
             this.Chooser.Reset(seed);
             List<Pet> list = this.GetAllPets().ToList();
-            if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || this.Chooser.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || list.FindIndex(a => a.Age == seed) != -1)
+            if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || this.Chooser.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenalty)) || list.FindIndex(a => a.Age == seed) != -1)
                 Game1.drawObjectDialogue("Just an empty box.");
             else
                 AdoptQuestion.Show(this.Helper.Events, this.GetAllPets().ToArray(), this.Chooser);
