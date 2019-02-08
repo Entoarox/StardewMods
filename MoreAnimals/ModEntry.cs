@@ -41,7 +41,7 @@ namespace Entoarox.MorePetsAndAnimals
         internal static ModConfig Config;
         internal static IModHelper SHelper;
 
-        internal static Dictionary<AnimalType, AnimalSkin[]> Indexes = new Dictionary<AnimalType, AnimalSkin[]>();
+        internal static Dictionary<string, AnimalSkin[]> Indexes = new Dictionary<string, AnimalSkin[]>();
         internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
 
 
@@ -65,8 +65,8 @@ namespace Entoarox.MorePetsAndAnimals
             ModEntry.Indexes = skins.GroupBy(skin => skin.AnimalType).ToDictionary(group => group.Key, group => group.ToArray());
             foreach (AnimalType type in Enum.GetValues(typeof(AnimalType)))
             {
-                if (!ModEntry.Indexes.ContainsKey(type))
-                    ModEntry.Indexes[type] = new AnimalSkin[0];
+                if (!ModEntry.Indexes.ContainsKey(type.ToString()))
+                    ModEntry.Indexes[type.ToString()] = new AnimalSkin[0];
             }
 
             // print skin summary
@@ -82,7 +82,7 @@ namespace Entoarox.MorePetsAndAnimals
                     + $"    AnimalsOnly: {ModEntry.Config.AnimalsOnly}\n"
                     + "  Skins:"
                 );
-                foreach (KeyValuePair<AnimalType, AnimalSkin[]> pair in ModEntry.Indexes)
+                foreach (KeyValuePair<string, AnimalSkin[]> pair in ModEntry.Indexes)
                 {
                     if (pair.Value.Length > 1)
                         summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetKey)).OrderBy(p => p))})");
@@ -94,7 +94,7 @@ namespace Entoarox.MorePetsAndAnimals
             // configure bus replacement
             if (ModEntry.Config.AnimalsOnly)
                 this.ReplaceBus = false;
-            if (this.ReplaceBus && !ModEntry.Indexes[AnimalType.Dog].Any() && !ModEntry.Indexes[AnimalType.Cat].Any())
+            if (this.ReplaceBus && !ModEntry.Indexes[AnimalType.Dog.ToString()].Any() && !ModEntry.Indexes[AnimalType.Cat.ToString()].Any())
             {
                 this.ReplaceBus = false;
                 this.Monitor.Log($"The `{nameof(ModConfig.AnimalsOnly)}` config option is set to false, but no dog or cat skins were found!", LogLevel.Error);
@@ -147,11 +147,7 @@ namespace Entoarox.MorePetsAndAnimals
 
                 // parse name
                 string[] parts = Path.GetFileNameWithoutExtension(file.Name).Split(new[] { '_' }, 2);
-                if (!AnimalSkin.TryParseType(parts[0], out AnimalType type))
-                {
-                    this.Monitor.Log($"Ignored skin `assets/skins/{file.Name}` with invalid naming convention (can't parse '{parts[0]}' as an animal type, expected one of {string.Join(", ", Enum.GetNames(typeof(AnimalType)))}).", LogLevel.Warn);
-                    continue;
-                }
+                string type = AnimalSkin.ParseType(parts[0]);
                 int index = 0;
                 if (parts.Length == 2 && !int.TryParse(parts[1], out index))
                 {
@@ -222,7 +218,7 @@ namespace Entoarox.MorePetsAndAnimals
             switch (npc)
             {
                 case Pet pet:
-                    return this.GetSkin(type: pet is Dog ? AnimalType.Dog : AnimalType.Cat, index: pet.Manners);
+                    return this.GetSkin(type: pet is Dog ? AnimalType.Dog.ToString() : AnimalType.Cat.ToString(), index: pet.Manners);
 
                 case FarmAnimal animal:
                     {
@@ -232,8 +228,7 @@ namespace Entoarox.MorePetsAndAnimals
                             typeStr = $"Baby{animal.type.Value}";
                         else if (animal.showDifferentTextureWhenReadyForHarvest.Value && animal.currentProduce.Value <= 0)
                             typeStr = $"Sheared{animal.type.Value}";
-                        if (!AnimalSkin.TryParseType(typeStr, out AnimalType type))
-                            return null;
+                        string type = AnimalSkin.ParseType(typeStr);
 
                         // get index
                         int index = animal.meatIndex.Value > 999
@@ -252,7 +247,7 @@ namespace Entoarox.MorePetsAndAnimals
         /// <summary>Get the skin to apply for an animal.</summary>
         /// <param name="type">The animal type.</param>
         /// <param name="index">The animal index.</param>
-        private AnimalSkin GetSkin(AnimalType type, int index)
+        private AnimalSkin GetSkin(string type, int index)
         {
             if (!ModEntry.Indexes.TryGetValue(type, out AnimalSkin[] skins) || !skins.Any())
                 return null;

@@ -40,8 +40,8 @@ namespace Entoarox.MorePetsAndAnimals
         {
             Random random = ModEntry.Random;
 
-            int catLimit = ModEntry.Indexes[AnimalType.Cat].Length;
-            int dogLimit = ModEntry.Indexes[AnimalType.Dog].Length;
+            int catLimit = ModEntry.Indexes[AnimalType.Cat.ToString()].Length;
+            int dogLimit = ModEntry.Indexes[AnimalType.Dog.ToString()].Length;
 
             bool cat = catLimit != 0 && (dogLimit == 0 || random.NextDouble() < 0.5);
             AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit), events);
