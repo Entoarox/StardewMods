@@ -40,7 +40,7 @@ namespace Entoarox.MorePetsAndAnimals
         internal static ModConfig Config;
         internal static IModHelper SHelper;
 
-        internal static Dictionary<AnimalType, AnimalSkin[]> Skins = new Dictionary<AnimalType, AnimalSkin[]>();
+        internal static Dictionary<string, AnimalSkin[]> Skins = new Dictionary<string, AnimalSkin[]>();
         internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
 
 
@@ -65,42 +65,21 @@ namespace Entoarox.MorePetsAndAnimals
             ModEntry.Skins = skins.GroupBy(skin => skin.AnimalType).ToDictionary(group => group.Key, group => group.ToArray());
             foreach (AnimalType type in Enum.GetValues(typeof(AnimalType)))
             {
-                if (!ModEntry.Skins.ContainsKey(type))
-                    ModEntry.Skins[type] = new AnimalSkin[0];
-            }
-
-            // print skin summary
-            {
-                StringBuilder summary = new StringBuilder();
-                summary.AppendLine(
-                    "Statistics:\n"
-                    + "  Config:\n"
-                    + $"    AdoptionPrice: {ModEntry.Config.AdoptionPrice}\n"
-                    + $"    RepeatedAdoptionPenalty: {ModEntry.Config.RepeatedAdoptionPenalty}\n"
-                    + $"    UseMaxAdoptionLimit: {ModEntry.Config.UseMaxAdoptionLimit}\n"
-                    + $"    MaxAdoptionLimit: {ModEntry.Config.MaxAdoptionLimit}\n"
-                    + $"    AnimalsOnly: {ModEntry.Config.AnimalsOnly}\n"
-                    + "  Skins:"
-                );
-                foreach (KeyValuePair<AnimalType, AnimalSkin[]> pair in ModEntry.Skins)
-                {
-                    if (pair.Value.Length > 1)
-                        summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetKey)).OrderBy(p => p))})");
-                }
-
-                this.Monitor.Log(summary.ToString(), LogLevel.Trace);
+                if (!ModEntry.Skins.ContainsKey(type.ToString()))
+                    ModEntry.Skins[type.ToString()] = new AnimalSkin[0];
             }
 
             // configure bus replacement
             if (ModEntry.Config.AnimalsOnly)
                 this.ReplaceBus = false;
-            if (this.ReplaceBus && !ModEntry.Skins[AnimalType.Dog].Any() && !ModEntry.Skins[AnimalType.Cat].Any())
+            if (this.ReplaceBus && !ModEntry.Skins[AnimalType.Dog.ToString()].Any() && !ModEntry.Skins[AnimalType.Cat.ToString()].Any())
             {
                 this.ReplaceBus = false;
                 this.Monitor.Log($"The `{nameof(ModConfig.AnimalsOnly)}` config option is set to false, but no dog or cat skins were found!", LogLevel.Error);
             }
 
             // hook events
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             if (this.ReplaceBus)
             {
@@ -147,11 +126,7 @@ namespace Entoarox.MorePetsAndAnimals
 
                 // parse name
                 string[] parts = Path.GetFileNameWithoutExtension(file.Name).Split(new[] { '_' }, 2);
-                if (!AnimalSkin.TryParseType(parts[0], out AnimalType type))
-                {
-                    this.Monitor.Log($"Ignored skin `assets/skins/{file.Name}` with invalid naming convention (can't parse '{parts[0]}' as an animal type, expected one of {string.Join(", ", Enum.GetNames(typeof(AnimalType)))}).", LogLevel.Warn);
-                    continue;
-                }
+                string type = AnimalSkin.ParseType(parts[0]);
                 int skinID = 0;
                 if (parts.Length == 2 && !int.TryParse(parts[1], out skinID))
                 {
@@ -162,6 +137,42 @@ namespace Entoarox.MorePetsAndAnimals
                 // yield
                 string assetKey = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", file.Name));
                 yield return new AnimalSkin(type, skinID, assetKey);
+            }
+        }
+
+        /// <summary>Raised after the game is launched, right before the first update tick.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            // load farm animals from data
+            Dictionary<string, string> data = Game1.content.Load<Dictionary<string, string>>("Data\\FarmAnimals");
+            foreach (string type in data.Keys)
+            {
+                if (!ModEntry.Skins.ContainsKey(type))
+                    ModEntry.Skins[type] = new AnimalSkin[0];
+            }
+
+            // print skin summary
+            {
+                StringBuilder summary = new StringBuilder();
+                summary.AppendLine(
+                    "Statistics:\n"
+                    + "  Config:\n"
+                    + $"    AdoptionPrice: {ModEntry.Config.AdoptionPrice}\n"
+                    + $"    RepeatedAdoptionPenalty: {ModEntry.Config.RepeatedAdoptionPenalty}\n"
+                    + $"    UseMaxAdoptionLimit: {ModEntry.Config.UseMaxAdoptionLimit}\n"
+                    + $"    MaxAdoptionLimit: {ModEntry.Config.MaxAdoptionLimit}\n"
+                    + $"    AnimalsOnly: {ModEntry.Config.AnimalsOnly}\n"
+                    + "  Skins:"
+                );
+                foreach (KeyValuePair<string, AnimalSkin[]> pair in ModEntry.Skins)
+                {
+                    if (pair.Value.Length > 1)
+                        summary.AppendLine($"    {pair.Key}: {pair.Value.Length} skins ({string.Join(", ", pair.Value.Select(p => Path.GetFileName(p.AssetKey)).OrderBy(p => p))})");
+                }
+
+                this.Monitor.Log(summary.ToString(), LogLevel.Trace);
             }
         }
 
@@ -224,15 +235,15 @@ namespace Entoarox.MorePetsAndAnimals
         /// <summary>Get the animal type for a character.</summary>
         /// <param name="npc">The animal to check.</param>
         /// <returns>Returns the animal type if valid, else null.</returns>
-        private AnimalType? GetType(Character npc)
+        private string GetType(Character npc)
         {
             switch (npc)
             {
                 case Cat _:
-                    return AnimalType.Cat;
+                    return AnimalType.Cat.ToString();
 
                 case Dog _:
-                    return AnimalType.Dog;
+                    return AnimalType.Dog.ToString();
 
                 case FarmAnimal animal:
                     {
@@ -244,9 +255,8 @@ namespace Entoarox.MorePetsAndAnimals
                             typeStr = $"Sheared{animal.type.Value}";
 
                         // parse type
-                        return AnimalSkin.TryParseType(typeStr, out AnimalType type)
-                            ? type
-                            : (AnimalType?)null;
+
+                        return AnimalSkin.ParseType(typeStr);
                     }
 
                 default:
@@ -259,20 +269,20 @@ namespace Entoarox.MorePetsAndAnimals
         private AnimalSkin GetSkin(Character npc)
         {
             // get type
-            AnimalType? type = this.GetType(npc);
+            string type = this.GetType(npc);
             if (type == null)
                 return null;
 
             switch (npc)
             {
                 case Pet pet:
-                    return this.GetSkin(type.Value, skinID: pet.Manners);
+                    return this.GetSkin(type, skinID: pet.Manners);
 
                 case FarmAnimal animal:
                     if (animal.meatIndex.Value <= 999)
                         return null;
 
-                    return this.GetSkin(type.Value, skinID: animal.meatIndex.Value - 999);
+                    return this.GetSkin(type, skinID: animal.meatIndex.Value - 999);
 
                 default:
                     return null;
@@ -282,7 +292,7 @@ namespace Entoarox.MorePetsAndAnimals
         /// <summary>Get the current skin for an animal.</summary>
         /// <param name="type">The animal type.</param>
         /// <param name="skinID">The skin ID.</param>
-        private AnimalSkin GetSkin(AnimalType type, int skinID)
+        private AnimalSkin GetSkin(string type, int skinID)
         {
             if (!ModEntry.Skins.TryGetValue(type, out AnimalSkin[] skins) || !skins.Any())
                 return null;
@@ -296,15 +306,15 @@ namespace Entoarox.MorePetsAndAnimals
         /// <param name="npc">The animal.</param>
         private AnimalSkin ChooseRandomSkin(Character npc)
         {
-            AnimalType? type = this.GetType(npc);
+            string type = this.GetType(npc);
             return type != null
-                ? this.ChooseRandomSkin(type.Value)
+                ? this.ChooseRandomSkin(type)
                 : null;
         }
 
         /// <summary>Choose a random skin for an animal type.</summary>
         /// <param name="type">The animal type.</param>
-        private AnimalSkin ChooseRandomSkin(AnimalType type)
+        private AnimalSkin ChooseRandomSkin(string type)
         {
             if (!ModEntry.Skins.TryGetValue(type, out AnimalSkin[] skins) || !skins.Any())
                 return null;
@@ -318,23 +328,20 @@ namespace Entoarox.MorePetsAndAnimals
 
         /// <summary>Get the skins currently assigned to animals in the world.</summary>
         /// <param name="type">The animal type to check.</param>
-        private IEnumerable<int> GetCurrentSkins(AnimalType type)
+        private IEnumerable<int> GetCurrentSkins(string type)
         {
-            switch (type)
+            if (type.Equals(AnimalType.Cat.ToString()) || type.Equals(AnimalType.Dog.ToString()))
             {
-                case AnimalType.Cat:
-                case AnimalType.Dog:
-                    return this
-                        .GetAllPets()
-                        .Where(pet => this.GetType(pet) == type)
-                        .Select(pet => pet.Manners);
-
-                default:
-                    return this
-                        .GetFarmAnimals()
-                        .Where(animal => this.GetType(animal) == type)
-                        .Select(p => p.meatIndex.Value);
+                return this
+                    .GetAllPets()
+                    .Where(pet => this.GetType(pet) == type)
+                    .Select(pet => pet.Manners);
             }
+
+            return this
+                .GetFarmAnimals()
+                .Where(animal => this.GetType(animal) == type)
+                .Select(p => p.meatIndex.Value);
         }
 
         /// <summary>Raised after the player enters a command for this mod in the SMAPI console.</summary>

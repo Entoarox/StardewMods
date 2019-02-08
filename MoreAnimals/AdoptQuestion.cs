@@ -146,8 +146,8 @@ namespace Entoarox.MorePetsAndAnimals
         /// <param name="chooser">Handles choosing from a set of available values.</param>
         private static AnimalType GetNextPet(Pet[] currentPets, Chooser chooser)
         {
-            int catSkins = ModEntry.Skins[AnimalType.Cat].Length;
-            int dogSkins = ModEntry.Skins[AnimalType.Dog].Length;
+            int catSkins = ModEntry.Skins[AnimalType.Cat.ToString()].Length;
+            int dogSkins = ModEntry.Skins[AnimalType.Dog.ToString()].Length;
 
             // choose whichever has skins
             if (catSkins == 0 || dogSkins == 0)
@@ -167,7 +167,7 @@ namespace Entoarox.MorePetsAndAnimals
         private static int GetNextSkin(bool isCat, Pet[] currentPets, Chooser chooser)
         {
             // get available skins
-            AnimalSkin[] skins = ModEntry.Skins[isCat ? AnimalType.Cat : AnimalType.Dog];
+            AnimalSkin[] skins = ModEntry.Skins[isCat ? AnimalType.Cat.ToString() : AnimalType.Dog.ToString()];
             if (!skins.Any())
                 return 0;
 

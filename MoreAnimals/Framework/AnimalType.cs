@@ -6,31 +6,7 @@ namespace Entoarox.MorePetsAndAnimals.Framework
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "The enum values are constructed dynamically.")]
     internal enum AnimalType
     {
-        BabyBlueChicken,
-        BabyBrownChicken,
-        BabyBrownCow,
-        BabyDuck, // Special: MorePets separates baby ducks from baby white chickens (BabyDuck.png as a copy of BabyWhite Chicken.png is bundled because of this)
-        BabyGoat,
-        BabyPig,
-        BabyRabbit,
-        BabySheep,
-        BabyVoidChicken,
-        BabyWhiteChicken,
-        BabyWhiteCow,
-        BlueChicken,
-        BrownChicken,
-        BrownCow,
         Cat,
-        Dinosaur,
-        Dog,
-        Duck,
-        Goat,
-        Pig,
-        Rabbit,
-        ShearedSheep,
-        Sheep,
-        VoidChicken,
-        WhiteChicken,
-        WhiteCow
+        Dog
     }
 }

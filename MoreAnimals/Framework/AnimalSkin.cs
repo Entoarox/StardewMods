@@ -9,7 +9,7 @@ namespace Entoarox.MorePetsAndAnimals.Framework
         ** Accessors
         *********/
         /// <summary>The animal type.</summary>
-        public AnimalType AnimalType { get; }
+        public string AnimalType { get; }
 
         /// <summary>A unique skin ID for the animal type.</summary>
         public int ID { get; }
@@ -25,7 +25,7 @@ namespace Entoarox.MorePetsAndAnimals.Framework
         /// <param name="animalType">The animal type.</param>
         /// <param name="id">A unique skin ID for the animal type.</param>
         /// <param name="assetKey">The internal asset key.</param>
-        public AnimalSkin(AnimalType animalType, int id, string assetKey)
+        public AnimalSkin(string animalType, int id, string assetKey)
         {
             this.AnimalType = animalType;
             this.ID = id;
@@ -36,10 +36,9 @@ namespace Entoarox.MorePetsAndAnimals.Framework
         /// <param name="raw">The raw animal type.</param>
         /// <param name="type">The parsed value, if valid.</param>
         /// <returns>Returns whether the value was successfully parsed.</returns>
-        public static bool TryParseType(string raw, out AnimalType type)
+        public static string ParseType(string raw)
         {
-            raw = raw?.Replace(" ", ""); // convert names like 'Brown Cow'
-            return Enum.TryParse(raw, true, out type);
+            return raw?.Replace(" ", ""); // convert names like 'Brown Cow'
         }
     }
 }
