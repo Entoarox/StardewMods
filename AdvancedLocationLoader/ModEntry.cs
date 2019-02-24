@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -174,6 +174,9 @@ namespace Entoarox.AdvancedLocationLoader
                         break;
                     case "ALLShop":
                         Actions.Shop(e.Who, e.Arguments, e.Position);
+                        break;
+                    case "ALLTrigger":
+                        Actions.Trigger(e.Who, e.Arguments, e.Position);
                         break;
                     default:
                         return;
