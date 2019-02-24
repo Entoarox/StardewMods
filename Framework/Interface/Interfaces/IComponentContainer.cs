@@ -7,9 +7,11 @@ namespace Entoarox.Framework.Interface
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>The menu this container is a part of.</summary>
         /// <exception cref="System.NullReferenceException">Container is not attached to a menu.</exception>
         InterfaceMenu Menu { get; }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>The outer bounds of the container, scaled using <see cref="StardewValley.Game1.pixelZoom" />. These bounds should be relative to the viewport.</summary>
         Rectangle OuterBounds { get; }

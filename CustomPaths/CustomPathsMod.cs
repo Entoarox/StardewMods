@@ -19,7 +19,7 @@ namespace Entoarox.CustomPaths
 
         public override void Entry(IModHelper helper)
         {
-            foreach (IContentPack pack in helper.GetContentPacks())
+            foreach (IContentPack pack in helper.ContentPacks.GetOwned())
             {
                 foreach (CustomPathConfig path in pack.ReadJsonFile<List<CustomPathConfig>>("paths.json"))
                 {
@@ -47,13 +47,13 @@ namespace Entoarox.CustomPaths
             if (CustomPathsMod.Map.Any(a => !string.IsNullOrEmpty(a.Value.Salesman)))
             {
                 this.Monitor.Log("One or more paths are for sale, enabling menu hook", LogLevel.Trace);
-                MenuEvents.MenuChanged += this.Event_MenuChanged;
+                helper.Events.Display.MenuChanged += this.Event_MenuChanged;
             }
 
             if (CustomPathsMod.Map.Any(a => a.Value.Speed > 0))
             {
                 this.Monitor.Log("One or more paths give a speed boost, enabling update hook", LogLevel.Trace);
-                GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+                helper.Events.GameLoop.UpdateTicked += this.GameEvents_UpdateTick;
             }
         }
 

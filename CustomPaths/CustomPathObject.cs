@@ -5,7 +5,7 @@ using StardewValley;
 
 namespace Entoarox.CustomPaths
 {
-    internal class CustomPathObject : Object, ICustomItem, IDeserializationHandler
+    internal class CustomPathObject : Object, ICustomItem
     {
         /*********
         ** Accessors

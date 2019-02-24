@@ -25,7 +25,9 @@ namespace Entoarox.Framework.Interface
         *********/
         public override string Tooltip => this.HoverComponent?.Tooltip;
         public virtual IDynamicComponent FloatComponent => (this._FocusComponent as IFloatComponent)?.FloatComponent;
+#pragma warning disable CS0618 // Type or member is obsolete
         public InterfaceMenu Menu => this.Owner.Menu;
+#pragma warning restore CS0618 // Type or member is obsolete
         public virtual Rectangle InnerBounds => this.OuterBounds;
 
         public bool Selected

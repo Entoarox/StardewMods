@@ -5,6 +5,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
 {
     internal class Conditional
     {
+#pragma warning disable CS0649
         /*********
         ** Accessors
         *********/
@@ -16,6 +17,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         [DefaultValue(null)]
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public string Success;
+#pragma warning restore CS0649
 
 
         /*********

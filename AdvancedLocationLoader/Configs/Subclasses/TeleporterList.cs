@@ -7,7 +7,9 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0649
         public List<TeleporterDestination> Destinations;
+#pragma warning restore CS0649
 
         public string ListName;
 

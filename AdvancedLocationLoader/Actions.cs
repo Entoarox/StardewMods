@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using StardewValley.Locations;
 using xTile.Layers;
 using xTile.ObjectModel;
 using SObject = StardewValley.Object;
@@ -140,6 +141,18 @@ namespace Entoarox.AdvancedLocationLoader
             catch (Exception err)
             {
                 ModEntry.Logger.Log("Unable to open shop due to unexpected error: ", LogLevel.Error, err);
+            }
+        }
+        public static void Trigger(Farmer who, string[] arguments, Vector2 tile)
+        {
+            switch(arguments[0])
+            {
+                case "Fridge":
+                    ((FarmHouse)Game1.getLocationFromName("FarmHouse")).fridge.Value.checkForAction(who, false);
+                    break;
+                default:
+                    ModEntry.Logger.Log("Unknown ALLTrigger argument: " + arguments[0], LogLevel.Error);
+                    break;
             }
         }
     }

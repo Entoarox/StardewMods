@@ -8,6 +8,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0649
         [DefaultValue(false)]
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public bool BigCraftable;
@@ -23,7 +24,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         [DefaultValue(int.MaxValue)]
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
         public int Stock;
-
+#pragma warning restore CS0649
 
         /*********
         ** Public methods

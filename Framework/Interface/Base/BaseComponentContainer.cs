@@ -7,7 +7,9 @@ namespace Entoarox.Framework.Interface
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0618 // Type or member is obsolete
         public InterfaceMenu Menu => this.Owner.Menu;
+#pragma warning restore CS0618 // Type or member is obsolete
         public Rectangle InnerBounds => this.OuterBounds;
         public IDynamicComponent FocusComponent => null;
 

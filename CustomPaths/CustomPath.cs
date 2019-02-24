@@ -9,7 +9,7 @@ using StardewValley.Tools;
 
 namespace Entoarox.CustomPaths
 {
-    internal class CustomPath : TerrainFeature, ICustomItem, IDeserializationHandler
+    internal class CustomPath : TerrainFeature, ICustomItem
     {
         /*********
         ** Fields

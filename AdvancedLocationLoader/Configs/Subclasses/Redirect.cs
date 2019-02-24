@@ -5,8 +5,10 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0649
         public string FromFile;
         public string ToFile;
+#pragma warning restore CS0649
 
 
         /*********

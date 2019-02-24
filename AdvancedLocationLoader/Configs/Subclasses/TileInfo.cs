@@ -8,6 +8,7 @@ namespace Entoarox.AdvancedLocationLoader.Configs
         /*********
         ** Accessors
         *********/
+#pragma warning disable CS0649
         public string Conditions;
         public string MapName;
 
@@ -17,5 +18,6 @@ namespace Entoarox.AdvancedLocationLoader.Configs
 
         public int TileX;
         public int TileY;
+#pragma warning restore CS0649
     }
 }
