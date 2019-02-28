@@ -1,8 +1,10 @@
 using System;
-using Entoarox.MorePetsAndAnimals.Framework;
+using System.Linq;
+using System.Collections.Generic;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
+
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Menus;
@@ -14,8 +16,7 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Fields
         *********/
-        private readonly IModEvents Events;
-        private readonly bool Cat;
+        private readonly string Type;
         private readonly int Skin;
         private readonly AnimatedSprite Sprite;
         private Farmer Who;
@@ -24,40 +25,75 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Public methods
         *********/
-        public AdoptQuestion(bool cat, int skin, IModEvents events)
+        public AdoptQuestion(string type, int skin)
         {
-            this.Cat = cat;
+            this.Type = type;
             this.Skin = skin;
-            this.Events = events;
 
-            this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{(cat ? "cat" : "dog")}_{skin}.png"), 28, 32, 32)
+            this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{type}_{skin}.png"), 28, 32, 32)
             {
                 loop = true
             };
         }
 
-        public static void Show(IModEvents events)
+        public static void Show()
         {
             Random random = ModEntry.Random;
-
-            int catLimit = ModEntry.Indexes[AnimalType.Cat].Length;
-            int dogLimit = ModEntry.Indexes[AnimalType.Dog].Length;
-
-            bool cat = catLimit != 0 && (dogLimit == 0 || random.NextDouble() < 0.5);
-            AdoptQuestion q = new AdoptQuestion(cat, random.Next(1, cat ? catLimit : dogLimit), events);
-            events.Display.RenderedHud += q.Display;
+            string type = "";
+            int id = 0;
+            if (ModEntry.Config.BalancedPetTypes)
+            {
+                Dictionary<string, double> types = ModEntry.Pets.Keys.ToDictionary(k => k, v => 1.0);
+                foreach (Pet pet in ModEntry.GetAllPets())
+                {
+                    string petType = ModEntry.Sanitize(pet.GetType().Name);
+                    types[petType] *= 0.5;
+                }
+                double typeChance = random.NextDouble();
+                foreach (KeyValuePair<string, double> pair in types.OrderBy(a => a.Value))
+                {
+                    if (pair.Value >= typeChance)
+                    {
+                        type = pair.Key;
+                        break;
+                    }
+                }
+            }
+            else
+                type = ModEntry.Pets.Keys.ToArray()[random.Next(ModEntry.Pets.Count)];
+            if (ModEntry.Config.BalancedPetSkins)
+            {
+                Dictionary<int, double> skins = ModEntry.Pets[type].ToDictionary(k => k.ID, v => 1.0);
+                foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.Sanitize(pet.GetType().Name) == type))
+                {
+                    skins[pet.Manners] *= 0.5;
+                }
+                double skinChance = random.NextDouble();
+                foreach (KeyValuePair<int, double> pair in skins.OrderBy(a => a.Value))
+                {
+                    if (pair.Value >= skinChance)
+                    {
+                        id = pair.Key;
+                        break;
+                    }
+                }
+            }
+            else
+                id = ModEntry.Pets[type][random.Next(ModEntry.Pets[type].Count)].ID;
+            AdoptQuestion q = new AdoptQuestion(type, id);
+            ModEntry.SHelper.Events.Display.RenderedHud += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
-                $"Oh dear, it looks like someone has abandoned a poor {(cat ? "Cat" : "Dog")} here! Perhaps you should pay Marnie {ModEntry.Config.AdoptionPrice} gold to give it a checkup so you can adopt it?",
+                ModEntry.SHelper.Translation.Get("AdoptMessage", new { petType = type, adoptionPrice = ModEntry.Config.AdoptionPrice }),
                 Game1.player.money < ModEntry.Config.AdoptionPrice
                     ? new[]
                     {
-                        new Response("n", $"Unfortunately I do not have the required {ModEntry.Config.AdoptionPrice} gold in order to do this.")
+                        new Response("n", ModEntry.SHelper.Translation.Get("AdoptNoGold", new { adoptionPrice = ModEntry.Config.AdoptionPrice }))
                     }
                     : new[]
                     {
-                        new Response("y", "Yes, I really should adopt the poor animal!"),
-                        new Response("n", "No, I do not have the space to house it.")
+                        new Response("y", ModEntry.SHelper.Translation.Get("AdoptYes")),
+                        new Response("n", ModEntry.SHelper.Translation.Get("AdoptNo"))
                     },
                 q.Resolver);
         }
@@ -74,37 +110,25 @@ namespace Entoarox.MorePetsAndAnimals
                 this.Sprite.Animate(Game1.currentGameTime, 28, 2, 500);
             }
             else
-                this.Events.Display.RenderedHud -= this.Display;
+                ModEntry.SHelper.Events.Display.RenderedHud -= this.Display;
         }
 
         public void Resolver(Farmer who, string answer)
         {
-            this.Events.Display.RenderedHud -= this.Display;
+            ModEntry.SHelper.Events.Display.RenderedHud -= this.Display;
             if (answer == "n")
                 return;
             this.Who = who;
-            Game1.activeClickableMenu = new NamingMenu(this.Namer, "Choose a name");
+            Game1.activeClickableMenu = new NamingMenu(this.Namer, ModEntry.SHelper.Translation.Get("ChooseName"));
         }
 
         public void Namer(string petName)
         {
             Pet pet;
             this.Who.Money -= ModEntry.Config.AdoptionPrice;
-            if (this.Cat)
-            {
-                pet = new Cat((int)Game1.player.position.X, (int)Game1.player.position.Y)
-                {
-                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/cat_{this.Skin}.png"), 0, 32, 32)
-                };
-            }
-            else
-            {
-                pet = new Dog(Game1.player.getTileLocationPoint().X, Game1.player.getTileLocationPoint().Y)
-                {
-                    Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/dog_{this.Skin}.png"), 0, 32, 32)
-                };
-            }
-
+            Type type = ModEntry.PetTypes[this.Type];
+            pet = (Pet)Activator.CreateInstance(type, (int)Game1.player.position.X, (int)Game1.player.position.Y);
+            pet.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{this.Type}_{this.Skin}.png"), 0, 32, 32);
             pet.Name = petName;
             pet.displayName = petName;
             pet.Manners = this.Skin;
@@ -112,7 +136,7 @@ namespace Entoarox.MorePetsAndAnimals
             pet.Position = Game1.player.position;
             Game1.currentLocation.addCharacter(pet);
             pet.warpToFarmHouse(this.Who);
-            Game1.drawObjectDialogue($"Marnie will bring {petName} to your house once they have their shots and been given a grooming.");
+            Game1.drawObjectDialogue(ModEntry.SHelper.Translation.Get("Adopted", new { petName }));
         }
     }
 }

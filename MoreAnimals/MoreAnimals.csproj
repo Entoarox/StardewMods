@@ -41,7 +41,7 @@
   <ItemGroup>
     <Compile Include="AdoptQuestion.cs" />
     <Compile Include="Framework\AnimalSkin.cs" />
-    <Compile Include="Framework\AnimalType.cs" />
+    <Compile Include="Framework\ModApi.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,6 +119,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="i18n\default.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json" />
     <None Include="README.md" />
     <None Include="RELEASE-NOTES.md" />
