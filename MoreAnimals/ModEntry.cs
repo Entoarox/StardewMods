@@ -373,7 +373,7 @@ namespace Entoarox.MorePetsAndAnimals
 
         private void LoadSkinMap(object s, EventArgs e)
         {
-            SkinMap = this.Helper.Data.ReadSaveData<Dictionary<long, int>>("animal-skins");
+            SkinMap = this.Helper.Data.ReadSaveData<Dictionary<long, int>>("animal-skins") ?? new Dictionary<long, int>();
         }
 
         private void SaveSkinMap(object s, EventArgs e)
