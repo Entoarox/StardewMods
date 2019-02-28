@@ -33,8 +33,6 @@ namespace Entoarox.MorePetsAndAnimals
         public bool BalancedPetSkins = true;
         public bool DisableDailyLimit = false;
 
-        public bool UseOldClickDetection = false;
-
         public string[] ExtraTypes=new string[0];
     }
 }

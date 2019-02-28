@@ -26,6 +26,7 @@ namespace Entoarox.MorePetsAndAnimals.Framework
             }
             ModEntry.Pets.Add(id, new List<AnimalSkin>());
             ModEntry.PetTypes.Add(id, type);
+            ModEntry.PetTypesRev.Add(type, id);
         }
         /// <summary>
         /// Registers a new animal type to handle skin support for.

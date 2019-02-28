@@ -39,48 +39,35 @@ namespace Entoarox.MorePetsAndAnimals
         public static void Show()
         {
             Random random = ModEntry.Random;
-            string type = "";
+            string type=null;
             int id = 0;
             if (ModEntry.Config.BalancedPetTypes)
             {
                 double totalType = ModEntry.Pets.Count;
                 Dictionary<string, double> types = ModEntry.Pets.Keys.ToDictionary(k => k, v => totalType);
-                foreach (Pet pet in ModEntry.GetAllPets())
-                {
-                    string petType = ModEntry.Sanitize(pet.GetType().Name);
-                    types[petType] *= 0.5;
-                }
+                foreach (Pet pet in ModEntry.GetAllPets().Where(p => ModEntry.PetTypesRev.ContainsKey(p.GetType()) && ModEntry.Pets[ModEntry.PetTypesRev[p.GetType()]].Count>0))
+                    types[ModEntry.PetTypesRev[pet.GetType()]] *= 0.5;
                 types = types.ToDictionary(k => k.Key, v => v.Value / totalType);
-                double typeChance = random.NextDouble();
-                foreach (KeyValuePair<string, double> pair in types.OrderBy(a => a.Value))
-                {
-                    if (pair.Value >= typeChance)
-                    {
-                        type = pair.Key;
-                        break;
-                    }
-                }
+                double typeMax = types.Values.OrderByDescending(a => a).First();
+                double typeChance = random.NextDouble() * typeMax;
+                string[] validTypes = types.Where(a => a.Value >= typeChance).Select(a => a.Key).ToArray();
+                if (validTypes.Length > 0)
+                    type = validTypes[random.Next(validTypes.Length)];
             }
-            if(type=="")
+            if(string.IsNullOrEmpty(type))
                 type = ModEntry.Pets.Keys.ToArray()[random.Next(ModEntry.Pets.Count)];
             if (ModEntry.Config.BalancedPetSkins)
             {
                 double totalSkin = ModEntry.Pets[type].Count;
                 Dictionary<int, double> skins = ModEntry.Pets[type].ToDictionary(k => k.ID, v => totalSkin);
-                foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.Sanitize(pet.GetType().Name) == type))
-                {
+                foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.PetTypesRev.ContainsKey(pet.GetType()) && ModEntry.PetTypesRev[pet.GetType()].Equals(type)))
                     skins[pet.Manners] *= 0.5;
-                }
                 skins = skins.ToDictionary(k => k.Key, v => v.Value / totalSkin);
+                double skinMax = skins.Values.OrderByDescending(a => a).First();
                 double skinChance = random.NextDouble();
-                foreach (KeyValuePair<int, double> pair in skins.OrderBy(a => a.Value))
-                {
-                    if (pair.Value >= skinChance)
-                    {
-                        id = pair.Key;
-                        break;
-                    }
-                }
+                int[] validSkins = skins.Where(a => a.Value >= skinChance).Select(a => a.Key).ToArray();
+                if (validSkins.Length > 0)
+                    id = validSkins[random.Next(validSkins.Length)];
             }
             if(id==0)
                 id = ModEntry.Pets[type][random.Next(ModEntry.Pets[type].Count)].ID;

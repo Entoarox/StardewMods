@@ -9,8 +9,6 @@ using Entoarox.Framework;
 using Entoarox.Framework.Events;
 using Entoarox.MorePetsAndAnimals.Framework;
 
-using Microsoft.Xna.Framework;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
@@ -19,14 +17,11 @@ using StardewValley.Characters;
 using StardewValley.Locations;
 
 using xTile.Dimensions;
-using xTile.ObjectModel;
 using xTile.Tiles;
 
 using Newtonsoft.Json;
 
 using Microsoft.Xna.Framework.Graphics;
-
-using Harmony;
 
 namespace Entoarox.MorePetsAndAnimals
 {
@@ -62,6 +57,7 @@ namespace Entoarox.MorePetsAndAnimals
         internal static Dictionary<string, List<AnimalSkin>> Animals = new Dictionary<string, List<AnimalSkin>>();
         internal static Dictionary<string, List<AnimalSkin>> Pets = new Dictionary<string, List<AnimalSkin>>();
         internal static Dictionary<string, Type> PetTypes = new Dictionary<string, Type>();
+        internal static Dictionary<Type, string> PetTypesRev = new Dictionary<Type, string>();
         internal static AnimalSkin BabyDuck;
         internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
         internal static bool SkinsReady = false;
@@ -145,10 +141,6 @@ namespace Entoarox.MorePetsAndAnimals
                     this.Monitor.Log("Unable to patch BusStop due to exception:", LogLevel.Error, e);
                 }
             }
-
-            // Apply harmony patches
-            var instance = HarmonyInstance.Create("Entoarox.MorePetsAndAnimals");
-            instance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         public override object GetApi()
