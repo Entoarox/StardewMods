@@ -170,7 +170,7 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
+            if (e.Button.IsActionButton() || e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
                 this.CheckForAction();
         }
 
@@ -179,7 +179,7 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (this.ActionInfo != null && (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight))
+            if (this.ActionInfo != null  && (e.Button.IsActionButton() || e.Button == SButton.ControllerA || e.Button == SButton.MouseRight))
             {
                 MoreEvents.FireActionTriggered(this.ActionInfo);
                 this.ActionInfo = null;

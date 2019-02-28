@@ -19,10 +19,8 @@ namespace Entoarox.FurnitureAnywhere
             this.boundingBox.Value = item.boundingBox.Value;
             this.currentRotation.Value = item.currentRotation.Value;
             this.rotations.Value = item.rotations.Value;
-            this.rotate();
-            this.rotate();
-            this.rotate();
-            this.rotate();
+            this.sourceRect.Value = item.sourceRect.Value;
+            this.updateDrawPosition();
         }
 
         public Furniture Revert()
@@ -32,10 +30,8 @@ namespace Entoarox.FurnitureAnywhere
             self.boundingBox.Value = this.boundingBox.Value;
             self.currentRotation.Value = this.currentRotation.Value;
             self.rotations.Value = this.rotations.Value;
-            self.rotate();
-            self.rotate();
-            self.rotate();
-            self.rotate();
+            self.sourceRect.Value = this.sourceRect.Value;
+            self.updateDrawPosition();
             return self;
         }
 
@@ -87,7 +83,7 @@ namespace Entoarox.FurnitureAnywhere
             this.TileLocation = new Vector2(point.X, point.Y);
             if (this.furniture_type.Value == 6 || this.furniture_type.Value == 13 || this.ParentSheetIndex == 1293)
             {
-                Game1.showRedMessage("Can only be placed in House");
+                Game1.showRedMessage("Can only be placed in House, Cabin or Shed");
                 return false;
             }
             for (int index1 = point.X; index1 < point.X + this.getTilesWide(); ++index1)
@@ -155,10 +151,7 @@ namespace Entoarox.FurnitureAnywhere
             furniture.boundingBox.Value = this.boundingBox.Value;
             furniture.currentRotation.Value = this.currentRotation.Value;
             furniture.rotations.Value = this.rotations.Value;
-            furniture.rotate();
-            furniture.rotate();
-            furniture.rotate();
-            furniture.rotate();
+            furniture.sourceRect.Value = this.sourceRect.Value;
             return furniture;
         }
 

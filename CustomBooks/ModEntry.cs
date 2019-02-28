@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Entoarox.CustomBooks.Menu;
 using Entoarox.Framework.Events;
@@ -24,10 +25,10 @@ namespace Entoarox.CustomBooks
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            ModEntry.SHelper = helper;
+            SHelper = helper;
             ItemEvents.AfterSerialize += this.ItemEvents_AfterSerialize;
             ItemEvents.BeforeDeserialize += this.ItemEvents_BeforeDeserialize;
-            InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
+            helper.Events.Input.ButtonReleased += this.InputEvents_ButtonReleased;
             helper.ConsoleCommands.Add("custombooks", "custombooks (spawn|clear)", this.Command_Custombooks);
         }
 
@@ -46,7 +47,7 @@ namespace Entoarox.CustomBooks
             ModEntry.Shelf = new Bookshelf();
         }
 
-        private void InputEvents_ButtonReleased(object s, EventArgsInput e)
+        private void InputEvents_ButtonReleased(object s, ButtonReleasedEventArgs e)
         {
             if ((!Game1.eventUp || Game1.currentLocation.currentEvent != null && Game1.currentLocation.currentEvent.showActiveObject) && !Game1.player.FarmerSprite.pauseForSingleAnimation && !Game1.player.isRidingHorse() && !Game1.player.bathingClothes.Value && e.Button == SButton.MouseRight)
                 (Game1.player.CurrentItem as Book)?.Activate();
@@ -62,7 +63,7 @@ namespace Entoarox.CustomBooks
                     Game1.player.addItemToInventory(new Book(id));
                     break;
                 case "clear":
-                    Game1.player.items.Filter(a => !(a is Book));
+                    Game1.player.Items=Game1.player.Items.Where(a => !(a is Book)).ToList();
                     break;
             }
         }

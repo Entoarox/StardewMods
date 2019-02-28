@@ -26,6 +26,7 @@ insert_final_newline = false
 
 #sort 'system' usings first
 dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
 
 # use 'this.' qualifier
 dotnet_style_qualification_for_field = true:error
