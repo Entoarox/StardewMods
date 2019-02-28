@@ -152,7 +152,6 @@ namespace Entoarox.Framework.Core
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.Saved += this.OnSaved;
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
         }
 
@@ -165,30 +164,13 @@ namespace Entoarox.Framework.Core
         /*********
         ** Protected methods
         *********/
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            if (e.Button.IsActionButton() || e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
-                this.CheckForAction();
-        }
 
         /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (this.ActionInfo != null  && (e.Button.IsActionButton() || e.Button == SButton.ControllerA || e.Button == SButton.MouseRight))
-            {
-                MoreEvents.FireActionTriggered(this.ActionInfo);
-                this.ActionInfo = null;
-            }
-        }
-
-        private void CheckForAction()
-        {
-            if (Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
+            if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
             {
                 this.ActionInfo = null;
                 Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
@@ -202,7 +184,7 @@ namespace Entoarox.Framework.Core
                     string[] split = ((string)propertyValue).Split(' ');
                     string[] args = new string[split.Length - 1];
                     Array.Copy(split, 1, args, 0, args.Length);
-                    this.ActionInfo = new EventArgsActionTriggered(Game1.player, split[0], args, grabTile);
+                    MoreEvents.FireActionTriggered(new EventArgsActionTriggered(Game1.player, split[0], args, grabTile));
                 }
             }
         }
