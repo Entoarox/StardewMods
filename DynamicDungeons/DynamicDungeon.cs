@@ -48,7 +48,9 @@ namespace Entoarox.DynamicDungeons
         *********/
         public DynamicDungeon(double difficulty = 0, int? seed = null)
         {
+#pragma warning disable AvoidNetField // Avoid Netcode types when possible
             this.name.Value = "DynamicDungeon";
+#pragma warning restore AvoidNetField // Avoid Netcode types when possible
             this.Seed = seed ?? DynamicDungeon.Random.Next();
             this.Difficulty = difficulty;
             DungeonBuilder builder = new DungeonBuilder(difficulty, 1);

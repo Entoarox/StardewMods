@@ -67,9 +67,11 @@ namespace LanguagePatcher
                     try
                     {
                         // Add the custom attribute to the assembly so that other things can check for it
+#pragma warning disable CS0618 // Type or member is obsolete
                         var attribute = new CustomAttribute(assembly.MainModule.Import(typeof(AssemblyMetadataAttribute).GetConstructor(new Type[] { typeof(string), typeof(string) })));
                         attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.Import(typeof(string)), PatcherName));
                         attribute.ConstructorArguments.Add(new CustomAttributeArgument(assembly.MainModule.Import(typeof(string)), PatcherVersion));
+#pragma warning restore CS0618 // Type or member is obsolete
                         assembly.CustomAttributes.Add(attribute);
 
                         // Add extra languages to the list of allowed languages

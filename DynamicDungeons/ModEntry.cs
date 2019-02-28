@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -39,7 +38,7 @@ namespace Entoarox.DynamicDungeons
         {
             ModEntry.SMonitor = this.Monitor;
             ModEntry.SHelper = this.Helper;
-            GameEvents.UpdateTick += this.GameEvents_UpdateTick;
+            helper.Events.GameLoop.UpdateTicked+= this.GameEvents_UpdateTick;
             helper.ConsoleCommands.Add("dd_fromseed", "dd_fromseed <seed> | Generate a dungeon from a specific seed", this.Command_Fromseed);
             this.InfoBook = new BookMenu(new List<Page>
             {
@@ -138,9 +137,9 @@ namespace Entoarox.DynamicDungeons
         {
             if (Context.IsWorldReady)
             {
-                GameEvents.UpdateTick -= this.GameEvents_UpdateTick;
-                InputEvents.ButtonReleased += this.InputEvents_ButtonReleased;
-                PlayerEvents.Warped += this.PlayerEvents_Warped;
+                this.Helper.Events.GameLoop.UpdateTicked -= this.GameEvents_UpdateTick;
+                this.Helper.Events.Input.ButtonReleased += this.InputEvents_ButtonReleased;
+                this.Helper.Events.Player.Warped += this.PlayerEvents_Warped;
                 GameLocation loc = Game1.getLocationFromName("WizardHouse");
                 TileSheet sheet = new TileSheet("Custom", loc.map, this.Helper.Content.GetActualAssetKey("assets/door.png"), new Size(4, 7), new Size(16, 16));
                 loc.map.AddTileSheet(sheet);
@@ -172,24 +171,22 @@ namespace Entoarox.DynamicDungeons
             }
         }
 
-        private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
+        private void PlayerEvents_Warped(object s, WarpedEventArgs e)
         {
-            if (e.PriorLocation != null && (e.PriorLocation.Name == "DynamicDungeonEntrance" || e.PriorLocation.Name == "WizardHouse"))
+            if (e.OldLocation != null && (e.OldLocation.Name == "DynamicDungeonEntrance" || e.OldLocation.Name == "WizardHouse"))
             {
-                ControlEvents.ControllerButtonPressed -= this.ControlEvents_ControllerButtonPressed;
-                ControlEvents.ControllerButtonReleased -= this.ControlEvents_ControllerButtonReleased;
-                ControlEvents.MouseChanged -= this.ControlEvents_MouseChanged;
-                if (e.PriorLocation.Name == "DynamicDungeonEntrance")
-                    GraphicsEvents.OnPreRenderHudEvent -= this.GraphicsEvents_OnPreRenderHudEvent;
+                this.Helper.Events.Input.ButtonPressed -= this.ControlEvents_ControllerButtonPressed;
+                this.Helper.Events.Input.ButtonReleased -= this.ControlEvents_ControllerButtonReleased;
+                if (e.OldLocation.Name == "DynamicDungeonEntrance")
+                    this.Helper.Events.Display.RenderingHud-= this.GraphicsEvents_OnPreRenderHudEvent;
             }
 
             if (e.NewLocation.Name == "DynamicDungeonEntrance" || e.NewLocation.Name == "WizardHouse")
             {
-                ControlEvents.ControllerButtonPressed += this.ControlEvents_ControllerButtonPressed;
-                ControlEvents.ControllerButtonReleased += this.ControlEvents_ControllerButtonReleased;
-                ControlEvents.MouseChanged += this.ControlEvents_MouseChanged;
+                this.Helper.Events.Input.ButtonPressed += this.ControlEvents_ControllerButtonPressed;
+                this.Helper.Events.Input.ButtonReleased += this.ControlEvents_ControllerButtonReleased;
                 if (e.NewLocation.Name == "DynamicDungeonEntrance")
-                    GraphicsEvents.OnPreRenderHudEvent += this.GraphicsEvents_OnPreRenderHudEvent;
+                    this.Helper.Events.Display.RenderingHud += this.GraphicsEvents_OnPreRenderHudEvent;
             }
         }
 
@@ -207,7 +204,7 @@ namespace Entoarox.DynamicDungeons
             Glow(7.75f, 8.50f);
         }
 
-        private void InputEvents_ButtonReleased(object s, EventArgsInput e)
+        private void InputEvents_ButtonReleased(object s, ButtonReleasedEventArgs e)
         {
             if (!Context.IsWorldReady || e.Button != SButton.F5 && e.Button != SButton.F6 && e.Button != SButton.F7)
                 return;
@@ -215,26 +212,15 @@ namespace Entoarox.DynamicDungeons
                 Game1.warpFarmer("WizardHouse", 5, 14, false);
         }
 
-        private void ControlEvents_ControllerButtonPressed(object sender, EventArgsControllerButtonPressed e)
+        private void ControlEvents_ControllerButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (e.ButtonPressed == Buttons.A)
+            if (e.Button.IsActionButton())
                 this.CheckForAction();
         }
 
-        private void ControlEvents_ControllerButtonReleased(object sender, EventArgsControllerButtonReleased e)
+        private void ControlEvents_ControllerButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (this.ActionInfo != null && e.ButtonReleased == Buttons.A)
-            {
-                this.ResolveAction();
-                this.ActionInfo = null;
-            }
-        }
-
-        private void ControlEvents_MouseChanged(object sender, EventArgsMouseStateChanged e)
-        {
-            if (e.NewState.RightButton == ButtonState.Pressed && e.PriorState.RightButton != ButtonState.Pressed)
-                this.CheckForAction();
-            if (this.ActionInfo != null && e.NewState.RightButton == ButtonState.Released)
+            if (this.ActionInfo != null && e.Button.IsActionButton())
             {
                 this.ResolveAction();
                 this.ActionInfo = null;
