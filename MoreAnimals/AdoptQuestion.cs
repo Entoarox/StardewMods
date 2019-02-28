@@ -43,12 +43,14 @@ namespace Entoarox.MorePetsAndAnimals
             int id = 0;
             if (ModEntry.Config.BalancedPetTypes)
             {
-                Dictionary<string, double> types = ModEntry.Pets.Keys.ToDictionary(k => k, v => 1.0);
+                double totalType = ModEntry.Pets.Count;
+                Dictionary<string, double> types = ModEntry.Pets.Keys.ToDictionary(k => k, v => totalType);
                 foreach (Pet pet in ModEntry.GetAllPets())
                 {
                     string petType = ModEntry.Sanitize(pet.GetType().Name);
                     types[petType] *= 0.5;
                 }
+                types = types.ToDictionary(k => k.Key, v => v.Value / totalType);
                 double typeChance = random.NextDouble();
                 foreach (KeyValuePair<string, double> pair in types.OrderBy(a => a.Value))
                 {
@@ -59,15 +61,17 @@ namespace Entoarox.MorePetsAndAnimals
                     }
                 }
             }
-            else
+            if(type=="")
                 type = ModEntry.Pets.Keys.ToArray()[random.Next(ModEntry.Pets.Count)];
             if (ModEntry.Config.BalancedPetSkins)
             {
-                Dictionary<int, double> skins = ModEntry.Pets[type].ToDictionary(k => k.ID, v => 1.0);
+                double totalSkin = ModEntry.Pets[type].Count;
+                Dictionary<int, double> skins = ModEntry.Pets[type].ToDictionary(k => k.ID, v => totalSkin);
                 foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.Sanitize(pet.GetType().Name) == type))
                 {
                     skins[pet.Manners] *= 0.5;
                 }
+                skins = skins.ToDictionary(k => k.Key, v => v.Value / totalSkin);
                 double skinChance = random.NextDouble();
                 foreach (KeyValuePair<int, double> pair in skins.OrderBy(a => a.Value))
                 {
@@ -78,7 +82,7 @@ namespace Entoarox.MorePetsAndAnimals
                     }
                 }
             }
-            else
+            if(id==0)
                 id = ModEntry.Pets[type][random.Next(ModEntry.Pets[type].Count)].ID;
             AdoptQuestion q = new AdoptQuestion(type, id);
             ModEntry.SHelper.Events.Display.RenderedHud += q.Display;

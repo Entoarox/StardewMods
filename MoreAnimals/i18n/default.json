@@ -1,9 +1,9 @@
 {
   "EmptyBox": "Just an empty box.",
-  "AdoptMessage": "Oh dear, it looks like someone has abandoned a poor {petType} here! Perhaps you should pay Marnie {adoptionPrice} gold to give it a checkup so you can adopt it?",
-  "AdoptNoGold": "Unfortunately I do not have the required {adoptionPrice} gold in order to do this.",
+  "AdoptMessage": "Oh dear, it looks like someone has abandoned a poor {{petType}} here! Perhaps you should pay Marnie {{adoptionPrice}} gold to give it a checkup so you can adopt it?",
+  "AdoptNoGold": "Unfortunately I do not have the required {{adoptionPrice}} gold in order to do this.",
   "AdoptYes": "Yes, I really should adopt the poor animal!",
   "AdoptNo": "No, I do not have the space to house it.",
   "ChooseName": "Choose a name",
-  "Adopted": "Marnie will bring {petName} to your house once their have had their checkup."
+  "Adopted": "Marnie will bring {{petName}} to your house once their have had their checkup."
 }

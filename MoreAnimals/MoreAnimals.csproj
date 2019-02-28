@@ -36,12 +36,17 @@
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>E:\SteamGames\steamapps\common\Stardew Valley\smapi-internal\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdoptQuestion.cs" />
     <Compile Include="Framework\AnimalSkin.cs" />
     <Compile Include="Framework\ModApi.cs" />
+    <Compile Include="Framework\HarmonyPatches.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="ModEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

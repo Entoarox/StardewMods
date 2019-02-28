@@ -3,20 +3,30 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Reflection;
+
 using Entoarox.Framework;
 using Entoarox.Framework.Events;
 using Entoarox.MorePetsAndAnimals.Framework;
+
 using Microsoft.Xna.Framework;
+
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Locations;
+
 using xTile.Dimensions;
 using xTile.ObjectModel;
 using xTile.Tiles;
+
 using Newtonsoft.Json;
+
 using Microsoft.Xna.Framework.Graphics;
+
+using Harmony;
 
 namespace Entoarox.MorePetsAndAnimals
 {
@@ -72,6 +82,7 @@ namespace Entoarox.MorePetsAndAnimals
             ModEntry.SMonitor = this.Monitor;
 
             // Event listeners
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.SaveLoaded += this.LoadSkinMap;
             helper.Events.GameLoop.Saving += this.SaveSkinMap;
             helper.Events.GameLoop.Saved += this.LoadSkinMap;
@@ -135,8 +146,9 @@ namespace Entoarox.MorePetsAndAnimals
                 }
             }
 
-            // hook events
-            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            // Apply harmony patches
+            var instance = HarmonyInstance.Create("Entoarox.MorePetsAndAnimals");
+            instance.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         public override object GetApi()
@@ -263,13 +275,7 @@ namespace Entoarox.MorePetsAndAnimals
             // patch bus stop
             if (this.ReplaceBus && Game1.getLocationFromName("BusStop") != null)
             {
-                if (Config.UseOldClickDetection)
-                {
-                    this.Helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-                    this.Helper.Events.Input.ButtonReleased += this.OnButtonReleased;
-                }
-                else
-                    MoreEvents.ActionTriggered += this.OnActionTriggered;
+                MoreEvents.ActionTriggered += this.OnActionTriggered;
                 this.Monitor.Log("Patching bus stop...", LogLevel.Trace);
                 GameLocation bus = Game1.getLocationFromName("BusStop");
                 bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, this.Helper.Content.GetActualAssetKey("assets/box.png"), new Size(2, 2), new Size(16, 16)));
@@ -285,15 +291,14 @@ namespace Entoarox.MorePetsAndAnimals
             // set pet skins
             foreach (Pet pet in GetAllPets())
             {
-                if (pet.Manners > 0 && !pet.updatedDialogueYet)
+                if (pet.Manners > 0)
                 {
                     AnimalSkin skin = this.GetSkin(pet);
-                    if (skin != null)
+                    if (skin != null && pet.Sprite.textureName.Value!=skin.AssetKey)
                     {
                         pet.Sprite = new AnimatedSprite(skin.AssetKey, 0, 32, 32);
                         pet.Manners = skin.ID;
                     }
-                    pet.updatedDialogueYet = true;
                 }
             }
 
@@ -363,7 +368,7 @@ namespace Entoarox.MorePetsAndAnimals
                 if (skin != null)
                     return skin;
 
-                this.Monitor.Log($"Found animal type {type} with index {index}, but there's no matching file. Reassigning a random skin to that animal.");
+                this.Monitor.Log($"Found animal of type `{type}` with skin index {index}, but there's no matching file. Randomly assigning a new skin.", LogLevel.Warn);
             }
 
             // get random skin
@@ -459,57 +464,18 @@ namespace Entoarox.MorePetsAndAnimals
         private void OnActionTriggered(object sender, EventArgsActionTriggered e)
         {
             if (e.Action.Equals("MorePetsAdoption"))
-                this.DoAction();
-        }
-
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            if (e.Button == SButton.ControllerA || e.Button == SButton.MouseRight)
-                this.CheckForAction();
-        }
-
-        /// <summary>Raised after the player releases a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
-        {
-            if (this.TriggerAction && !e.IsDown(SButton.MouseRight) && !e.IsDown(SButton.ControllerA))
             {
-                this.TriggerAction = false;
-                this.DoAction();
+                int seed = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
+                if (Config.DisableDailyLimit)
+                    ModEntry.Random = new Random();
+                else
+                    ModEntry.Random = new Random(seed);
+                List<Pet> list = GetAllPets().ToList();
+                if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || ModEntry.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || (!Config.DisableDailyLimit && list.FindIndex(a => a.Age == seed) != -1))
+                    Game1.drawObjectDialogue(this.Helper.Translation.Get("EmptyBox"));
+                else
+                    AdoptQuestion.Show();
             }
-        }
-
-        private void CheckForAction()
-        {
-            if (Game1.hasLoadedGame && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
-            {
-                Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
-                if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
-                    grabTile = Game1.player.GetGrabTile();
-                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
-                PropertyValue propertyValue = null;
-                tile?.Properties.TryGetValue("Action", out propertyValue);
-                if (propertyValue != null && propertyValue == "MorePetsAdoption")
-                    this.TriggerAction = true;
-            }
-        }
-
-        private void DoAction()
-        {
-            int seed = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
-            if (Config.DisableDailyLimit)
-                ModEntry.Random = new Random();
-            else
-                ModEntry.Random = new Random(seed);
-            List<Pet> list = GetAllPets().ToList();
-            if (ModEntry.Config.UseMaxAdoptionLimit && list.Count >= ModEntry.Config.MaxAdoptionLimit || ModEntry.Random.NextDouble() < Math.Max(0.1, Math.Min(0.9, list.Count * ModEntry.Config.RepeatedAdoptionPenality)) || (!Config.DisableDailyLimit && list.FindIndex(a => a.Age == seed) != -1))
-                Game1.drawObjectDialogue(this.Helper.Translation.Get("EmptyBox"));
-            else
-                AdoptQuestion.Show();
         }
     }
 }
