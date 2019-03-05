@@ -60,7 +60,7 @@ namespace Entoarox.MorePetsAndAnimals
             {
                 double totalSkin = ModEntry.Pets[type].Count;
                 Dictionary<int, double> skins = ModEntry.Pets[type].ToDictionary(k => k.ID, v => totalSkin);
-                foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.PetTypesRev.ContainsKey(pet.GetType()) && ModEntry.PetTypesRev[pet.GetType()].Equals(type)))
+                foreach (Pet pet in ModEntry.GetAllPets().Where(pet => ModEntry.PetTypesRev.ContainsKey(pet.GetType()) && ModEntry.PetTypesRev[pet.GetType()].Equals(type) && skins.ContainsKey(pet.Manners)))
                     skins[pet.Manners] *= 0.5;
                 skins = skins.ToDictionary(k => k.Key, v => v.Value / totalSkin);
                 double skinMax = skins.Values.OrderByDescending(a => a).First();

@@ -1,0 +1,6 @@
+{
+  "FirstMessage": "You have found your first hidden junimo, find all five to wake up the Magic Junimo!",
+  "FoundMessage": "You have found hidden junimo {{TotalFound}} of 5, find them all to wake up the Magic Junimo!",
+  "LastMessage": "You have found all hidden junimo's and awoken the Magic Junimo, it will reach your farm tomorrow.",
+  "EmptyMessage": "The junimo that was hidden here has since moved on."
+}
