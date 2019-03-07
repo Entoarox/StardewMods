@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -34,19 +35,8 @@ namespace MagicJunimoPet
                 Game1.drawObjectDialogue(this.Helper.Translation.Get("EmptyMessage"));
                 return;
             }
-            // If this code runs, then you've at least found the current one
-            int found = 1;
-            // Check how many of the others you've found
-            if (Game1.MasterPlayer.mailReceived.Contains("HiddenJunimo1"))
-                found++;
-            if (Game1.MasterPlayer.mailReceived.Contains("HiddenJunimo2"))
-                found++;
-            if (Game1.MasterPlayer.mailReceived.Contains("HiddenJunimo3"))
-                found++;
-            if (Game1.MasterPlayer.mailReceived.Contains("HiddenJunimo4"))
-                found++;
-            if (Game1.MasterPlayer.mailReceived.Contains("HiddenJunimo5"))
-                found++;
+            // Count your jumino's
+            int found = new[] { "HiddenJunimo1", "HiddenJunimo2", "HiddenJunimo3", "HiddenJunimo4", "HiddenJunimo5" }.Count(Game1.MasterPlayer.mailReceived.Contains)+1;
             // Add the current one, and play the sound
             Game1.playSound("junimoMeep1");
             Game1.MasterPlayer.mailReceived.Add(junimo);
@@ -97,6 +87,8 @@ namespace MagicJunimoPet
         }
         private void OnDayStarted(object s, EventArgs e)
         {
+            if (!Game1.MasterPlayer.mailReceived.Contains("ccDoorUnlock"))
+                return;
             if(!Game1.MasterPlayer.mailReceived.Contains("HasMagicJunimoPet") && Game1.MasterPlayer.mailReceived.Contains("ccIsComplete") && !Game1.MasterPlayer.mailReceived.Contains("JojaMember"))
             {
                 Game1.playSound("junimoMeep1");
@@ -106,8 +98,6 @@ namespace MagicJunimoPet
             }
             if (Game1.MasterPlayer.mailReceived.Contains("HasMagicJunimoPet"))
                 SpawnJunimo();
-            if (!Game1.MasterPlayer.mailReceived.Contains("ccDoorUnlock"))
-                return;
             Game1.getLocationFromName("Beach").setTileProperty(51, 9, "Buildings", "Action", "HiddenJunimo1");
             Game1.getLocationFromName("Mountain").setTileProperty(31, 4, "Buildings", "Action", "HiddenJunimo2");
             Game1.getLocationFromName("Forest").setTileProperty(73, 98, "Buildings", "Action", "HiddenJunimo3");

@@ -61,8 +61,10 @@ namespace Entoarox.ExtendedMinecart
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, EventArgs e)
         {
-            if (!Game1.hasLoadedGame || Game1.CurrentEvent != null)
+            if (!Context.IsWorldReady)
                 return;
+            if (Context.IsMultiplayer)
+                this.Monitor.Log("Multiplayer game detected, you are using Extended Minecarts at your own risk!", LogLevel.Warn);
 
             this.Helper.Events.GameLoop.UpdateTicked -= this.OnUpdateTicked;
             ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
@@ -334,7 +336,7 @@ namespace Entoarox.ExtendedMinecart
                 ModEntry.Destinations["Desert"].Disabled = true;
             if (this.Config.WoodsDestinationEnabled && !Game1.player.mailReceived.Contains("beenToWoods"))
                 ModEntry.Destinations["Woods"].Disabled = true;
-            if (this.Config.BeachDestinationEnabled && !(Game1.getLocationFromName("Beach") as Beach).bridgeFixed.Value)
+            if (this.Config.BeachDestinationEnabled && (!(Game1.getLocationFromName("Beach") as Beach).bridgeFixed.Value || (Game1.currentSeason.Equals("winter") && Game1.dayOfMonth >= 15 && Game1.dayOfMonth <= 17)))
                 ModEntry.Destinations["Beach"].Disabled = true;
             this.CheckRefuel = false;
             Game1.activeClickableMenu = ModEntry.Menu;
