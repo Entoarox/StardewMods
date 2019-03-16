@@ -13,6 +13,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using xTile;
+using xTile.Layers;
 using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
 
 namespace Entoarox.AdvancedLocationLoader
@@ -47,6 +48,7 @@ namespace Entoarox.AdvancedLocationLoader
             MoreEvents.ActionTriggered += this.OnActionTriggered;
             helper.Events.Specialised.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
             helper.Events.Player.Warped += this.OnWarped;
+            helper.Events.Player.Warped += this.DrawFarBack;
 
             this.Helper.Content.RegisterSerializerType<Greenhouse>();
             this.Helper.Content.RegisterSerializerType<Sewer>();
@@ -138,6 +140,19 @@ namespace Entoarox.AdvancedLocationLoader
             ModEntry.UpdateConditionalEdits();
             if (Game1.dayOfMonth == 1)
                 ModEntry.UpdateTilesheets();
+        }
+
+        private void DrawFarBack(object s, WarpedEventArgs e)
+        {
+            if (!e.IsLocalPlayer)
+                return;
+            e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DoDrawFarBack;
+            e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DoDrawFarBack;
+        }
+        private void DoDrawFarBack(object s, LayerEventArgs e)
+        {
+            Game1.currentLocation.map.GetLayer("FarBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, xTile.Dimensions.Location.Origin, false, 4);
+            Game1.currentLocation.map.GetLayer("MidBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, xTile.Dimensions.Location.Origin, false, 4);
         }
 
         /// <summary>Raised after a map action is triggered.</summary>
