@@ -217,7 +217,7 @@ namespace Entoarox.MorePetsAndAnimals
                 }
 
                 // yield
-                string assetKey = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", file.Name));
+                string assetKey = this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "skins", extension.Equals("xnb") ? Path.Combine(Path.GetDirectoryName(file.Name), Path.GetFileNameWithoutExtension(file.Name)) : file.Name));
                 if (Animals.ContainsKey(type))
                     Animals[type].Add(new AnimalSkin(type, index, assetKey));
                 else
@@ -440,7 +440,7 @@ namespace Entoarox.MorePetsAndAnimals
                     break;
                 case "list_animal_types":
                     List<string> types = new List<string>();
-                    foreach(FarmAnimal animal in GetFarmAnimals())
+                    foreach(FarmAnimal animal in this.GetFarmAnimals())
                     {
                         string type = Sanitize(animal.type.Value);
                         if (!types.Contains(type))
@@ -450,7 +450,7 @@ namespace Entoarox.MorePetsAndAnimals
                     break;
                 case "list_animal_skins":
                     List<string> skins = new List<string>();
-                    foreach (FarmAnimal animal in GetFarmAnimals())
+                    foreach (FarmAnimal animal in this.GetFarmAnimals())
                     {
                         string type = Sanitize(animal.type.Value) + ':' + (SkinMap.ContainsKey(animal.myID.Value) ? SkinMap[animal.myID.Value] : 0);
                         if (!skins.Contains(type))
