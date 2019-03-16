@@ -89,7 +89,7 @@ namespace MagicJunimoPet
         {
             if (!Game1.MasterPlayer.mailReceived.Contains("ccDoorUnlock"))
                 return;
-            if(!Game1.MasterPlayer.mailReceived.Contains("HasMagicJunimoPet") && Game1.MasterPlayer.mailReceived.Contains("ccIsComplete") && !Game1.MasterPlayer.mailReceived.Contains("JojaMember"))
+            if(!Game1.MasterPlayer.mailReceived.Contains("HasMagicJunimoPet") && (Game1.MasterPlayer.mailReceived.Contains("ccIsComplete") || Game1.MasterPlayer.hasCompletedCommunityCenter()) && !Game1.MasterPlayer.mailReceived.Contains("JojaMember"))
             {
                 Game1.playSound("junimoMeep1");
                 DelayedAction.playSoundAfterDelay("junimoMeep1", 200);
@@ -97,7 +97,7 @@ namespace MagicJunimoPet
                 Game1.MasterPlayer.mailReceived.Add("HasMagicJunimoPet");
             }
             if (Game1.MasterPlayer.mailReceived.Contains("HasMagicJunimoPet"))
-                SpawnJunimo();
+                this.SpawnJunimo();
             Game1.getLocationFromName("Beach").setTileProperty(51, 9, "Buildings", "Action", "HiddenJunimo1");
             Game1.getLocationFromName("Mountain").setTileProperty(31, 4, "Buildings", "Action", "HiddenJunimo2");
             Game1.getLocationFromName("Forest").setTileProperty(73, 98, "Buildings", "Action", "HiddenJunimo3");

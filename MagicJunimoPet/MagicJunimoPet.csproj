@@ -50,7 +50,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="i18n\default.json" />
+    <None Include="i18n\default.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="i18n\ko.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
