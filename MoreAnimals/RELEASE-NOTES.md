@@ -4,6 +4,7 @@ Not yet released
 
 * Adds italian localization.
 * Fixes xnb files not being usable as skins.
+* Fixes pet types without skins having a chance of being selected.
 
 ## 3.0
 Released 3 March 2019.

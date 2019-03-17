@@ -9,6 +9,8 @@ using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Menus;
 
+using Entoarox.MorePetsAndAnimals.Framework;
+
 namespace Entoarox.MorePetsAndAnimals
 {
     internal class AdoptQuestion
@@ -25,12 +27,12 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Public methods
         *********/
-        public AdoptQuestion(string type, int skin)
+        public AdoptQuestion(AnimalSkin skin)
         {
-            this.Type = type;
-            this.Skin = skin;
+            this.Type = skin.AnimalType;
+            this.Skin = skin.ID;
 
-            this.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{type}_{skin}.png"), 28, 32, 32)
+            this.Sprite = new AnimatedSprite(skin.AssetKey, 28, 32, 32)
             {
                 loop = true
             };
@@ -40,11 +42,11 @@ namespace Entoarox.MorePetsAndAnimals
         {
             Random random = ModEntry.Random;
             string type=null;
-            int id = 0;
+            AnimalSkin skin=null;
             if (ModEntry.Config.BalancedPetTypes)
             {
                 double totalType = ModEntry.Pets.Count;
-                Dictionary<string, double> types = ModEntry.Pets.Keys.ToDictionary(k => k, v => totalType);
+                Dictionary<string, double> types = ModEntry.Pets.Where(a => a.Value.Count>0).ToDictionary(k => k.Key, v => totalType);
                 foreach (Pet pet in ModEntry.GetAllPets().Where(p => ModEntry.PetTypesRev.ContainsKey(p.GetType()) && ModEntry.Pets[ModEntry.PetTypesRev[p.GetType()]].Count>0))
                     types[ModEntry.PetTypesRev[pet.GetType()]] *= 0.5;
                 types = types.ToDictionary(k => k.Key, v => v.Value / totalType);
@@ -54,8 +56,11 @@ namespace Entoarox.MorePetsAndAnimals
                 if (validTypes.Length > 0)
                     type = validTypes[random.Next(validTypes.Length)];
             }
-            if(string.IsNullOrEmpty(type))
-                type = ModEntry.Pets.Keys.ToArray()[random.Next(ModEntry.Pets.Count)];
+            if (string.IsNullOrEmpty(type))
+            {
+                string[] arr = ModEntry.Pets.Where(a => a.Value.Count > 0).Select(a => a.Key).ToArray();
+                type = arr[random.Next(arr.Length)];
+            }
             if (ModEntry.Config.BalancedPetSkins)
             {
                 double totalSkin = ModEntry.Pets[type].Count;
@@ -66,12 +71,14 @@ namespace Entoarox.MorePetsAndAnimals
                 double skinMax = skins.Values.OrderByDescending(a => a).First();
                 double skinChance = random.NextDouble();
                 int[] validSkins = skins.Where(a => a.Value >= skinChance).Select(a => a.Key).ToArray();
+                int id = 0;
                 if (validSkins.Length > 0)
                     id = validSkins[random.Next(validSkins.Length)];
+                skin = ModEntry.Pets[type].FirstOrDefault(a => a.ID == id);
             }
-            if(id==0)
-                id = ModEntry.Pets[type][random.Next(ModEntry.Pets[type].Count)].ID;
-            AdoptQuestion q = new AdoptQuestion(type, id);
+            if(skin==null)
+                skin = ModEntry.Pets[type][random.Next(ModEntry.Pets[type].Count)];
+            AdoptQuestion q = new AdoptQuestion(skin);
             ModEntry.SHelper.Events.Display.RenderedHud += q.Display;
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
