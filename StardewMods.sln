@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicJunimoPet", "MagicJuni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SundropCity", "SundropCity\SundropCity.csproj", "{414FAE92-0580-4C5B-8187-97E260A8309A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DialogueFramework", "DialogueFramework\DialogueFramework.csproj", "{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,14 @@ Global
 		{414FAE92-0580-4C5B-8187-97E260A8309A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{414FAE92-0580-4C5B-8187-97E260A8309A}.Release|x86.ActiveCfg = Release|Any CPU
 		{414FAE92-0580-4C5B-8187-97E260A8309A}.Release|x86.Build.0 = Release|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Debug|x86.Build.0 = Debug|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|x86.ActiveCfg = Release|Any CPU
+		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
