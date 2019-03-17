@@ -271,11 +271,12 @@ namespace Entoarox.MorePetsAndAnimals
                 this.LoadSkins();
 
             // patch bus stop
-            if (this.ReplaceBus && Game1.getLocationFromName("BusStop") != null)
+            if (this.ReplaceBus && Game1.getLocationFromName("BusStop")?.map.Properties.ContainsKey("MA.Patched")==false)
             {
                 MoreEvents.ActionTriggered += this.OnActionTriggered;
                 this.Monitor.Log("Patching bus stop...", LogLevel.Trace);
                 GameLocation bus = Game1.getLocationFromName("BusStop");
+                bus.map.Properties.Add("MA.Patched", true);
                 bus.map.AddTileSheet(new TileSheet("MorePetsTilesheet", bus.map, this.Helper.Content.GetActualAssetKey("assets/box.png"), new Size(2, 2), new Size(16, 16)));
                 bus.SetTile(1, 2, "Front", 0, "MorePetsTilesheet");
                 bus.SetTile(2, 2, "Front", 1, "MorePetsTilesheet");
@@ -283,7 +284,6 @@ namespace Entoarox.MorePetsAndAnimals
                 bus.SetTile(2, 3, "Buildings", 3, "MorePetsTilesheet");
                 bus.SetTileProperty(1, 3, "Buildings", "Action", "MorePetsAdoption");
                 bus.SetTileProperty(2, 3, "Buildings", "Action", "MorePetsAdoption");
-                this.ReplaceBus = false;
             }
 
             // set pet skins
