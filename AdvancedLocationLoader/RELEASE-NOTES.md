@@ -1,4 +1,15 @@
 ## Release notes
+## 1.5.0
+Not yet released
+
+* Added `FarBack` and `MidBack` layers, they get drawn just before the `Back` layer.
+
+
+## 1.4.7
+Released 03 Match 2019
+
+* Compatibility update for latest SDV release.
+
 ## 1.4.6
 Released 28 December 2018. (Thanks to Pathoschild!)
 
