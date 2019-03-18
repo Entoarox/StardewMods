@@ -1,6 +1,6 @@
 ## Release notes
 ## 3.0.1
-Not yet released
+Released 18 march 2019.
 
 * Adds italian localization.
 * Fixes xnb files not being usable as skins.
