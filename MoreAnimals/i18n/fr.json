@@ -1,0 +1,9 @@
+{
+  "EmptyBox": "Juste une boîte vide.",
+  "AdoptMessage": "Oh non, on dirait que quelqu'un a abandonné un pauvre {{petType}} ici ! Peut-être devriez-vous payer Marnie {{adoptionPrice}} po pour qu'elle lui fasse un bilan de santé pour pouvoir l'adopter ?",
+  "AdoptNoGold": "Malheureusement, je n'ai pas les {{adoptionPrice}} po nécessaires pour le faire.",
+  "AdoptYes": "Oui, je devrais vraiment adopter ce pauvre animal !",
+  "AdoptNo": "Non, je n'ai pas la place pour l'accueillir.",
+  "ChooseName": "Choisissez un nom",
+  "Adopted": "Marnie amènera {{petName}} chez vous une fois qu'elle aura fait leur bilan de santé."
+}
