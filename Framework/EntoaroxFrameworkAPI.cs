@@ -13,7 +13,6 @@ namespace Entoarox.Framework
         private static readonly Dictionary<string, int> RunBoosts = new Dictionary<string, int>();
         private static readonly Dictionary<string, int> WalkBoosts = new Dictionary<string, int>();
 
-
         /*********
         ** Public methods
         *********/

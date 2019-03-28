@@ -48,12 +48,61 @@ namespace SundropCity
 
         private void Setup()
         {
+            // Handle patches specific to other mods
+            var registry = this.Helper.Data.ReadJsonFile<Dictionary<string, string>>("assets/TownPatches/registry.json");
+            string patchVersion = "Vanilla";
+            foreach(var pair in registry)
+            {
+                if (!this.Helper.ModRegistry.IsLoaded(pair.Key))
+                    continue;
+                patchVersion = pair.Value;
+                break;
+            }
+            // Setup for patching
+            var town = Game1.getLocationFromName("Town");
+            var patch = this.Helper.Content.Load<xTile.Map>("assets/TownPatches/"+patchVersion+".tbin");
+            var layers = town.map.Layers.Where(a => patch.GetLayer(a.Id) != null).Select(a => a.Id);
+            // Perform patching
+            foreach (string layer in layers)
+            {
+                xTile.Layers.Layer toLayer = town.map.GetLayer(layer),
+                    fromLayer = patch.GetLayer(layer);
+                // First patch area: The road
+                for (int x = 96; x < 120; x++)
+                    for (int y = 53; y < 61; y++)
+                    {
+                        var tile = fromLayer.Tiles[x, y];
+                        if (tile == null)
+                            toLayer.Tiles[x, y] = null;
+                        else
+                            toLayer.Tiles[x, y] = new xTile.Tiles.StaticTile(toLayer, town.map.GetTileSheet(tile.TileSheet.Id), xTile.Tiles.BlendMode.Additive, tile.TileIndex);
+                        var vect = new Microsoft.Xna.Framework.Vector2(x, y);
+                        town.largeTerrainFeatures.Filter(a => a.tilePosition.Value != vect);
+                    }
+                // Second patch area: replacing the pink tree
+                for (int x = 110; x < 116; x++)
+                    for (int y = 46; y < 53; y++)
+                    {
+                        var tile = fromLayer.Tiles[x, y];
+                        if (tile == null)
+                            toLayer.Tiles[x, y] = null;
+                        else
+                            toLayer.Tiles[x, y] = new xTile.Tiles.StaticTile(toLayer, town.map.GetTileSheet(tile.TileSheet.Id), xTile.Tiles.BlendMode.Additive, tile.TileIndex);
+                    }
+            }
+            // Setup warps to sundrop [TEMP: Will become warps to SundropBusStop map in the future]
+            town.warps.Add(new Warp(120, 55, "SundropPromenade", 1, 29, false));
+            town.warps.Add(new Warp(120, 56, "SundropPromenade", 1, 30, false));
+            town.warps.Add(new Warp(120, 57, "SundropPromenade", 1, 31, false));
+            town.warps.Add(new Warp(120, 58, "SundropPromenade", 1, 32, false));
             // Add new locations
             foreach (string map in this.Maps)
             {
                 this.Monitor.Log("Adding sundrop location: "+ Path.GetFileNameWithoutExtension(map), LogLevel.Trace);
                 Game1.locations.Add(new SundropLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map)));
             }
+            // Add warp back to Pelican [TEMP: Will be removed once proper travel is implemented]
+            Game1.getLocationFromName("SundropPromenade").setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
         }
 
         private void OnSaveLoaded(object s, EventArgs e)
