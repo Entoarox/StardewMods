@@ -4,7 +4,6 @@ Not yet released
 
 * Added `FarBack` and `MidBack` layers, they get drawn just before the `Back` layer.
 
-
 ## 1.4.7
 Released 03 Match 2019
 
