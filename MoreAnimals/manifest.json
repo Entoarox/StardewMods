@@ -1,7 +1,7 @@
 {
   "Name": "More Animals",
   "Author": "Entoarox, see credits.txt for texture authors",
-  "Version": "3.0.1",
+  "Version": "3.0.2",
   "Description": "Lets you adopt more pets, with skins of your choice! - Now also includes randomised animal skins!",
   "UniqueID": "Entoarox.MoreAnimals",
   "EntryDll": "MoreAnimals.dll",

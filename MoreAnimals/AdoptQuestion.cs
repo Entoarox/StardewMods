@@ -18,8 +18,7 @@ namespace Entoarox.MorePetsAndAnimals
         /*********
         ** Fields
         *********/
-        private readonly string Type;
-        private readonly int Skin;
+        private readonly AnimalSkin Skin;
         private readonly AnimatedSprite Sprite;
         private Farmer Who;
 
@@ -29,8 +28,7 @@ namespace Entoarox.MorePetsAndAnimals
         *********/
         public AdoptQuestion(AnimalSkin skin)
         {
-            this.Type = skin.AnimalType;
-            this.Skin = skin.ID;
+            this.Skin = skin;
 
             this.Sprite = new AnimatedSprite(skin.AssetKey, 28, 32, 32)
             {
@@ -124,12 +122,12 @@ namespace Entoarox.MorePetsAndAnimals
         {
             Pet pet;
             this.Who.Money -= ModEntry.Config.AdoptionPrice;
-            Type type = ModEntry.PetTypes[this.Type];
+            Type type = ModEntry.PetTypes[this.Skin.AnimalType];
             pet = (Pet)Activator.CreateInstance(type, (int)Game1.player.position.X, (int)Game1.player.position.Y);
-            pet.Sprite = new AnimatedSprite(ModEntry.SHelper.Content.GetActualAssetKey($"assets/skins/{this.Type}_{this.Skin}.png"), 0, 32, 32);
+            pet.Sprite = new AnimatedSprite(this.Skin.AssetKey, 0, 32, 32);
             pet.Name = petName;
             pet.displayName = petName;
-            pet.Manners = this.Skin;
+            pet.Manners = this.Skin.ID;
             pet.Age = Game1.year * 1000 + Array.IndexOf(ModEntry.Seasons, Game1.currentSeason) * 100 + Game1.dayOfMonth;
             pet.Position = Game1.player.position;
             Game1.currentLocation.addCharacter(pet);

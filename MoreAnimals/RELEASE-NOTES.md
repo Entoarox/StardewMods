@@ -1,4 +1,11 @@
 ## Release notes
+## 3.0.2
+Released 28 march 2019
+
+* Adds french localization.
+* Adds spanish localization.
+* Fixes a missed issue with xnb skins.
+
 ## 3.0.1
 Released 18 march 2019.
 
