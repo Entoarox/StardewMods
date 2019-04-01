@@ -1,5 +1,5 @@
 ## Release notes
-##1.8.2
+## 1.8.2
 Released 01 April 2019.
 
 * Hopefully fixed minecart destinations disappearing in some situations.
