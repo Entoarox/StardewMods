@@ -1,9 +1,10 @@
 ## Release notes
-##1.8.1
-Released 20 March 2019.
+##1.8.2
+Released 01 April 2019.
 
-* Fixed minecart destinations disappearing in some situations.
-* Fixed certain destinations not unlocking for FarmHands.
+* Hopefully fixed minecart destinations disappearing in some situations.
+* Hopefully fixed certain destinations not unlocking for FarmHands.
+* Added debug logging in case these fixes are not working.
 
 ## 1.8.1
 Released 06 March 2019.

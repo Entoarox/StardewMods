@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Entoarox.Framework;
 using Entoarox.Framework.UI;
@@ -58,6 +59,7 @@ namespace Entoarox.ExtendedMinecart
         *********/
         private void OnDayStarted(object s, EventArgs e)
         {
+            this.Monitor.Log("DayStarted event, preparing custom minecarts...", LogLevel.Trace);
             if (Context.IsMultiplayer)
                 this.Monitor.Log("Multiplayer game detected, you are using Extended Minecarts at your own risk!", LogLevel.Warn);
             ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
@@ -94,6 +96,14 @@ namespace Entoarox.ExtendedMinecart
             ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), this.Helper.Translation.Get("choose-destination")));
             foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
                 ModEntry.Menu.AddComponent(c);
+            Dictionary<string, string> Status = new Dictionary<string, string>()
+            {
+                ["Farm"] = "Unknown",
+                ["Desert"] = "Unknown",
+                ["Woods"] = "Unknown",
+                ["Forest"] = "Unknown",
+                ["Beach"] = "Unknown"
+            };
             // # Farm
             if (this.Config.FarmDestinationEnabled && !this.Config.UseCustomFarmDestination)
             {
@@ -152,14 +162,19 @@ namespace Entoarox.ExtendedMinecart
                             // Keep exit clear
                             farm.setTileProperty(78, 14, "Back", "NoFurniture", "T");
                         }
+                        Status["Farm"] = "Patched";
                         farm.map.Properties.Add("Entoarox.ExtendedMinecarts.Patched", true);
                     }
+                    else
+                        Status["Farm"] = "Skipped";
                 }
                 catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Farm due to a unknown error", LogLevel.Error, err);
                 }
             }
+            else
+                Status["Farm"] = "Disabled";
             if (this.Config.DesertDestinationEnabled)
             {
                 try
@@ -220,14 +235,19 @@ namespace Entoarox.ExtendedMinecart
                             desert.SetTile(34, 42, "Buildings", 958, "z_path_objects_custom_sheet");
                             desert.SetTileProperty(34, 42, "Buildings", "Action", "MinecartTransport");
                         }
+                        Status["Desert"] = "Patched";
                         desert.map.Properties.Add("Entoarox.ExtendedMinecarts.Patched", true);
                     }
+                    else
+                        Status["Desert"] = "Skipped";
                 }
                 catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Desert due to a unknown error", LogLevel.Error, err);
                 }
             }
+            else
+                Status["Desert"] = "Disabled";
             if (this.Config.WoodsDestinationEnabled)
             {
                 try
@@ -239,14 +259,19 @@ namespace Entoarox.ExtendedMinecart
                         woods.SetTile(46, 3, "Front", 933, "untitled tile sheet");
                         woods.SetTile(46, 4, "Buildings", 958, "untitled tile sheet");
                         woods.SetTileProperty(46, 4, "Buildings", "Action", "MinecartTransport");
+                        Status["Woods"] = "Patched";
                         woods.map.Properties.Add("Entoarox.ExtendedMinecarts.Patched", true);
                     }
+                    else
+                        Status["Woods"] = "Skipped";
                 }
                 catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Woods due to a unknown error", LogLevel.Error, err);
                 }
             }
+            else
+                Status["Woods"] = "Disabled";
             if (this.Config.WizardDestinationEnabled)
             {
                 try
@@ -270,14 +295,19 @@ namespace Entoarox.ExtendedMinecart
                         forest.SetTile(14, 38, "Buildings", 933, "outdoors");
                         forest.SetTile(14, 39, "Buildings", 958, "outdoors");
                         forest.SetTileProperty(14, 39, "Buildings", "Action", "MinecartTransport");
+                        Status["Forest"] = "Patched";
                         forest.map.Properties.Add("Entoarox.ExtendedMinecarts.Patched", true);
                     }
+                    else
+                        Status["Forest"] = "Skipped";
                 }
                 catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Forest due to a unknown error", LogLevel.Error, err);
                 }
             }
+            else
+                Status["Forest"] = "Disabled";
             if (this.Config.BeachDestinationEnabled)
             {
                 try
@@ -296,16 +326,21 @@ namespace Entoarox.ExtendedMinecart
                         beach.SetTile(67, 2, "Buildings", 933, "z_path_objects_custom_sheet");
                         beach.SetTile(67, 3, "Buildings", 958, "z_path_objects_custom_sheet");
                         beach.SetTileProperty(67, 3, "Buildings", "Action", "MinecartTransport");
+                        Status["Beach"] = "Patched";
                         beach.map.Properties.Add("Entoarox.ExtendedMinecarts.Patched", true);
                     }
+                    else
+                        Status["Beach"] = "Skipped";
                 }
                 catch (Exception err)
                 {
                     this.Monitor.Log("Could not patch the Beach due to a unknown error", LogLevel.Error, err);
                 }
             }
+            else
+                Status["Beach"] = "Disabled";
+            this.Monitor.Log("Minecart status: " + string.Join(", ", Status.Select(item => $"{item.Key} ({item.Value})")) + '.', LogLevel.Trace);
         }
-
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
