@@ -1,0 +1,15 @@
+{
+  "Hotel.Properties.Comfort": "Comfort: {{Comfort}}",
+  "Hotel.Properties.Upkeep": "Upkeep: {{Upkeep}}",
+  "Hotel.Properties.Popularity": "Popularity: {{Popularity}}",
+  "Hotel.Properties.Capacity": "Capacity: {{Capacity}}",
+  "Hotel.Properties.StarLevel": "Star Level: {{StarLevel}}",
+  "Hotel.Properties.Revenue": "Revenue: {{Revenue}}",
+
+  "Hotel.Info.Set": "Set: {{SetName}}",
+  "Hotel.SetNames.LemonCreamPie": "Lemon Cream Pie",
+  "Hotel.SetFurniture.LemonCreamPie.LargeBed/Name": "Large Bed",
+  "Hotel.SetFurniture.LemonCreamPie.LargeBed/Description": "A large bed, suitable for 2 people to sleep in.",
+  "Hotel.SetFurniture.LemonCreamPie.SmallBed/Name": "Small Bed",
+  "Hotel.SetFurniture.LemonCreamPie.SmallBed/Description": "A small bed, suitable for 1 person to sleep in."
+}

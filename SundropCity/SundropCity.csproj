@@ -35,6 +35,9 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hotel\FurnitureInfo.cs" />
+    <Compile Include="Hotel\Furniture.cs" />
+    <Compile Include="Hotel\SetFurniture.cs" />
+    <Compile Include="Hotel\Upgrade.cs" />
     <Compile Include="SundropCityMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SundropLoader.cs" />
@@ -52,6 +59,16 @@
     <Compile Include="Locations\SundropLocation.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\Hotel\Data\GenericFurnitureTypes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Hotel\Data\SetFurnitureTypes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\Hotel\Data\Sets\LemonCreamPie.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="i18n\default.json" />
     <None Include="manifest.json" />
     <None Include="packages.config" />
   </ItemGroup>
