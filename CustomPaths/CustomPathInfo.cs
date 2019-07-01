@@ -22,6 +22,9 @@ namespace Entoarox.CustomPaths
         public string Requirements;
         public string Salesman;
         public int Speed;
+        public bool Animated;
+        public int[] Frames;
+        public int MillisPerFrame;
 
 
         /*********
@@ -37,11 +40,14 @@ namespace Entoarox.CustomPaths
             this.Salesman = config.Salesman;
             this.Requirements = config.Requirements;
             this.Speed = config.SpeedBoost;
+            this.Animated = config.Animated;
+            this.Frames = config.Frames;
+            this.MillisPerFrame = config.MillisPerFrame;
         }
 
         internal CustomPathInfo(Dictionary<string, Texture2D> textures, CustomPathConfig config)
         {
-            this.Seasonal = false;
+            this.Seasonal = true;
             this.Textures = textures;
             this.Name = config.Name;
             this.Alternates = config.Alternatives;

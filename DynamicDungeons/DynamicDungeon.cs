@@ -80,6 +80,7 @@ namespace Entoarox.DynamicDungeons
 
         public override void drawAboveAlwaysFrontLayer(SpriteBatch b)
         {
+            ModEntry.SMonitor.Log("DynamicDungeon#drawAboveAlwaysFrontLayer", StardewModdingAPI.LogLevel.Trace);
             if (this.DrawInfo)
                 this.Map.GetLayer("MapInfo").Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, Game1.pixelZoom);
             foreach (NPC current in this.characters)
@@ -141,12 +142,14 @@ namespace Entoarox.DynamicDungeons
 
         public override void checkForMusic(GameTime time)
         {
+            ModEntry.SMonitor.Log("DynamicDungeon#checkForMusic", StardewModdingAPI.LogLevel.Trace);
             if (Game1.currentSong == null || !Game1.currentSong.IsPlaying)
                 Game1.changeMusicTrack("Upper_Ambient");
         }
 
         public override void UpdateWhenCurrentLocation(GameTime time)
         {
+            ModEntry.SMonitor.Log("DynamicDungeon#UpdateWhenCurrentLocation", StardewModdingAPI.LogLevel.Trace);
             Game1.timeOfDay = this.Time;
             foreach (ResourceClump current in this.ResourceClumps)
                 current.tickUpdate(time, current.tile.Value, this);
@@ -173,6 +176,7 @@ namespace Entoarox.DynamicDungeons
 
         public override void draw(SpriteBatch b)
         {
+            ModEntry.SMonitor.Log("DynamicDungeon#draw", StardewModdingAPI.LogLevel.Trace);
             foreach (ResourceClump current in this.ResourceClumps)
                 current.draw(b, current.tile.Value);
             base.draw(b);
@@ -241,13 +245,16 @@ namespace Entoarox.DynamicDungeons
         /*********
         ** Protected methods
         *********/
+        /*
         protected override void resetLocalState()
         {
+            ModEntry.SMonitor.Log("DynamicDungeon#resetLocalState", StardewModdingAPI.LogLevel.Trace);
             this.Time = Game1.timeOfDay;
             base.resetLocalState();
             this.resetForPlayerEntry();
             this.forceViewportPlayerFollow = true;
         }
+        */
 
         private void ExitResolver(Farmer player, string answer)
         {

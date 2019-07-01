@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,10 +46,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abilities\FeedAbility.cs" />
+    <Compile Include="Abilities\MagicalAbility.cs" />
+    <Compile Include="Abilities\PetAbility.cs" />
+    <Compile Include="Ability.cs" />
+    <Compile Include="Behaviour.cs" />
+    <Compile Include="Behaviours\FollowBehaviour.cs" />
     <Compile Include="ColorScale.cs" />
+    <Compile Include="IActiveAbility.cs" />
+    <Compile Include="IRankedAbility.cs" />
+    <Compile Include="IRestrictedAbility.cs" />
+    <Compile Include="ISkinAbility.cs" />
+    <Compile Include="ITickingAbility.cs" />
     <Compile Include="MagicJunimo.cs" />
     <Compile Include="MJPModEntry.cs" />
+    <Compile Include="PetState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Renderer.cs" />
+    <Compile Include="SmartPet.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="i18n\default.json">

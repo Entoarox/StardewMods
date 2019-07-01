@@ -1,0 +1,9 @@
+{
+  "EmptyBox": "只是一个空箱子。",
+  "AdoptMessage": "啊，天呀!看起来有一只被遗弃又可怜的{{petType}}在这里!也许你应该付给玛妮{{adoptionPrice}}元，给它做个检查，看看能不能领养它?",
+  "AdoptNoGold": "很不幸的，我并没有{{adoptionPrice}}元做这件事。",
+  "AdoptYes": "是，我真的应该领养这只可怜的动物!",
+  "AdoptNo": "不，我没有空间收留它。",
+  "ChooseName": "取一个名字",
+  "Adopted": "一旦他们做了检查，玛妮将会带{{petName}}去你家。"
+}

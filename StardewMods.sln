@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SundropCity", "SundropCity\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DialogueFramework", "DialogueFramework\DialogueFramework.csproj", "{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedLocationLoader2", "AdvancedLocationLoader2\AdvancedLocationLoader2.csproj", "{3E6083A5-7122-4E40-B720-D4436CD816B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +167,14 @@ Global
 		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|x86.ActiveCfg = Release|Any CPU
 		{1ADC0DCB-5229-4DB7-B4B1-B58F9281F1A3}.Release|x86.Build.0 = Release|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Debug|x86.Build.0 = Debug|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Release|x86.ActiveCfg = Release|Any CPU
+		{3E6083A5-7122-4E40-B720-D4436CD816B5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -175,7 +185,6 @@ Global
 		{AE355745-73FE-45C6-BA17-DE56744BB3D6} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{B2A28A37-3C82-4D6D-A97E-8DA9BBCBD368} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{AE56920C-7F17-4E17-B703-6586B190EF04} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
-		{19A8DB34-7A24-4576-B50F-7EB02D09E465} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{64EAD78D-04D6-4D96-B1B2-350865064344} = {819BEEFF-4CCF-4A5A-9B04-05DD857009E6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

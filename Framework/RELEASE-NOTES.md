@@ -1,4 +1,9 @@
 ## Release notes
+## 2.4.3
+Not yet released
+* Added new `world_reset` command with `bushes` and `characters` options, enables reloading relevant data from disk when triggered in a active save.
+* Restored some lost ICustomItem supported types (`TerrainFeature` & `GameLocation`), due to technical limits ``Building` support is not yet back.
+
 ## 2.4.2
 Released 28 December 2018. (Thanks to Pathoschild!)
 

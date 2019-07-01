@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
@@ -12,8 +12,10 @@ namespace MagicJunimoPet
     {
         internal static string TexturePath;
         internal static MagicJunimo Junimo;
+        internal static IModHelper SHelper;
         public override void Entry(IModHelper helper)
         {
+            SHelper = helper;
             TexturePath = helper.Content.GetActualAssetKey("assets/junimo.png");
             helper.ConsoleCommands.Add("give_me_my_junimo", "Bully the game into giving you your junimo.", this.OnCommandReceived);
             helper.Events.GameLoop.Saving += this.OnSaving;
@@ -82,6 +84,8 @@ namespace MagicJunimoPet
         }
         private void OnSaving(object s, EventArgs e)
         {
+            if(!Junimo.currentLocation.Name.Equals("Farm"))
+                Game1.warpCharacter(Junimo, Game1.getFarm(), new Vector2(54f, 8f));
             foreach(GameLocation loc in Game1.locations)
                 loc.characters.Filter(a => !(a is MagicJunimo));
         }

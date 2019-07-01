@@ -9,7 +9,7 @@ using StardewValley.Tools;
 
 namespace Entoarox.CustomPaths
 {
-    internal class CustomPath : TerrainFeature, ICustomItem
+    internal class CustomPath : TerrainFeature, ICustomItem, IDeserializationHandler
     {
         /*********
         ** Fields
@@ -67,7 +67,9 @@ namespace Entoarox.CustomPaths
         private int Connection;
         private Action<SpriteBatch, Vector2, Vector2, float, float> DrawHandler;
         private Texture2D Texture;
-
+        private int Timer = 0;
+        private int Frame = 0;
+        private int Offset = 0;
 
         /*********
         ** Accessors
@@ -78,8 +80,7 @@ namespace Entoarox.CustomPaths
         /*********
         ** Public methods
         *********/
-        public CustomPath()
-            : base(needsTick: false)
+        public CustomPath() : base(true)
         {
             this.DrawHandler = this.DrawHandlerSetup;
         }
@@ -117,6 +118,24 @@ namespace Entoarox.CustomPaths
                 return true;
             }
 
+            return false;
+        }
+
+        public override bool tickUpdate(GameTime time, Vector2 tileLocation, GameLocation location)
+        {
+            if (!CustomPathsMod.Map[this.Id].Animated)
+                return false;
+            this.Timer += time.ElapsedGameTime.Milliseconds;
+            int millis = CustomPathsMod.Map[this.Id].MillisPerFrame;
+            int frames = CustomPathsMod.Map[this.Id].Frames.Length;
+            while (this.Timer> millis)
+            {
+                this.Timer -= millis;
+                this.Frame++;
+                if (this.Frame >= frames)
+                    this.Frame = 0;
+            }
+            this.Offset = CustomPathsMod.Map[this.Id].Frames[this.Frame];
             return false;
         }
 
@@ -175,7 +194,7 @@ namespace Entoarox.CustomPaths
 
         private void DrawHandlerReal(SpriteBatch spriteBatch, Vector2 positionOnScreen, Vector2 tileLocation, float scale, float layerDepth)
         {
-            spriteBatch.Draw(this.Texture, positionOnScreen, Game1.getSourceRectForStandardTileSheet(this.Texture, this.Connection, 16, 16), Color.White, 0f, Vector2.Zero, scale * Game1.pixelZoom, SpriteEffects.None, layerDepth == 1E-09f ? layerDepth : layerDepth + positionOnScreen.Y / 20000f);
+            spriteBatch.Draw(this.Texture, positionOnScreen, Game1.getSourceRectForStandardTileSheet(this.Texture, this.Connection + (this.Offset*256), 16, 16), Color.White, 0f, Vector2.Zero, scale * Game1.pixelZoom, SpriteEffects.None, layerDepth == 1E-09f ? layerDepth : layerDepth + positionOnScreen.Y / 20000f);
         }
 
         private bool HasPath(float x, float y, Vector2? ignore)

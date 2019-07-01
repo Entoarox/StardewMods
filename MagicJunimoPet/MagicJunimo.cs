@@ -17,6 +17,10 @@ namespace MagicJunimoPet
         private Color Color1;
         private Color Color2;
         private Color Color3;
+        private int Delay;
+        private bool IsFollowing = false;
+        private Vector2 OldPosition;
+        private Farmer Target;
 
         static MagicJunimo()
         {
@@ -43,13 +47,111 @@ namespace MagicJunimoPet
             this.Color2 = Colors[Math.Max(0, (int)Math.Floor((this.Timer % 3000) / 30d) - 1)];
             this.Color3 = Colors[Math.Max(0, (int)Math.Floor((this.Timer % 3000) / 30d) - 2)];
         }
+        public override bool checkAction(Farmer who, GameLocation l)
+        {
+            this.Target = this.IsFollowing ? null : who;
+            this.doEmote(this.IsFollowing ? 12 : 20, true);
+            this.IsFollowing = !this.IsFollowing;
+            this.playContentSound();
+            return true;
+        }
         public override void update(GameTime time, GameLocation location)
         {
+            base.update(time, location);
             this.Timer += time.ElapsedGameTime.Milliseconds;
             this.SetColor();
             if (Game1.random.NextDouble() < 0.001)
                 this.playContentSound();
-            base.update(time, location);
+            if (this.IsFollowing)
+            {
+                if (this.currentLocation != null && this.Target.currentLocation != null && this.currentLocation != this.Target.currentLocation)
+                    Game1.warpCharacter(this, this.Target.currentLocation, this.Target.Position);
+                float distance = Vector2.Distance(new Vector2(this.position.X + 32, this.Position.Y), this.Target.Position);
+                if (distance > 640 || (distance>96 && this.OldPosition == this.position))
+                    this.Position = this.Target.Position;
+                else if (distance > 96)
+                {
+                    this.Delay = 5;
+                    this.faceGeneralDirection(this.Target.Position);
+                    if (Game1.IsMasterGame)
+                    {
+                        this.setMovingInFacingDirection();
+                        if (this.Sprite.CurrentAnimation == null)
+                            this.MovePosition(time, Game1.viewport, location);
+                    }
+                }
+                else if (this.Delay > 0)
+                {
+                    this.Delay--;
+                    if (this.Delay == 0)
+                    {
+                        this.Halt();
+                        this.faceDirection(this.Target.FacingDirection);
+                    }
+                }
+                else
+                    this.Idle(time, location);
+                this.OldPosition = this.position;
+            }
+            else
+                this.Idle(time, location);
+        }
+        public void Leap(Farmer who)
+        {
+            if (this.currentLocation.Equals(Game1.currentLocation))
+            {
+                this.jump();
+            }
+            if (this.FacingDirection == 1)
+            {
+                this.xVelocity = 8f;
+            }
+            else if (this.FacingDirection == 3)
+            {
+                this.xVelocity = -8f;
+            }
+        }
+        public void LickSound(Farmer who)
+        {
+            if (Utility.isOnScreen(this.getTileLocationPoint(), 128, this.currentLocation))
+            {
+                Game1.playSound("junimoMeep1");
+            }
+        }
+        public void FlopSound(Farmer who)
+        {
+            if (Utility.isOnScreen(this.getTileLocationPoint(), 128, this.currentLocation))
+            {
+                Game1.playSound("thudStep");
+            }
+        }
+        public override void playContentSound()
+        {
+            if (Utility.isOnScreen(this.getTileLocationPoint(), 128, this.currentLocation))
+            {
+                Game1.playSound("junimoMeep1");
+            }
+        }
+        public override void draw(SpriteBatch b)
+        {
+            if (this.Sprite.Texture != null)
+            {
+                Vector2 pos = Game1.GlobalToLocal(Game1.viewport, this.Position);
+                pos.Y -= 64f;
+                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color3, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, this.GetBoundingBox().Center.Y / 10000f - 0.000002f);
+                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color2, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, this.GetBoundingBox().Center.Y / 10000f - 0.000001f);
+                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color1, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, this.GetBoundingBox().Center.Y / 10000f);
+            }
+            if (this.IsEmoting)
+            {
+                Vector2 emotePosition = this.getLocalPosition(Game1.viewport);
+                emotePosition.X += 32f;
+                emotePosition.Y -= 64f;
+                b.Draw(Game1.emoteSpriteSheet, emotePosition, new Rectangle(this.CurrentEmoteIndex * 16 % Game1.emoteSpriteSheet.Width, this.CurrentEmoteIndex * 16 / Game1.emoteSpriteSheet.Width * 16, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, this.getStandingY() / 10000f + 0.0001f);
+            }
+        }
+        private void Idle(GameTime time, GameLocation location)
+        {
             if (this.currentLocation == null)
             {
                 this.currentLocation = location;
@@ -69,13 +171,13 @@ namespace MagicJunimoPet
                         }
                         else if (Game1.random.NextDouble() < 0.002)
                         {
-                            doEmote(24, true);
+                            this.doEmote(24, true);
                         }
                         return;
                     case 2:
                         if (this.Sprite.currentFrame != 18 && this.Sprite.CurrentAnimation == null)
                         {
-                            initiateCurrentBehavior();
+                            this.initiateCurrentBehavior();
                         }
                         else if (this.Sprite.currentFrame == 18 && Game1.random.NextDouble() < 0.01)
                         {
@@ -83,8 +185,8 @@ namespace MagicJunimoPet
                             {
                                 case 0:
                                     this.CurrentBehavior = 0;
-                                    Halt();
-                                    faceDirection(2);
+                                    this.Halt();
+                                    this.faceDirection(2);
                                     this.Sprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
                     {
                         new FarmerSprite.AnimationFrame(17, 200),
@@ -128,8 +230,8 @@ namespace MagicJunimoPet
                                         this.Sprite.loop = false;
                                         if (blink && Game1.random.NextDouble() < 0.2)
                                         {
-                                            playContentSound();
-                                            shake(200);
+                                            this.playContentSound();
+                                            this.shake(200);
                                         }
                                         break;
                                     }
@@ -144,15 +246,15 @@ namespace MagicJunimoPet
                                 case 0:
                                 case 1:
                                 case 2:
-                                    initiateCurrentBehavior();
+                                    this.initiateCurrentBehavior();
                                     break;
                                 case 3:
                                     switch (this.FacingDirection)
                                     {
                                         case 0:
                                         case 2:
-                                            Halt();
-                                            faceDirection(2);
+                                            this.Halt();
+                                            this.faceDirection(2);
                                             this.Sprite.loop = false;
                                             this.CurrentBehavior = 2;
                                             break;
@@ -225,11 +327,11 @@ namespace MagicJunimoPet
                 }
                 if (this.Sprite.CurrentAnimation == null)
                 {
-                    MovePosition(time, Game1.viewport, location);
+                    this.MovePosition(time, Game1.viewport, location);
                 }
                 else if (this.xVelocity != 0f || this.yVelocity != 0f)
                 {
-                    Rectangle nextPosition = GetBoundingBox();
+                    Rectangle nextPosition = this.GetBoundingBox();
                     nextPosition.X += (int)this.xVelocity;
                     nextPosition.Y -= (int)this.yVelocity;
                     if (this.currentLocation == null || !this.currentLocation.isCollidingPosition(nextPosition, Game1.viewport, false, 0, false, this))
@@ -240,60 +342,6 @@ namespace MagicJunimoPet
                     this.xVelocity = (int)(this.xVelocity - this.xVelocity / 4f);
                     this.yVelocity = (int)(this.yVelocity - this.yVelocity / 4f);
                 }
-            }
-        }
-        public void Leap(Farmer who)
-        {
-            if (this.currentLocation.Equals(Game1.currentLocation))
-            {
-                jump();
-            }
-            if (this.FacingDirection == 1)
-            {
-                this.xVelocity = 8f;
-            }
-            else if (this.FacingDirection == 3)
-            {
-                this.xVelocity = -8f;
-            }
-        }
-        public void LickSound(Farmer who)
-        {
-            if (Utility.isOnScreen(getTileLocationPoint(), 128, this.currentLocation))
-            {
-                Game1.playSound("junimoMeep1");
-            }
-        }
-        public void FlopSound(Farmer who)
-        {
-            if (Utility.isOnScreen(getTileLocationPoint(), 128, this.currentLocation))
-            {
-                Game1.playSound("thudStep");
-            }
-        }
-        public override void playContentSound()
-        {
-            if (Utility.isOnScreen(getTileLocationPoint(), 128, this.currentLocation))
-            {
-                Game1.playSound("junimoMeep1");
-            }
-        }
-        public override void draw(SpriteBatch b)
-        {
-            if (this.Sprite.Texture != null)
-            {
-                Vector2 pos = Game1.GlobalToLocal(Game1.viewport, this.Position);
-                pos.Y -= 64f;
-                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color3, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, GetBoundingBox().Center.Y / 10000f - 0.000002f);
-                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color2, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, GetBoundingBox().Center.Y / 10000f - 0.000001f);
-                b.Draw(this.Sprite.Texture, pos, this.Sprite.sourceRect, this.Color1, 0f, Vector2.Zero, 4f, (this.Sprite.CurrentAnimation != null && this.Sprite.CurrentAnimation[this.Sprite.currentAnimationIndex].flip) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, GetBoundingBox().Center.Y / 10000f);
-            }
-            if (this.IsEmoting)
-            {
-                Vector2 emotePosition = getLocalPosition(Game1.viewport);
-                emotePosition.X += 32f;
-                emotePosition.Y -= 64f;
-                b.Draw(Game1.emoteSpriteSheet, emotePosition, new Rectangle(this.CurrentEmoteIndex * 16 % Game1.emoteSpriteSheet.Width, this.CurrentEmoteIndex * 16 / Game1.emoteSpriteSheet.Width * 16, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, getStandingY() / 10000f + 0.0001f);
             }
         }
     }

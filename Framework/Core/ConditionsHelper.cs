@@ -69,7 +69,7 @@ namespace Entoarox.Framework.Core
         /*********
         ** Protected methods
         *********/
-        private ConditionsHelper()
+        internal ConditionsHelper()
         {
             this.RegisterConditionResolver("weather", (args, resolver) => resolver(args[0], ConditionsHelper.WeatherMap[Game1.weatherIcon]));
             this.RegisterConditionResolver("day", (args, resolver) => resolver(args[0], ConditionsHelper.DayMap[Game1.dayOfMonth % 7]));
@@ -99,33 +99,33 @@ namespace Entoarox.Framework.Core
             this.RegisterConditionResolver("wallet", (args, resolver) =>
             {
                 List<string> opts = new List<string>();
-                if (Game1.player.canUnderstandDwarves)
+                if (Game1.MasterPlayer.canUnderstandDwarves)
                     opts.Add("dwarfscroll");
-                if (Game1.player.hasClubCard)
+                if (Game1.MasterPlayer.hasClubCard)
                     opts.Add("clubcard");
-                if (Game1.player.hasDarkTalisman)
+                if (Game1.MasterPlayer.hasDarkTalisman)
                     opts.Add("darktalisman");
-                if (Game1.player.hasMagicInk)
+                if (Game1.MasterPlayer.hasMagicInk)
                     opts.Add("magicink");
-                if (Game1.player.hasRustyKey)
+                if (Game1.MasterPlayer.hasRustyKey)
                     opts.Add("rustykey");
-                if (Game1.player.hasSkullKey)
+                if (Game1.MasterPlayer.hasSkullKey)
                     opts.Add("skullkey");
-                if (Game1.player.hasSpecialCharm)
+                if (Game1.MasterPlayer.hasSpecialCharm)
                     opts.Add("specialcharm");
                 return resolver(args[0], opts.ToArray());
             });
             this.RegisterConditionResolver("married", (args, resolver) =>
             {
-                if (string.IsNullOrEmpty(Game1.player.spouse) || Game1.player.spouse.Contains("engaged"))
+                if (string.IsNullOrEmpty(Game1.MasterPlayer.spouse) || Game1.MasterPlayer.spouse.Contains("engaged"))
                     return resolver(args[0], "false");
-                return resolver(args[0], Game1.player.spouse, "true");
+                return resolver(args[0], Game1.MasterPlayer.spouse, "true");
             });
             this.RegisterConditionResolver("engaged", (args, resolver) =>
             {
-                if (string.IsNullOrEmpty(Game1.player.spouse) || !Game1.player.spouse.Contains("engaged"))
+                if (string.IsNullOrEmpty(Game1.MasterPlayer.spouse) || !Game1.MasterPlayer.spouse.Contains("engaged"))
                     return false;
-                return resolver(args[0], Game1.player.spouse.Substring(7), "true");
+                return resolver(args[0], Game1.MasterPlayer.spouse.Substring(7), "true");
             });
             this.RegisterConditionResolver("divorced", (args, resolver) =>
             {
@@ -139,13 +139,13 @@ namespace Entoarox.Framework.Core
                 names.Add("true");
                 return resolver(args[0], names.ToArray());
             });
-            this.RegisterConditionResolver("house", (args, resolver) => resolver(args[0], Game1.player.HouseUpgradeLevel.ToString()));
-            this.RegisterConditionResolver("farm", (args, resolver) => resolver(args[0], ConditionsHelper.FarmMap[Math.Min(5, Game1.whichFarm)]));
-            this.RegisterConditionResolver("event", (args, resolver) => resolver(args[0], Game1.player.eventsSeen.Select(a => a.ToString()).ToArray()));
-            this.RegisterConditionResolver("money", (args, resolver) => resolver(args[0], Game1.player.money.ToString()));
+            this.RegisterConditionResolver("house", (args, resolver) => resolver(args[0], Game1.MasterPlayer.HouseUpgradeLevel.ToString()));
+            this.RegisterConditionResolver("farm", (args, resolver) => resolver(args[0], ConditionsHelper.FarmMap[Math.Min(ConditionsHelper.FarmMap.Length - 1, Game1.whichFarm)]));
+            this.RegisterConditionResolver("event", (args, resolver) => resolver(args[0], Game1.MasterPlayer.eventsSeen.Select(a => a.ToString()).ToArray()));
+            this.RegisterConditionResolver("money", (args, resolver) => resolver(args[0], Game1.MasterPlayer.money.ToString()));
             this.RegisterConditionResolver("carries", (args, resolver) =>
             {
-                IEnumerable<Item> matches = Game1.player.Items.Where(a => a.Name == args[0]);
+                IEnumerable<Item> matches = Game1.MasterPlayer.Items.Where(a => a.Name == args[0]);
                 if (!matches.Any())
                     return false;
                 int c = 0;
@@ -164,7 +164,7 @@ namespace Entoarox.Framework.Core
             });
             */
             //TODO RegisterConditionResolver("skill");
-            this.RegisterConditionResolver("friendship", (args, resolver) => { return resolver(args[1], Game1.player.getFriendshipHeartLevelForNPC(args[0]).ToString()); });
+            this.RegisterConditionResolver("friendship", (args, resolver) => { return resolver(args[1], Game1.MasterPlayer.getFriendshipHeartLevelForNPC(args[0]).ToString()); });
         }
 
         private bool ResolveOperators(string arg, params string[] values)

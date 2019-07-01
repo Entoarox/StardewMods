@@ -22,6 +22,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <FileAlignment>1024</FileAlignment>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <NoWarn>CS0618</NoWarn>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
@@ -49,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Advanced\PolyTupleHelper.cs" />
+    <Compile Include="API\DecorationApi.cs" />
     <Compile Include="Config\ConfigAttribute.cs" />
     <Compile Include="Config\ConfigCustomAttribute.cs" />
     <Compile Include="Config\ConfigDropdownAttribute.cs" />
@@ -67,7 +70,7 @@
     <Compile Include="Core\PlayerHelper.cs" />
     <Compile Include="Core\PlayerModifierHelper.cs" />
     <Compile Include="Core\Serialization\ReadonlyContractResolver.cs" />
-    <Compile Include="Core\Serialization\CustomItem.cs" />
+    <Compile Include="Core\Serialization\InstanceState.cs" />
     <Compile Include="Core\Serialization\Placeholder.cs" />
     <Compile Include="Core\Serialization\RectangleConverter.cs" />
     <Compile Include="Core\Utilities\DictionaryAssetInfo.cs" />
@@ -95,6 +98,7 @@
     <Compile Include="Events\EventArgsActionTriggered.cs" />
     <Compile Include="Core\ModConfig.cs" />
     <Compile Include="ICustomItem.cs" />
+    <Compile Include="IDeserializationHandler.cs" />
     <Compile Include="IHookedLocation.cs" />
     <Compile Include="IInterModHelper.cs" />
     <Compile Include="IMessageHelper.cs" />

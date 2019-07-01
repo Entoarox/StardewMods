@@ -13,5 +13,8 @@ namespace Entoarox.CustomPaths
         public string Salesman = "";
         public bool Seasonal = false;
         public int SpeedBoost = 0;
+        public bool Animated = false;
+        public int[] Frames = new int[0];
+        public int MillisPerFrame = 200;
     }
 }

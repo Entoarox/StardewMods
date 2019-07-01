@@ -1,13 +1,10 @@
 {
-  "Name": "Sundrop City (DLL)",
+  "Name": "Sundrop City",
   "Author": "Sundrop Team",
   "Version": "0.1.0",
   "Description": "Visit and explore Sundrop City, a DLC-sized expansion to Stardew Valley!",
   "UniqueID": "SundropCity.Main",
   "MinimumApiVersion": "2.11.0",
   "EntryDll": "SundropCity.dll",
-  "UpdateKeys": [],
-  "Dependencies": [
-    { "UniqueID": "Entoarox.EntoaroxFramework" }
-  ]
+  "UpdateKeys": [ "nexus:4014" ]
 }

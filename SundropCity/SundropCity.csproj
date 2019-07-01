@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -48,15 +50,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Facing.cs" />
     <Compile Include="Hotel\FurnitureInfo.cs" />
     <Compile Include="Hotel\Furniture.cs" />
     <Compile Include="Hotel\SetFurniture.cs" />
     <Compile Include="Hotel\Upgrade.cs" />
+    <Compile Include="MrCake.cs" />
+    <Compile Include="ParkingSpot.cs" />
     <Compile Include="SundropCityMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SundropLoader.cs" />
+    <Compile Include="TerrainFeatures\SundropCar.cs" />
     <Compile Include="TerrainFeatures\SundropGrass.cs" />
-    <Compile Include="Locations\SundropLocation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Hotel\Data\GenericFurnitureTypes.json">
