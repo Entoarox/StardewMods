@@ -5,7 +5,6 @@
     <RootNamespace>Entoarox.CustomPaths</RootNamespace>
     <Version>1.1.2</Version>
     <TargetFramework>net452</TargetFramework>
-    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +17,7 @@
       <Private>false</Private>
     </ProjectReference>
   </ItemGroup>
+
+  <Import Project="$(SolutionDir)\common.targets" />
 
 </Project>

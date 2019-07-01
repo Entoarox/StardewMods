@@ -5,7 +5,6 @@
     <RootNamespace>Entoarox.ExtendedMinecart</RootNamespace>
     <Version>1.8.2</Version>
     <TargetFramework>net452</TargetFramework>
-    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,5 +16,7 @@
       <Private>false</Private>
     </ProjectReference>
   </ItemGroup>
+
+  <Import Project="$(SolutionDir)\common.targets" />
 
 </Project>

@@ -17,4 +17,6 @@
     </ProjectReference>
   </ItemGroup>
 
+  <Import Project="$(SolutionDir)\common.targets" />
+
 </Project>

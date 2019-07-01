@@ -5,7 +5,6 @@
     <RootNamespace>DialogueFramework</RootNamespace>
     <Version>1.0.0</Version>
     <TargetFramework>net452</TargetFramework>
-    <LangVersion>7.1</LangVersion>
 
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
@@ -13,5 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0-beta.5" />
   </ItemGroup>
+
+  <Import Project="$(SolutionDir)\common.targets" />
 
 </Project>

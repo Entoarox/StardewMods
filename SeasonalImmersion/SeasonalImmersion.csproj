@@ -86,4 +86,6 @@
     <EmbeddedResource Include="ContentPack\winter\Well.png" />
   </ItemGroup>
 
+  <Import Project="$(SolutionDir)\common.targets" />
+
 </Project>

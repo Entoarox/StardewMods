@@ -6,13 +6,12 @@
     <Version>1.0.0</Version>
     <TargetFramework>net452</TargetFramework>
     <OutputType>Exe</OutputType>
-    <Platforms>x86</Platforms>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Cecil" Version="0.10.3" />
   </ItemGroup>
+
+  <Import Project="$(SolutionDir)\common.targets" />
 
 </Project>
