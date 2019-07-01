@@ -24,6 +24,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Entoarox.MorePetsAndAnimals
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********
@@ -76,6 +77,7 @@ namespace Entoarox.MorePetsAndAnimals
             ModEntry.SMonitor = this.Monitor;
 
             // Event listeners
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
             helper.Events.GameLoop.SaveLoaded += this.LoadSkinMap;
             helper.Events.GameLoop.Saving += this.SaveSkinMap;
@@ -87,7 +89,13 @@ namespace Entoarox.MorePetsAndAnimals
             helper.ConsoleCommands.Add("list_animal_types", "Lists all animal types on your farm.", this.OnCommandReceived);
             helper.ConsoleCommands.Add("list_animal_skins", "Lists all animal skins used on your farm.", this.OnCommandReceived);
             helper.ConsoleCommands.Add("reset_animal_skins", "Lists all animal skins used on your farm.", this.OnCommandReceived);
+        }
 
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
             // Prepare BabyDuck override
             try
             {
@@ -95,9 +103,9 @@ namespace Entoarox.MorePetsAndAnimals
                 Game1.content.Load<Texture2D>(asset);
                 BabyDuck = new AnimalSkin("BabyDuck", 0, asset);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                this.Monitor.Log("Unable to patch BabyDuck due to exception:", LogLevel.Error, e);
+                this.Monitor.Log("Unable to patch BabyDuck due to exception:", LogLevel.Error, ex);
             }
 
             // Register default supported animal types
@@ -114,9 +122,9 @@ namespace Entoarox.MorePetsAndAnimals
             Api.RegisterAnimalType("White Chicken");
             Api.RegisterAnimalType("White Cow");
 
-            if(Config.ExtraTypes!=null && Config.ExtraTypes.Length>0)
-            foreach (string type in Config.ExtraTypes)
-                Api.RegisterAnimalType(type, false);
+            if (Config.ExtraTypes != null && Config.ExtraTypes.Length > 0)
+                foreach (string type in Config.ExtraTypes)
+                    Api.RegisterAnimalType(type, false);
 
             // Register default supported pet types
             Api.RegisterPetType("cat", typeof(Cat));
@@ -125,6 +133,7 @@ namespace Entoarox.MorePetsAndAnimals
             // Trigger setup
             this.DoSetup();
         }
+
         private void DoSetup()
         {
             if (ModEntry.Config.AnimalsOnly)

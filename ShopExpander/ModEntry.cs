@@ -10,6 +10,7 @@ using SDVObject = StardewValley.Object;
 
 namespace Entoarox.ShopExpander
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********

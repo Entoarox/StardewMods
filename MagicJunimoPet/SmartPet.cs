@@ -42,7 +42,7 @@ namespace MagicJunimoPet
         public void AddAbility(Ability ability)
         {
             if (ability.Pet != null)
-                throw new ArgumentException("Invalid ability, already assigned to a pet.", nameof(ability);
+                throw new ArgumentException("Invalid ability, already assigned to a pet.", nameof(ability));
             this.Abilities.Add(ability.Id, ability);
             ability.Pet = this;
         }

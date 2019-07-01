@@ -16,6 +16,7 @@ using xTile.Tiles;
 */
 namespace Entoarox.ExtendedMinecart
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********

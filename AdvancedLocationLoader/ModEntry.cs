@@ -18,6 +18,7 @@ using Warp = Entoarox.AdvancedLocationLoader.Configs.Warp;
 
 namespace Entoarox.AdvancedLocationLoader
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********
@@ -46,6 +47,7 @@ namespace Entoarox.AdvancedLocationLoader
             ModEntry.Strings = helper.Translation;
 
             MoreEvents.ActionTriggered += this.OnActionTriggered;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Specialised.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
             helper.Events.Player.Warped += this.OnWarped;
             helper.Events.Player.Warped += this.DrawFarBack;
@@ -54,10 +56,6 @@ namespace Entoarox.AdvancedLocationLoader
             this.Helper.Content.RegisterSerializerType<Sewer>();
             this.Helper.Content.RegisterSerializerType<Desert>();
             this.Helper.Content.RegisterSerializerType<DecoratableLocation>();
-
-            // load content packs
-            ContentPackData[] contentPacks = this.LoadContentPackData().ToArray();
-            this.Patcher = new Patcher(this.Monitor, this.Helper.Content, contentPacks);
         }
 
         internal static void UpdateConditionalEdits()
@@ -97,6 +95,16 @@ namespace Entoarox.AdvancedLocationLoader
         /*********
         ** Private methods
         *********/
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            // load content packs
+            ContentPackData[] contentPacks = this.LoadContentPackData().ToArray();
+            this.Patcher = new Patcher(this.Monitor, this.Helper.Content, contentPacks);
+        }
+
         /// <summary>Load the data from each available content pack.</summary>
         private IEnumerable<ContentPackData> LoadContentPackData()
         {
