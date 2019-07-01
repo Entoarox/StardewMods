@@ -11,6 +11,8 @@
     <AssemblyName>FurnitureAnywhere</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+
+    <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,12 +38,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0-beta.5" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>E:\SteamGames\steamapps\common\Stardew Valley\smapi-internal\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
   </ItemGroup>

@@ -34,7 +34,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0-beta.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -72,78 +72,40 @@
     <Compile Include="TitlePage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\DynamicDungeonsEntrance.tbin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="assets\DynamicDungeonsEntrance.tbin" />
     <None Include="assets\unused\merged.xcf" />
     <None Include="assets\unused\sheet_info.xcf" />
     <None Include="i18n\default.json" />
     <None Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\book.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\book\doodle1.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\book\doodle2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\book\doodle3.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="assets\book.png" />
+    <Content Include="assets\book\doodle1.png" />
+    <Content Include="assets\book\doodle2.png" />
+    <Content Include="assets\book\doodle3.png" />
     <Content Include="assets\unused\DoorSpriteSheet.png" />
     <Content Include="assets\unused\door_anim.png" />
     <Content Include="assets\unused\door_anim2.png" />
     <Content Include="assets\unused\door_wall.png" />
     <Content Include="assets\unused\probably_old_robot_thingy.png" />
     <Content Include="assets\unused\pufferchick.png" />
-    <Content Include="assets\dungeon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\entrance.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\door.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_boulder.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_cavein.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_dwarfvendor.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_info.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_stalagmite1.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_stalagmite2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_statue.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_tracks.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\sheet_walls.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="assets\dungeon.png" />
+    <Content Include="assets\entrance.png" />
+    <Content Include="assets\door.png" />
+    <Content Include="assets\sheet_boulder.png" />
+    <Content Include="assets\sheet_cavein.png" />
+    <Content Include="assets\sheet_dwarfvendor.png" />
+    <Content Include="assets\sheet_info.png" />
+    <Content Include="assets\sheet_stalagmite1.png" />
+    <Content Include="assets\sheet_stalagmite2.png" />
+    <Content Include="assets\sheet_statue.png" />
+    <Content Include="assets\sheet_tracks.png" />
+    <Content Include="assets\sheet_walls.png" />
     <Content Include="assets\unused\robot_head_animation.png" />
     <Content Include="assets\unused\sheet_light.png" />
     <Content Include="assets\unused\sheet_walls2.png" />
-    <Content Include="assets\zDynamicDungeonsEntrance_tiles.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\credits.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="assets\zDynamicDungeonsEntrance_tiles.png" />
+    <Content Include="assets\credits.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

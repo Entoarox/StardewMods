@@ -35,7 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="2.2.0" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.0.0-beta.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -71,33 +71,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\abook.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\binding.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\book.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\brush.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\delete.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\edit.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\pages.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="assets\quil.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="assets\abook.png" />
+    <Content Include="assets\binding.png" />
+    <Content Include="assets\book.png" />
+    <Content Include="assets\brush.png" />
+    <Content Include="assets\delete.png" />
+    <Content Include="assets\edit.png" />
+    <Content Include="assets\icon.png" />
+    <Content Include="assets\pages.png" />
+    <Content Include="assets\quil.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
