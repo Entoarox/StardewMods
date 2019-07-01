@@ -22,6 +22,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SundropCity
 {
+    /// <summary>The mod entry class.</summary>
     public class SundropCityMod : Mod
     {
         internal static IModHelper SHelper;
@@ -31,6 +32,8 @@ namespace SundropCity
 
         private List<string> Maps;
 
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             // Define internals
@@ -40,9 +43,27 @@ namespace SundropCity
             // Add custom loader to make custom tree work
             helper.Content.AssetLoaders.Add(new SundropLoader());
 
+            // Setup events
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.GameLoop.Saving += this.OnSaving;
+
+            // Handle ALL not providing extra layer drawing
+            if (!helper.ModRegistry.IsLoaded("Entoarox.AdvancedLocationLoader") || helper.ModRegistry.Get("Entoarox.AdvancedLocationLoader").Manifest.Version.IsOlderThan("1.5.0"))
+                helper.Events.Player.Warped += this.OnWarped;
+        }
+
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            var helper = this.Helper;
+
             // Load maps
             List<string> maps = new List<string>();
-            foreach(string file in Directory.EnumerateFiles(Path.Combine(helper.DirectoryPath,"assets","Maps")))
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
             {
                 string ext = Path.GetExtension(file);
                 this.Monitor.Log($"Checking file: {file} (ext: {ext})", LogLevel.Trace);
@@ -52,7 +73,7 @@ namespace SundropCity
                 this.Monitor.Log("Found sundrop location: " + map, LogLevel.Trace);
                 try
                 {
-                    helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                    this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
                     maps.Add(map);
                 }
                 catch(Exception err)
@@ -62,14 +83,6 @@ namespace SundropCity
             }
             this.Maps = maps;
 
-            // Setup events
-            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
-            helper.Events.GameLoop.Saved += this.OnSaved;
-            helper.Events.GameLoop.Saving += this.OnSaving;
-
-            // Handle ALL not providing extra layer drawing
-            if (!helper.ModRegistry.IsLoaded("Entoarox.AdvancedLocationLoader") || helper.ModRegistry.Get("Entoarox.AdvancedLocationLoader").Manifest.Version.IsOlderThan("1.5.0"))
-                helper.Events.Player.Warped += this.OnWarped;
 
             JObject dict = helper.Content.Load<JObject>("assets/Data/ParkingSpots.json");
             foreach(JProperty map in dict.Properties())

@@ -14,6 +14,7 @@ using SObject = StardewValley.Object;
 
 namespace Entoarox.FurnitureAnywhere
 {
+    /// <summary>The mod entry class.</summary>
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {

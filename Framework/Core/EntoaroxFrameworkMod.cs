@@ -26,6 +26,7 @@ using SObject = StardewValley.Object;
 
 namespace Entoarox.Framework.Core
 {
+    /// <summary>The mod entry class.</summary>
     internal class EntoaroxFrameworkMod : Mod
     {
         /*********
@@ -157,6 +158,7 @@ namespace Entoarox.Framework.Core
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
         }
 
+        /// <summary>Get an API that other mods can access. This is always called after <see cref="Entry" />.</summary>
         public override object GetApi()
         {
             return new EntoaroxFrameworkAPI();

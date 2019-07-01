@@ -9,6 +9,7 @@ using StardewValley;
 
 namespace Entoarox.CustomBooks
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********

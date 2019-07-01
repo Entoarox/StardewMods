@@ -16,6 +16,7 @@ using StardewValley.TerrainFeatures;
 
 namespace Entoarox.SeasonalImmersion
 {
+    /// <summary>The mod entry class.</summary>
     public class ModEntry : Mod
     {
         /*********
@@ -63,6 +64,18 @@ namespace Entoarox.SeasonalImmersion
             this.Config = helper.ReadConfig<ModConfig>();
             ModEntry.FilePath = helper.DirectoryPath;
 
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+        }
+
+
+        /*********
+        ** Protected methods
+        *********/
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
             try
             {
                 this.VerboseLog("Loading Seasonal Immersion ContentPack...");
@@ -73,13 +86,9 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log($"Could not load ContentPack\n{ex.Message}\n{ex.StackTrace}", LogLevel.Error);
             }
 
-            helper.Content.AssetLoaders.Add(new SeasonalTextureLoader());
+            this.Helper.Content.AssetLoaders.Add(new SeasonalTextureLoader());
         }
 
-
-        /*********
-        ** Protected methods
-        *********/
         private Texture2D PreMultiply(Texture2D texture)
         {
             try

@@ -8,11 +8,15 @@ using StardewValley;
 
 namespace MagicJunimoPet
 {
+    /// <summary>The mod entry class.</summary>
     public class MJPModEntry : Mod
     {
         internal static string TexturePath;
         internal static MagicJunimo Junimo;
         internal static IModHelper SHelper;
+
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             SHelper = helper;
@@ -22,6 +26,7 @@ namespace MagicJunimoPet
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
         }
+
         private void SpawnJunimo()
         {
             Junimo = new MagicJunimo
