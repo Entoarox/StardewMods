@@ -34,7 +34,11 @@ namespace Entoarox.Framework
         {
             if (error != null)
                 message += Environment.NewLine + error;
-            self.ExitGameImmediately(message);
+
+            self.Log(message, LogLevel.Error);
+            self.Log("Forcing game crash", LogLevel.Error);
+            void InfiniteRecursiveLoop() => InfiniteRecursiveLoop();
+            InfiniteRecursiveLoop();
         }
     }
 }
