@@ -14,6 +14,7 @@ using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace Entoarox.DynamicDungeons
 {
+    /// <summary>The mod entry class.</summary>
     internal class ModEntry : Mod
     {
         /*********
@@ -34,12 +35,23 @@ namespace Entoarox.DynamicDungeons
         /*********
         ** Public methods
         *********/
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             ModEntry.SMonitor = this.Monitor;
             ModEntry.SHelper = this.Helper;
             helper.Events.GameLoop.UpdateTicked+= this.GameEvents_UpdateTick;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.ConsoleCommands.Add("dd_fromseed", "dd_fromseed <seed> | Generate a dungeon from a specific seed", this.Command_Fromseed);
+        }
+
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            var helper = this.Helper;
             this.InfoBook = new BookMenu(new List<Page>
             {
                 new TitlePage(helper.Translation.Get("Book_Title"), helper.Translation.Get("Book_Subtitle"), helper.Translation.Get("Book_Introduction")),

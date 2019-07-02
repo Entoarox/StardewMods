@@ -16,6 +16,7 @@ using StardewValley.TerrainFeatures;
 
 namespace Entoarox.SeasonalImmersion
 {
+    /// <summary>The mod entry class.</summary>
     public class ModEntry : Mod
     {
         /*********
@@ -63,6 +64,18 @@ namespace Entoarox.SeasonalImmersion
             this.Config = helper.ReadConfig<ModConfig>();
             ModEntry.FilePath = helper.DirectoryPath;
 
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+        }
+
+
+        /*********
+        ** Protected methods
+        *********/
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
             try
             {
                 this.VerboseLog("Loading Seasonal Immersion ContentPack...");
@@ -73,13 +86,9 @@ namespace Entoarox.SeasonalImmersion
                 this.Monitor.Log($"Could not load ContentPack\n{ex.Message}\n{ex.StackTrace}", LogLevel.Error);
             }
 
-            helper.Content.AssetLoaders.Add(new SeasonalTextureLoader());
+            this.Helper.Content.AssetLoaders.Add(new SeasonalTextureLoader());
         }
 
-
-        /*********
-        ** Protected methods
-        *********/
         private Texture2D PreMultiply(Texture2D texture)
         {
             try
@@ -196,8 +205,8 @@ namespace Entoarox.SeasonalImmersion
                 ModEntry.SeasonTextures.Add(name, textures);
             }
 
-            PlayerEvents.Warped += this.PlayerEvents_Warped;
-            TimeEvents.AfterDayStarted += this.TimeEvents_AfterDayStarted;
+            this.Helper.Events.Player.Warped += this.OnWarped;
+            this.Helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             this.Monitor.Log($"ContentPack processed, found [{ModEntry.SeasonTextures.Count}] seasonal files", LogLevel.Info);
         }
 
@@ -309,15 +318,21 @@ namespace Entoarox.SeasonalImmersion
             }
         }
 
-        private void TimeEvents_AfterDayStarted(object s, EventArgs e)
+        /// <summary>Raised after the game begins a new day (including when the player loads a save).</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             if (Game1.dayOfMonth == 1)
                 this.UpdateTextures();
         }
 
-        private void PlayerEvents_Warped(object s, EventArgsPlayerWarped e)
+        /// <summary>Raised after a player warps to a new location. NOTE: this event is currently only raised for the current player.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnWarped(object sender, WarpedEventArgs e)
         {
-            if (e.NewLocation.Name == "Farm" || (e.PriorLocation != null && e.PriorLocation.IsOutdoors != e.NewLocation.IsOutdoors))
+            if (e.NewLocation.Name == "Farm" || (e.OldLocation != null && e.OldLocation.IsOutdoors != e.NewLocation.IsOutdoors))
                 this.UpdateTextures();
         }
 

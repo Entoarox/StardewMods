@@ -3,10 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Entoarox.Framework;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 
 namespace Entoarox.XnbLoader
 {
+    /// <summary>The mod entry class.</summary>
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {
@@ -54,6 +56,18 @@ namespace Entoarox.XnbLoader
         {
             this.Config = helper.ReadConfig<ModConfig>();
 
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+        }
+
+
+        /*********
+        ** Private methods
+        *********/
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
             // prepare directory structure
             string contentPath = Path.Combine(this.Helper.DirectoryPath, this.ContentFolderName);
             foreach (string path in this.PathsToCreate)
@@ -68,10 +82,6 @@ namespace Entoarox.XnbLoader
                 this.Monitor.Log($"Found and redirected [{overrides}] files", LogLevel.Info);
         }
 
-
-        /*********
-        ** Private methods
-        *********/
         /// <summary>Recursively find XNBs and register them with the content registry.</summary>
         /// <param name="root">The root path being searched.</param>
         /// <param name="path">The path for which to load XNBs.</param>

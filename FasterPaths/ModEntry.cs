@@ -3,11 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 using Entoarox.Framework;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 
 namespace Entoarox.FasterPaths
 {
+    /// <summary>The mod entry class.</summary>
     [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by SMAPI.")]
     internal class ModEntry : Mod
     {
@@ -28,8 +30,21 @@ namespace Entoarox.FasterPaths
         {
             this.Config = this.Helper.ReadConfig<ModConfig>();
 
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+
             helper.ConsoleCommands.Add("fp_info", "Gives info about the path you are currently standing on", this.CommandInfo);
+        }
+
+
+        /*********
+        ** Protected methods
+        *********/
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event data.</param>
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
             this.Modifiers = new[]
             {
                 new PlayerModifier { WalkSpeedModifier = this.Config.WoodFloorBoost, RunSpeedModifier = this.Config.WoodFloorBoost },
@@ -46,10 +61,6 @@ namespace Entoarox.FasterPaths
             this.Helper.Player().Modifiers.Add(new PlayerModifier { WalkSpeedModifier = this.Config.WalkSpeedBoost, RunSpeedModifier = this.Config.RunSpeedBoost });
         }
 
-
-        /*********
-        ** Protected methods
-        *********/
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>

@@ -26,6 +26,7 @@ using SObject = StardewValley.Object;
 
 namespace Entoarox.Framework.Core
 {
+    /// <summary>The mod entry class.</summary>
     internal class EntoaroxFrameworkMod : Mod
     {
         /*********
@@ -157,6 +158,7 @@ namespace Entoarox.Framework.Core
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
         }
 
+        /// <summary>Get an API that other mods can access. This is always called after <see cref="Entry" />.</summary>
         public override object GetApi()
         {
             return new EntoaroxFrameworkAPI();
@@ -551,15 +553,14 @@ namespace Entoarox.Framework.Core
                 }
                 Game1.player.Items = this.Serialize(data, Game1.player.Items.ToList());
                 var house = (Game1.getLocationFromName("FarmHouse") as FarmHouse);
-                if (house.fridge.Value != null)
-                    house.fridge.Value.items.Set(this.Serialize(data, house.fridge.Value.items.ToList()));
+                house.fridge.Value?.items.Set(this.Serialize(data, house.fridge.Value.items.ToList()));
                 this.Monitor.Log("Found and serialized [" + data.Count + "] Item instances", LogLevel.Trace);
                 this.Monitor.Log("Found and serialized [" + features.Count + "] TerrainFeature instances", LogLevel.Trace);
                 this.Monitor.Log("Found and serialized [" + locations.Count + "] GameLocation instances", LogLevel.Trace);
                 string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework");
-                this.Helper.WriteJsonFile(Path.Combine(path, "CustomItems.json"), data);
-                this.Helper.WriteJsonFile(Path.Combine(path, "CustomTerrain.json"), features);
-                this.Helper.WriteJsonFile(Path.Combine(path, "CustomLocations.json"), locations);
+                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomItems.json"), data);
+                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomTerrain.json"), features);
+                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomLocations.json"), locations);
                 ItemEvents.FireAfterSerialize();
                 this.Monitor.Log("Packing complete", LogLevel.Trace);
                 /*

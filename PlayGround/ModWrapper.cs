@@ -17,8 +17,11 @@ using StardewValley;
 
 namespace PlayGround
 {
+    /// <summary>The mod entry class.</summary>
     class ModWrapper : Mod
     {
+        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
+        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             this.Helper.ConsoleCommands.Add("pg_debug", "pg_debug <action>", (cmd, args) =>
