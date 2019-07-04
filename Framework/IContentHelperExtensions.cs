@@ -19,8 +19,10 @@ namespace Entoarox.Framework
         /// <summary>Allows you to add a new type to the serializer, provided the serializer has not yet been initialized.</summary>
         /// <typeparam name="T">The Type to add</typeparam>
         /// <param name="helper">The <see cref="IContentHelper" /> this extension method is attached to</param>
+        [Obsolete("Deprecated, use save events to add/remove custom content instead.")]
         public static void RegisterSerializerType<T>(this IContentHelper helper)
         {
+            EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(helper)}` mod uses deprecated serializer injection, this will be removed in a future update.", LogLevel.Alert);
             if (EntoaroxFrameworkMod.SerializerInjected)
                 EntoaroxFrameworkMod.Logger.Log($"[IContentHelper] The `{Globals.GetModName(helper)}` mod failed to augment the serializer, serializer has already been created.", LogLevel.Error);
             else if (!EntoaroxFrameworkMod.SerializerTypes.Contains(typeof(T)))

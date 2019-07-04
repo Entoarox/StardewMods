@@ -1,8 +1,11 @@
 ## Release notes
 ## 2.4.3
-Not yet released
+Released 04 July 2019
+* Updated for the upcoming SMAPI 3.0 again.
+* Detect when a SDV version uses a different serializer mechanic and disable the custom serializer on those versions (Android & similar)
+* Deprecated the ability to add types to the save serializer
 * Added new `world_reset` command with `bushes` and `characters` options, enables reloading relevant data from disk when triggered in a active save.
-* Restored some lost ICustomItem supported types (`TerrainFeature` & `GameLocation`), due to technical limits ``Building` support is not yet back.
+* Restored some lost ICustomItem supported types (`TerrainFeature` & `GameLocation`), due to technical limits `Building` support is not yet back.
 
 ## 2.4.2
 Released 28 December 2018. (Thanks to Pathoschild!)

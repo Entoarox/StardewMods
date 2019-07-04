@@ -32,6 +32,7 @@ namespace Entoarox.Framework.Core
         /*********
         ** Fields
         *********/
+        private static bool SkipSerializer = false;
         private static readonly List<string> Farms = new List<string> { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
         internal static JsonSerializer Serializer;
@@ -123,6 +124,9 @@ namespace Entoarox.Framework.Core
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            // Check if the serializer override should be skipped
+            if (typeof(SaveGame).GetField("contract") == null)
+                SkipSerializer = true;
             Serializer = new JsonSerializer();
             Serializer.Converters.Add(new RectangleConverter());
             Serializer.Formatting = Formatting.None;
@@ -150,12 +154,20 @@ namespace Entoarox.Framework.Core
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands);
             }
 
-            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
+
+            if (SkipSerializer)
+            {
+                this.Monitor.Log("Detected incompatible SDV version for serializer function, function is disabled.", LogLevel.Warn);
+                return;
+            }
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.UpdateTicked += this.EnforceSerializer;
         }
 
         /// <summary>Get an API that other mods can access. This is always called after <see cref="Entry" />.</summary>
@@ -465,7 +477,6 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            this.EnforceSerializer();
             if (!Context.IsWorldReady)
                 return;
             if (Game1.player.CurrentItem == null && this.PrevItem != null || Game1.player.CurrentItem != null && !Game1.player.CurrentItem.Equals(this.PrevItem))
@@ -857,10 +868,10 @@ namespace Entoarox.Framework.Core
             this.FarmerSerializer = new XmlSerializer(typeof(Farmer), EntoaroxFrameworkMod.FarmerTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
             this.LocationSerializer = new XmlSerializer(typeof(GameLocation), EntoaroxFrameworkMod.LocationTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
             EntoaroxFrameworkMod.SerializerInjected = true;
-            this.EnforceSerializer();
+            this.EnforceSerializer(null, null);
         }
 
-        private void EnforceSerializer()
+        private void EnforceSerializer(object sender, UpdateTickedEventArgs e)
         {
             SaveGame.serializer = this.MainSerializer;
             SaveGame.farmerSerializer = this.FarmerSerializer;

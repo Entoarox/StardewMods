@@ -12,6 +12,8 @@ using StardewValley.TerrainFeatures;
 using SundropCity.TerrainFeatures;
 
 using xTile;
+using xTile.Dimensions;
+using xTile.ObjectModel;
 using xTile.Layers;
 using xTile.Tiles;
 
@@ -48,6 +50,7 @@ namespace SundropCity
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.GameLoop.Saving += this.OnSaving;
+            helper.Events.Input.ButtonReleased += this.OnButtonReleased;
 
             // Handle ALL not providing extra layer drawing
             if (!helper.ModRegistry.IsLoaded("Entoarox.AdvancedLocationLoader") || helper.ModRegistry.Get("Entoarox.AdvancedLocationLoader").Manifest.Version.IsOlderThan("1.5.0"))
@@ -170,11 +173,6 @@ namespace SundropCity
                             toLayer.Tiles[x, y] = new StaticTile(toLayer, town.map.GetTileSheet(tile.TileSheet.Id), BlendMode.Additive, tile.TileIndex);
                     }
             }
-            // Setup warps to sundrop [TEMP: Will become warps to SundropBusStop map in the future]
-            town.warps.Add(new Warp(120, 55, "SundropPromenade", 1, 29, false));
-            town.warps.Add(new Warp(120, 56, "SundropPromenade", 1, 30, false));
-            town.warps.Add(new Warp(120, 57, "SundropPromenade", 1, 31, false));
-            town.warps.Add(new Warp(120, 58, "SundropPromenade", 1, 32, false));
             // Add new locations
             foreach (string map in this.Maps)
             {
@@ -191,6 +189,16 @@ namespace SundropCity
                 }
             }
             var promenade = Game1.getLocationFromName("SundropPromenade");
+            if(promenade==null)
+            {
+                this.Monitor.Log("Promenade failed to load, cancelling further setup as a result.", LogLevel.Error);
+                return;
+            }
+            // Setup warps to sundrop [TEMP: Will become warps to SundropBusStop map in the future]
+            town.warps.Add(new Warp(120, 55, "SundropPromenade", 1, 29, false));
+            town.warps.Add(new Warp(120, 56, "SundropPromenade", 1, 30, false));
+            town.warps.Add(new Warp(120, 57, "SundropPromenade", 1, 31, false));
+            town.warps.Add(new Warp(120, 58, "SundropPromenade", 1, 32, false));
             // Add warp back to Pelican [TEMP: Will be removed once proper travel is implemented]
             promenade.setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
             // Temp NPC spawns
@@ -270,6 +278,31 @@ namespace SundropCity
                 }
         }
 
+
+        private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
+        {
+            if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
+            {
+                Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
+                if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
+                    grabTile = Game1.player.GetGrabTile();
+                Tile tile = Game1.currentLocation.map.GetLayer("Buildings").PickTile(new Location((int)grabTile.X * Game1.tileSize, (int)grabTile.Y * Game1.tileSize), Game1.viewport.Size);
+                PropertyValue propertyValue = null;
+                tile?.Properties.TryGetValue("Action", out propertyValue);
+                if (propertyValue != null)
+                {
+                    string[] split = ((string)propertyValue).Split(' ');
+                    string[] args = new string[split.Length - 1];
+                    Array.Copy(split, 1, args, 0, args.Length);
+                    switch(split[0])
+                    {
+                        case "SundropMessage":
+
+                            break;
+                    }
+                }
+            }
+        }
 
         private void OnSaveLoaded(object s, EventArgs e)
         {
