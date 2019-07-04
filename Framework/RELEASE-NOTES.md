@@ -1,4 +1,11 @@
 ## Release notes
+## 2.4.4
+Released 04 July 2019
+* Fixed the ICustomItem `TerrainFeature` and `GameLocation` support
+* Fixed SMAPI listeners being removed unintentionally
+* Fixed a cross-mod API error due to trying to setup to early
+* Fixed the serializer detection being inverted, disabling on the wrong platforms
+
 ## 2.4.3
 Released 04 July 2019
 * Updated for the upcoming SMAPI 3.0 again.

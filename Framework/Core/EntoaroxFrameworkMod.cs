@@ -32,7 +32,6 @@ namespace Entoarox.Framework.Core
         /*********
         ** Fields
         *********/
-        private static bool SkipSerializer = false;
         private static readonly List<string> Farms = new List<string> { "standard", "river", "forest", "hilltop", "wilderniss" };
         private static string Verify;
         internal static JsonSerializer Serializer;
@@ -124,9 +123,6 @@ namespace Entoarox.Framework.Core
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            // Check if the serializer override should be skipped
-            if (typeof(SaveGame).GetField("contract") == null)
-                SkipSerializer = true;
             Serializer = new JsonSerializer();
             Serializer.Converters.Add(new RectangleConverter());
             Serializer.Formatting = Formatting.None;
@@ -154,19 +150,20 @@ namespace Entoarox.Framework.Core
                     .Add("player_warp", "player_warp <location> <x> <y> | Warps the player to the given position in the game.", this.Commands);
             }
 
-
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
 
-            if (SkipSerializer)
+            // Check if the serializer override should be skipped
+            if (typeof(SaveGame).GetField("contract") != null)
             {
                 this.Monitor.Log("Detected incompatible SDV version for serializer function, function is disabled.", LogLevel.Warn);
                 return;
             }
-            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.GameLaunched += this.SetupSerializer;
             helper.Events.GameLoop.UpdateTicked += this.EnforceSerializer;
         }
 
@@ -469,7 +466,7 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
-            this.SetupSerializer();
+            EntoaroxFrameworkAPI.Ready();
         }
 
         /// <summary>Raised after the game state is updated (≈60 times per second).</summary>
@@ -545,53 +542,30 @@ namespace Entoarox.Framework.Core
                 var locations = new Dictionary<string, Tuple<bool, InstanceState>>();
                 foreach (var loc in this.GetAllLocations())
                 {
-                    foreach (Chest chest in loc.objects.ToList()[0].Where(a => a.Value is Chest).Select(a => (Chest)a.Value))
-                    {
-                        chest.items.Set(this.Serialize(data, chest.items.ToList()));
-                    }
-                    var objs = loc.objects.ToList()[0];
-                    loc.objects.Clear();
-                    loc.objects.Add(this.Serialize(data, objs));
+                    foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
+                        this.Serialize(data, chest.items);
+                    this.Serialize(data, loc.Objects);
                     if (loc.terrainFeatures != null)
-                    {
-                        loc.terrainFeatures.Set(this.Serialize(features, loc, loc.terrainFeatures.ToList()[0]));
-                    }
+                        this.Serialize(features, loc, loc.terrainFeatures);
                 }
                 foreach (var location in Game1.locations.Where(a => a is ICustomItem).ToArray())
                 {
                     Game1.locations.Remove(location);
                     this.Serialize(locations, location);
                 }
-                Game1.player.Items = this.Serialize(data, Game1.player.Items.ToList());
-                var house = (Game1.getLocationFromName("FarmHouse") as FarmHouse);
-                house.fridge.Value?.items.Set(this.Serialize(data, house.fridge.Value.items.ToList()));
+                this.Serialize(data, Game1.player.Items);
+                FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
+                if (house.fridge.Value != null)
+                    this.Serialize(data, house.fridge.Value.items);
                 this.Monitor.Log("Found and serialized [" + data.Count + "] Item instances", LogLevel.Trace);
                 this.Monitor.Log("Found and serialized [" + features.Count + "] TerrainFeature instances", LogLevel.Trace);
                 this.Monitor.Log("Found and serialized [" + locations.Count + "] GameLocation instances", LogLevel.Trace);
                 string path = Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework");
-                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomItems.json"), data);
-                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomTerrain.json"), features);
-                this.Helper.Data.WriteJsonFile(Path.Combine(path, "CustomLocations.json"), locations);
+                this.Helper.Data.WriteSaveData("custom-items", data);
+                this.Helper.Data.WriteSaveData("custom-features", features);
+                this.Helper.Data.WriteSaveData("custom-locations", locations);
                 ItemEvents.FireAfterSerialize();
                 this.Monitor.Log("Packing complete", LogLevel.Trace);
-                /*
-                this.Monitor.Log("Packing custom objects...", LogLevel.Trace);
-                ItemEvents.FireBeforeSerialize();
-                Dictionary<string, InstanceState> data = new Dictionary<string, InstanceState>();
-                foreach (GameLocation loc in Game1.locations)
-                {
-                    foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                        this.Serialize(data, chest.items);
-                }
-
-                this.Serialize(data, Game1.player.Items);
-                FarmHouse house = Game1.getLocationFromName("FarmHouse") as FarmHouse;
-
-                if (house.fridge.Value != null)
-                    this.Serialize(data, house.fridge.Value.items);
-                this.Helper.Data.WriteSaveData("custom-items", data);
-                ItemEvents.FireAfterSerialize();
-                */
             }
         }
 
@@ -614,8 +588,19 @@ namespace Entoarox.Framework.Core
             // read data
             this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
             ItemEvents.FireBeforeDeserialize();
+            Dictionary<string, Tuple<bool, InstanceState>> locations = this.Helper.Data.ReadSaveData<Dictionary<string, Tuple<bool, InstanceState>>>("custom-locations") ?? new Dictionary<string, Tuple<bool, InstanceState>>();
+            foreach (var location in locations)
+            {
+                if (location.Value.Item1)
+                    return;
+                Game1.locations.Remove(Game1.getLocationFromName(location.Key));
+                Game1.locations.Add(location.Value.Item2.Restore<GameLocation>());
+            }
             IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items") ?? new Dictionary<string, InstanceState>();
             this.RestoreItems(data);
+            List<Tuple<string, Vector2, InstanceState>> features = this.Helper.Data.ReadSaveData<List<Tuple<string, Vector2, InstanceState>>>("custom-features") ?? new List<Tuple<string, Vector2, InstanceState>>();
+            foreach(var feature in features)
+                Game1.getLocationFromName(feature.Item1)?.terrainFeatures.Add(feature.Item2, feature.Item3.Restore<TerrainFeature>());
             ItemEvents.FireAfterDeserialize();
         }
         #region Functions
@@ -629,51 +614,46 @@ namespace Entoarox.Framework.Core
                 yield return loc;
             }
         }
-        private SerializableDictionary<Vector2, TerrainFeature> Serialize(List<Tuple<string, Vector2, InstanceState>> data, GameLocation location, SerializableDictionary<Vector2, TerrainFeature> features)
+        private void Serialize(List<Tuple<string, Vector2, InstanceState>> data, GameLocation location, StardewValley.Network.NetVector2Dictionary<TerrainFeature, Netcode.NetRef<TerrainFeature>> features)
         {
-            var output = new SerializableDictionary<Vector2, TerrainFeature>();
-            foreach (var pair in features)
-            {
-                if (pair.Value is ICustomItem)
+            foreach(SerializableDictionary<Vector2, TerrainFeature> dict in features)
+                foreach (var pair in dict)
                 {
-                    data.Add(new Tuple<string, Vector2, InstanceState>(location.Name, pair.Key, new InstanceState(pair.Value.GetType().AssemblyQualifiedName, JToken.FromObject(pair.Value, Serializer))));
-                }
-                else
-                    output.Add(pair.Key, pair.Value);
-            }
-            return output;
-        }
-        private SerializableDictionary<Vector2, SObject> Serialize(Dictionary<string, InstanceState> data, SerializableDictionary<Vector2, SObject> items)
-        {
-            var output = new SerializableDictionary<Vector2, SObject>();
-            foreach (var item in items)
-            {
-                if (item.Value is ICustomItem)
-                {
-                    string id = Guid.NewGuid().ToString();
-                    int counter = 0;
-                    while (data.ContainsKey(id) && counter++ < 25)
-                        id = Guid.NewGuid().ToString();
-                    if (counter >= 25)
-                        throw new TimeoutException("Unable to assign a GUID to all items!");
-                    SObject obj = new SObject()
+                    if (pair.Value is ICustomItem)
                     {
-                        Stack = item.Value.getStack(),
-                        ParentSheetIndex = 0,
-                        Type = id,
-                        Name = "(Entoarox.Framework.ICustomItem)",
-                        Price = item.Value.salePrice(),
-                    };
-                    if (item.Value is Placeholder pitm)
-                        data.Add(id, new InstanceState(pitm.Id, pitm.Data));
-                    else
-                        data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, Serializer)));
-                    output.Add(item.Key, obj);
+                        data.Add(new Tuple<string, Vector2, InstanceState>(location.Name, pair.Key, new InstanceState(pair.Value.GetType().AssemblyQualifiedName, JToken.FromObject(pair.Value, Serializer))));
+                        features.Remove(pair.Key);
+                    }
                 }
-                else
-                    output.Add(item.Key, item.Value);
-            }
-            return output;
+        }
+        private void Serialize(Dictionary<string, InstanceState> data, StardewValley.Network.OverlaidDictionary items)
+        {
+            foreach (var dict in items)
+                foreach (var item in dict)
+                {
+                    if (item.Value is ICustomItem)
+                    {
+                        string id = Guid.NewGuid().ToString();
+                        int counter = 0;
+                        while (data.ContainsKey(id) && counter++ < 25)
+                            id = Guid.NewGuid().ToString();
+                        if (counter >= 25)
+                            throw new TimeoutException("Unable to assign a GUID to all items!");
+                        SObject obj = new SObject()
+                        {
+                            Stack = item.Value.getStack(),
+                            ParentSheetIndex = 0,
+                            Type = id,
+                            Name = "(Entoarox.Framework.ICustomItem)",
+                            Price = item.Value.salePrice(),
+                        };
+                        if (item.Value is Placeholder pitm)
+                            data.Add(id, new InstanceState(pitm.Id, pitm.Data));
+                        else
+                            data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, Serializer)));
+                        items[item.Key] = obj;
+                    }
+                }
         }
         private GameLocation Serialize(Dictionary<string, Tuple<bool, InstanceState>> data, GameLocation location, bool building = false)
         {
@@ -685,93 +665,6 @@ namespace Entoarox.Framework.Core
             data.Add(building ? guid : location.Name, new Tuple<bool, InstanceState>(building, new InstanceState(location.GetType().AssemblyQualifiedName, JToken.FromObject(location, Serializer))));
             return output;
         }
-        private List<Item> Serialize(Dictionary<string, InstanceState> data, List<Item> items)
-        {
-            List<Item> output = new List<Item>();
-            foreach (Item item in items)
-            {
-                if (item is ICustomItem)
-                {
-                    string id = Guid.NewGuid().ToString();
-                    int counter = 0;
-                    while (data.ContainsKey(id) && counter++ < 25)
-                        id = Guid.NewGuid().ToString();
-                    if (counter >= 25)
-                        throw new TimeoutException("Unable to assign a GUID to all items!");
-                    SObject obj = new SObject()
-                    {
-                        Stack = item.getStack(),
-                        ParentSheetIndex = 0,
-                        Type = id,
-                        Name = "(Entoarox.Framework.ICustomItem)",
-                        Price = item.salePrice(),
-                    };
-                    if (item is Placeholder pitm)
-                        data.Add(id, new InstanceState(pitm.Id, pitm.Data));
-                    else
-                        data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, Serializer)));
-                    output.Add(obj);
-                }
-                else
-                    output.Add(item);
-            }
-            return output;
-        }
-        private List<Item> Deserialize(Dictionary<string, InstanceState> data, List<Item> items)
-        {
-            List<Item> output = new List<Item>();
-            foreach (Item item in items)
-            {
-                if (item is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
-                {
-                    if (data.ContainsKey(itm.Type))
-                    {
-                        var result = data[itm.Type].Restore<Item>();
-                        if (result == null)
-                            continue;
-                        if (result is SObject obj)
-                            obj.reloadSprite();
-                        output.Add(result);
-                    }
-                    else
-                    {
-                        output.Add(item);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
-                    }
-                }
-                else
-                    output.Add(item);
-            }
-            return output;
-        }
-        private SerializableDictionary<Vector2, SObject> Deserialize(Dictionary<string, InstanceState> data, SerializableDictionary<Vector2, SObject> items)
-        {
-            var output = new SerializableDictionary<Vector2, SObject>();
-            foreach (var item in items)
-            {
-                if (item.Value is SObject itm && itm.name.Equals("(Entoarox.Framework.ICustomItem)"))
-                {
-                    if (data.ContainsKey(itm.Type))
-                    {
-                        var result = data[itm.Type].Restore<SObject>();
-                        if (result == null)
-                            continue;
-                        result.reloadSprite();
-                        output.Add(item.Key, result);
-                    }
-                    else
-                    {
-                        output.Add(item.Key, item.Value);
-                        this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + itm.Type, LogLevel.Error);
-                    }
-                }
-                else
-                    output.Add(item.Key, item.Value);
-            }
-            return output;
-        }
-        #endregion
-
         private void RestoreItems(IDictionary<string, InstanceState> data)
         {
             foreach (GameLocation loc in Game1.locations)
@@ -858,11 +751,11 @@ namespace Entoarox.Framework.Core
                 }
             }
         }
-
+        #endregion functions
         /****
         ** Serializer
         ****/
-        private void SetupSerializer()
+        private void SetupSerializer(object sender, EventArgs e)
         {
             this.MainSerializer = new XmlSerializer(typeof(SaveGame), EntoaroxFrameworkMod.SerialiserTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
             this.FarmerSerializer = new XmlSerializer(typeof(Farmer), EntoaroxFrameworkMod.FarmerTypes.Concat(EntoaroxFrameworkMod.SerializerTypes).ToArray());
@@ -871,7 +764,7 @@ namespace Entoarox.Framework.Core
             this.EnforceSerializer(null, null);
         }
 
-        private void EnforceSerializer(object sender, UpdateTickedEventArgs e)
+        private void EnforceSerializer(object sender, EventArgs e)
         {
             SaveGame.serializer = this.MainSerializer;
             SaveGame.farmerSerializer = this.FarmerSerializer;

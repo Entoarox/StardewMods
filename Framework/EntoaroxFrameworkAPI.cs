@@ -15,6 +15,7 @@ namespace Entoarox.Framework
         /*********
         ** Fields
         *********/
+        internal static EntoaroxFrameworkAPI Singleton;
         private static PlayerModifier Modifier = new PlayerModifier();
         private static readonly Dictionary<string, int> RunBoosts = new Dictionary<string, int>();
         private static readonly Dictionary<string, int> WalkBoosts = new Dictionary<string, int>();
@@ -44,16 +45,21 @@ namespace Entoarox.Framework
 
         public EntoaroxFrameworkAPI()
         {
-            this.RegisterIdResolver("sdv.object", id => new SObject(Convert.ToInt32(id), 1));
-            this.RegisterIdResolver("sdv.craftable", id => new SObject(Vector2.Zero, Convert.ToInt32(id), 1));
-            this.RegisterIdResolver("sdv.hat", id => new Hat(Convert.ToInt32(id)));
-            this.RegisterIdResolver("sdv.furniture", id => new Furniture(Convert.ToInt32(id), Vector2.Zero));
-            this.RegisterIdResolver("sdv.ring", id => new Ring(Convert.ToInt32(id)));
-            this.RegisterIdResolver("sdv.flooring", id => new Wallpaper(Convert.ToInt32(id), true));
-            this.RegisterIdResolver("sdv.wallpaper", id => new Wallpaper(Convert.ToInt32(id)));
-            this.RegisterIdResolver("sdv.sign", id => new Sign(Vector2.Zero, Convert.ToInt32(id)));
-            this.RegisterIdResolver("sdv.weapon", id => new MeleeWeapon(Convert.ToInt32(id)));
-            this.RegisterIdResolver("sdv.wine", id =>
+            Singleton = this;
+        }
+
+        internal static void Ready()
+        {
+            Singleton.RegisterIdResolver("sdv.object", id => new SObject(Convert.ToInt32(id), 1));
+            Singleton.RegisterIdResolver("sdv.craftable", id => new SObject(Vector2.Zero, Convert.ToInt32(id), 1));
+            Singleton.RegisterIdResolver("sdv.hat", id => new Hat(Convert.ToInt32(id)));
+            Singleton.RegisterIdResolver("sdv.furniture", id => new Furniture(Convert.ToInt32(id), Vector2.Zero));
+            Singleton.RegisterIdResolver("sdv.ring", id => new Ring(Convert.ToInt32(id)));
+            Singleton.RegisterIdResolver("sdv.flooring", id => new Wallpaper(Convert.ToInt32(id), true));
+            Singleton.RegisterIdResolver("sdv.wallpaper", id => new Wallpaper(Convert.ToInt32(id)));
+            Singleton.RegisterIdResolver("sdv.sign", id => new Sign(Vector2.Zero, Convert.ToInt32(id)));
+            Singleton.RegisterIdResolver("sdv.weapon", id => new MeleeWeapon(Convert.ToInt32(id)));
+            Singleton.RegisterIdResolver("sdv.wine", id =>
             {
                 SObject item = new SObject(Convert.ToInt32(id), 1);
                 SObject wine = new SObject(348, 1)
@@ -65,7 +71,7 @@ namespace Entoarox.Framework
                 wine.preservedParentSheetIndex.Value = item.ParentSheetIndex;
                 return wine;
             });
-            this.RegisterIdResolver("sdv.jelly", id =>
+            Singleton.RegisterIdResolver("sdv.jelly", id =>
             {
                 SObject item = new SObject(Convert.ToInt32(id), 1);
                 SObject jelly = new SObject(344, 1)
@@ -77,7 +83,7 @@ namespace Entoarox.Framework
                 jelly.preservedParentSheetIndex.Value = item.ParentSheetIndex;
                 return jelly;
             });
-            this.RegisterIdResolver("sdv.juice", id =>
+            Singleton.RegisterIdResolver("sdv.juice", id =>
             {
                 SObject item = new SObject(Convert.ToInt32(id), 1);
                 SObject juice = new SObject(350, 1)
@@ -89,7 +95,7 @@ namespace Entoarox.Framework
                 juice.preservedParentSheetIndex.Value = item.ParentSheetIndex;
                 return juice;
             });
-            this.RegisterIdResolver("sdv.pickled", id =>
+            Singleton.RegisterIdResolver("sdv.pickled", id =>
             {
                 SObject item = new SObject(Convert.ToInt32(id), 1);
                 SObject pickled = new SObject(342, 1)
@@ -101,7 +107,7 @@ namespace Entoarox.Framework
                 pickled.preservedParentSheetIndex.Value = item.ParentSheetIndex;
                 return pickled;
             });
-            this.RegisterIdResolver("sdv.honey", id =>
+            Singleton.RegisterIdResolver("sdv.honey", id =>
             {
                 SObject item = new SObject(Convert.ToInt32(id), 1);
                 SObject honey = new SObject(Vector2.Zero, 340, "Honey", false, true, false, false)
@@ -135,7 +141,7 @@ namespace Entoarox.Framework
                 }
                 return honey;
             });
-            this.RegisterIdResolver("sdv.other", id => {
+            Singleton.RegisterIdResolver("sdv.other", id => {
                 switch(id)
                 {
                     case "chest":
@@ -154,11 +160,11 @@ namespace Entoarox.Framework
             if (registry.IsLoaded("spacechase0.JsonAssets"))
             {
                 IJsonAssetsAPI jaApi = registry.GetApi<IJsonAssetsAPI>("spacechase0.JsonAssets");
-                this.RegisterIdResolver("ja.object", id => new SObject(jaApi.GetObjectId(id), 1));
-                this.RegisterIdResolver("ja.craftable", id => new SObject(Vector2.Zero, jaApi.GetBigCraftableId(id), 1));
-                this.RegisterIdResolver("ja.hat", id => new Hat(jaApi.GetHatId(id)));
-                this.RegisterIdResolver("ja.weapon", id => new MeleeWeapon(jaApi.GetWeaponId(id)));
-                this.RegisterIdResolver("ja.ring", id => new Ring(jaApi.GetObjectId(id)));
+                Singleton.RegisterIdResolver("ja.object", id => new SObject(jaApi.GetObjectId(id), 1));
+                Singleton.RegisterIdResolver("ja.craftable", id => new SObject(Vector2.Zero, jaApi.GetBigCraftableId(id), 1));
+                Singleton.RegisterIdResolver("ja.hat", id => new Hat(jaApi.GetHatId(id)));
+                Singleton.RegisterIdResolver("ja.weapon", id => new MeleeWeapon(jaApi.GetWeaponId(id)));
+                Singleton.RegisterIdResolver("ja.ring", id => new Ring(jaApi.GetObjectId(id)));
             }
         }
 
