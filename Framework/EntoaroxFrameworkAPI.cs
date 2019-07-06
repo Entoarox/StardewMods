@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Entoarox.Framework.Core;
+
 using StardewValley;
 using SObject = StardewValley.Object;
 using StardewValley.Objects;
 using StardewValley.Tools;
+
 using Microsoft.Xna.Framework;
+
+using Entoarox.Framework.Core;
+using Entoarox.Framework.ApiWrappers;
 
 namespace Entoarox.Framework
 {
@@ -21,27 +25,6 @@ namespace Entoarox.Framework
         private static readonly Dictionary<string, int> WalkBoosts = new Dictionary<string, int>();
         private static readonly Dictionary<string, Func<string, Item>> IdResolvers = new Dictionary<string, Func<string, Item>>();
 
-        private interface IJsonAssetsAPI
-        {
-            void LoadAssets(string path);
-
-            int GetObjectId(string name);
-            int GetCropId(string name);
-            int GetFruitTreeId(string name);
-            int GetBigCraftableId(string name);
-            int GetHatId(string name);
-            int GetWeaponId(string name);
-
-            IDictionary<string, int> GetAllObjectIds();
-            IDictionary<string, int> GetAllCropIds();
-            IDictionary<string, int> GetAllFruitTreeIds();
-            IDictionary<string, int> GetAllBigCraftableIds();
-            IDictionary<string, int> GetAllHatIds();
-            IDictionary<string, int> GetAllWeaponIds();
-
-            event EventHandler IdsAssigned;
-            event EventHandler AddedItemsToShop;
-        }
 
         public EntoaroxFrameworkAPI()
         {

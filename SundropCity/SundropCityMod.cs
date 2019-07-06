@@ -297,7 +297,7 @@ namespace SundropCity
                     switch(split[0])
                     {
                         case "SundropMessage":
-
+                            Game1.drawDialogueNoTyping(this.Helper.Translation.Get(args[0]));
                             break;
                     }
                 }
@@ -322,13 +322,19 @@ namespace SundropCity
         {
             if (!e.IsLocalPlayer)
                 return;
-            e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers;
-            e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers;
+            e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
+            e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
+            e.OldLocation.map.GetLayer("Front").AfterDraw -= this.DrawExtraLayers2;
+            e.NewLocation.map.GetLayer("Front").AfterDraw += this.DrawExtraLayers2;
         }
-        private void DrawExtraLayers(object s, LayerEventArgs e)
+        private void DrawExtraLayers1(object s, LayerEventArgs e)
         {
-            Game1.currentLocation.map.GetLayer("FarBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, xTile.Dimensions.Location.Origin, false, 4);
-            Game1.currentLocation.map.GetLayer("MidBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, xTile.Dimensions.Location.Origin, false, 4);
+            Game1.currentLocation.map.GetLayer("FarBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+            Game1.currentLocation.map.GetLayer("MidBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+        }
+        private void DrawExtraLayers2(object s, LayerEventArgs e)
+        {
+            Game1.currentLocation.map.GetLayer("Front2")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
         }
     }
 }

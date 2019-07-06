@@ -1,4 +1,12 @@
 ## Release notes
+## 2.4.6
+Released 06 July 2019
+* Fixed JsonAssets error again, nested interfaces are also invalid
+
+## 2.4.5
+Released 04 July 2019
+* Fixed a error related to the JsonAssets integration
+
 ## 2.4.4
 Released 04 July 2019
 * Fixed the ICustomItem `TerrainFeature` and `GameLocation` support
