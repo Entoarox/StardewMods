@@ -1,7 +1,13 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Newtonsoft.Json.Linq;
 
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -13,20 +19,37 @@ using SundropCity.TerrainFeatures;
 
 using xTile;
 using xTile.Dimensions;
-using xTile.ObjectModel;
 using xTile.Layers;
+using xTile.ObjectModel;
 using xTile.Tiles;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using Newtonsoft.Json.Linq;
 
 namespace SundropCity
 {
+    using Json;
     /// <summary>The mod entry class.</summary>
     public class SundropCityMod : Mod
     {
+        private static Texture2D DemoSource;
+        private static PaletteTexture DemoTex;
+        private static readonly Dictionary<string, Color> DemoTexColors = new Dictionary<string, Color>()
+        {
+            ["DullDark"] = new Color(39,31,27),
+            ["MediumDark"] = new Color(76,61,46),
+            ["BrightDark"] = new Color(103,57,49),
+            ["DullLight"] = new Color(143,77,87),
+            ["MediumLight"] = new Color(189,106,98),
+            ["BrightLight"] = new Color(255,174,112)
+        };
+        private static readonly Dictionary<string, Color> DemoTexSource = new Dictionary<string, Color>()
+        {
+            ["DullDark"] = new Color(57, 57, 57),
+            ["MediumDark"] = new Color(81, 81, 81),
+            ["BrightDark"] = new Color(119, 119, 119),
+            ["DullLight"] = new Color(158, 158, 158),
+            ["MediumLight"] = new Color(224, 224, 224),
+            ["BrightLight"] = new Color(254, 254, 254)
+        };
+
         internal static IModHelper SHelper;
         internal static IMonitor SMonitor;
 
@@ -52,9 +75,15 @@ namespace SundropCity
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
 
-            // Handle ALL not providing extra layer drawing
-            if (!helper.ModRegistry.IsLoaded("Entoarox.AdvancedLocationLoader") || helper.ModRegistry.Get("Entoarox.AdvancedLocationLoader").Manifest.Version.IsOlderThan("1.5.0"))
-                helper.Events.Player.Warped += this.OnWarped;
+            // Handle custom layer drawing
+            helper.Events.Player.Warped += this.OnWarped;
+
+            /**
+            // Demo stuff
+            DemoSource = helper.Content.Load<Texture2D>("assets/recolor.png");
+            DemoTex = new PaletteTexture(DemoSource, DemoTexSource);
+            helper.Events.Display.Rendered += this.DemoDraw;
+            /**/
         }
 
         /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
@@ -62,33 +91,32 @@ namespace SundropCity
         /// <param name="e">The event data.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
+            this.Monitor.Log("Performing init...", LogLevel.Trace);
             var helper = this.Helper;
-
+            this.Maps = new List<string>();
             // Load maps
-            List<string> maps = new List<string>();
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
+            this.Monitor.Log("Preparing maps...", LogLevel.Trace);
+            Parallel.ForEach(Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")), file =>
             {
                 string ext = Path.GetExtension(file);
-                this.Monitor.Log($"Checking file: {file} (ext: {ext})", LogLevel.Trace);
-                if (!ext.Equals(".tbin"))
-                    continue;
-                string map = Path.GetFileName(file);
-                this.Monitor.Log("Found sundrop location: " + map, LogLevel.Trace);
-                try
+                if (ext.Equals(".tbin"))
                 {
-                    this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
-                    maps.Add(map);
+                    string map = Path.GetFileName(file);
+                    try
+                    {
+                        this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                        new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
+                        lock(this.Maps)
+                            this.Maps.Add(map);
+                    }
+                    catch (Exception err)
+                    {
+                        this.Monitor.Log("Unable to prepare [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
+                    }
                 }
-                catch(Exception err)
-                {
-                    this.Monitor.Log("Unable to prepare [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
-                }
-            }
-            this.Maps = maps;
-
-
-            JObject dict = helper.Content.Load<JObject>("assets/Data/ParkingSpots.json");
-            foreach(JProperty map in dict.Properties())
+            });
+            this.Monitor.Log("Reading parking data...", LogLevel.Trace);
+            foreach(var map in helper.Content.Load<JObject>("assets/Data/ParkingSpots.json").Properties())
             {
                 this.Monitor.Log("Parsing parking data for the [" + map.Name + "] map, found [" + (map.Value as JArray).Count + "] parking spaces.", LogLevel.Trace);
                 JArray spotsArr = map.Value.ToObject<JArray>();
@@ -102,17 +130,54 @@ namespace SundropCity
                         facings.Add((Facing)Enum.Parse(typeof(Facing), facing.ToObject<string>()));
                     spots.Add(new ParkingSpot(new Vector2(values[0].ToObject<int>(), values[1].ToObject<int>()), facings.ToArray()));
                 }
-                ParkingSpots.Add(key, spots.ToArray());
+                lock(ParkingSpots)
+                    ParkingSpots.Add(key, spots.ToArray());
             }
-            this.Monitor.Log("Loading bundled car textures...", LogLevel.Trace);
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(helper.DirectoryPath, "assets/TerrainFeatures/Cars")))
+            this.Monitor.Log("Reading car data...", LogLevel.Trace);
+            SundropCar.CarTypes = helper.Data.ReadJsonFile<List<CarType>>("assets/Data/Cars.json")?.Select(type =>
+             {
+                 type.Base = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + type.Base + ".png");
+                 type.Recolor = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + type.Recolor + ".png");
+                 type.Decals = type.Decals.Select(pair => new KeyValuePair<string, string>(pair.Key, helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + pair.Value + ".png"))).ToDictionary(pair => pair.Key, pair => pair.Value);
+                 return type;
+             }).ToList();
+            if(SundropCar.CarTypes==null)
             {
-                string local = file.Replace(helper.DirectoryPath + Path.DirectorySeparatorChar, "");
-                this.Monitor.Log("Checking file: " + local, LogLevel.Trace);
-                if (Path.GetExtension(local).Equals(".png"))
-                    SundropCar.Textures.Add(helper.Content.Load<Texture2D>(local));
+                this.Monitor.Log("Unable to read Cars.json for car data, cars will not be able to spawn!", LogLevel.Error);
+                SundropCar.CarTypes = new List<CarType>();
             }
-            this.Monitor.Log("Found and loaded [" + SundropCar.Textures.Count.ToString() + "] bundled car textures.", LogLevel.Trace);
+            this.Monitor.Log("Preparing characters...", LogLevel.Trace);
+            // NPC Spawning
+            foreach(var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"))
+            {
+                try
+                {
+                    new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
+                    {
+                        Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
+                    };
+                }
+                catch (Exception err)
+                {
+                    this.Monitor.Log("Unable to prepare villager by name of [" + info.Name + "] due to a unexpected issue.\n" + err.ToString(), LogLevel.Error);
+                }
+            }
+            this.Monitor.Log("Preparing cameos...", LogLevel.Trace);
+            foreach(var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CameoSpawns.json"))
+            {
+                try
+                {
+                    new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
+                    {
+                        Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
+                    };
+                }
+                catch (Exception err)
+                {
+                    this.Monitor.Log("Unable to prepare cameo character for [" + info.Name + "] due to a unexpected issue.\n" + err.ToString(), LogLevel.Warn);
+                }
+            }
+            this.Monitor.Log("Registering commands...", LogLevel.Trace);
             helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
              {
                  switch(args[0])
@@ -120,18 +185,112 @@ namespace SundropCity
                      case "car":
                          Facing facing = (Facing)Enum.Parse(typeof(Facing), args[1]);
                          Game1.currentLocation.largeTerrainFeatures.Add(new SundropCar(Game1.player.getTileLocation(), facing));
+                         this.Monitor.Log("Spawned car.", LogLevel.Alert);
                          break;
                      case "parking":
                          this.SpawnCars(Game1.currentLocation, Convert.ToDouble(args[1]));
+                         this.Monitor.Log("Performed car spawning algorithm.", LogLevel.Alert);
+                         break;
+                     case "tourist":
+                         Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
+                         this.Monitor.Log("Spawned tourist.", LogLevel.Alert);
                          break;
                  }
              });
+            this.Monitor.Log("Init complete!", LogLevel.Trace);
         }
 
         private void Setup()
         {
+            var start = DateTime.Now;
             this.Monitor.Log("Performing setup...", LogLevel.Trace);
-            // Handle patches specific to other mods
+            GameLocation promenade = null;
+            this.Monitor.Log("Adding locations...", LogLevel.Trace);
+            // Add new locations
+            Parallel.ForEach(this.Maps, map =>
+            {
+                try
+                {
+                    var loc = new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
+                    this.SetupLocation(loc);
+                    lock (Game1.locations)
+                    {
+                        this.Monitor.Log("Adding sundrop location: " + Path.GetFileNameWithoutExtension(map), LogLevel.Trace);
+                        Game1.locations.Add(loc);
+                    }
+                }
+                catch (Exception err)
+                {
+                    this.Monitor.Log("Unable to add [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
+                }
+            });
+            promenade = Game1.getLocationFromName("SundropPromenade");
+            this.Monitor.Log("Spawning characters...", LogLevel.Trace);
+            // NPC Spawning
+            Parallel.ForEach(this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"), info =>
+            {
+                if (Game1.getLocationFromName(info.Map) == null)
+                    this.Monitor.Log("Unable to add villager by name of [" + info.Name + "] because their default map failed to load, this character will not appear in your game as a result.", LogLevel.Error);
+                else
+                    try
+                    {
+                        this.Monitor.Log("Adding sundrop villager: " + info.Name, LogLevel.Trace);
+                        Vector2 pos = new Vector2(info.Position[0], info.Position[1]);
+                        NPC villagerNPC = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), pos * 64f, 2, info.Name)
+                        {
+                            Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
+                        };
+                        villagerNPC.DefaultMap = info.Map;
+                        villagerNPC.DefaultPosition = pos * 64f;
+                        villagerNPC.setNewDialogue(info.Message);
+                        lock (Game1.getLocationFromName(info.Map))
+                            Game1.getLocationFromName(info.Map).addCharacter(villagerNPC);
+                    }
+                    catch (Exception err)
+                    {
+                        this.Monitor.Log("Unable to add villager by name of [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err.ToString(), LogLevel.Error);
+                    }
+            });
+            this.Monitor.Log("Spawning cameos...", LogLevel.Trace);
+            Parallel.ForEach(this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CameoSpawns.json"), info =>
+            {
+                if (Game1.getLocationFromName(info.Map) == null)
+                    this.Monitor.Log("Unable to add cameo character for [" + info.Name + "] because their default map failed to load, this character will not appear in your game as a result.", LogLevel.Warn);
+                else
+                    try
+                    {
+                        this.Monitor.Log("Adding sundrop cameo: " + info.Name, LogLevel.Trace);
+                        Vector2 pos = new Vector2(info.Position[0], info.Position[1]);
+                        NPC cameoNPC = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), pos * 64f, 2, info.Name)
+                        {
+                            Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
+                        };
+                        cameoNPC.DefaultMap = info.Map;
+                        cameoNPC.DefaultPosition = pos * 64f;
+                        cameoNPC.setNewDialogue(info.Message);
+                        lock (Game1.getLocationFromName(info.Map))
+                            Game1.getLocationFromName(info.Map).addCharacter(cameoNPC);
+                    }
+                    catch (Exception err)
+                    {
+                        this.Monitor.Log("Unable to add cameo character for [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err.ToString(), LogLevel.Warn);
+                    }
+            });
+            var npc = Game1.getCharacterFromName("Joe");
+            npc.Schedule = this.Helper.Reflection.GetMethod(npc, "parseMasterSchedule").Invoke<Dictionary<int, SchedulePathDescription>>("610 80 20 2/630 23 20 2/710 80 20 2/730 23 20 2/810 80 20 2/830 23 20 2/910 80 20 2/930 23 20 2");
+            NPC cake = new MrCake(new Vector2(22, 20), npc);
+            cake.setNewDialogue("Mr. Cake looks at you with approval.");
+            promenade?.addCharacter(cake);
+            var end = DateTime.Now;
+            var time=end.Subtract(start);
+            this.Monitor.Log("Sundrop loading took " + time.TotalMilliseconds + " milliseconds.", LogLevel.Trace);
+            if (promenade == null)
+            {
+                this.Monitor.Log("Promenade failed to load, please report this issue.", LogLevel.Error);
+                return;
+            }
+            this.Monitor.Log("Patching town...", LogLevel.Trace);
+            // Cross-mod compatibility
             var registry = this.Helper.Data.ReadJsonFile<Dictionary<string, string>>("assets/TownPatches/registry.json");
             string patchVersion = "Vanilla";
             foreach (var pair in registry)
@@ -173,63 +332,31 @@ namespace SundropCity
                             toLayer.Tiles[x, y] = new StaticTile(toLayer, town.map.GetTileSheet(tile.TileSheet.Id), BlendMode.Additive, tile.TileIndex);
                     }
             }
-            // Add new locations
-            foreach (string map in this.Maps)
-            {
-                try
-                {
-                    this.Monitor.Log("Adding sundrop location: " + Path.GetFileNameWithoutExtension(map), LogLevel.Trace);
-                    var loc = new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
-                    this.SetupLocation(loc);
-                    Game1.locations.Add(loc);
-                }
-                catch(Exception err)
-                {
-                    this.Monitor.Log("Unable to add [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
-                }
-            }
-            var promenade = Game1.getLocationFromName("SundropPromenade");
-            if(promenade==null)
-            {
-                this.Monitor.Log("Promenade failed to load, cancelling further setup as a result.", LogLevel.Error);
-                return;
-            }
-            // Setup warps to sundrop [TEMP: Will become warps to SundropBusStop map in the future]
+
+            // TEMP STUFF
+            promenade?.setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
             town.warps.Add(new Warp(120, 55, "SundropPromenade", 1, 29, false));
             town.warps.Add(new Warp(120, 56, "SundropPromenade", 1, 30, false));
             town.warps.Add(new Warp(120, 57, "SundropPromenade", 1, 31, false));
             town.warps.Add(new Warp(120, 58, "SundropPromenade", 1, 32, false));
-            // Add warp back to Pelican [TEMP: Will be removed once proper travel is implemented]
-            promenade.setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
-            // Temp NPC spawns
-            NPC npc = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/Joe.png"), 18, 16, 32), new Vector2(24, 20) * 64f, 2, "Joe")
+            this.Monitor.Log("Patching complete, enjoy sundrop!", LogLevel.Trace);
+
+            // Lock residential in the 0.2.0 release, it is not release ready
+            if(this.ModManifest.Version.IsOlderThan("0.3.0"))
             {
-                Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/Joe.png"),
-                Breather = false,
-                HideShadow = true
-            };
-            npc.DefaultMap = "SundropPromenade";
-            npc.DefaultPosition = new Vector2(23, 20) * 64f;
-            npc.Schedule = this.Helper.Reflection.GetMethod(npc, "parseMasterSchedule").Invoke<Dictionary<int, SchedulePathDescription>>("610 80 20 2/630 23 20 2/710 80 20 2/730 23 20 2/810 80 20 2/830 23 20 2/910 80 20 2/930 23 20 2");
-            npc.setNewDialogue("Mr. Bones wanted me to take care of Mr. Cake for him while he deals with a corruption claim by this guy called Stubbs...$bNo idea why the cat even bothers, everyone knows Mr. Cake is best doggo!");
-            promenade.addCharacter(npc);
-            NPC cake = new MrCake(new Vector2(22, 20), npc);
-            cake.setNewDialogue("Mr. Cake looks at you with approval.");
-            promenade.addCharacter(cake);
-            this.AddCameoChar("ChefRude", "SundropPromenade", new Vector2(24, 50), "So much work to do... $b#$sI just cant keep up...");
+                var layer = Game1.getLocationFromName("SundropShoppingDistrict")?.map.GetLayer("Buildings");
+                if (layer == null)
+                    return;
+                var sheet = Game1.getLocationFromName("SundropShoppingDistrict").map.GetTileSheet("sundropOutdoor");
+                for(int y=47;y<=51;y++)
+                    layer.Tiles[99, y] = new StaticTile(layer, sheet, BlendMode.Additive, 0);
+            }
+        }
+        private void AddCitizen(string id, string name, string map, Vector2 pos, string dialogue)
+        {
         }
         private void AddCameoChar(string name, string map, Vector2 pos, string dialogue)
         {
-            NPC npc = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + name + "Sprite.png"), 18, 16, 32), pos * 64f, 2, name)
-            {
-                Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/"+name+"Portrait.png"),
-                Breather = false,
-                HideShadow = true
-            };
-            npc.DefaultMap = map;
-            npc.DefaultPosition =pos * 64f;
-            npc.setNewDialogue(dialogue);
-            Game1.getLocationFromName(map).addCharacter(npc);
         }
         private void SetupLocation(GameLocation location)
         {
@@ -237,11 +364,11 @@ namespace SundropCity
                 location.map.Properties.Add("IsSundropLocation", true);
             if (location.map.GetLayer("SundropPaths") != null)
             {
-                var layer = location.map.GetLayer("SundropPaths");
-                for (int x = 0; x < location.map.DisplayWidth; x++)
-                    for (int y = 0; y < location.map.DisplayHeight; y++)
+                var pathsLayer = location.map.GetLayer("SundropPaths");
+                for (int x = 0; x < pathsLayer.LayerWidth; x++)
+                    for (int y = 0; y < pathsLayer.LayerHeight; y++)
                     {
-                        var tile = layer.Tiles[x, y];
+                        var tile = pathsLayer.Tiles[x, y];
                         if (tile == null)
                             continue;
                         Vector2 vect = new Vector2(x, y);
@@ -258,6 +385,21 @@ namespace SundropCity
                         }
                     }
             }
+            var layer = location.map.GetLayer("Back");
+            var sheet = location.map.TileSheets.Where(_ => _.ImageSource.Contains("SundropPaths.png")).FirstOrDefault();
+            if (sheet == null || sheet==default)
+            {
+                var img = this.Helper.Content.Load<Texture2D>("assets/Maps/SundropPaths.png");
+                sheet = new TileSheet("PathsTilesheet", location.map, this.Helper.Content.GetActualAssetKey("assets/Maps/SundropPaths.png"), new Size(img.Width / 16, img.Height / 16), new Size(16, 16));
+                location.map.AddTileSheet(sheet);
+            }
+            for (int x = 0; x < layer.LayerWidth; x++)
+                for (int y = 0; y < layer.LayerHeight; y++)
+                {
+                    var tile = layer.Tiles[x, y];
+                    if (tile == null)
+                        layer.Tiles[x, y] = new StaticTile(layer, sheet, BlendMode.Additive, 2);
+                }
         }
         private void SpawnCars(GameLocation location, double chance)
         {
@@ -324,8 +466,14 @@ namespace SundropCity
                 return;
             e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
             e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
-            e.OldLocation.map.GetLayer("Front").AfterDraw -= this.DrawExtraLayers2;
-            e.NewLocation.map.GetLayer("Front").AfterDraw += this.DrawExtraLayers2;
+            e.OldLocation.map.GetLayer("Back").AfterDraw -= this.DrawExtraLayers4;
+            e.NewLocation.map.GetLayer("Back").AfterDraw += this.DrawExtraLayers4;
+            e.OldLocation.map.GetLayer("Front").BeforeDraw -= this.DrawExtraLayers2;
+            e.NewLocation.map.GetLayer("Front").BeforeDraw += this.DrawExtraLayers2;
+            if (e.OldLocation.map.GetLayer("AlwaysFront") != null)
+                e.OldLocation.map.GetLayer("AlwaysFront").AfterDraw -= this.DrawExtraLayers3;
+            if (e.NewLocation.map.GetLayer("AlwaysFront") != null)
+                e.NewLocation.map.GetLayer("AlwaysFront").AfterDraw += this.DrawExtraLayers3;
         }
         private void DrawExtraLayers1(object s, LayerEventArgs e)
         {
@@ -334,7 +482,21 @@ namespace SundropCity
         }
         private void DrawExtraLayers2(object s, LayerEventArgs e)
         {
-            Game1.currentLocation.map.GetLayer("Front2")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+            Game1.currentLocation.map.GetLayer("LowFront")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+        }
+        private void DrawExtraLayers3(object s, LayerEventArgs e)
+        {
+            Game1.currentLocation.map.GetLayer("AlwaysFront2")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+        }
+
+        private void DrawExtraLayers4(object s, LayerEventArgs e)
+        {
+            Game1.currentLocation.map.GetLayer("Shadows")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+        }
+        private void DemoDraw(object s, EventArgs e)
+        {
+            Game1.spriteBatch.Draw(DemoTex, new Microsoft.Xna.Framework.Rectangle(16, 16, DemoSource.Width * 4, DemoSource.Height * 4), DemoTexColors);
+            Game1.spriteBatch.Draw(DemoSource, new Microsoft.Xna.Framework.Rectangle(32 + DemoSource.Width * 4, 16, DemoSource.Width * 4, DemoSource.Height * 4), Color.Brown);
         }
     }
 }

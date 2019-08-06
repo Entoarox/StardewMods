@@ -12,20 +12,24 @@ using StardewValley.TerrainFeatures;
 
 namespace SundropCity.TerrainFeatures
 {
+    using Json;
     class SundropCar : LargeTerrainFeature
     {
         private readonly bool Mirror;
         private readonly Facing Facing;
         private readonly Rectangle RenderRect;
-        private readonly Texture2D Texture;
+        private readonly Texture2D BaseTexture;
+        private readonly PaletteTexture RecolorTexture;
+        private readonly Texture2D DecalTexture;
+        private readonly Dictionary<string, Color> ColorPalette;
 
         private static readonly Rectangle Up = new Rectangle(0, 0, 3 * 16, 5 * 16);
         private static readonly Rectangle Down = new Rectangle(3 * 16, 0, 3 * 16, 5 * 16);
         private static readonly Rectangle Sideways = new Rectangle(0, 5 * 16, 5 * 16, 3 * 16);
         private static readonly Random Rand = new Random();
-        internal static List<Texture2D> Textures = new List<Texture2D>();
+        internal static List<CarType> CarTypes = new List<CarType>();
 
-        public SundropCar(Vector2 tilePosition, Facing facing, Texture2D texture=null) : base(false)
+        public SundropCar(Vector2 tilePosition, Facing facing, int? type=null, int? variant=null, string decal=null) : base(false)
         {
             this.tilePosition.Value = tilePosition;
             this.Facing = facing;
@@ -43,7 +47,16 @@ namespace SundropCity.TerrainFeatures
                     this.RenderRect = Sideways;
                     break;
             }
-            this.Texture = texture ?? Textures[Rand.Next(0,Textures.Count)];
+            int myType = type ?? Rand.Next(CarTypes.Count);
+            int myVariant = variant ?? Rand.Next(CarTypes[myType].Variants.Length);
+            this.BaseTexture = Game1.content.Load<Texture2D>(CarTypes[myType].Base);
+            this.RecolorTexture = new PaletteTexture(Game1.content.Load<Texture2D>(CarTypes[myType].Recolor), CarTypes[myType].Source);
+            this.ColorPalette = CarTypes[myType].Variants[myVariant].Palette;
+            var validDecals = CarTypes[myType].Decals.Where(_ => !CarTypes[myType].Variants[myVariant].Disallow.Contains(_.Key)).Select(_ => _.Key).ToList();
+            int rand = Rand.Next(validDecals.Count + 1);
+            if (rand == validDecals.Count)
+                return;
+            this.DecalTexture = Game1.content.Load<Texture2D>(CarTypes[myType].Decals[validDecals[rand]]);
         }
 
         public override Rectangle getBoundingBox(Vector2 tileLocation)
@@ -90,7 +103,10 @@ namespace SundropCity.TerrainFeatures
                     vector.Y -= 64;
                     break;
             }
-            b.Draw(this.Texture, Game1.GlobalToLocal(Game1.viewport, vector), this.RenderRect, Color.White, 0, Vector2.Zero, Game1.pixelZoom, this.Mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (this.RenderRect.Height * 4 + vector.Y) / 10000f);
+            b.Draw(this.BaseTexture, Game1.GlobalToLocal(Game1.viewport, vector), this.RenderRect, Color.White, 0, Vector2.Zero, Game1.pixelZoom, this.Mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (this.RenderRect.Height * 4 + vector.Y) / 10000f);
+            b.Draw(this.RecolorTexture, Game1.GlobalToLocal(Game1.viewport, vector), this.RenderRect, this.ColorPalette, 0, Vector2.Zero, Game1.pixelZoom, this.Mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (this.RenderRect.Height * 4 + vector.Y + 1) / 10000f);
+            if (this.DecalTexture != null)
+                b.Draw(this.DecalTexture, Game1.GlobalToLocal(Game1.viewport, vector), this.RenderRect, Color.White, 0, Vector2.Zero, Game1.pixelZoom, this.Mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None, (this.RenderRect.Height * 4 + vector.Y + 2) / 10000f);
         }
     }
 }

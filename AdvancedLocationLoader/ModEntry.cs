@@ -50,7 +50,6 @@ namespace Entoarox.AdvancedLocationLoader
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Specialised.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
             helper.Events.Player.Warped += this.OnWarped;
-            helper.Events.Player.Warped += this.DrawFarBack;
 
             this.Helper.Content.RegisterSerializerType<Greenhouse>();
             this.Helper.Content.RegisterSerializerType<Sewer>();
