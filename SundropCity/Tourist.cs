@@ -15,7 +15,16 @@ namespace SundropCity
 {
     class Tourist : NPC
     {
-        const int TOURIST_LINE_COUNT = 12;
+        public const int TOURIST_LINE_COUNT = 12;
+        public const int TILE_SPAWN = 0;
+        public const int TILE_BLOCK = 1;
+        public const int TILE_KEEPMOVING = 2;
+        public const int TILE_WARP = 3;
+        public const int TILE_BROWSE = 4;
+        public const int TILE_ARROW_DOWN = 5;
+        public const int TILE_ARROW_RIGHT = 6;
+        public const int TILE_ARROW_UP = 7;
+        public const int TILE_ARROW_LEFT = 8;
         protected AnimatedSprite Base;
         protected AnimatedSprite Makeup;
         protected AnimatedSprite Hat;
@@ -35,6 +44,7 @@ namespace SundropCity
             this.Speed = 2;
             this.Position = position;
             this.Name = "SundropTourist" + Guid.NewGuid().ToString();
+            this.faceDirection(Game1.random.Next(4));
             this.Sprite = new AnimatedSprite();
             this.Base = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/body.png"), 0, 16, 32);
             this.Makeup = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/lashes.png"), 0, 16, 32);
@@ -42,6 +52,21 @@ namespace SundropCity
             this.Shirt = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Top/g1.png"), 0, 16, 32);
             this.Pants = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Bottom/g1.png"), 0, 16, 32);
             this.Shoes = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Shoe/g1.png"), 0, 16, 32);
+        }
+        public override bool hasSpecialCollisionRules()
+        {
+            return true;
+        }
+        private static readonly List<int> Blacklist = new List<int>()
+        {
+            1152,1153,1154,1155,1160,1161,1162,1163,1164,
+            1216,1217,1218,1219,1224,1225,1226,1227,1228,
+            1280,1281,1282
+        };
+        public override bool isColliding(GameLocation l, Vector2 tile)
+        {
+            var layer = this.currentLocation.map.GetLayer("Tourists");
+            return tile.X <= 0 || tile.X >= layer.LayerWidth || tile.Y <= 0 || tile.Y >= layer.LayerHeight || layer.Tiles[(int)tile.X, (int)tile.Y]?.TileIndex == TILE_BLOCK;
         }
         public override Microsoft.Xna.Framework.Rectangle GetBoundingBox()
         {
@@ -277,41 +302,46 @@ namespace SundropCity
         {
             // Handle vanilla stuffs
             base.update(time, location);
-            // Make sure none of our tourists become void walkers by making sure that if they reach the edge of the map they do a heel-face-turn to get away.
-            if(this.position.X<=0)
+            // Check if we're in a keep-moving region
+            var point = this.getTileLocationPoint();
+            int index = this.currentLocation.map.GetLayer("Tourists").Tiles[point.X, point.Y]?.TileIndex ?? -1;
+            if (index==TILE_KEEPMOVING)
             {
-                this.Halt();
-                this.Timer = 25;
-                this.SetMovingOnlyRight();
-            }
-            if (this.position.Y <= 0)
-            {
-                this.Halt();
-                this.Timer = 25;
-                this.SetMovingOnlyDown();
-            }
-            if(this.position.X >= this.currentLocation.map.DisplayWidth)
-            {
-                this.Halt();
-                this.Timer = 25;
-                this.SetMovingOnlyLeft();
-            }
-            if (this.position.Y >= this.currentLocation.map.DisplayHeight)
-            {
-                this.Halt();
-                this.Timer = 25;
-                this.SetMovingOnlyUp();
+                this.Timer++;
+                if (!this.isMoving())
+                    this.Delay++;
+                else
+                    this.Delay = 0;
+                this.setMovingInFacingDirection();
+                if (this.Delay > 3)
+                    if (!Utility.isOnScreen(this.position, 8))
+                        this.currentLocation.characters.Remove(this);
             }
             // Slows down update rate on the "Am I stuck?" check
             if (this.Timer > 0)
                 this.Timer--;
             // When the timer is 0 do a stuck check
-            else if (this.OldPos == this.Position || Game1.random.NextDouble() <= 0.01)
+            else if (!this.isMoving() || Game1.random.NextDouble() <= 0.05)
             {
                 // If the stuck check matches (Or the tourist has a random change of mind) set the timer
-                this.Timer = 15;
+                this.Timer = 5;
                 // And increase delay by 1
                 this.Delay++;
+                // If stuck, we add an extra bit of delay
+                if (!this.isMoving())
+                    this.Delay += 2;
+            }
+            // When within reach of a arrow tile prefer to follow it
+            else if (index >= TILE_ARROW_DOWN && index <= TILE_ARROW_LEFT && Game1.random.NextDouble() < 0.05)
+            {
+                if (this.FacingDirection != index - TILE_ARROW_DOWN || Game1.random.NextDouble() < 0.25)
+                {
+                    this.Halt();
+                    this.faceDirection(index - TILE_ARROW_DOWN);
+                    this.setMovingInFacingDirection();
+                    this.Timer = 10;
+                    this.Delay = 0;
+                }
             }
             // If not stuck
             else
@@ -320,7 +350,7 @@ namespace SundropCity
                 if (this.Delay > 0)
                     this.Delay -= 3;
                 // Set the timer
-                this.Timer = 15;
+                this.Timer = 10;
             }
             // If delay is at 6 or more
             if(this.Delay>6)
@@ -367,6 +397,20 @@ namespace SundropCity
                 return false;
             this.showTextAboveHead(SundropCityMod.SHelper.Translation.Get("Tourist.Lines." + Game1.random.Next(TOURIST_LINE_COUNT).ToString()));
             return true;
+        }
+
+        private bool IsTileAt(Vector2 target, string sheet, List<int> tiles)
+        {
+            var tSheet = this.currentLocation.map.TileSheets.Where(_ => _.ImageSource.Contains(sheet)).FirstOrDefault();
+            if (tSheet == default)
+                return false;
+            var back = this.currentLocation.map.GetLayer("Back");
+            var midBack = this.currentLocation.map.GetLayer("MidBack");
+            var farBack = this.currentLocation.map.GetLayer("FarBack");
+            var bTile = back.Tiles[(int)target.X, (int)target.Y];
+            var mbTile = midBack.Tiles[(int)target.X, (int)target.Y];
+            var fbTile = farBack.Tiles[(int)target.X, (int)target.Y];
+            return (bTile != null && bTile.TileSheet == tSheet && tiles.Contains(bTile.TileIndex)) || (mbTile != null && mbTile.TileSheet == tSheet && tiles.Contains(mbTile.TileIndex)) || (fbTile != null && fbTile.TileSheet == tSheet && tiles.Contains(fbTile.TileIndex));
         }
 
         private void Animate(AnimatedSprite sprite, GameTime time)

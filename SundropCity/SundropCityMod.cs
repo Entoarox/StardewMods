@@ -29,27 +29,6 @@ namespace SundropCity
     /// <summary>The mod entry class.</summary>
     public class SundropCityMod : Mod
     {
-        private static Texture2D DemoSource;
-        private static PaletteTexture DemoTex;
-        private static readonly Dictionary<string, Color> DemoTexColors = new Dictionary<string, Color>()
-        {
-            ["DullDark"] = new Color(39,31,27),
-            ["MediumDark"] = new Color(76,61,46),
-            ["BrightDark"] = new Color(103,57,49),
-            ["DullLight"] = new Color(143,77,87),
-            ["MediumLight"] = new Color(189,106,98),
-            ["BrightLight"] = new Color(255,174,112)
-        };
-        private static readonly Dictionary<string, Color> DemoTexSource = new Dictionary<string, Color>()
-        {
-            ["DullDark"] = new Color(57, 57, 57),
-            ["MediumDark"] = new Color(81, 81, 81),
-            ["BrightDark"] = new Color(119, 119, 119),
-            ["DullLight"] = new Color(158, 158, 158),
-            ["MediumLight"] = new Color(224, 224, 224),
-            ["BrightLight"] = new Color(254, 254, 254)
-        };
-
         internal static IModHelper SHelper;
         internal static IMonitor SMonitor;
 
@@ -77,13 +56,6 @@ namespace SundropCity
 
             // Handle custom layer drawing
             helper.Events.Player.Warped += this.OnWarped;
-
-            /**
-            // Demo stuff
-            DemoSource = helper.Content.Load<Texture2D>("assets/recolor.png");
-            DemoTex = new PaletteTexture(DemoSource, DemoTexSource);
-            helper.Events.Display.Rendered += this.DemoDraw;
-            /**/
         }
 
         /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
@@ -96,7 +68,7 @@ namespace SundropCity
             this.Maps = new List<string>();
             // Load maps
             this.Monitor.Log("Preparing maps...", LogLevel.Trace);
-            Parallel.ForEach(Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")), file =>
+            foreach(string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
             {
                 string ext = Path.GetExtension(file);
                 if (ext.Equals(".tbin"))
@@ -114,7 +86,7 @@ namespace SundropCity
                         this.Monitor.Log("Unable to prepare [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
                     }
                 }
-            });
+            }
             this.Monitor.Log("Reading parking data...", LogLevel.Trace);
             foreach(var map in helper.Content.Load<JObject>("assets/Data/ParkingSpots.json").Properties())
             {
@@ -194,6 +166,38 @@ namespace SundropCity
                      case "tourist":
                          Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
                          this.Monitor.Log("Spawned tourist.", LogLevel.Alert);
+                         break;
+                     case "touristHorde":
+                         int amount = Convert.ToInt32(args[1]);
+                         var loc = Game1.player.currentLocation;
+                         var layer = loc.map.GetLayer("Tourists");
+                         if(layer==null)
+                         {
+                             this.Monitor.Log("Tourist metadata not found on current map.", LogLevel.Error);
+                             return;
+                         }
+                         List<Vector2> validPoints = new List<Vector2>();
+                         for (int x=0;x<layer.LayerWidth;x++)
+                             for(int y=0;y<layer.LayerHeight;y++)
+                             {
+                                 if (!loc.isTileLocationTotallyClearAndPlaceable(x, y))
+                                     continue;
+                                 int index = layer.Tiles[x, y]?.TileIndex ?? Tourist.TILE_BLOCK;
+                                 switch(index)
+                                 {
+                                     case Tourist.TILE_SPAWN:
+                                     case Tourist.TILE_ARROW_DOWN:
+                                     case Tourist.TILE_ARROW_UP:
+                                     case Tourist.TILE_ARROW_LEFT:
+                                     case Tourist.TILE_ARROW_RIGHT:
+                                     case Tourist.TILE_BROWSE:
+                                     case Tourist.TILE_WARP:
+                                         validPoints.Add(new Vector2(x, y));
+                                         break;
+                                 }
+                             }
+                         for (int c = 0; c < amount; c++)
+                             Game1.player.currentLocation.addCharacter(new Tourist(validPoints[Game1.random.Next(validPoints.Count)] * 64f));
                          break;
                  }
              });
@@ -493,11 +497,6 @@ namespace SundropCity
         private void DrawExtraLayers4(object s, LayerEventArgs e)
         {
             Game1.currentLocation.map.GetLayer("Shadows")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
-        }
-        private void DemoDraw(object s, EventArgs e)
-        {
-            Game1.spriteBatch.Draw(DemoTex, new Microsoft.Xna.Framework.Rectangle(16, 16, DemoSource.Width * 4, DemoSource.Height * 4), DemoTexColors);
-            Game1.spriteBatch.Draw(DemoSource, new Microsoft.Xna.Framework.Rectangle(32 + DemoSource.Width * 4, 16, DemoSource.Width * 4, DemoSource.Height * 4), Color.Brown);
         }
     }
 }
