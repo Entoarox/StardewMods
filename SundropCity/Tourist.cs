@@ -15,6 +15,7 @@ namespace SundropCity
 {
     class Tourist : NPC
     {
+        const int TOURIST_LINE_COUNT = 12;
         protected AnimatedSprite Base;
         protected AnimatedSprite Makeup;
         protected AnimatedSprite Hat;
@@ -22,10 +23,15 @@ namespace SundropCity
         protected AnimatedSprite Shirt;
         protected AnimatedSprite Pants;
         protected AnimatedSprite Shoes;
+        protected Color HairColor = Color.Brown;
+        protected Color PantsColor = Color.DarkSeaGreen;
+        protected Color ShoeColor = Color.SlateGray;
         protected byte Timer = 0;
+        protected byte Delay = 0;
         protected Vector2 OldPos;
         public Tourist(Vector2 position)
         {
+            this.willDestroyObjectsUnderfoot = false;
             this.Speed = 2;
             this.Position = position;
             this.Name = "SundropTourist" + Guid.NewGuid().ToString();
@@ -110,7 +116,7 @@ namespace SundropCity
             this.Pants?.AnimateRight(time, interval, sound);
             this.Shoes?.AnimateRight(time, interval, sound);
         }
-        protected void animateOnce(GameTime time)
+        protected void AnimateOnce(GameTime time)
         {
             this.Base?.animateOnce(time);
             this.Makeup?.animateOnce(time);
@@ -253,7 +259,7 @@ namespace SundropCity
             }
             else
             {
-                this.animateOnce(time);
+                this.AnimateOnce(time);
             }
             if (this.blockedInterval >= 3000 && (float)this.blockedInterval <= 3750f && !Game1.eventUp)
             {
@@ -269,30 +275,72 @@ namespace SundropCity
         }
         public override void update(GameTime time, GameLocation location)
         {
+            // Handle vanilla stuffs
             base.update(time, location);
-            /*
-            this.Animate(this.Base, time);
-            this.Animate(this.Makeup, time);
-            this.Animate(this.Hat, time);
-            this.Animate(this.Hair, time);
-            this.Animate(this.Shirt, time);
-            this.Animate(this.Pants, time);
-            this.Animate(this.Shoes, time);
-            */
+            // Make sure none of our tourists become void walkers by making sure that if they reach the edge of the map they do a heel-face-turn to get away.
+            if(this.position.X<=0)
+            {
+                this.Halt();
+                this.Timer = 25;
+                this.SetMovingOnlyRight();
+            }
+            if (this.position.Y <= 0)
+            {
+                this.Halt();
+                this.Timer = 25;
+                this.SetMovingOnlyDown();
+            }
+            if(this.position.X >= this.currentLocation.map.DisplayWidth)
+            {
+                this.Halt();
+                this.Timer = 25;
+                this.SetMovingOnlyLeft();
+            }
+            if (this.position.Y >= this.currentLocation.map.DisplayHeight)
+            {
+                this.Halt();
+                this.Timer = 25;
+                this.SetMovingOnlyUp();
+            }
+            // Slows down update rate on the "Am I stuck?" check
             if (this.Timer > 0)
                 this.Timer--;
-            else if (this.OldPos==this.Position || Game1.random.NextDouble() > 0.01)
+            // When the timer is 0 do a stuck check
+            else if (this.OldPos == this.Position || Game1.random.NextDouble() <= 0.01)
             {
+                // If the stuck check matches (Or the tourist has a random change of mind) set the timer
                 this.Timer = 15;
-                this.Halt();
-                this.faceDirection(Game1.random.Next(4));
+                // And increase delay by 1
+                this.Delay++;
             }
-            if(Game1.IsMasterGame)
+            // If not stuck
+            else
             {
-                this.setMovingInFacingDirection();
-                if (this.Base.CurrentAnimation == null)
-                    this.MovePosition(time, Game1.viewport, location);
+                // Check if delay is bigger then 0, if so decrease by 3
+                if (this.Delay > 0)
+                    this.Delay -= 3;
+                // Set the timer
+                this.Timer = 15;
             }
+            // If delay is at 6 or more
+            if(this.Delay>6)
+            {
+                // We set it to 0
+                this.Delay = 0;
+                // Set the timer
+                this.Timer = 25;
+                // And make the NPC get ready to move in a random direction
+                this.Halt();
+                int dir = this.getFacingDirection() + Game1.random.Next(4);
+                if (dir > 3)
+                    dir -= 4;
+                this.faceDirection(dir);
+                this.setMovingInFacingDirection();
+            }
+            // If this is the master game
+            if(Game1.IsMasterGame && this.Base.CurrentAnimation == null)
+                this.MovePosition(time, Game1.viewport, location);
+            // We remember our position for the stuck check
             this.OldPos = this.Position;
         }
         public override void draw(SpriteBatch b, float alpha = 1)
@@ -303,21 +351,21 @@ namespace SundropCity
             if(this.Makeup!=null)
                 b.Draw(this.Makeup.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000001f)));
             if(this.Hair!=null)
-                b.Draw(this.Hair.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000002f)));
+                b.Draw(this.Hair.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.HairColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000002f)));
             if (this.Hat != null)
                 b.Draw(this.Hat.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f +0.000003f)));
             if (this.Shirt != null)
                 b.Draw(this.Shirt.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000004f)));
             if (this.Pants != null)
-                b.Draw(this.Pants.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000005f)));
+                b.Draw(this.Pants.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.PantsColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000005f)));
             if (this.Shoes != null)
-                b.Draw(this.Shoes.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000006f)));
+                b.Draw(this.Shoes.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.ShoeColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000006f)));
         }
         public override bool checkAction(Farmer who, GameLocation l)
         {
             if (this.textAboveHeadTimer > 0)
                 return false;
-            this.showTextAboveHead("Hi!");
+            this.showTextAboveHead(SundropCityMod.SHelper.Translation.Get("Tourist.Lines." + Game1.random.Next(TOURIST_LINE_COUNT).ToString()));
             return true;
         }
 

@@ -420,7 +420,6 @@ namespace SundropCity
                 }
         }
 
-
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
             if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
@@ -464,6 +463,8 @@ namespace SundropCity
         {
             if (!e.IsLocalPlayer)
                 return;
+            if (ParkingSpots.ContainsKey(e.NewLocation.Name))
+                this.SpawnCars(e.NewLocation, .8);
             e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
             e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
             e.OldLocation.map.GetLayer("Back").AfterDraw -= this.DrawExtraLayers4;
