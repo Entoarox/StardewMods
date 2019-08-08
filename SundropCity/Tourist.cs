@@ -1,30 +1,31 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
 using StardewValley;
-using StardewValley.Characters;
-using xTile.Dimensions;
 
 namespace SundropCity
 {
-    class Tourist : NPC
+    internal class Tourist : NPC
     {
-        public const int TOURIST_LINE_COUNT = 12;
+        public const int TOURIST_LINE_COUNT = 50;
+
         public const int TILE_SPAWN = 0;
         public const int TILE_BLOCK = 1;
         public const int TILE_KEEPMOVING = 2;
-        public const int TILE_WARP = 3;
         public const int TILE_BROWSE = 4;
         public const int TILE_ARROW_DOWN = 5;
         public const int TILE_ARROW_RIGHT = 6;
         public const int TILE_ARROW_UP = 7;
         public const int TILE_ARROW_LEFT = 8;
+        public const int TILE_WARP_DOWN = 10;
+        public const int TILE_WARP_RIGHT = 11;
+        public const int TILE_WARP_UP = 12;
+        public const int TILE_WARP_LEFT = 13;
+
         protected AnimatedSprite Base;
         protected AnimatedSprite Makeup;
         protected AnimatedSprite Hat;
@@ -32,45 +33,291 @@ namespace SundropCity
         protected AnimatedSprite Shirt;
         protected AnimatedSprite Pants;
         protected AnimatedSprite Shoes;
-        protected Color HairColor = Color.Brown;
-        protected Color PantsColor = Color.DarkSeaGreen;
-        protected Color ShoeColor = Color.SlateGray;
-        protected byte Timer = 0;
-        protected byte Delay = 0;
+        protected AnimatedSprite Accessory;
+        protected AnimatedSprite FaceHair;
+
+        protected Color HairColor;
+        protected Color PantsColor;
+        protected Color ShoeColor;
+
+        protected byte Timer;
+        protected byte Delay;
+        protected byte Cooldown;
         protected Vector2 OldPos;
+
+        internal static Dictionary<string, List<Vector2>> WarpCache = new Dictionary<string, List<Vector2>>();
+        internal static List<string> BaseColors = new List<string>();
+        internal static List<string> MaleHair = new List<string>();
+        internal static List<string> FemaleHair = new List<string>();
+        internal static List<string> MaleShirt = new List<string>();
+        internal static List<string> FemaleShirt = new List<string>();
+        internal static List<string> MalePants = new List<string>();
+        internal static List<string> FemalePants = new List<string>();
+        internal static List<string> MaleShoes = new List<string>();
+        internal static List<string> FemaleShoes = new List<string>();
+        internal static List<string> MaleAccessory = new List<string>();
+        internal static List<string> FemaleAccessory = new List<string>();
+        internal static List<string> MaleHat = new List<string>();
+        internal static List<string> FemaleHat = new List<string>();
+        internal static List<string> FaceHairs = new List<string>();
+        internal static Color[] HairColors = {
+            Color.Brown,
+            Color.AntiqueWhite,
+            Color.DarkRed,
+            Color.DarkBlue,
+            Color.ForestGreen,
+            Color.HotPink,
+            Color.LightGoldenrodYellow,
+            Color.LightBlue,
+            Color.MediumPurple,
+            Color.RosyBrown,
+            Color.SandyBrown,
+            Color.Tan,
+            Color.Yellow
+        };
+        internal static Color[] ClothingColors = {
+            Color.Brown,
+            Color.AntiqueWhite,
+            Color.DarkRed,
+            Color.DarkBlue,
+            Color.ForestGreen,
+            Color.HotPink,
+            Color.LightGoldenrodYellow,
+            Color.LightBlue,
+            Color.MediumPurple,
+            Color.RosyBrown,
+            Color.SandyBrown,
+            Color.Tan,
+            Color.Yellow,
+            Color.DarkSeaGreen,
+            Color.SlateGray
+        };
+        internal static string FemaleMakeup= SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/lashes.png");
+        internal static AnimatedSprite BlankSprite = new AnimatedSprite();
+
+        internal static List<Vector2> GetSpawnPoints(GameLocation location, HashSet<int> validTiles)
+        {
+            var layer = location.map.GetLayer("Tourists");
+            if (layer == null)
+                return new List<Vector2>();
+            List<Vector2> validPoints = new List<Vector2>();
+            for (int x = 1; x < layer.LayerWidth; x++)
+                for (int y = 1; y < layer.LayerHeight; y++)
+                {
+                    if (!location.isTileLocationTotallyClearAndPlaceable(x, y))
+                        continue;
+                    int index = Tourist.GetTileIndex(location, x, y);
+                    if (index == -1)
+                        continue;
+                    if (validTiles.Contains(index))
+                        validPoints.Add(new Vector2(x, y));
+                }
+            return validPoints;
+        }
+        internal static int GetTileIndex(GameLocation loc, int x, int y)
+        {
+            var layer = loc.map.GetLayer("Tourists");
+            if (layer == null)
+                return -1;
+            return layer.Tiles[x, y]?.TileIndex ?? -1;
+        }
+
         public Tourist(Vector2 position)
         {
             this.willDestroyObjectsUnderfoot = false;
             this.Speed = 2;
             this.Position = position;
-            this.Name = "SundropTourist" + Guid.NewGuid().ToString();
+            this.Name = "SundropTourist" + Guid.NewGuid();
+            // ReSharper disable twice VirtualMemberCallInConstructor
             this.faceDirection(Game1.random.Next(4));
-            this.Sprite = new AnimatedSprite();
-            this.Base = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/body.png"), 0, 16, 32);
-            this.Makeup = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/lashes.png"), 0, 16, 32);
-            this.Hair = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Hair/f1.png"), 0, 16, 32);
-            this.Shirt = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Top/g1.png"), 0, 16, 32);
-            this.Pants = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Bottom/g1.png"), 0, 16, 32);
-            this.Shoes = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Shoe/g1.png"), 0, 16, 32);
+            this.Sprite = Tourist.BlankSprite;
+            this.RandomizeLook();
+        }
+        private void RandomizeLook()
+        {
+            this.Base = new AnimatedSprite(BaseColors[Game1.random.Next(BaseColors.Count)], 0, 20, 34);
+            this.HairColor = HairColors[Game1.random.Next(HairColors.Length)];
+            this.PantsColor = ClothingColors[Game1.random.Next(ClothingColors.Length)];
+            this.ShoeColor = ClothingColors[Game1.random.Next(ClothingColors.Length)];
+            bool isFemale = Game1.random.NextDouble() < 0.5;
+            if (isFemale)
+            {
+                this.Makeup = new AnimatedSprite(FemaleMakeup, 0, 20, 34);
+                this.Shirt = new AnimatedSprite(FemaleShirt[Game1.random.Next(FemaleShirt.Count)], 0, 20, 34);
+                this.Pants = new AnimatedSprite(FemalePants[Game1.random.Next(FemalePants.Count)], 0, 20, 34);
+                this.Shoes = new AnimatedSprite(FemaleShoes[Game1.random.Next(FemaleShoes.Count)], 0, 20, 34);
+                int hat = Game1.random.Next(FemaleHat.Count*3);
+                if (hat < FemaleHat.Count)
+                {
+                    string hatKey = FemaleHat[hat];
+                    this.Hat = new AnimatedSprite(hatKey, 0, 20, 34);
+                    string hatName = Path.GetFileNameWithoutExtension(hatKey) ?? "";
+                    if (hatName[hatName.Length - 1] != 't')
+                    {
+                        string path = FemaleHair[Game1.random.Next(FemaleHair.Count)];
+                        string ext = Path.GetExtension(path);
+                        string file = path.Substring(0, path.Length - ext?.Length ?? 0) + 'h';
+                        this.Hair = new AnimatedSprite(file + ext, 0, 20, 34);
+                    }
+                }
+                if(this.Hair==null)
+                    this.Hair = new AnimatedSprite(FemaleHair[Game1.random.Next(FemaleHair.Count)], 0, 20, 34);
+                int accessory = Game1.random.Next(Tourist.FemaleAccessory.Count * 2);
+                if(accessory<Tourist.FemaleAccessory.Count)
+                    this.Accessory=new AnimatedSprite(FemaleAccessory[accessory], 0, 20, 34);
+            }
+            else
+            {
+                this.Shirt = new AnimatedSprite(MaleShirt[Game1.random.Next(MaleShirt.Count)], 0, 20, 34);
+                this.Pants = new AnimatedSprite(MalePants[Game1.random.Next(MalePants.Count)], 0, 20, 34);
+                this.Shoes = new AnimatedSprite(MaleShoes[Game1.random.Next(MaleShoes.Count)], 0, 20, 34);
+                int beard = Game1.random.Next(FaceHairs.Count*2);
+                if(beard < FaceHairs.Count)
+                    this.FaceHair= new AnimatedSprite(FaceHairs[beard], 0, 20, 34);
+                int hat = Game1.random.Next(MaleHat.Count*3);
+                if (hat < MaleHat.Count)
+                {
+                    string hatKey = MaleHat[hat];
+                    this.Hat = new AnimatedSprite(hatKey, 0, 20, 34);
+                    string hatName = Path.GetFileNameWithoutExtension(hatKey) ?? "";
+                    if (hatName[hatName.Length - 1] != 't')
+                    {
+                        string path = MaleHair[Game1.random.Next(MaleHair.Count)];
+                        string ext = Path.GetExtension(path);
+                        string file = path.Substring(0, path.Length - ext?.Length ?? 0) + 'h';
+                        this.Hair = new AnimatedSprite(file + ext, 0, 20, 34);
+                    }
+                }
+                if (this.Hair == null)
+                    this.Hair = new AnimatedSprite(MaleHair[Game1.random.Next(MaleHair.Count)], 0, 20, 34);
+                int accessory = Game1.random.Next(Tourist.MaleAccessory.Count * 2);
+                if (accessory < Tourist.MaleAccessory.Count)
+                    this.Accessory = new AnimatedSprite(MaleAccessory[accessory], 0, 20, 34);
+            }
+        }
+        private void DoWarp()
+        {
+            if (!WarpCache.ContainsKey(this.currentLocation.Name))
+                WarpCache.Add(this.currentLocation.Name, Tourist.GetSpawnPoints(this.currentLocation, new HashSet<int>() { TILE_WARP_DOWN, TILE_WARP_LEFT, TILE_WARP_RIGHT, TILE_WARP_UP }));
+            var validWarps = WarpCache[this.currentLocation.Name];
+            var target = validWarps[Game1.random.Next(validWarps.Count)];
+            int dir = Tourist.GetTileIndex(this.currentLocation, (int)target.X, (int)target.Y) - TILE_WARP_DOWN;
+            this.RandomizeLook();
+            this.Position = target * 64f;
+            this.faceDirection(dir);
+            this.setMovingInFacingDirection();
+            this.Timer = 10;
+            this.Delay = 0;
+            this.Cooldown = byte.MaxValue;
+        }
+        public override bool isColliding(GameLocation l, Vector2 tile)
+        {
+            return Tourist.GetTileIndex(l, (int)tile.X, (int)tile.Y) == TILE_BLOCK;
+        }
+        public override void update(GameTime time, GameLocation location)
+        {
+            // Handle vanilla stuffs
+            base.update(time, location);
+            // Set some default vars
+            var point = this.getTileLocationPoint();
+            var backLayer = this.currentLocation.map.GetLayer("Back");
+            int index = Tourist.GetTileIndex(this.currentLocation, point.X, point.Y);
+            // Check if we are in a keep moving region
+            if (index == TILE_KEEPMOVING)
+            {
+                if (this.Timer % 2 == 1)
+                    this.Timer--;
+                else
+                    this.Timer += 2;
+                if (!this.isMoving())
+                    this.Delay++;
+                else
+                    this.Delay = 0;
+                this.setMovingInFacingDirection();
+                if (this.Delay > 3)
+                    if (!Utility.isOnScreen(this.position, 8))
+                        this.DoWarp();
+            }
+            // If warp cooldown is active, decrement
+            if (this.Cooldown > 0)
+                this.Cooldown--;
+            // Slows down update rate on the "Am I stuck?" check
+            if (this.Timer > 0)
+                this.Timer--;
+            // When the timer is 0 do a stuck check
+            else if (!this.isMoving() || Game1.random.NextDouble() <= 0.05)
+            {
+                // If the stuck check matches (Or the tourist has a random change of mind) set the timer
+                this.Timer = 5;
+                // And increase delay by 1
+                this.Delay++;
+                // If stuck, we add an extra bit of delay
+                if (!this.isMoving())
+                    this.Delay += 2;
+            }
+            // When within reach of a arrow tile prefer to follow it
+            else if (index >= TILE_ARROW_DOWN && index <= TILE_ARROW_LEFT && Game1.random.NextDouble() < 0.1)
+            {
+                if (this.FacingDirection != index - TILE_ARROW_DOWN || Game1.random.NextDouble() < 0.25)
+                {
+                    this.Halt();
+                    this.faceDirection(index - TILE_ARROW_DOWN);
+                    this.setMovingInFacingDirection();
+                    this.Timer = 10;
+                    this.Delay = 0;
+                }
+            }
+            // When within reach of a warp tile, see if we should warp
+            else if(index >= TILE_WARP_DOWN && index <= TILE_WARP_LEFT && this.Cooldown == 0 || this.position.X < 0 || this.position.Y < 0 || this.position.Y > backLayer.DisplayHeight || this.position.X > backLayer.DisplayWidth)
+                this.DoWarp();
+            // If on a browse tile, maybe start browsing for a while?
+            else if(index == TILE_BROWSE && Game1.random.NextDouble() < 0.25)
+            {
+                this.Halt();
+                this.Timer = 120;
+                this.Delay = 0;
+            }
+            // If nothing else needs to be done
+            else
+            {
+                // Check if delay is bigger then 0, if so decrease by 3
+                if (this.Delay > 0)
+                    this.Delay -= 3;
+                // Set the timer
+                this.Timer = 10;
+            }
+            // If delay is at 6 or more
+            if (this.Delay > 6)
+            {
+                // We set it to 0
+                this.Delay = 0;
+                // Set the timer
+                this.Timer = 25;
+                // And make the NPC get ready to move in a random direction
+                this.Halt();
+                int cur = this.FacingDirection;
+                if (index >= TILE_ARROW_DOWN && index <= TILE_ARROW_LEFT && cur != index - TILE_ARROW_DOWN)
+                    cur = index - TILE_ARROW_DOWN;
+                else if (index >= TILE_WARP_DOWN && index <= TILE_WARP_LEFT && cur != index - TILE_WARP_DOWN)
+                    cur = index - TILE_WARP_DOWN;
+                else
+                    cur = Game1.random.Next(4);
+                this.faceDirection(cur);
+                this.setMovingInFacingDirection();
+            }
+            // If this is the master game
+            if (Game1.IsMasterGame && this.Base.CurrentAnimation == null)
+                this.MovePosition(time, Game1.viewport, location);
+            // We remember our position for the stuck check
+            this.OldPos = this.Position;
         }
         public override bool hasSpecialCollisionRules()
         {
             return true;
         }
-        private static readonly List<int> Blacklist = new List<int>()
+        public override Rectangle GetBoundingBox()
         {
-            1152,1153,1154,1155,1160,1161,1162,1163,1164,
-            1216,1217,1218,1219,1224,1225,1226,1227,1228,
-            1280,1281,1282
-        };
-        public override bool isColliding(GameLocation l, Vector2 tile)
-        {
-            var layer = this.currentLocation.map.GetLayer("Tourists");
-            return tile.X <= 0 || tile.X >= layer.LayerWidth || tile.Y <= 0 || tile.Y >= layer.LayerHeight || layer.Tiles[(int)tile.X, (int)tile.Y]?.TileIndex == TILE_BLOCK;
-        }
-        public override Microsoft.Xna.Framework.Rectangle GetBoundingBox()
-        {
-            return new Microsoft.Xna.Framework.Rectangle((int)this.Position.X + 16, (int)this.Position.Y + 16, this.Base.SpriteWidth * 4 * 3 / 4, 32);
+            return new Rectangle((int)this.Position.X + 16, (int)this.Position.Y + 16, this.Base.SpriteWidth * 4 * 3 / 4, 32);
         }
         public override void Halt()
         {
@@ -151,35 +398,31 @@ namespace SundropCity
             this.Pants?.animateOnce(time);
             this.Shoes?.animateOnce(time);
         }
-        public override void MovePosition(GameTime time, xTile.Dimensions.Rectangle viewport, GameLocation currentLocation)
+        public override void MovePosition(GameTime time, xTile.Dimensions.Rectangle viewport, GameLocation curLocation)
         {
             TimeSpan elapsedGameTime;
+            // ReSharper disable twice CompareOfFloatsByEqualityOperator
             if (this.xVelocity != 0f || this.yVelocity != 0f)
-            {
                 this.applyVelocity(this.currentLocation);
-            }
             else if (this.moveUp)
             {
-                if (currentLocation == null || !currentLocation.isCollidingPosition(this.nextPosition(0), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(0), viewport, false, 0, false, this) || this.isCharging)
                 {
-                    this.position.Y -= (float)(this.speed + this.addedSpeed);
+                    this.position.Y -= this.speed + this.addedSpeed;
                     if (!this.ignoreMovementAnimation)
                     {
-                        this.AnimateUp(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, currentLocation) ? "Cowboy_Footstep" : "");
+                        this.AnimateUp(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, curLocation) ? "Cowboy_Footstep" : "");
                         this.faceDirection(0);
                     }
                 }
-                else if (!currentLocation.isTilePassable(this.nextPosition(0), viewport) || !this.willDestroyObjectsUnderfoot)
-                {
+                else if (!curLocation.isTilePassable(this.nextPosition(0), viewport) || !this.willDestroyObjectsUnderfoot)
                     this.Halt();
-                }
                 else if (this.willDestroyObjectsUnderfoot)
                 {
-                    new Vector2((float)(this.getStandingX() / 64), (float)(this.getStandingY() / 64 - 1));
-                    if (currentLocation.characterDestroyObjectWithinRectangle(this.nextPosition(0), true))
+                    if (curLocation.characterDestroyObjectWithinRectangle(this.nextPosition(0), true))
                     {
-                        this.doEmote(12, true);
-                        this.position.Y -= (float)(this.speed + this.addedSpeed);
+                        this.doEmote(12);
+                        this.position.Y -= (this.speed + this.addedSpeed);
                     }
                     else
                     {
@@ -191,26 +434,23 @@ namespace SundropCity
             }
             else if (this.moveRight)
             {
-                if (currentLocation == null || !currentLocation.isCollidingPosition(this.nextPosition(1), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(1), viewport, false, 0, false, this) || this.isCharging)
                 {
-                    this.position.X += (float)(this.speed + this.addedSpeed);
+                    this.position.X += (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)
                     {
-                        this.AnimateRight(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, currentLocation) ? "Cowboy_Footstep" : "");
+                        this.AnimateRight(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, curLocation) ? "Cowboy_Footstep" : "");
                         this.faceDirection(1);
                     }
                 }
-                else if (!currentLocation.isTilePassable(this.nextPosition(1), viewport) || !this.willDestroyObjectsUnderfoot)
-                {
+                else if (!curLocation.isTilePassable(this.nextPosition(1), viewport) || !this.willDestroyObjectsUnderfoot)
                     this.Halt();
-                }
                 else if (this.willDestroyObjectsUnderfoot)
                 {
-                    new Vector2((float)(this.getStandingX() / 64 + 1), (float)(this.getStandingY() / 64));
-                    if (currentLocation.characterDestroyObjectWithinRectangle(this.nextPosition(1), true))
+                    if (curLocation.characterDestroyObjectWithinRectangle(this.nextPosition(1), true))
                     {
-                        this.doEmote(12, true);
-                        this.position.X += (float)(this.speed + this.addedSpeed);
+                        this.doEmote(12);
+                        this.position.X += (this.speed + this.addedSpeed);
                     }
                     else
                     {
@@ -222,26 +462,23 @@ namespace SundropCity
             }
             else if (this.moveDown)
             {
-                if (currentLocation == null || !currentLocation.isCollidingPosition(this.nextPosition(2), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(2), viewport, false, 0, false, this) || this.isCharging)
                 {
-                    this.position.Y += (float)(this.speed + this.addedSpeed);
+                    this.position.Y += (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)
                     {
-                        this.AnimateDown(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, currentLocation) ? "Cowboy_Footstep" : "");
+                        this.AnimateDown(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, curLocation) ? "Cowboy_Footstep" : "");
                         this.faceDirection(2);
                     }
                 }
-                else if (!currentLocation.isTilePassable(this.nextPosition(2), viewport) || !this.willDestroyObjectsUnderfoot)
-                {
+                else if (!curLocation.isTilePassable(this.nextPosition(2), viewport) || !this.willDestroyObjectsUnderfoot)
                     this.Halt();
-                }
                 else if (this.willDestroyObjectsUnderfoot)
                 {
-                    new Vector2((float)(this.getStandingX() / 64), (float)(this.getStandingY() / 64 + 1));
-                    if (currentLocation.characterDestroyObjectWithinRectangle(this.nextPosition(2), true))
+                    if (curLocation.characterDestroyObjectWithinRectangle(this.nextPosition(2), true))
                     {
-                        this.doEmote(12, true);
-                        this.position.Y += (float)(this.speed + this.addedSpeed);
+                        this.doEmote(12);
+                        this.position.Y += this.speed + this.addedSpeed;
                     }
                     else
                     {
@@ -253,26 +490,23 @@ namespace SundropCity
             }
             else if (this.moveLeft)
             {
-                if (currentLocation == null || !currentLocation.isCollidingPosition(this.nextPosition(3), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(3), viewport, false, 0, false, this) || this.isCharging)
                 {
-                    this.position.X -= (float)(this.speed + this.addedSpeed);
+                    this.position.X -= (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)
                     {
-                        this.AnimateLeft(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, currentLocation) ? "Cowboy_Footstep" : "");
+                        this.AnimateLeft(time, (this.speed - 2 + this.addedSpeed) * -25, Utility.isOnScreen(this.getTileLocationPoint(), 1, curLocation) ? "Cowboy_Footstep" : "");
                         this.faceDirection(3);
                     }
                 }
-                else if (!currentLocation.isTilePassable(this.nextPosition(3), viewport) || !this.willDestroyObjectsUnderfoot)
-                {
+                else if (!curLocation.isTilePassable(this.nextPosition(3), viewport) || !this.willDestroyObjectsUnderfoot)
                     this.Halt();
-                }
                 else if (this.willDestroyObjectsUnderfoot)
                 {
-                    new Vector2((float)(this.getStandingX() / 64 - 1), (float)(this.getStandingY() / 64));
-                    if (currentLocation.characterDestroyObjectWithinRectangle(this.nextPosition(3), true))
+                    if (curLocation.characterDestroyObjectWithinRectangle(this.nextPosition(3), true))
                     {
-                        this.doEmote(12, true);
-                        this.position.X -= (float)(this.speed + this.addedSpeed);
+                        this.doEmote(12);
+                        this.position.X -= (this.speed + this.addedSpeed);
                     }
                     else
                     {
@@ -283,12 +517,10 @@ namespace SundropCity
                 }
             }
             else
-            {
                 this.AnimateOnce(time);
-            }
-            if (this.blockedInterval >= 3000 && (float)this.blockedInterval <= 3750f && !Game1.eventUp)
+            if (this.blockedInterval >= 3000 && this.blockedInterval <= 3750f && !Game1.eventUp)
             {
-                this.doEmote((Game1.random.NextDouble() < 0.5) ? 8 : 40, true);
+                this.doEmote(Game1.random.NextDouble() < 0.5 ? 8 : 40);
                 this.blockedInterval = 3750;
             }
             else if (this.blockedInterval >= 5000)
@@ -298,98 +530,28 @@ namespace SundropCity
                 this.blockedInterval = 0;
             }
         }
-        public override void update(GameTime time, GameLocation location)
-        {
-            // Handle vanilla stuffs
-            base.update(time, location);
-            // Check if we're in a keep-moving region
-            var point = this.getTileLocationPoint();
-            int index = this.currentLocation.map.GetLayer("Tourists").Tiles[point.X, point.Y]?.TileIndex ?? -1;
-            if (index==TILE_KEEPMOVING)
-            {
-                this.Timer++;
-                if (!this.isMoving())
-                    this.Delay++;
-                else
-                    this.Delay = 0;
-                this.setMovingInFacingDirection();
-                if (this.Delay > 3)
-                    if (!Utility.isOnScreen(this.position, 8))
-                        this.currentLocation.characters.Remove(this);
-            }
-            // Slows down update rate on the "Am I stuck?" check
-            if (this.Timer > 0)
-                this.Timer--;
-            // When the timer is 0 do a stuck check
-            else if (!this.isMoving() || Game1.random.NextDouble() <= 0.05)
-            {
-                // If the stuck check matches (Or the tourist has a random change of mind) set the timer
-                this.Timer = 5;
-                // And increase delay by 1
-                this.Delay++;
-                // If stuck, we add an extra bit of delay
-                if (!this.isMoving())
-                    this.Delay += 2;
-            }
-            // When within reach of a arrow tile prefer to follow it
-            else if (index >= TILE_ARROW_DOWN && index <= TILE_ARROW_LEFT && Game1.random.NextDouble() < 0.05)
-            {
-                if (this.FacingDirection != index - TILE_ARROW_DOWN || Game1.random.NextDouble() < 0.25)
-                {
-                    this.Halt();
-                    this.faceDirection(index - TILE_ARROW_DOWN);
-                    this.setMovingInFacingDirection();
-                    this.Timer = 10;
-                    this.Delay = 0;
-                }
-            }
-            // If not stuck
-            else
-            {
-                // Check if delay is bigger then 0, if so decrease by 3
-                if (this.Delay > 0)
-                    this.Delay -= 3;
-                // Set the timer
-                this.Timer = 10;
-            }
-            // If delay is at 6 or more
-            if(this.Delay>6)
-            {
-                // We set it to 0
-                this.Delay = 0;
-                // Set the timer
-                this.Timer = 25;
-                // And make the NPC get ready to move in a random direction
-                this.Halt();
-                int dir = this.getFacingDirection() + Game1.random.Next(4);
-                if (dir > 3)
-                    dir -= 4;
-                this.faceDirection(dir);
-                this.setMovingInFacingDirection();
-            }
-            // If this is the master game
-            if(Game1.IsMasterGame && this.Base.CurrentAnimation == null)
-                this.MovePosition(time, Game1.viewport, location);
-            // We remember our position for the stuck check
-            this.OldPos = this.Position;
-        }
         public override void draw(SpriteBatch b, float alpha = 1)
         {
             if (!Utility.isOnScreen(this.Position, 128))
                 return;
-            b.Draw(this.Base.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f)));
+            var positionVector = this.getLocalPosition(Game1.viewport) + new Vector2(this.Base.SpriteWidth * 2, this.GetBoundingBox().Height / 2f) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero);
+            var originVector = new Vector2(this.Base.SpriteWidth / 2f + 2, this.Base.SpriteHeight * 0.75f);
+            float scaleFloat = Math.Max(0.2f, this.Scale) * 4f;
+            var spriteEffects = this.flip || this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            float depth = Math.Max(0f, this.drawOnTop ? 0.991f : this.getStandingY() / 10000f);
+            b.Draw(this.Base.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth);
             if(this.Makeup!=null)
-                b.Draw(this.Makeup.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000001f)));
-            if(this.Hair!=null)
-                b.Draw(this.Hair.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.HairColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000002f)));
+                b.Draw(this.Makeup.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00001f);
+            b.Draw(this.Shirt.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00002f);
+            b.Draw(this.Pants.Texture, positionVector, this.Base.SourceRect, this.PantsColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00003f);
+            b.Draw(this.Shoes.Texture, positionVector, this.Base.SourceRect, this.ShoeColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00004f);
+            b.Draw(this.Hair.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00005f);
+            if(this.FaceHair!=null)
+                b.Draw(this.FaceHair.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00005f);
+            if (this.Accessory != null)
+                b.Draw(this.Accessory.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00006f);
             if (this.Hat != null)
-                b.Draw(this.Hat.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f +0.000003f)));
-            if (this.Shirt != null)
-                b.Draw(this.Shirt.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, Color.White * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000004f)));
-            if (this.Pants != null)
-                b.Draw(this.Pants.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.PantsColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000005f)));
-            if (this.Shoes != null)
-                b.Draw(this.Shoes.Texture, this.getLocalPosition(Game1.viewport) + new Vector2((this.Base.SpriteWidth * 4 / 2), (this.GetBoundingBox().Height / 2)) + ((this.shakeTimer > 0) ? new Vector2(Game1.random.Next(-1, 2), Game1.random.Next(-1, 2)) : Vector2.Zero), this.Base.SourceRect, this.ShoeColor * alpha, this.rotation, new Vector2((this.Base.SpriteWidth / 2), this.Base.SpriteHeight * 3f / 4f), Math.Max(0.2f, this.scale.Value) * 4f, (this.flip || (this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip)) ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Math.Max(0f, this.drawOnTop ? 0.991f : (this.getStandingY() / 10000f + 0.000006f)));
+                b.Draw(this.Hat.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00007f);
         }
         public override bool checkAction(Farmer who, GameLocation l)
         {
@@ -397,52 +559,6 @@ namespace SundropCity
                 return false;
             this.showTextAboveHead(SundropCityMod.SHelper.Translation.Get("Tourist.Lines." + Game1.random.Next(TOURIST_LINE_COUNT).ToString()));
             return true;
-        }
-
-        private bool IsTileAt(Vector2 target, string sheet, List<int> tiles)
-        {
-            var tSheet = this.currentLocation.map.TileSheets.Where(_ => _.ImageSource.Contains(sheet)).FirstOrDefault();
-            if (tSheet == default)
-                return false;
-            var back = this.currentLocation.map.GetLayer("Back");
-            var midBack = this.currentLocation.map.GetLayer("MidBack");
-            var farBack = this.currentLocation.map.GetLayer("FarBack");
-            var bTile = back.Tiles[(int)target.X, (int)target.Y];
-            var mbTile = midBack.Tiles[(int)target.X, (int)target.Y];
-            var fbTile = farBack.Tiles[(int)target.X, (int)target.Y];
-            return (bTile != null && bTile.TileSheet == tSheet && tiles.Contains(bTile.TileIndex)) || (mbTile != null && mbTile.TileSheet == tSheet && tiles.Contains(mbTile.TileIndex)) || (fbTile != null && fbTile.TileSheet == tSheet && tiles.Contains(fbTile.TileIndex));
-        }
-
-        private void Animate(AnimatedSprite sprite, GameTime time)
-        {
-            if (sprite == null)
-                return;
-            if (sprite.CurrentAnimation != null)
-                sprite.animateOnce(time);
-            else
-            {
-                sprite.faceDirection(this.FacingDirection);
-                if (this.isMoving())
-                {
-                    switch (this.FacingDirection)
-                    {
-                        case 0:
-                            sprite.AnimateUp(time, 0, "");
-                            break;
-                        case 1:
-                            sprite.AnimateRight(time, 0, "");
-                            break;
-                        case 2:
-                            sprite.AnimateDown(time, 0, "");
-                            break;
-                        case 3:
-                            sprite.AnimateLeft(time, 0, "");
-                            break;
-                    }
-                }
-                else
-                    sprite.StopAnimation();
-            }
         }
     }
 }

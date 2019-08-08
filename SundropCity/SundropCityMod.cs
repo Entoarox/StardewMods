@@ -58,7 +58,7 @@ namespace SundropCity
             helper.Events.Player.Warped += this.OnWarped;
         }
 
-        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialized at this point, so this is a good time to set up mod integrations.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -71,36 +71,70 @@ namespace SundropCity
             foreach(string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
             {
                 string ext = Path.GetExtension(file);
-                if (ext.Equals(".tbin"))
+                if (ext==null || !ext.Equals(".tbin"))
+                    continue;
+                string map = Path.GetFileName(file);
+                if (map == null)
+                    continue;
+                try
                 {
-                    string map = Path.GetFileName(file);
-                    try
-                    {
-                        this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
-                        new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
-                        lock(this.Maps)
-                            this.Maps.Add(map);
-                    }
-                    catch (Exception err)
-                    {
-                        this.Monitor.Log("Unable to prepare [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
-                    }
+                    this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                    var mapInst=new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
+                    lock(this.Maps)
+                        this.Maps.Add(map);
+                    lock(Tourist.WarpCache)
+                        Tourist.WarpCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_WARP_DOWN, Tourist.TILE_WARP_LEFT, Tourist.TILE_WARP_RIGHT, Tourist.TILE_WARP_UP }));
                 }
+                catch (Exception err)
+                {
+                    this.Monitor.Log("Unable to prepare [" + map + "] location, error follows\n" + err, LogLevel.Error);
+                }
+            }
+            this.Monitor.Log("Mapping tourist graphics...", LogLevel.Trace);
+            string touristRelative = Path.Combine("assets", "Characters", "Tourists");
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Bottom", Tourist.MalePants, Tourist.FemalePants);
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Top", Tourist.MaleShirt, Tourist.FemaleShirt);
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Hair", Tourist.MaleHair, Tourist.FemaleHair);
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Shoe", Tourist.MaleShoes, Tourist.FemaleShoes);
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Accessory", Tourist.MaleAccessory, Tourist.FemaleAccessory);
+            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Hat", Tourist.MaleHat, Tourist.FemaleHat);
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, touristRelative, "FaceHair")))
+            {
+                string ext = Path.GetExtension(file);
+                if (ext == null || !ext.Equals(".png"))
+                    continue;
+                string name = Path.GetFileName(file);
+                if (name == null)
+                    continue;
+                string path = Path.Combine(touristRelative, "FaceHair", name);
+                string key = this.Helper.Content.GetActualAssetKey(path);
+                this.Helper.Content.Load<Texture2D>(path);
+                Tourist.FaceHairs.Add(key);
+            }
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, touristRelative, "Body")))
+            {
+                string ext = Path.GetExtension(file);
+                if (ext==null || !ext.Equals(".png"))
+                    continue;
+                string name = Path.GetFileName(file);
+                if (name == null)
+                    continue;
+                string path = Path.Combine(touristRelative, "Body", name);
+                string key = this.Helper.Content.GetActualAssetKey(path);
+                this.Helper.Content.Load<Texture2D>(path);
+                Tourist.BaseColors.Add(key);
             }
             this.Monitor.Log("Reading parking data...", LogLevel.Trace);
             foreach(var map in helper.Content.Load<JObject>("assets/Data/ParkingSpots.json").Properties())
             {
-                this.Monitor.Log("Parsing parking data for the [" + map.Name + "] map, found [" + (map.Value as JArray).Count + "] parking spaces.", LogLevel.Trace);
-                JArray spotsArr = map.Value.ToObject<JArray>();
+                this.Monitor.Log("Parsing parking data for the [" + map.Name + "] map, found [" + (map.Value as JArray)?.Count + "] parking spaces.", LogLevel.Trace);
+                var spotsArr = map.Value.ToObject<JArray>();
                 string key = map.Name;
-                List<ParkingSpot> spots = new List<ParkingSpot>();
-                foreach (JArray spotArr in spotsArr)
+                var spots = new List<ParkingSpot>();
+                foreach (var spotArr in spotsArr.Cast<JArray>())
                 {
                     var values = spotArr.Children().ToArray();
-                    List<Facing> facings = new List<Facing>();
-                    foreach (JValue facing in values[2].ToObject<JArray>())
-                        facings.Add((Facing)Enum.Parse(typeof(Facing), facing.ToObject<string>()));
-                    spots.Add(new ParkingSpot(new Vector2(values[0].ToObject<int>(), values[1].ToObject<int>()), facings.ToArray()));
+                    spots.Add(new ParkingSpot(new Vector2(values[0].ToObject<int>(), values[1].ToObject<int>()), (from JValue facing in values[2].ToObject<JArray>() select (Facing) Enum.Parse(typeof(Facing), facing.ToObject<string>())).ToArray()));
                 }
                 lock(ParkingSpots)
                     ParkingSpots.Add(key, spots.ToArray());
@@ -121,9 +155,9 @@ namespace SundropCity
             this.Monitor.Log("Preparing characters...", LogLevel.Trace);
             // NPC Spawning
             foreach(var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"))
-            {
                 try
                 {
+                    // ReSharper disable once ObjectCreationAsStatement
                     new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
                     {
                         Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
@@ -131,14 +165,13 @@ namespace SundropCity
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Unable to prepare villager by name of [" + info.Name + "] due to a unexpected issue.\n" + err.ToString(), LogLevel.Error);
+                    this.Monitor.Log("Unable to prepare villager by name of [" + info.Name + "] due to a unexpected issue.\n" + err, LogLevel.Error);
                 }
-            }
             this.Monitor.Log("Preparing cameos...", LogLevel.Trace);
             foreach(var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CameoSpawns.json"))
-            {
                 try
                 {
+                    // ReSharper disable once ObjectCreationAsStatement
                     new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
                     {
                         Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
@@ -146,9 +179,8 @@ namespace SundropCity
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Unable to prepare cameo character for [" + info.Name + "] due to a unexpected issue.\n" + err.ToString(), LogLevel.Warn);
+                    this.Monitor.Log("Unable to prepare cameo character for [" + info.Name + "] due to a unexpected issue.\n" + err, LogLevel.Warn);
                 }
-            }
             this.Monitor.Log("Registering commands...", LogLevel.Trace);
             helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
              {
@@ -170,34 +202,7 @@ namespace SundropCity
                      case "touristHorde":
                          int amount = Convert.ToInt32(args[1]);
                          var loc = Game1.player.currentLocation;
-                         var layer = loc.map.GetLayer("Tourists");
-                         if(layer==null)
-                         {
-                             this.Monitor.Log("Tourist metadata not found on current map.", LogLevel.Error);
-                             return;
-                         }
-                         List<Vector2> validPoints = new List<Vector2>();
-                         for (int x=0;x<layer.LayerWidth;x++)
-                             for(int y=0;y<layer.LayerHeight;y++)
-                             {
-                                 if (!loc.isTileLocationTotallyClearAndPlaceable(x, y))
-                                     continue;
-                                 int index = layer.Tiles[x, y]?.TileIndex ?? Tourist.TILE_BLOCK;
-                                 switch(index)
-                                 {
-                                     case Tourist.TILE_SPAWN:
-                                     case Tourist.TILE_ARROW_DOWN:
-                                     case Tourist.TILE_ARROW_UP:
-                                     case Tourist.TILE_ARROW_LEFT:
-                                     case Tourist.TILE_ARROW_RIGHT:
-                                     case Tourist.TILE_BROWSE:
-                                     case Tourist.TILE_WARP:
-                                         validPoints.Add(new Vector2(x, y));
-                                         break;
-                                 }
-                             }
-                         for (int c = 0; c < amount; c++)
-                             Game1.player.currentLocation.addCharacter(new Tourist(validPoints[Game1.random.Next(validPoints.Count)] * 64f));
+                         SundropCityMod.SpawnTourists(loc, amount);
                          break;
                  }
              });
@@ -206,9 +211,8 @@ namespace SundropCity
 
         private void Setup()
         {
-            var start = DateTime.Now;
             this.Monitor.Log("Performing setup...", LogLevel.Trace);
-            GameLocation promenade = null;
+            var start = DateTime.Now;
             this.Monitor.Log("Adding locations...", LogLevel.Trace);
             // Add new locations
             Parallel.ForEach(this.Maps, map =>
@@ -225,10 +229,10 @@ namespace SundropCity
                 }
                 catch (Exception err)
                 {
-                    this.Monitor.Log("Unable to add [" + map + "] location, error follows\n" + err.ToString(), LogLevel.Error);
+                    this.Monitor.Log("Unable to add [" + map + "] location, error follows\n" + err, LogLevel.Error);
                 }
             });
-            promenade = Game1.getLocationFromName("SundropPromenade");
+            var promenade = Game1.getLocationFromName("SundropPromenade");
             this.Monitor.Log("Spawning characters...", LogLevel.Trace);
             // NPC Spawning
             Parallel.ForEach(this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"), info =>
@@ -239,20 +243,20 @@ namespace SundropCity
                     try
                     {
                         this.Monitor.Log("Adding sundrop villager: " + info.Name, LogLevel.Trace);
-                        Vector2 pos = new Vector2(info.Position[0], info.Position[1]);
-                        NPC villagerNPC = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), pos * 64f, 2, info.Name)
+                        var pos = new Vector2(info.Position[0], info.Position[1]);
+                        var villagerNpc = new NPC( new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), pos * 64f, 2, info.Name)
                         {
                             Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
+                            DefaultMap = info.Map,
+                            DefaultPosition = pos * 64f
                         };
-                        villagerNPC.DefaultMap = info.Map;
-                        villagerNPC.DefaultPosition = pos * 64f;
-                        villagerNPC.setNewDialogue(info.Message);
+                        villagerNpc.setNewDialogue(info.Message);
                         lock (Game1.getLocationFromName(info.Map))
-                            Game1.getLocationFromName(info.Map).addCharacter(villagerNPC);
+                            Game1.getLocationFromName(info.Map).addCharacter(villagerNpc);
                     }
                     catch (Exception err)
                     {
-                        this.Monitor.Log("Unable to add villager by name of [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err.ToString(), LogLevel.Error);
+                        this.Monitor.Log("Unable to add villager by name of [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err, LogLevel.Error);
                     }
             });
             this.Monitor.Log("Spawning cameos...", LogLevel.Trace);
@@ -264,20 +268,20 @@ namespace SundropCity
                     try
                     {
                         this.Monitor.Log("Adding sundrop cameo: " + info.Name, LogLevel.Trace);
-                        Vector2 pos = new Vector2(info.Position[0], info.Position[1]);
-                        NPC cameoNPC = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), pos * 64f, 2, info.Name)
+                        var pos = new Vector2(info.Position[0], info.Position[1]);
+                        var cameoNpc = new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), pos * 64f, 2, info.Name)
                         {
                             Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
+                            DefaultMap = info.Map,
+                            DefaultPosition = pos * 64f
                         };
-                        cameoNPC.DefaultMap = info.Map;
-                        cameoNPC.DefaultPosition = pos * 64f;
-                        cameoNPC.setNewDialogue(info.Message);
+                        cameoNpc.setNewDialogue(info.Message);
                         lock (Game1.getLocationFromName(info.Map))
-                            Game1.getLocationFromName(info.Map).addCharacter(cameoNPC);
+                            Game1.getLocationFromName(info.Map).addCharacter(cameoNpc);
                     }
                     catch (Exception err)
                     {
-                        this.Monitor.Log("Unable to add cameo character for [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err.ToString(), LogLevel.Warn);
+                        this.Monitor.Log("Unable to add cameo character for [" + info.Name + "] due to a unexpected issue, this character will not appear in your game as a result.\n" + err, LogLevel.Warn);
                     }
             });
             var npc = Game1.getCharacterFromName("Joe");
@@ -322,8 +326,8 @@ namespace SundropCity
                             toLayer.Tiles[x, y] = null;
                         else
                             toLayer.Tiles[x, y] = new StaticTile(toLayer, town.map.GetTileSheet(tile.TileSheet.Id), BlendMode.Additive, tile.TileIndex);
-                        var vect = new Vector2(x, y);
-                        town.largeTerrainFeatures.Filter(a => a.tilePosition.Value != vect);
+                        var vector = new Vector2(x, y);
+                        town.largeTerrainFeatures.Filter(a => a.tilePosition.Value != vector);
                     }
                 // Second patch area: replacing the pink tree
                 for (int x = 110; x < 116; x++)
@@ -338,7 +342,7 @@ namespace SundropCity
             }
 
             // TEMP STUFF
-            promenade?.setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
+            promenade.setTileProperty(3, 37, "Buildings", "Action", "Warp 119 56 Town");
             town.warps.Add(new Warp(120, 55, "SundropPromenade", 1, 29, false));
             town.warps.Add(new Warp(120, 56, "SundropPromenade", 1, 30, false));
             town.warps.Add(new Warp(120, 57, "SundropPromenade", 1, 31, false));
@@ -356,11 +360,34 @@ namespace SundropCity
                     layer.Tiles[99, y] = new StaticTile(layer, sheet, BlendMode.Additive, 0);
             }
         }
-        private void AddCitizen(string id, string name, string map, Vector2 pos, string dialogue)
+
+        private void LoadTouristParts(string root, string relative, string folder, List<string> male, List<string> female)
         {
-        }
-        private void AddCameoChar(string name, string map, Vector2 pos, string dialogue)
-        {
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(root, relative, folder)))
+            {
+                string ext = Path.GetExtension(file);
+                if (ext==null || !ext.Equals(".png"))
+                    continue;
+                string name = Path.GetFileName(file);
+                if (name == null || name[name.Length-ext.Length-1]=='h')
+                    continue;
+                string path = Path.Combine(relative, folder, name);
+                string key = this.Helper.Content.GetActualAssetKey(path);
+                this.Helper.Content.Load<Texture2D>(path);
+                switch (name[0])
+                {
+                    case 'f':
+                        female.Add(key);
+                        break;
+                    case 'm':
+                        male.Add(key);
+                        break;
+                    case 'g':
+                        female.Add(key);
+                        male.Add(key);
+                        break;
+                }
+            }
         }
         private void SetupLocation(GameLocation location)
         {
@@ -375,23 +402,23 @@ namespace SundropCity
                         var tile = pathsLayer.Tiles[x, y];
                         if (tile == null)
                             continue;
-                        Vector2 vect = new Vector2(x, y);
+                        Vector2 vector = new Vector2(x, y);
                         switch (tile.TileIndex)
                         {
                             case 0:
-                                if (!location.terrainFeatures.ContainsKey(vect))
-                                    location.terrainFeatures.Add(vect, new SundropGrass());
+                                if (!location.terrainFeatures.ContainsKey(vector))
+                                    location.terrainFeatures.Add(vector, new SundropGrass());
                                 break;
                             case 1:
-                                if (!location.terrainFeatures.ContainsKey(vect))
-                                    location.terrainFeatures.Add(vect, new Tree(456, 5));
+                                if (!location.terrainFeatures.ContainsKey(vector))
+                                    location.terrainFeatures.Add(vector, new Tree(456, 5));
                                 break;
                         }
                     }
             }
             var layer = location.map.GetLayer("Back");
-            var sheet = location.map.TileSheets.Where(_ => _.ImageSource.Contains("SundropPaths.png")).FirstOrDefault();
-            if (sheet == null || sheet==default)
+            var sheet = location.map.TileSheets.FirstOrDefault(_ => _.ImageSource.Contains("SundropPaths.png"));
+            if (sheet == null)
             {
                 var img = this.Helper.Content.Load<Texture2D>("assets/Maps/SundropPaths.png");
                 sheet = new TileSheet("PathsTilesheet", location.map, this.Helper.Content.GetActualAssetKey("assets/Maps/SundropPaths.png"), new Size(img.Width / 16, img.Height / 16), new Size(16, 16));
@@ -408,11 +435,11 @@ namespace SundropCity
         private void SpawnCars(GameLocation location, double chance)
         {
             Random rand = new Random();
-            this.Monitor.Log($"SpawnCars: Cleaning up any old car objects in the map.", LogLevel.Trace);
+            this.Monitor.Log("SpawnCars: Cleaning up any old car objects in the map.", LogLevel.Trace);
             if (location.largeTerrainFeatures.Any(_ => _ is SundropCar))
                 foreach (LargeTerrainFeature car in location.largeTerrainFeatures.Where(_ => _ is SundropCar).ToArray())
                     location.largeTerrainFeatures.Remove(car);
-            this.Monitor.Log($"SpawnCars: Checking if map has parking spots defined.", LogLevel.Trace);
+            this.Monitor.Log("SpawnCars: Checking if map has parking spots defined.", LogLevel.Trace);
             if (!ParkingSpots.ContainsKey(location.Name))
                 return;
             this.Monitor.Log($"SpawnCars: Spawning cars in [{location.Name}] with a {chance * 100}% chance.", LogLevel.Trace);
@@ -422,6 +449,23 @@ namespace SundropCity
                     Facing facing = spot.Facings[rand.Next(spot.Facings.Length)];
                     location.largeTerrainFeatures.Add(new SundropCar(spot.Target, facing));
                 }
+        }
+        private static void SpawnTourists(GameLocation loc, int amount)
+        {
+            var validPoints = Tourist.GetSpawnPoints(loc, new HashSet<int>() {
+                 Tourist.TILE_ARROW_DOWN,
+                 Tourist.TILE_ARROW_LEFT,
+                 Tourist.TILE_ARROW_RIGHT,
+                 Tourist.TILE_ARROW_UP,
+                 Tourist.TILE_BROWSE,
+                 Tourist.TILE_SPAWN,
+                 Tourist.TILE_WARP_DOWN,
+                 Tourist.TILE_WARP_LEFT,
+                 Tourist.TILE_WARP_RIGHT,
+                 Tourist.TILE_WARP_UP
+            });
+            for (int c = 0; c < amount; c++)
+                loc.addCharacter(new Tourist(validPoints[Game1.random.Next(validPoints.Count)] * 64f));
         }
 
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
@@ -465,20 +509,29 @@ namespace SundropCity
 
         private void OnWarped(object s, WarpedEventArgs e)
         {
-            if (!e.IsLocalPlayer)
-                return;
-            if (ParkingSpots.ContainsKey(e.NewLocation.Name))
-                this.SpawnCars(e.NewLocation, .8);
-            e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
-            e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
-            e.OldLocation.map.GetLayer("Back").AfterDraw -= this.DrawExtraLayers4;
-            e.NewLocation.map.GetLayer("Back").AfterDraw += this.DrawExtraLayers4;
-            e.OldLocation.map.GetLayer("Front").BeforeDraw -= this.DrawExtraLayers2;
-            e.NewLocation.map.GetLayer("Front").BeforeDraw += this.DrawExtraLayers2;
-            if (e.OldLocation.map.GetLayer("AlwaysFront") != null)
-                e.OldLocation.map.GetLayer("AlwaysFront").AfterDraw -= this.DrawExtraLayers3;
-            if (e.NewLocation.map.GetLayer("AlwaysFront") != null)
-                e.NewLocation.map.GetLayer("AlwaysFront").AfterDraw += this.DrawExtraLayers3;
+            if (e.Player == Game1.MasterPlayer)
+            {
+                if (ParkingSpots.ContainsKey(e.NewLocation.Name))
+                    this.SpawnCars(e.NewLocation, .8);
+                if (e.OldLocation.farmers.Count == 0 && e.OldLocation.map.Properties.ContainsKey("TouristCount"))
+                    foreach (var character in e.OldLocation.characters.Where(_ => _ is Tourist))
+                        e.OldLocation.characters.Remove(character);
+                if (e.NewLocation.farmers.Count == 1 && e.NewLocation.map.Properties.ContainsKey("TouristCount"))
+                    SundropCityMod.SpawnTourists(e.NewLocation, Convert.ToInt32((string)e.NewLocation.map.Properties["TouristCount"]));
+            }
+            if (e.IsLocalPlayer)
+            {
+                e.OldLocation.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
+                e.NewLocation.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
+                e.OldLocation.map.GetLayer("Back").AfterDraw -= this.DrawExtraLayers4;
+                e.NewLocation.map.GetLayer("Back").AfterDraw += this.DrawExtraLayers4;
+                e.OldLocation.map.GetLayer("Front").BeforeDraw -= this.DrawExtraLayers2;
+                e.NewLocation.map.GetLayer("Front").BeforeDraw += this.DrawExtraLayers2;
+                if (e.OldLocation.map.GetLayer("AlwaysFront") != null)
+                    e.OldLocation.map.GetLayer("AlwaysFront").AfterDraw -= this.DrawExtraLayers3;
+                if (e.NewLocation.map.GetLayer("AlwaysFront") != null)
+                    e.NewLocation.map.GetLayer("AlwaysFront").AfterDraw += this.DrawExtraLayers3;
+            }
         }
         private void DrawExtraLayers1(object s, LayerEventArgs e)
         {
