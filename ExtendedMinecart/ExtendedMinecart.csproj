@@ -5,6 +5,7 @@
     <RootNamespace>Entoarox.ExtendedMinecart</RootNamespace>
     <Version>1.8.2</Version>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

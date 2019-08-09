@@ -5,6 +5,7 @@
     <RootNamespace>Entoarox.SeasonalImmersion</RootNamespace>
     <Version>1.12.1</Version>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -368,13 +368,13 @@ namespace SundropCity
                 string ext = Path.GetExtension(file);
                 if (ext==null || !ext.Equals(".png"))
                     continue;
-                string name = Path.GetFileName(file);
-                if (name == null || name[name.Length-ext.Length-1]=='h')
+                string part = Path.GetFileNameWithoutExtension(file);
+                if (part == null || part[part.Length-1]=='h')
                     continue;
-                string path = Path.Combine(relative, folder, name);
+                string path = Path.Combine(relative, folder, part + ext);
                 string key = this.Helper.Content.GetActualAssetKey(path);
                 this.Helper.Content.Load<Texture2D>(path);
-                switch (name[0])
+                switch (part[0])
                 {
                     case 'f':
                         female.Add(key);
@@ -470,7 +470,7 @@ namespace SundropCity
 
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1 && !Game1.fadeToBlack)
+            if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1)
             {
                 Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
@@ -514,8 +514,16 @@ namespace SundropCity
                 if (ParkingSpots.ContainsKey(e.NewLocation.Name))
                     this.SpawnCars(e.NewLocation, .8);
                 if (e.OldLocation.farmers.Count == 0 && e.OldLocation.map.Properties.ContainsKey("TouristCount"))
-                    foreach (var character in e.OldLocation.characters.Where(_ => _ is Tourist))
+                    foreach (var character in new List<Tourist>(e.OldLocation.characters.Where(_ => _ is Tourist).Cast<Tourist>()))
+                    {
+                        if (character.IsWally)
+                        {
+                            Tourist.WallyAge = 0;
+                            character.RandomizeLook();
+                        }
                         e.OldLocation.characters.Remove(character);
+                    }
+
                 if (e.NewLocation.farmers.Count == 1 && e.NewLocation.map.Properties.ContainsKey("TouristCount"))
                     SundropCityMod.SpawnTourists(e.NewLocation, Convert.ToInt32((string)e.NewLocation.map.Properties["TouristCount"]));
             }

@@ -5,6 +5,11 @@
     <RootNamespace>SundropCity</RootNamespace>
     <Version>0.1.0</Version>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

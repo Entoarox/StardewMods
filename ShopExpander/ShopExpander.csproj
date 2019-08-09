@@ -5,6 +5,7 @@
     <RootNamespace>Entoarox.ShopExpander</RootNamespace>
     <Version>1.6.2</Version>
     <TargetFramework>net452</TargetFramework>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

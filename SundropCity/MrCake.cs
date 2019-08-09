@@ -19,7 +19,6 @@ namespace SundropCity
             this.Target = target;
             this.Breather = false;
             this.HideShadow = true;
-            this.willDestroyObjectsUnderfoot = false;
             this.DefaultMap = "SundropPromenade";
             this.DefaultPosition = position * 64f;
             this.Portrait = SundropCityMod.SHelper.Content.Load<Texture2D>("assets/Characters/Portraits/MrCake.png");
