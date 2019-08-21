@@ -23,6 +23,8 @@ namespace SundropCity.TerrainFeatures
         private readonly Texture2D DecalTexture;
         private readonly Dictionary<string, Color> ColorPalette;
 
+        private static readonly Dictionary<string, PaletteTexture> TextureCache = new Dictionary<string, PaletteTexture>();
+
         private static readonly Rectangle Up = new Rectangle(0, 0, 3 * 16, 5 * 16);
         private static readonly Rectangle Down = new Rectangle(3 * 16, 0, 3 * 16, 5 * 16);
         private static readonly Rectangle Sideways = new Rectangle(0, 5 * 16, 5 * 16, 3 * 16);
@@ -50,7 +52,9 @@ namespace SundropCity.TerrainFeatures
             int myType = type ?? Rand.Next(CarTypes.Count);
             int myVariant = variant ?? Rand.Next(CarTypes[myType].Variants.Length);
             this.BaseTexture = Game1.content.Load<Texture2D>(CarTypes[myType].Base);
-            this.RecolorTexture = new PaletteTexture(Game1.content.Load<Texture2D>(CarTypes[myType].Recolor), CarTypes[myType].Source);
+            if (!TextureCache.ContainsKey(CarTypes[myType].Recolor))
+                TextureCache.Add(CarTypes[myType].Recolor, new PaletteTexture(Game1.content.Load<Texture2D>(CarTypes[myType].Recolor), CarTypes[myType].Source));
+            this.RecolorTexture = TextureCache[CarTypes[myType].Recolor];
             this.ColorPalette = CarTypes[myType].Variants[myVariant].Palette;
             var validDecals = CarTypes[myType].Decals.Where(_ => !CarTypes[myType].Variants[myVariant].Disallow.Contains(_.Key)).Select(_ => _.Key).ToList();
             int rand = Rand.Next(validDecals.Count + 1);

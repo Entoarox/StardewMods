@@ -1,10 +1,10 @@
 {
-  "Name": "Sundrop City",
-  "Author": "Sundrop Team",
-  "Version": "0.2.5-internal.1",
-  "Description": "Visit and explore Sundrop City, a DLC-sized expansion to Stardew Valley!",
-  "UniqueID": "SundropCity.Main",
-  "MinimumApiVersion": "2.11.0",
-  "EntryDll": "SundropCity.dll",
-  "UpdateKeys": [ "nexus:4014" ]
+    "Name": "Sundrop City",
+    "Author": "Sundrop Team",
+    "Version": "0.2.5-internal.4",
+    "Description": "Visit and explore Sundrop City, a DLC-sized expansion to Stardew Valley!",
+    "UniqueID": "SundropTeam.SundropCity",
+    "MinimumApiVersion": "2.11.0",
+    "EntryDll": "SundropCity.dll",
+    "UpdateKeys": [ "nexus:4014" ]
 }

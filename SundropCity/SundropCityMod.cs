@@ -49,10 +49,11 @@ namespace SundropCity
 
             // Setup events
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            //helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
+            helper.Events.Specialised.LoadStageChanged += this.OnLoadStageChanged;
 
             // Handle custom layer drawing
             helper.Events.Player.Warped += this.OnWarped;
@@ -74,16 +75,18 @@ namespace SundropCity
                 if (ext==null || !ext.Equals(".tbin"))
                     continue;
                 string map = Path.GetFileName(file);
+                this.Monitor.Log("Currently preparing: " + map, LogLevel.Trace);
                 if (map == null)
                     continue;
                 try
                 {
-                    this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                    var mapFile=this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                    if (mapFile.Properties.ContainsKey("Light"))
+                        mapFile.Properties["Light"] = mapFile.Properties["Light"].ToString().Replace("\n", "").Replace(";", "");
                     var mapInst=new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
-                    lock(this.Maps)
-                        this.Maps.Add(map);
-                    lock(Tourist.WarpCache)
-                        Tourist.WarpCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_WARP_DOWN, Tourist.TILE_WARP_LEFT, Tourist.TILE_WARP_RIGHT, Tourist.TILE_WARP_UP }));
+                    this.Maps.Add(map);
+                    Tourist.WarpCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() {Tourist.TILE_WARP_DOWN, Tourist.TILE_WARP_LEFT, Tourist.TILE_WARP_RIGHT, Tourist.TILE_WARP_UP}));
+                    Tourist.SpawnCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() {Tourist.TILE_ARROW_DOWN, Tourist.TILE_ARROW_LEFT, Tourist.TILE_ARROW_RIGHT, Tourist.TILE_ARROW_UP, Tourist.TILE_BROWSE, Tourist.TILE_SPAWN}));
                 }
                 catch (Exception err)
                 {
@@ -91,39 +94,7 @@ namespace SundropCity
                 }
             }
             this.Monitor.Log("Mapping tourist graphics...", LogLevel.Trace);
-            string touristRelative = Path.Combine("assets", "Characters", "Tourists");
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Bottom", Tourist.MalePants, Tourist.FemalePants);
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Top", Tourist.MaleShirt, Tourist.FemaleShirt);
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Hair", Tourist.MaleHair, Tourist.FemaleHair);
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Shoe", Tourist.MaleShoes, Tourist.FemaleShoes);
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Accessory", Tourist.MaleAccessory, Tourist.FemaleAccessory);
-            this.LoadTouristParts(this.Helper.DirectoryPath, touristRelative, "Hat", Tourist.MaleHat, Tourist.FemaleHat);
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, touristRelative, "FaceHair")))
-            {
-                string ext = Path.GetExtension(file);
-                if (ext == null || !ext.Equals(".png"))
-                    continue;
-                string name = Path.GetFileName(file);
-                if (name == null)
-                    continue;
-                string path = Path.Combine(touristRelative, "FaceHair", name);
-                string key = this.Helper.Content.GetActualAssetKey(path);
-                this.Helper.Content.Load<Texture2D>(path);
-                Tourist.FaceHairs.Add(key);
-            }
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, touristRelative, "Body")))
-            {
-                string ext = Path.GetExtension(file);
-                if (ext==null || !ext.Equals(".png"))
-                    continue;
-                string name = Path.GetFileName(file);
-                if (name == null)
-                    continue;
-                string path = Path.Combine(touristRelative, "Body", name);
-                string key = this.Helper.Content.GetActualAssetKey(path);
-                this.Helper.Content.Load<Texture2D>(path);
-                Tourist.BaseColors.Add(key);
-            }
+            Tourist.LoadResources();
             this.Monitor.Log("Reading parking data...", LogLevel.Trace);
             foreach(var map in helper.Content.Load<JObject>("assets/Data/ParkingSpots.json").Properties())
             {
@@ -197,7 +168,7 @@ namespace SundropCity
                          break;
                      case "tourist":
                          Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
-                         this.Monitor.Log("Spawned tourist.", LogLevel.Alert);
+                         this.Monitor.Log("Spawned ", LogLevel.Alert);
                          break;
                      case "touristHorde":
                          int amount = Convert.ToInt32(args[1]);
@@ -233,6 +204,7 @@ namespace SundropCity
                 }
             });
             var promenade = Game1.getLocationFromName("SundropPromenade");
+            /*
             this.Monitor.Log("Spawning characters...", LogLevel.Trace);
             // NPC Spawning
             Parallel.ForEach(this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"), info =>
@@ -289,6 +261,7 @@ namespace SundropCity
             NPC cake = new MrCake(new Vector2(22, 20), npc);
             cake.setNewDialogue("Mr. Cake looks at you with approval.");
             promenade?.addCharacter(cake);
+            */
             var end = DateTime.Now;
             var time=end.Subtract(start);
             this.Monitor.Log("Sundrop loading took " + time.TotalMilliseconds + " milliseconds.", LogLevel.Trace);
@@ -396,25 +369,29 @@ namespace SundropCity
             if (location.map.GetLayer("SundropPaths") != null)
             {
                 var pathsLayer = location.map.GetLayer("SundropPaths");
-                for (int x = 0; x < pathsLayer.LayerWidth; x++)
-                    for (int y = 0; y < pathsLayer.LayerHeight; y++)
-                    {
-                        var tile = pathsLayer.Tiles[x, y];
-                        if (tile == null)
-                            continue;
-                        Vector2 vector = new Vector2(x, y);
-                        switch (tile.TileIndex)
-                        {
-                            case 0:
-                                if (!location.terrainFeatures.ContainsKey(vector))
-                                    location.terrainFeatures.Add(vector, new SundropGrass());
-                                break;
-                            case 1:
-                                if (!location.terrainFeatures.ContainsKey(vector))
-                                    location.terrainFeatures.Add(vector, new Tree(456, 5));
-                                break;
-                        }
-                    }
+                Parallel.For(0, pathsLayer.LayerWidth, x =>
+                {
+                    Parallel.For(0, pathsLayer.LayerHeight, y =>
+                     {
+                         var tile = pathsLayer.Tiles[x, y];
+                         if (tile == null)
+                             return;
+                         Vector2 vector = new Vector2(x, y);
+                         switch (tile.TileIndex)
+                         {
+                             case 0:
+                                 lock (location.terrainFeatures)
+                                     if (!location.terrainFeatures.ContainsKey(vector))
+                                         location.terrainFeatures.Add(vector, new SundropGrass());
+                                 break;
+                             case 1:
+                                 lock (location.terrainFeatures)
+                                     if (!location.terrainFeatures.ContainsKey(vector))
+                                         location.terrainFeatures.Add(vector, new Tree(456, 5));
+                                 break;
+                         }
+                     });
+                });
             }
             var layer = location.map.GetLayer("Back");
             var sheet = location.map.TileSheets.FirstOrDefault(_ => _.ImageSource.Contains("SundropPaths.png"));
@@ -424,53 +401,43 @@ namespace SundropCity
                 sheet = new TileSheet("PathsTilesheet", location.map, this.Helper.Content.GetActualAssetKey("assets/Maps/SundropPaths.png"), new Size(img.Width / 16, img.Height / 16), new Size(16, 16));
                 location.map.AddTileSheet(sheet);
             }
-            for (int x = 0; x < layer.LayerWidth; x++)
-                for (int y = 0; y < layer.LayerHeight; y++)
+            Parallel.For(0, layer.LayerWidth, x =>
+            {
+                Parallel.For(0, layer.LayerHeight, y =>
                 {
-                    var tile = layer.Tiles[x, y];
-                    if (tile == null)
+                    if (layer.Tiles[x, y] == null)
                         layer.Tiles[x, y] = new StaticTile(layer, sheet, BlendMode.Additive, 2);
-                }
+                });
+            });
         }
         private void SpawnCars(GameLocation location, double chance)
         {
             Random rand = new Random();
-            this.Monitor.Log("SpawnCars: Cleaning up any old car objects in the map.", LogLevel.Trace);
             if (location.largeTerrainFeatures.Any(_ => _ is SundropCar))
                 foreach (LargeTerrainFeature car in location.largeTerrainFeatures.Where(_ => _ is SundropCar).ToArray())
                     location.largeTerrainFeatures.Remove(car);
-            this.Monitor.Log("SpawnCars: Checking if map has parking spots defined.", LogLevel.Trace);
             if (!ParkingSpots.ContainsKey(location.Name))
                 return;
-            this.Monitor.Log($"SpawnCars: Spawning cars in [{location.Name}] with a {chance * 100}% chance.", LogLevel.Trace);
-            foreach (ParkingSpot spot in ParkingSpots[location.Name])
+            Parallel.ForEach(ParkingSpots[location.Name], spot =>
+            {
                 if (rand.NextDouble() <= chance)
                 {
                     Facing facing = spot.Facings[rand.Next(spot.Facings.Length)];
-                    location.largeTerrainFeatures.Add(new SundropCar(spot.Target, facing));
+                    lock(location.largeTerrainFeatures)
+                        location.largeTerrainFeatures.Add(new SundropCar(spot.Target, facing));
                 }
+            });
         }
         private static void SpawnTourists(GameLocation loc, int amount)
         {
-            var validPoints = Tourist.GetSpawnPoints(loc, new HashSet<int>() {
-                 Tourist.TILE_ARROW_DOWN,
-                 Tourist.TILE_ARROW_LEFT,
-                 Tourist.TILE_ARROW_RIGHT,
-                 Tourist.TILE_ARROW_UP,
-                 Tourist.TILE_BROWSE,
-                 Tourist.TILE_SPAWN,
-                 Tourist.TILE_WARP_DOWN,
-                 Tourist.TILE_WARP_LEFT,
-                 Tourist.TILE_WARP_RIGHT,
-                 Tourist.TILE_WARP_UP
-            });
+            var validPoints = Tourist.SpawnCache[loc.Name];
             for (int c = 0; c < amount; c++)
                 loc.addCharacter(new Tourist(validPoints[Game1.random.Next(validPoints.Count)] * 64f));
         }
 
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
         {
-            if (e.Button.IsActionButton() && Game1.activeClickableMenu == null && !Game1.player.UsingTool && !Game1.pickingTool && !Game1.menuUp && (!Game1.eventUp || Game1.currentLocation.currentEvent.playerControlSequence) && !Game1.nameSelectUp && Game1.numberOfSelectedItems == -1)
+            if (e.Button.IsActionButton() && Context.IsPlayerFree)
             {
                 Vector2 grabTile = new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y) / Game1.tileSize;
                 if (!Utility.tileWithinRadiusOfPlayer((int)grabTile.X, (int)grabTile.Y, 1, Game1.player))
@@ -493,6 +460,12 @@ namespace SundropCity
             }
         }
 
+        private void OnLoadStageChanged(object s, LoadStageChangedEventArgs e)
+        {
+            if (e.NewStage == StardewModdingAPI.Enums.LoadStage.SaveLoadedBasicInfo)
+                this.Setup();
+        }
+
         private void OnSaveLoaded(object s, EventArgs e)
         {
             this.Setup();
@@ -504,7 +477,20 @@ namespace SundropCity
         private void OnSaving(object s, EventArgs e)
         {
             foreach (var location in Game1.locations.Where(_ => _.map.Properties.ContainsKey("IsSundropLocation")).ToArray())
-                Game1.locations.Remove(location);
+            {
+                if (location.largeTerrainFeatures.Any(_ => _ is SundropCar))
+                    foreach (LargeTerrainFeature car in location.largeTerrainFeatures.Where(_ => _ is SundropCar).ToArray())
+                        location.largeTerrainFeatures.Remove(car);
+                if (location.terrainFeatures.Pairs.Any(_ => _.Value is SundropGrass))
+                    foreach (var feature in location.terrainFeatures.Pairs.Where(_ => _.Value is SundropGrass).Select(_ => _.Key).ToArray())
+                        location.terrainFeatures.Remove(feature);
+                if (location.characters.Any(_ => _ is Tourist))
+                    foreach (var character in location.characters.Where(_ => _ is Tourist).ToArray())
+                        location.characters.Remove(character);
+                if (location.characters.Any(_ => _ is MrCake))
+                    foreach (var character in location.characters.Where(_ => _ is MrCake).ToArray())
+                        location.characters.Remove(character);
+            }
         }
 
         private void OnWarped(object s, WarpedEventArgs e)
@@ -516,9 +502,9 @@ namespace SundropCity
                 if (e.OldLocation.farmers.Count == 0 && e.OldLocation.map.Properties.ContainsKey("TouristCount"))
                     foreach (var character in new List<Tourist>(e.OldLocation.characters.Where(_ => _ is Tourist).Cast<Tourist>()))
                     {
-                        if (character.IsWally)
+                        if (character.Special!=null)
                         {
-                            Tourist.WallyAge = 0;
+                            character.TickAge = short.MaxValue;
                             character.RandomizeLook();
                         }
                         e.OldLocation.characters.Remove(character);

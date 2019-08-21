@@ -1,4 +1,8 @@
 ## Release notes
+## 2.4.7
+Released 22 August 2019
+* Fixed the Vortex mod manager seeing this as a XNB rather then SMAPI mod
+
 ## 2.4.6
 Released 06 July 2019
 * Fixed JsonAssets error again, nested interfaces are also invalid

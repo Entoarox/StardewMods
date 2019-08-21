@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
@@ -9,10 +11,16 @@ using StardewValley;
 
 namespace SundropCity
 {
+    using Json;
     internal class Tourist : NPC
     {
         public const int TOURIST_LINE_COUNT = 60;
-        public const int WALLY_LINE_COUNT = 16;
+        public const int RARITY_RANGE = 10;
+
+        private static readonly IReadOnlyList<SpecialTourist> Specials = new List<SpecialTourist>()
+        {
+            new SpecialTourist("Wally", 16, 0.0001)
+        };
 
         public const int TILE_SPAWN = 0;
         public const int TILE_BLOCK = 1;
@@ -28,30 +36,40 @@ namespace SundropCity
         public const int TILE_WARP_LEFT = 13;
 
         protected AnimatedSprite Base;
-        protected AnimatedSprite Makeup;
         protected AnimatedSprite Hat;
         protected AnimatedSprite Hair;
         protected AnimatedSprite Shirt;
         protected AnimatedSprite Pants;
         protected AnimatedSprite Shoes;
         protected AnimatedSprite Accessory;
-        protected AnimatedSprite FaceHair;
+        protected AnimatedSprite Decoration;
 
         protected Color HairColor;
         protected Color PantsColor;
         protected Color ShoeColor;
+        protected Color ShirtColor;
+        protected Color HatColor;
+        protected Color AccessoryColor;
+        protected Color DecorationColor;
 
         protected byte Timer;
         protected byte Delay;
         protected byte Cooldown;
         protected byte Stuck;
-        internal bool IsWally;
+        internal short TickAge;
+        internal string Special;
         protected Vector2 OldPos;
 
-        internal static Tourist Wally;
-        internal static int WallyAge;
+        internal static Dictionary<string, TouristPartsGroup> Parts = new Dictionary<string, TouristPartsGroup>()
+        {
+            ["spring"] = new TouristPartsGroup(),
+            ["summer"] = new TouristPartsGroup(),
+            ["fall"] = new TouristPartsGroup(),
+            ["winter"] = new TouristPartsGroup(),
+        };
 
         internal static Dictionary<string, List<Vector2>> WarpCache = new Dictionary<string, List<Vector2>>();
+        internal static Dictionary<string, List<Vector2>> SpawnCache = new Dictionary<string, List<Vector2>>();
         internal static List<string> BaseColors = new List<string>();
         internal static List<string> MaleHair = new List<string>();
         internal static List<string> FemaleHair = new List<string>();
@@ -67,7 +85,9 @@ namespace SundropCity
         internal static List<string> FemaleHat = new List<string>();
         internal static List<string> FaceHairs = new List<string>();
 
-        internal static Color[] HairColors =
+        internal static string[] Seasons = { "spring", "summer", "fall", "winter" };
+        internal static string[] SeasonsHot = { "spring", "summer", "fall" };
+        internal static List<Color> HairColors = new List<Color>()
         {
             new Color(246, 255, 94),
             new Color(215, 209, 219),
@@ -95,7 +115,7 @@ namespace SundropCity
             new Color(255, 0, 219),
         };
 
-        internal static Color[] ClothingColors =
+        internal static List<Color> ClothingColors = new List<Color>()
         {
             new Color(255, 134, 73),
             new Color(255, 73, 94),
@@ -122,29 +142,31 @@ namespace SundropCity
             new Color(50, 12, 61),
             new Color(43, 26, 85),
         };
-
-        internal static string FemaleMakeup = SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/lashes.png");
-        internal static string WallyTexture = SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/wally.png");
         internal static AnimatedSprite BlankSprite = new AnimatedSprite();
 
         internal static List<Vector2> GetSpawnPoints(GameLocation location, HashSet<int> validTiles)
         {
             var layer = location.map.GetLayer("Tourists");
             if (layer == null)
-                return new List<Vector2>();
+                return null;
             List<Vector2> validPoints = new List<Vector2>();
-            for (int x = 0; x < layer.LayerWidth; x++)
-            for (int y = 0; y < layer.LayerHeight; y++)
+            var npc = new Tourist();
+            Parallel.For(0, layer.LayerWidth, x =>
             {
-                if (!location.isTileLocationTotallyClearAndPlaceable(x, y))
-                    continue;
-                int index = Tourist.GetTileIndex(location, x, y);
-                if (index == -1)
-                    continue;
-                if (validTiles.Contains(index))
-                    validPoints.Add(new Vector2(x, y));
-            }
-
+                Parallel.For(0, layer.LayerHeight, y =>
+                {
+                    try
+                    {
+                        var box = new Rectangle(x * 64 + 16, y * 64 + 16, 32, 32);
+                        int index = GetTileIndex(location, x, y);
+                        if (index == -1 || !validTiles.Contains(index) || location.isCollidingPosition(box, Game1.viewport, npc))
+                            return;
+                        validPoints.Add(new Vector2(x, y));
+                    }
+                    catch
+                    { }
+                });
+            });
             return validPoints;
         }
 
@@ -155,100 +177,169 @@ namespace SundropCity
                 return -1;
             return layer.Tiles[x, y]?.TileIndex ?? -1;
         }
+        private static Dictionary<string, string> VariableCache = new Dictionary<string, string>();
+        private static string PartVariables(string part)
+        {
+            if (!VariableCache.ContainsKey(part))
+                VariableCache.Add(part, Path.GetFileNameWithoutExtension(part).Split('_')[1]);
+            return VariableCache[part];
+        }
+
+        internal static void LoadResources()
+        {
+            string path = Path.Combine("assets","Characters","Tourists");
+            List<Task> TaskList = new List<Task>();
+            foreach(string part in new[]{ "Body", "Top", "Bottom", "Shoe", "Hair", "Accessory", "Decoration", "Hat"})
+                TaskList.Add(LoadParts(path, part));
+            Task.WaitAll(TaskList.ToArray());
+        }
+        private static Task LoadParts(string path, string folder)
+        {
+            return Task.Run(() =>
+            {
+                int i = 0;
+                try
+                {
+                    foreach (string file in Directory.EnumerateFiles(Path.Combine(SundropCityMod.SHelper.DirectoryPath, path, folder)))
+                    {
+                        SundropCityMod.SMonitor.Log("Examining file: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Trace);
+                        if (!Path.GetExtension(file).Equals(".png"))
+                            continue;
+                        string vars = PartVariables(file);
+                        if (vars.Length < 3)
+                            continue;
+                        if (vars[2].Equals('s'))
+                            continue;
+                        string key = Path.Combine(path, folder, Path.GetFileName(file));
+                        SundropCityMod.SHelper.Content.Load<Texture2D>(key);
+                        int rarity = vars.Length > 3 ? RARITY_RANGE - Convert.ToInt32(vars[3].ToString(), RARITY_RANGE) : RARITY_RANGE;
+                        string[] seasons;
+                        int seasonNum = Convert.ToInt32(vars[1].ToString());
+                        switch(seasonNum)
+                        {
+                            case 0:
+                                seasons = Seasons;
+                                break;
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                                seasons = new[] { Seasons[seasonNum-1] };
+                                break;
+                            case 5:
+                                seasons = SeasonsHot;
+                                break;
+                            default:
+                                SundropCityMod.SMonitor.Log("Unable to resolve ["+seasonNum+"] as season code from prefix: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Warn);
+                                continue;
+                        }
+                        foreach (string season in Seasons)
+                        {
+                            var cache = Parts[season];
+                            if (!vars[0].Equals('f'))
+                                for (int c = 0; c < rarity; c++)
+                                    cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                            if (!vars[0].Equals('m'))
+                                for (int c = 0; c < rarity; c++)
+                                    cache.Female[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                        }
+                        i++;
+                    }
+                }
+                catch(Exception err)
+                {
+                    SundropCityMod.SMonitor.Log("Loading [" + folder +"] tourists parts failed due to error on index ["+i+"].\n"+err, StardewModdingAPI.LogLevel.Error);
+                }
+            });
+        }
+        private static T Select<T>(List<T> parts)
+        {
+            return parts[Game1.random.Next(parts.Count)];
+        }
 
         public Tourist(Vector2 position)
         {
             this.Speed = 2;
             this.Position = position;
             this.Name = "SundropTourist" + Guid.NewGuid();
-            // ReSharper disable twice VirtualMemberCallInConstructor
             this.faceDirection(Game1.random.Next(4));
-            this.Sprite = Tourist.BlankSprite;
+            this.Sprite = BlankSprite;
             this.RandomizeLook();
+        }
+
+        protected Tourist()
+        {
+
         }
 
         internal void RandomizeLook()
         {
-            if (Tourist.Wally == null && Game1.random.NextDouble() < 0.001)
+            var specials = Specials.Where(_ => !_.IsActive && (_.Season == null || _.Season == Game1.currentSeason) && Game1.random.NextDouble() < _.Chance);
+            if (specials.Any())
             {
-                Tourist.Wally = this;
-                this.IsWally = true;
-                this.Base = new AnimatedSprite(Tourist.WallyTexture, 0, 20, 34);
-                Tourist.WallyAge = short.MaxValue;
-                Game1.showGlobalMessage("Where's wally...");
+                var special = Select(specials.ToList());
+                this.Special = special.Id;
+                special.IsActive = true;
+                Game1.showGlobalMessage(SundropCityMod.SHelper.Translation.Get("Tourist." + this.Special + ".Enter"));
+                this.Base = new AnimatedSprite(SundropCityMod.SHelper.Content.GetActualAssetKey("assets/Characters/Tourists/Special/" + this.Special + ".png"), 0, 20, 34);
             }
             else
             {
-                if (Tourist.Wally == this)
+                if (this.Special!=null)
                 {
-                    if (Tourist.WallyAge != 0)
+                    if (this.TickAge < short.MaxValue/2)
                         return;
-                    Tourist.Wally = null;
-                    this.IsWally = false;
-                    Game1.showGlobalMessage("Wally has gone home for now...");
+                    var special = Specials.First(_ => _.Id.Equals(this.Special));
+                    special.IsActive = false;
+                    Game1.showGlobalMessage(SundropCityMod.SHelper.Translation.Get("Tourist." + this.Special + ".Leave"));
+                    this.Special = null;
                 }
-
-                this.Base = new AnimatedSprite(BaseColors[Game1.random.Next(BaseColors.Count)], 0, 20, 34);
-                this.HairColor = HairColors[Game1.random.Next(HairColors.Length)];
-                this.PantsColor = ClothingColors[Game1.random.Next(ClothingColors.Length)];
-                this.ShoeColor = ClothingColors[Game1.random.Next(ClothingColors.Length)];
                 bool isFemale = Game1.random.NextDouble() < 0.5;
-                if (isFemale)
+                Dictionary<string, List<string>> parts = isFemale ? Parts[Game1.currentSeason].Female : Parts[Game1.currentSeason].Male;
+                this.Base = new AnimatedSprite(Select(parts["Body"]), 0, 20, 34);
+                string shirt = Select(parts["Top"]);
+                this.Shirt = new AnimatedSprite(shirt, 0, 20, 34);
+                this.ShirtColor = PartVariables(shirt)[2] == 'c' ? Select(ClothingColors) : Color.White;
+                string pants = Select(parts["Bottom"]);
+                this.Pants = new AnimatedSprite(pants, 0, 20, 34);
+                this.PantsColor = PartVariables(pants)[2] == 'c' ? Color.White : Select(ClothingColors);
+                string shoes = Select(parts["Shoe"]);
+                this.Shoes = new AnimatedSprite(shoes, 0, 20, 34);
+                this.ShoeColor = PartVariables(shoes)[2] == 'c' ? Color.White : Select(ClothingColors);
+                string hat = null;
+                if (Game1.random.NextDouble() < 0.5)
                 {
-                    this.Makeup = new AnimatedSprite(FemaleMakeup, 0, 20, 34);
-                    this.Shirt = new AnimatedSprite(FemaleShirt[Game1.random.Next(FemaleShirt.Count)], 0, 20, 34);
-                    this.Pants = new AnimatedSprite(FemalePants[Game1.random.Next(FemalePants.Count)], 0, 20, 34);
-                    this.Shoes = new AnimatedSprite(FemaleShoes[Game1.random.Next(FemaleShoes.Count)], 0, 20, 34);
-                    int hat = Game1.random.Next(FemaleHat.Count * 3);
-                    if (hat < FemaleHat.Count)
-                    {
-                        string hatKey = FemaleHat[hat];
-                        this.Hat = new AnimatedSprite(hatKey, 0, 20, 34);
-                        string hatName = Path.GetFileNameWithoutExtension(hatKey) ?? "0";
-                        if (hatName[hatName.Length - 1] != 't')
-                        {
-                            string path = FemaleHair[Game1.random.Next(FemaleHair.Count)];
-                            string ext = Path.GetExtension(path);
-                            string file = path.Substring(0, path.Length - ext?.Length ?? 0) + 'h';
-                            this.Hair = new AnimatedSprite(file + ext, 0, 20, 34);
-                        }
-                    }
-
-                    if (this.Hair == null)
-                        this.Hair = new AnimatedSprite(FemaleHair[Game1.random.Next(FemaleHair.Count)], 0, 20, 34);
-                    int accessory = Game1.random.Next(Tourist.FemaleAccessory.Count * 2);
-                    if (accessory < Tourist.FemaleAccessory.Count)
-                        this.Accessory = new AnimatedSprite(FemaleAccessory[accessory], 0, 20, 34);
+                    hat = Select(parts["Hat"]);
+                    this.Hat = new AnimatedSprite(hat, 0, 20, 34);
+                    this.HatColor = PartVariables(hat)[2] == 'c' || PartVariables(hat)[2] == 'm' ? Select(ClothingColors) : Color.White;
                 }
                 else
+                    this.Hat = null;
+                string hair = Select(parts["Hair"]);
+                if (hat != null && PartVariables(hat)[2] != 's' && PartVariables(hat)[2] != 'm')
                 {
-                    this.Shirt = new AnimatedSprite(MaleShirt[Game1.random.Next(MaleShirt.Count)], 0, 20, 34);
-                    this.Pants = new AnimatedSprite(MalePants[Game1.random.Next(MalePants.Count)], 0, 20, 34);
-                    this.Shoes = new AnimatedSprite(MaleShoes[Game1.random.Next(MaleShoes.Count)], 0, 20, 34);
-                    int beard = Game1.random.Next(FaceHairs.Count * 2);
-                    if (beard < FaceHairs.Count)
-                        this.FaceHair = new AnimatedSprite(FaceHairs[beard], 0, 20, 34);
-                    int hat = Game1.random.Next(MaleHat.Count * 3);
-                    if (hat < MaleHat.Count)
-                    {
-                        string hatKey = MaleHat[hat];
-                        this.Hat = new AnimatedSprite(hatKey, 0, 20, 34);
-                        string hatName = Path.GetFileNameWithoutExtension(hatKey) ?? "0";
-                        if (hatName[hatName.Length - 1] != 't')
-                        {
-                            string path = MaleHair[Game1.random.Next(MaleHair.Count)];
-                            string ext = Path.GetExtension(path);
-                            string file = path.Substring(0, path.Length - ext?.Length ?? 0) + 'h';
-                            this.Hair = new AnimatedSprite(file + ext, 0, 20, 34);
-                        }
-                    }
-
-                    if (this.Hair == null)
-                        this.Hair = new AnimatedSprite(MaleHair[Game1.random.Next(MaleHair.Count)], 0, 20, 34);
-                    int accessory = Game1.random.Next(Tourist.MaleAccessory.Count * 2);
-                    if (accessory < Tourist.MaleAccessory.Count)
-                        this.Accessory = new AnimatedSprite(MaleAccessory[accessory], 0, 20, 34);
+                    string[] hairParts = Path.GetFileNameWithoutExtension(hair).Split('_');
+                    hairParts[1] = hairParts[1].Replace('x', 's');
+                    hair = hair.Replace(Path.GetFileNameWithoutExtension(hair), string.Join("_", hairParts));
                 }
+                this.Hair = new AnimatedSprite(hair, 0, 20, 34);
+                this.HairColor = Select(HairColors);
+                if (isFemale || Game1.random.NextDouble() < 0.334)
+                {
+                    string decoration = Select(parts["Decoration"]);
+                    this.Decoration = new AnimatedSprite(decoration, 0, 20, 34);
+                    this.DecorationColor = PartVariables(decoration)[2] == 'c' ? Select(ClothingColors) : Path.GetFileName(decoration)[2] == 's' ? this.HairColor : Color.White;
+                }
+                else
+                    this.Decoration = null;
+                if (Game1.random.NextDouble() < 0.334)
+                {
+                    string accessory = Select(parts["Accessory"]);
+                    this.Accessory = new AnimatedSprite(accessory, 0, 20, 34);
+                    this.AccessoryColor = PartVariables(accessory)[2] == 'c' ? Select(ClothingColors) : Color.White;
+                }
+                else
+                    this.Accessory = null;
             }
         }
 
@@ -256,7 +347,7 @@ namespace SundropCity
         {
             var validWarps = WarpCache[this.currentLocation.Name];
             var target = validWarps[Game1.random.Next(validWarps.Count)];
-            int dir = Tourist.GetTileIndex(this.currentLocation, (int)target.X, (int)target.Y) - TILE_WARP_DOWN;
+            int dir = GetTileIndex(this.currentLocation, (int)target.X, (int)target.Y) - TILE_WARP_DOWN;
             this.RandomizeLook();
             this.Position = target * 64f;
             this.faceDirection(dir);
@@ -264,20 +355,23 @@ namespace SundropCity
             this.Timer = 10;
             this.Delay = 0;
             this.Stuck = 0;
+            this.TickAge = 0;
             this.Cooldown = byte.MaxValue;
         }
         public override bool isColliding(GameLocation l, Vector2 tile)
         {
-            return Tourist.GetTileIndex(l, (int)tile.X, (int)tile.Y) == TILE_BLOCK;
+            return GetTileIndex(l, (int)tile.X, (int)tile.Y) == TILE_BLOCK;
         }
         public override void update(GameTime time, GameLocation location)
         {
             // Handle vanilla stuffs
             base.update(time, location);
             // Set some default vars
+            if(this.TickAge<short.MaxValue)
+                this.TickAge++;
             var point = this.getTileLocationPoint();
             var backLayer = this.currentLocation.map.GetLayer("Back");
-            int index = Tourist.GetTileIndex(this.currentLocation, point.X, point.Y);
+            int index = GetTileIndex(this.currentLocation, point.X, point.Y);
             // Check if we are in a keep moving region
             if (index == TILE_KEEPMOVING)
             {
@@ -366,15 +460,13 @@ namespace SundropCity
                 this.setMovingInFacingDirection();
             }
             // Check if stuck counter has reached 5 & this NPC is off screen
-            if(this.Stuck>5 && !Utility.isOnScreen(this.Position, 8))
+            if((this.Stuck>5 || this.TickAge==short.MaxValue) && !Utility.isOnScreen(this.Position, 8))
                 this.DoWarp();
             // If this is the master game
             if (Game1.IsMasterGame && this.Base.CurrentAnimation == null)
                 this.MovePosition(time, Game1.viewport, location);
             // We remember our position for the stuck check
             this.OldPos = this.Position;
-            if (this.IsWally && Tourist.WallyAge > 0)
-                Tourist.WallyAge--;
         }
         public override bool hasSpecialCollisionRules()
         {
@@ -394,7 +486,7 @@ namespace SundropCity
                 this.Speed = 2;
                 this.addedSpeed = 0;
                 this.Base?.StopAnimation();
-                this.Makeup?.StopAnimation();
+                this.Decoration?.StopAnimation();
                 this.Hat?.StopAnimation();
                 this.Hair?.StopAnimation();
                 this.Shirt?.StopAnimation();
@@ -409,7 +501,7 @@ namespace SundropCity
                 return;
             this.FacingDirection = direction;
             this.Base?.faceDirection(direction);
-                this.Makeup?.faceDirection(direction);
+                this.Decoration?.faceDirection(direction);
                 this.Hat?.faceDirection(direction);
                 this.Hair?.faceDirection(direction);
                 this.Shirt?.faceDirection(direction);
@@ -420,7 +512,7 @@ namespace SundropCity
         protected void AnimateDown(GameTime time, int interval, string sound)
         {
             this.Base?.AnimateDown(time, interval, sound);
-                this.Makeup?.AnimateDown(time, interval, sound);
+                this.Decoration?.AnimateDown(time, interval, sound);
                 this.Hat?.AnimateDown(time, interval, sound);
                 this.Hair?.AnimateDown(time, interval, sound);
                 this.Shirt?.AnimateDown(time, interval, sound);
@@ -431,7 +523,7 @@ namespace SundropCity
         protected void AnimateUp(GameTime time, int interval, string sound)
         {
             this.Base?.AnimateUp(time, interval, sound);
-                this.Makeup?.AnimateUp(time, interval, sound);
+                this.Decoration?.AnimateUp(time, interval, sound);
                 this.Hat?.AnimateUp(time, interval, sound);
                 this.Hair?.AnimateUp(time, interval, sound);
                 this.Shirt?.AnimateUp(time, interval, sound);
@@ -442,7 +534,7 @@ namespace SundropCity
         protected void AnimateLeft(GameTime time, int interval, string sound)
         {
             this.Base?.AnimateLeft(time, interval, sound);
-                this.Makeup?.AnimateLeft(time, interval, sound);
+                this.Decoration?.AnimateLeft(time, interval, sound);
                 this.Hat?.AnimateLeft(time, interval, sound);
                 this.Hair?.AnimateLeft(time, interval, sound);
                 this.Shirt?.AnimateLeft(time, interval, sound);
@@ -454,7 +546,7 @@ namespace SundropCity
         protected void AnimateRight(GameTime time, int interval, string sound)
         {
             this.Base?.AnimateRight(time, interval, sound);
-                this.Makeup?.AnimateRight(time, interval, sound);
+                this.Decoration?.AnimateRight(time, interval, sound);
                 this.Hat?.AnimateRight(time, interval, sound);
                 this.Hair?.AnimateRight(time, interval, sound);
                 this.Shirt?.AnimateRight(time, interval, sound);
@@ -466,7 +558,7 @@ namespace SundropCity
         protected void AnimateOnce(GameTime time)
         {
             this.Base?.animateOnce(time);
-                this.Makeup?.animateOnce(time);
+                this.Decoration?.animateOnce(time);
                 this.Hat?.animateOnce(time);
                 this.Hair?.animateOnce(time);
                 this.Shirt?.animateOnce(time);
@@ -477,7 +569,6 @@ namespace SundropCity
 
         public override void MovePosition(GameTime time, xTile.Dimensions.Rectangle viewport, GameLocation curLocation)
         {
-            // ReSharper disable twice CompareOfFloatsByEqualityOperator
             if (this.xVelocity != 0f || this.yVelocity != 0f)
                 this.applyVelocity(this.currentLocation);
             else if (this.moveUp)
@@ -561,27 +652,33 @@ namespace SundropCity
             float scaleFloat = Math.Max(0.2f, this.Scale) * 4f;
             var spriteEffects = this.flip || this.Base.CurrentAnimation != null && this.Base.CurrentAnimation[this.Base.currentAnimationIndex].flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
             b.Draw(this.Base.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth);
-            if (this.IsWally)
+            if (this.Special!=null)
                 return;
-            if (this.Makeup != null)
-                b.Draw(this.Makeup.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00001f);
-            b.Draw(this.Shirt.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00002f);
+            if (this.Decoration != null)
+                b.Draw(this.Decoration.Texture, positionVector, this.Base.SourceRect, this.DecorationColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00001f);
+            b.Draw(this.Shirt.Texture, positionVector, this.Base.SourceRect, this.ShirtColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00002f);
             b.Draw(this.Pants.Texture, positionVector, this.Base.SourceRect, this.PantsColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00003f);
             b.Draw(this.Shoes.Texture, positionVector, this.Base.SourceRect, this.ShoeColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00004f);
-            if (this.FaceHair != null)
-                b.Draw(this.FaceHair.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00005f);
             if (this.Accessory != null)
-                b.Draw(this.Accessory.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00006f);
-            b.Draw(this.Hair.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00007f);
+                b.Draw(this.Accessory.Texture, positionVector, this.Base.SourceRect, this.AccessoryColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00005f);
+            b.Draw(this.Hair.Texture, positionVector, this.Base.SourceRect, this.HairColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00006f);
             if (this.Hat != null)
-                b.Draw(this.Hat.Texture, positionVector, this.Base.SourceRect, Color.White * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00008f);
+                b.Draw(this.Hat.Texture, positionVector, this.Base.SourceRect, this.HatColor * alpha, this.rotation, originVector, scaleFloat, spriteEffects, depth + 0.00007f);
         }
 
         public override bool checkAction(Farmer who, GameLocation l)
         {
             if (this.textAboveHeadTimer > 0)
                 return false;
-            this.showTextAboveHead(this.IsWally ? SundropCityMod.SHelper.Translation.Get("Tourist.Wally." + Game1.random.Next(Tourist.WALLY_LINE_COUNT)) : SundropCityMod.SHelper.Translation.Get("Tourist.Lines." + Game1.random.Next(Tourist.TOURIST_LINE_COUNT)));
+            if(this.Special==null)
+            {
+                this.showTextAboveHead(SundropCityMod.SHelper.Translation.Get("Tourist.Lines." + Game1.random.Next(TOURIST_LINE_COUNT)));
+                return true;
+            }
+            var special = Specials.First(_ => _.Id.Equals(this.Special));
+            if (special.Trigger?.Invoke(who) == true)
+                return true;
+            this.showTextAboveHead(SundropCityMod.SHelper.Translation.Get("Tourist." + this.Special + "." + Game1.random.Next(special.Lines)));
             return true;
         }
     }

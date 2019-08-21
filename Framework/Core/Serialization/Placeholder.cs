@@ -32,7 +32,7 @@ namespace Entoarox.Framework.Core.Serialization
         public Placeholder(string id, JToken data)
         {
             if (Placeholder.Icon == null)
-                Placeholder.Icon = EntoaroxFrameworkMod.SHelper.Content.Load<Texture2D>(Path.Combine("Content", "placeholder.png"));
+                Placeholder.Icon = EntoaroxFrameworkMod.SHelper.Content.Load<Texture2D>(Path.Combine("assets", "placeholder.png"));
             this.Id = id;
             this.Data = data;
             this.ItemIcon = Placeholder.Icon;
