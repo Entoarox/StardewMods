@@ -267,7 +267,6 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             try
             {
                 NPC.populateRoutesFromLocationToLocationList();
-                this.VerifyGameIntegrity();
                 this.Monitor.Log("Patches applied!", LogLevel.Debug);
             }
             catch (Exception ex)
@@ -324,39 +323,6 @@ namespace Entoarox.AdvancedLocationLoader.Processing
             }
 
             return true;
-        }
-
-        private void VerifyGameIntegrity()
-        {
-            string[] seasons = { "spring", "summer", "fall", "winter" };
-            foreach (GameLocation loc in Game1.locations)
-            {
-                if (!loc.IsOutdoors || loc.Name.Equals("Desert"))
-                    continue;
-
-                foreach (TileSheet sheet in loc.map.TileSheets)
-                {
-                    string fileName = Path.GetFileName(sheet.ImageSource);
-                    if (fileName.StartsWith("spring_") || fileName.StartsWith("summer_") || fileName.StartsWith("fall_") || fileName.StartsWith("winter_"))
-                    {
-                        string path = Path.GetDirectoryName(sheet.ImageSource);
-                        if (string.IsNullOrWhiteSpace(path))
-                            path = "Maps";
-
-                        foreach (string season in seasons)
-                        {
-                            try
-                            {
-                                Game1.content.Load<Texture2D>(Path.Combine(path, $"{season}_{fileName.Split(new[] { '_' }, 2)[1]}"));
-                            }
-                            catch
-                            {
-                                this.Monitor.ExitGameImmediately($"The `{sheet.Id}` (`{sheet.ImageSource}`) tileSheet in the `{loc.Name}` location is seasonal, but ALL can't find the tilesheet for the `{season}` season. This will cause bugs!");
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }

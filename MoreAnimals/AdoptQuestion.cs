@@ -81,7 +81,7 @@ namespace Entoarox.MorePetsAndAnimals
             Game1.currentLocation.lastQuestionKey = "AdoptPetQuestion";
             Game1.currentLocation.createQuestionDialogue(
                 ModEntry.SHelper.Translation.Get("AdoptMessage", new { petType = type, adoptionPrice = ModEntry.Config.AdoptionPrice }),
-                Game1.player.money < ModEntry.Config.AdoptionPrice
+                Game1.player.Money < ModEntry.Config.AdoptionPrice
                     ? new[]
                     {
                         new Response("n", ModEntry.SHelper.Translation.Get("AdoptNoGold", new { adoptionPrice = ModEntry.Config.AdoptionPrice }))
@@ -123,7 +123,7 @@ namespace Entoarox.MorePetsAndAnimals
             Pet pet;
             this.Who.Money -= ModEntry.Config.AdoptionPrice;
             Type type = ModEntry.PetTypes[this.Skin.AnimalType];
-            pet = (Pet)Activator.CreateInstance(type, (int)Game1.player.position.X, (int)Game1.player.position.Y);
+            pet = (Pet)Activator.CreateInstance(type, (int)Game1.player.position.X, (int)Game1.player.position.Y, 0);
             pet.Sprite = new AnimatedSprite(this.Skin.AssetKey, 0, 32, 32);
             pet.Name = petName;
             pet.displayName = petName;

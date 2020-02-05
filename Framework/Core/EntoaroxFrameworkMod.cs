@@ -123,14 +123,16 @@ namespace Entoarox.Framework.Core
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            Serializer = new JsonSerializer();
+            Serializer = new JsonSerializer
+            {
+                Formatting = Formatting.None,
+                /*NullValueHandling = NullValueHandling.Ignore,*/
+                /*DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,*/
+                ContractResolver = new CustomContractResolver()
+            };
             Serializer.Converters.Add(new RectangleConverter());
-            Serializer.Formatting = Formatting.None;
-            Serializer.NullValueHandling = NullValueHandling.Ignore;
-            Serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
-            Serializer.ContractResolver = new ReadonlyContractResolver();
             DeferredAssetHandler typeHandler = new DeferredAssetHandler();
-            helper.Content.AssetEditors.Add(typeHandler);
+            helper.Content.AssetLoaders.Add(typeHandler);
             helper.Content.AssetEditors.Add(typeHandler);
             helper.Content.AssetEditors.Add(new DeferredTypeHandler());
             helper.Content.AssetLoaders.Add(new XnbLoader());
@@ -428,10 +430,10 @@ namespace Entoarox.Framework.Core
                 case "farm_clear":
                     if (EntoaroxFrameworkMod.Verify == null && args.Length == 0)
                     {
-                        EntoaroxFrameworkMod.Verify = new Random().Next().ToString("XXX");
+                        EntoaroxFrameworkMod.Verify = (new Random().Next() % ushort.MaxValue).ToString("X").PadLeft(4, '0');
                         EntoaroxFrameworkMod.Logger.Log($"This will remove all objects, natural and user-made from your farm, use `farm_clear {EntoaroxFrameworkMod.Verify}` to verify that you actually want to do this.", LogLevel.Alert);
                     }
-                    else if (!args[0].Equals(EntoaroxFrameworkMod.Verify))
+                    else if (args.Length==0 || !args[0].Equals(EntoaroxFrameworkMod.Verify))
                     {
                         EntoaroxFrameworkMod.Verify = null;
                         EntoaroxFrameworkMod.Logger.Log("Verification failed, attempt to remove objects has been cancelled.", LogLevel.Error);
@@ -441,6 +443,9 @@ namespace Entoarox.Framework.Core
                         EntoaroxFrameworkMod.Verify = null;
                         Farm farm = Game1.getFarm();
                         farm.objects.Clear();
+                        farm.terrainFeatures.Clear();
+                        farm.largeTerrainFeatures.Clear();
+                        farm.resourceClumps.Clear();
                     }
 
                     break;
@@ -507,25 +512,7 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
-            // read data
-            if (Context.IsMainPlayer)
-            {
-                this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
-                ItemEvents.FireBeforeDeserialize();
-                IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items");
-                if (data == null)
-                {
-                    // read from legacy mod file
-                    FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
-                    if (legacyFile.Exists)
-                        data = JsonConvert.DeserializeObject<Dictionary<string, InstanceState>>(File.ReadAllText(legacyFile.FullName));
-                }
-
-                if (data == null)
-                    data = new Dictionary<string, InstanceState>();
-                this.RestoreItems(data);
-                ItemEvents.FireAfterDeserialize();
-            }
+            this.RestoreSave();
         }
 
         /// <summary>Raised before the game begins writes data to the save file (except the initial save creation).</summary>
@@ -574,34 +561,7 @@ namespace Entoarox.Framework.Core
         /// <param name="e">The event arguments.</param>
         private void OnSaved(object sender, SavedEventArgs e)
         {
-            // delete legacy mod data (migrated into save file by this point)
-            {
-                FileInfo legacyFile = new FileInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework", "CustomItems.json"));
-                if (legacyFile.Exists)
-                    legacyFile.Delete();
-
-                DirectoryInfo legacyDir = new DirectoryInfo(Path.Combine(Constants.CurrentSavePath, "Entoarox.Framework"));
-                if (legacyDir.Exists && !legacyDir.GetFileSystemInfos().Any())
-                    legacyDir.Delete();
-            }
-
-            // read data
-            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
-            ItemEvents.FireBeforeDeserialize();
-            Dictionary<string, Tuple<bool, InstanceState>> locations = this.Helper.Data.ReadSaveData<Dictionary<string, Tuple<bool, InstanceState>>>("custom-locations") ?? new Dictionary<string, Tuple<bool, InstanceState>>();
-            foreach (var location in locations)
-            {
-                if (location.Value.Item1)
-                    return;
-                Game1.locations.Remove(Game1.getLocationFromName(location.Key));
-                Game1.locations.Add(location.Value.Item2.Restore<GameLocation>());
-            }
-            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items") ?? new Dictionary<string, InstanceState>();
-            this.RestoreItems(data);
-            List<Tuple<string, Vector2, InstanceState>> features = this.Helper.Data.ReadSaveData<List<Tuple<string, Vector2, InstanceState>>>("custom-features") ?? new List<Tuple<string, Vector2, InstanceState>>();
-            foreach(var feature in features)
-                Game1.getLocationFromName(feature.Item1)?.terrainFeatures.Add(feature.Item2, feature.Item3.Restore<TerrainFeature>());
-            ItemEvents.FireAfterDeserialize();
+            this.RestoreSave();
         }
         #region Functions
         private IEnumerable<GameLocation> GetAllLocations()
@@ -631,7 +591,7 @@ namespace Entoarox.Framework.Core
             foreach (var dict in items)
                 foreach (var item in dict)
                 {
-                    if (item.Value is ICustomItem)
+                    if (item.Value is ICustomItem && item.Value is SObject sobj)
                     {
                         string id = Guid.NewGuid().ToString();
                         int counter = 0;
@@ -641,16 +601,16 @@ namespace Entoarox.Framework.Core
                             throw new TimeoutException("Unable to assign a GUID to all items!");
                         SObject obj = new SObject()
                         {
-                            Stack = item.Value.getStack(),
+                            Stack = sobj.Stack,
                             ParentSheetIndex = 0,
                             Type = id,
                             Name = "(Entoarox.Framework.ICustomItem)",
-                            Price = item.Value.salePrice(),
+                            Price = sobj.salePrice(),
                         };
-                        if (item.Value is Placeholder pitm)
+                        if (sobj is Placeholder pitm)
                             data.Add(id, new InstanceState(pitm.Id, pitm.Data));
                         else
-                            data.Add(id, new InstanceState(item.GetType().AssemblyQualifiedName, JToken.FromObject(item, Serializer)));
+                            data.Add(id, new InstanceState(sobj.GetType().AssemblyQualifiedName, JToken.FromObject(sobj, Serializer)));
                         items[item.Key] = obj;
                     }
                 }
@@ -664,18 +624,6 @@ namespace Entoarox.Framework.Core
 #pragma warning restore AvoidNetField // Avoid Netcode types when possible
             data.Add(building ? guid : location.Name, new Tuple<bool, InstanceState>(building, new InstanceState(location.GetType().AssemblyQualifiedName, JToken.FromObject(location, Serializer))));
             return output;
-        }
-        private void RestoreItems(IDictionary<string, InstanceState> data)
-        {
-            foreach (GameLocation loc in Game1.locations)
-            {
-                foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
-                    this.Deserialize(data, chest.items);
-            }
-
-            FarmHouse house = (FarmHouse)Game1.getLocationFromName("FarmHouse");
-            this.Deserialize(data, Game1.player.Items);
-            this.Deserialize(data, house.fridge.Value.items);
         }
 
         private void Serialize(IDictionary<string, InstanceState> data, IList<Item> items)
@@ -693,7 +641,7 @@ namespace Entoarox.Framework.Core
                         throw new TimeoutException("Unable to assign a GUID to all items!");
                     SObject obj = new SObject
                     {
-                        Stack = item.getStack(),
+                        Stack = item.Stack,
                         ParentSheetIndex = 0,
                         Type = id,
                         name = "(Entoarox.Framework.ICustomItem)",
@@ -708,9 +656,70 @@ namespace Entoarox.Framework.Core
                 }
             }
         }
+        private void RestoreItems(IDictionary<string, InstanceState> data)
+        {
+            foreach (GameLocation loc in Game1.locations)
+            {
+                foreach (Chest chest in loc.Objects.Values.OfType<Chest>())
+                    this.Deserialize(data, chest.items);
+                this.Deserialize(data, loc.Objects);
+            }
+
+            FarmHouse house = (FarmHouse)Game1.getLocationFromName("FarmHouse");
+            this.Deserialize(data, Game1.player.Items);
+            this.Deserialize(data, house.fridge.Value.items);
+        }
+
+        private void Deserialize(IDictionary<string, InstanceState> data, StardewValley.Network.OverlaidDictionary items)
+        {
+            var trash = new List<Vector2>();
+            foreach(var dict in items)
+                foreach(var item in dict)
+                if (item.Value is SObject obj && obj.name.Equals("(Entoarox.Framework.ICustomItem)"))
+                {
+                        if (data.ContainsKey(obj.Type))
+                        {
+                            string cls = data[obj.Type].Type;
+                            Type type = Type.GetType(cls);
+                            if (type == null)
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item, type does not exist: " + cls, LogLevel.Error);
+                                items[item.Key] = new Placeholder(cls, data[obj.Type].Data);
+                            }
+                            else if (!typeof(Item).IsAssignableFrom(type))
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item, class does not inherit from StardewValley.Item in any form: " + cls, LogLevel.Error);
+                                items[item.Key] = new Placeholder(cls, data[obj.Type].Data);
+                            }
+                            else if (!type.GetInterfaces().Contains(typeof(ICustomItem)))
+                            {
+                                this.Monitor.Log("Unable to deserialize custom item, item class does not implement the ICustomItem interface: " + cls, LogLevel.Error);
+                                items[item.Key] = new Placeholder(cls, data[obj.Type].Data);
+                            }
+                            else
+                                try
+                                {
+                                    items[item.Key] = (SObject)data[obj.Type].Data.ToObject(type, Serializer);
+                                }
+                                catch (Exception err)
+                                {
+                                    this.Monitor.Log("Unable to deserialize custom item of type " + cls + ", unknown error:\n" + err, LogLevel.Error);
+                                    items[item.Key] = new Placeholder(cls, data[obj.Type].Data);
+                                }
+                        }
+                        else
+                        {
+                            this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + obj.Type, LogLevel.Error);
+                            trash.Add(item.Key);
+                        }
+                }
+            foreach (var vector in trash)
+                items.Remove(vector);
+        }
 
         private void Deserialize(IDictionary<string, InstanceState> data, IList<Item> items)
         {
+            var trash = new List<Item>();
             for (int i = 0; i < items.Count; i++)
             {
                 Item item = items[i];
@@ -747,10 +756,39 @@ namespace Entoarox.Framework.Core
                             }
                     }
                     else
+                    {
                         this.Monitor.Log("Unable to deserialize custom item, GUID does not exist: " + obj.Type, LogLevel.Error);
+                        trash.Add(items[i]);
+                    }
                 }
             }
+            foreach (var vector in trash)
+                items.Remove(vector);
         }
+
+        private void RestoreSave()
+        {
+            if (!Context.IsMainPlayer)
+                return;
+            // read data
+            this.Monitor.Log("Unpacking custom objects...", LogLevel.Trace);
+            ItemEvents.FireBeforeDeserialize();
+            Dictionary<string, Tuple<bool, InstanceState>> locations = this.Helper.Data.ReadSaveData<Dictionary<string, Tuple<bool, InstanceState>>>("custom-locations") ?? new Dictionary<string, Tuple<bool, InstanceState>>();
+            foreach (var location in locations)
+            {
+                if (location.Value.Item1)
+                    return;
+                Game1.locations.Remove(Game1.getLocationFromName(location.Key));
+                Game1.locations.Add(location.Value.Item2.Restore<GameLocation>());
+            }
+            IDictionary<string, InstanceState> data = this.Helper.Data.ReadSaveData<Dictionary<string, InstanceState>>("custom-items") ?? new Dictionary<string, InstanceState>();
+            this.RestoreItems(data);
+            List<Tuple<string, Vector2, InstanceState>> features = this.Helper.Data.ReadSaveData<List<Tuple<string, Vector2, InstanceState>>>("custom-features") ?? new List<Tuple<string, Vector2, InstanceState>>();
+            foreach (var feature in features)
+                Game1.getLocationFromName(feature.Item1)?.terrainFeatures.Add(feature.Item2, feature.Item3.Restore<TerrainFeature>());
+            ItemEvents.FireAfterDeserialize();
+        }
+
         #endregion functions
         /****
         ** Serializer

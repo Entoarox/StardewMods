@@ -1,7 +1,7 @@
 {
   "Name": "Custom Paths",
   "Author": "Entoarox",
-  "Version": "1.2.1-beta.0",
+  "Version": "1.2.4",
   "Description": "Enables adding custom paths to the game using Content Packs!",
   "UniqueID": "Entoarox.CustomPaths",
   "EntryDll": "CustomPaths.dll",

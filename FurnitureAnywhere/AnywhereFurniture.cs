@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Objects;
 
+using Entoarox.Framework;
+
 namespace Entoarox.FurnitureAnywhere
 {
-    public class AnywhereFurniture : Furniture
+    public class AnywhereFurniture : Furniture, ICustomItem
     {
         /*********
         ** Public methods
@@ -157,17 +159,26 @@ namespace Entoarox.FurnitureAnywhere
 
         public override bool clicked(Farmer who)
         {
-            Game1.haltAfterCheck = false;
-            if (this.furniture_type.Value == 11 && who.ActiveObject != null && this.heldObject.Value == null)
-                return false;
-            if (this.heldObject.Value == null && !(who.ActiveObject is Furniture))
-                return who.addItemToInventoryBool(this.Revert());
-            if (this.heldObject.Value == null || !who.addItemToInventoryBool(this.heldObject.Value))
-                return false;
-            this.heldObject.Value.performRemoveAction(this.TileLocation, who.currentLocation);
-            this.heldObject.Value = null;
-            Game1.playSound("coin");
-            return true;
+            try
+            {
+                Game1.haltAfterCheck = false;
+                if (this.furniture_type.Value == 11 && who.ActiveObject != null && this.heldObject.Value == null)
+                    return false;
+                if (this.heldObject.Value == null && !(who.ActiveObject is Furniture))
+                    return who.addItemToInventoryBool(this.Revert());
+                if (this.heldObject.Value == null || !who.addItemToInventoryBool(this.heldObject.Value))
+                    return false;
+                this.heldObject.Value.performRemoveAction(this.TileLocation, who.currentLocation);
+                this.heldObject.Value = null;
+                Game1.playSound("coin");
+                return true;
+            }
+            catch
+            {
+                Game1.showRedMessage("Broken furniture detected, deleting...");
+                Game1.currentLocation.objects.Remove(this.TileLocation);
+                return true;
+            }
         }
     }
 }

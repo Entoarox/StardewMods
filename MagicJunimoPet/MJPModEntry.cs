@@ -89,6 +89,8 @@ namespace MagicJunimoPet
         }
         private void OnSaving(object s, EventArgs e)
         {
+            if (Junimo == null)
+                return;
             if(!Junimo.currentLocation.Name.Equals("Farm"))
                 Game1.warpCharacter(Junimo, Game1.getFarm(), new Vector2(54f, 8f));
             foreach(GameLocation loc in Game1.locations)

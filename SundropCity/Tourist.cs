@@ -59,6 +59,7 @@ namespace SundropCity
         internal short TickAge;
         internal string Special;
         protected Vector2 OldPos;
+        protected byte Skip = 0;
 
         internal static Dictionary<string, TouristPartsGroup> Parts = new Dictionary<string, TouristPartsGroup>()
         {
@@ -202,16 +203,31 @@ namespace SundropCity
                 {
                     foreach (string file in Directory.EnumerateFiles(Path.Combine(SundropCityMod.SHelper.DirectoryPath, path, folder)))
                     {
-                        SundropCityMod.SMonitor.Log("Examining file: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Trace);
                         if (!Path.GetExtension(file).Equals(".png"))
                             continue;
                         string vars = PartVariables(file);
                         if (vars.Length < 3)
                             continue;
-                        if (vars[2].Equals('s'))
+                        if (folder.Equals("Hair") && vars[2].Equals('s'))
                             continue;
+                        //SundropCityMod.SMonitor.Log("Mapping file: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Trace);
                         string key = Path.Combine(path, folder, Path.GetFileName(file));
                         SundropCityMod.SHelper.Content.Load<Texture2D>(key);
+                        if (folder.Equals("Hair"))
+                        {
+                            try
+                            {
+                                string[] hairParts = Path.GetFileNameWithoutExtension(key).Split('_');
+                                hairParts[1] = hairParts[1].Replace('x', 's');
+                                string hathair = key.Replace(Path.GetFileNameWithoutExtension(key), string.Join("_", hairParts));
+                                SundropCityMod.SHelper.Content.Load<Texture2D>(hathair);
+                            }
+                            catch
+                            {
+                                SundropCityMod.SMonitor.Log("Missing hat variant for hair texture: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Warn);
+                                continue;
+                            }
+                        }
                         int rarity = vars.Length > 3 ? RARITY_RANGE - Convert.ToInt32(vars[3].ToString(), RARITY_RANGE) : RARITY_RANGE;
                         string[] seasons;
                         int seasonNum = Convert.ToInt32(vars[1].ToString());
@@ -230,25 +246,52 @@ namespace SundropCity
                                 seasons = SeasonsHot;
                                 break;
                             default:
-                                SundropCityMod.SMonitor.Log("Unable to resolve ["+seasonNum+"] as season code from prefix: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Warn);
+                                SundropCityMod.SMonitor.Log("Unable to resolve ("+seasonNum+") as season code from prefix: " + folder + '/' + Path.GetFileName(file), StardewModdingAPI.LogLevel.Warn);
                                 continue;
                         }
                         foreach (string season in Seasons)
                         {
                             var cache = Parts[season];
-                            if (!vars[0].Equals('f'))
-                                for (int c = 0; c < rarity; c++)
-                                    cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
-                            if (!vars[0].Equals('m'))
-                                for (int c = 0; c < rarity; c++)
-                                    cache.Female[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                            switch(vars[0])
+                            {
+                                case 'f':
+                                    for (int c = 0; c < rarity; c++)
+                                        cache.Female[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    break;
+                                case 'm':
+                                    for (int c = 0; c < rarity; c++)
+                                        cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    break;
+                                case 'a':
+                                    for (int c = 0; c < rarity; c++)
+                                    {
+                                        cache.Female[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                        cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    }
+                                    break;
+                                case 'g':
+                                    for (int c = 0; c < rarity; c++)
+                                        cache.Girl[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    break;
+                                case 'b':
+                                    for (int c = 0; c < rarity; c++)
+                                        cache.Boy[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    break;
+                                case 'c':
+                                    for (int c = 0; c < rarity; c++)
+                                    {
+                                        cache.Girl[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                        cache.Boy[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
+                                    }
+                                    break;
+                            }
                         }
                         i++;
                     }
                 }
                 catch(Exception err)
                 {
-                    SundropCityMod.SMonitor.Log("Loading [" + folder +"] tourists parts failed due to error on index ["+i+"].\n"+err, StardewModdingAPI.LogLevel.Error);
+                    SundropCityMod.SMonitor.Log("Loading `" + folder +"` tourists parts failed due to error on index ("+i+").\n"+err, StardewModdingAPI.LogLevel.Error);
                 }
             });
         }
@@ -295,7 +338,8 @@ namespace SundropCity
                     this.Special = null;
                 }
                 bool isFemale = Game1.random.NextDouble() < 0.5;
-                Dictionary<string, List<string>> parts = isFemale ? Parts[Game1.currentSeason].Female : Parts[Game1.currentSeason].Male;
+                bool isChild = false;// Game1.random.NextDouble() < 0.2;
+                Dictionary<string, List<string>> parts = isFemale ? (isChild ? Parts[Game1.currentSeason].Girl : Parts[Game1.currentSeason].Female) : (isChild ? Parts[Game1.currentSeason].Boy : Parts[Game1.currentSeason].Male);
                 this.Base = new AnimatedSprite(Select(parts["Body"]), 0, 20, 34);
                 string shirt = Select(parts["Top"]);
                 this.Shirt = new AnimatedSprite(shirt, 0, 20, 34);
@@ -345,9 +389,25 @@ namespace SundropCity
 
         private void DoWarp()
         {
+            string name = this.currentLocation.Name;
+            if (!WarpCache.ContainsKey(name))
+            {
+                SundropCityMod.SMonitor.Log($"Tourst at {name} failed to warp, current location is not in warp cache.", StardewModdingAPI.LogLevel.Error);
+                return;
+            }
             var validWarps = WarpCache[this.currentLocation.Name];
+            if(validWarps.Count==0)
+            {
+                SundropCityMod.SMonitor.Log("Tourst at {name} failed to warp, current location has no warp points." + this.currentLocation.Name, StardewModdingAPI.LogLevel.Error);
+                return;
+            }
             var target = validWarps[Game1.random.Next(validWarps.Count)];
             int dir = GetTileIndex(this.currentLocation, (int)target.X, (int)target.Y) - TILE_WARP_DOWN;
+            if(dir > 3)
+            {
+                SundropCityMod.SMonitor.Log("Tourst at {name} failed to warp, facing direction out of bounds." + this.currentLocation.Name, StardewModdingAPI.LogLevel.Error);
+                return;
+            }
             this.RandomizeLook();
             this.Position = target * 64f;
             this.faceDirection(dir);
@@ -366,6 +426,14 @@ namespace SundropCity
         {
             // Handle vanilla stuffs
             base.update(time, location);
+            if (this.currentLocation.farmers.Count==0)
+                return;
+            if(!Utility.isOnScreen(this.Position, 8))
+            {
+                this.Skip++;
+                if (this.Skip%3 > 0)
+                    return;
+            }
             // Set some default vars
             if(this.TickAge<short.MaxValue)
                 this.TickAge++;
@@ -386,7 +454,10 @@ namespace SundropCity
                 this.setMovingInFacingDirection();
                 if (this.Delay > 3)
                     if (!Utility.isOnScreen(this.Position, 8))
+                    {
                         this.DoWarp();
+                        return;
+                    }
             }
             // If warp cooldown is active, decrement
             if (this.Cooldown > 0)
@@ -573,7 +644,7 @@ namespace SundropCity
                 this.applyVelocity(this.currentLocation);
             else if (this.moveUp)
             {
-                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(0), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || this.isCharging || !curLocation.isCollidingPosition(this.nextPosition(0), viewport, false, 0, false, this))
                 {
                     this.position.Y -= this.speed + this.addedSpeed;
                     if (!this.ignoreMovementAnimation)
@@ -587,7 +658,7 @@ namespace SundropCity
             }
             else if (this.moveRight)
             {
-                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(1), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || this.isCharging || !curLocation.isCollidingPosition(this.nextPosition(1), viewport, false, 0, false, this))
                 {
                     this.position.X += (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)
@@ -601,7 +672,7 @@ namespace SundropCity
             }
             else if (this.moveDown)
             {
-                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(2), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || this.isCharging || !curLocation.isCollidingPosition(this.nextPosition(2), viewport, false, 0, false, this))
                 {
                     this.position.Y += (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)
@@ -615,7 +686,7 @@ namespace SundropCity
             }
             else if (this.moveLeft)
             {
-                if (curLocation == null || !curLocation.isCollidingPosition(this.nextPosition(3), viewport, false, 0, false, this) || this.isCharging)
+                if (curLocation == null || this.isCharging || !curLocation.isCollidingPosition(this.nextPosition(3), viewport, false, 0, false, this))
                 {
                     this.position.X -= (this.speed + this.addedSpeed);
                     if (!this.ignoreMovementAnimation)

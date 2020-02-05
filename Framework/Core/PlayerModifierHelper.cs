@@ -51,8 +51,9 @@ namespace Entoarox.Framework.Core
             {
                 this.ClearMoveBoost();
                 this.LastMoveBoost = Game1.player.running ? this.Mods.RunSpeed : this.Mods.WalkSpeed;
+                Game1.player.addedSpeed = this.GetVanillaSpeedBoost();
                 if (this.LastMoveBoost != 0)
-                    Game1.player.addedSpeed = this.GetVanillaSpeedBoost() + this.LastMoveBoost;
+                    Game1.player.addedSpeed += this.LastMoveBoost;
             }
 
             // health regen

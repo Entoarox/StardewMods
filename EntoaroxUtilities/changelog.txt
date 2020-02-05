@@ -1,0 +1,29 @@
+0.1.0-internal.3
+- Added missing tools to `sdv.tools`
+- Fixed support for tv's in `sdv.furniture`
+- Fixed support for slingshots in `sdv.weapon`
+- Changed `sdv.artisan` so it should work for items provided through TypeHandlers other then `sdv.object`
+    It loops through all handlers for the given Id, and accepts the first valid match
+- Added 2 new API methods to enable custom TypeHandlers to do what `sdv.artisan` does
+    > string ResolveFirstMatchingTypeId(string id, List<string> excludedTypes = null);
+    > string ResolveFirstMatchingTypeId<TClass>(string id, List<string> excludedTypes = null) where TClass : Item;
+    Second option enables defining a sub-class of Item that the item needs to be assignable to for a match to be valid
+    The returned string is the full TypeId, which can be used with the normal method to get the actual Item instance
+
+0.1.0-internal.4
+- Added support for CustomFarmingRedux machines (`cf.machine`) - if that mod is installed
+- Reorganised code to better separate externals from internals
+- Initial attempt at reverse-lookup implemented, due to how SDV handles items, reverse-lookups can fail.
+    - Reverse-lookup can by default return "unreliable" TypeId's, to disable this behaviour set the strict parameter to `true`
+        (A unreliable TypeId is one which matches in the current session, but may no longer match after loading a new save or restarting the game)
+- Reverse-lookup support for PrismaticTools added
+- Exported Mappings into separate JSON files
+- Changed how reverse-mappings work to improve handling
+- Adding logging to report on TypeId status
+- Mapping for sdv.weapon, sdv.hat and sdv.furniture added.
+- Support for 1.4 Clothing added (Not yet mapped)
+- Added mappings for the 1.4 items in existing mappings
+
+0.1.0-internal.5
+- Added partial mappings for Clothing
+- Implemented a TypeId lookup cache, repeated lookups of the same TypeId should be near instant

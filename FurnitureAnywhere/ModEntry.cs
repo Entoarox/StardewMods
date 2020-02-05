@@ -28,10 +28,10 @@ namespace Entoarox.FurnitureAnywhere
             ItemEvents.ActiveItemChanged += this.MoreEvents_ActiveItemChanged;
             helper.Events.Player.Warped += this.OnWarped;
             helper.Events.Display.MenuChanged += this.OnMenuChanged;
-            helper.Events.GameLoop.Saving += this.OnSaving;
+            //helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
-            this.Helper.Content.RegisterSerializerType<AnywhereFurniture>();
+            //this.Helper.Content.RegisterSerializerType<AnywhereFurniture>();
         }
 
 
@@ -84,7 +84,10 @@ namespace Entoarox.FurnitureAnywhere
         /// <param name="e">The event arguments.</param>
         private void OnMenuChanged(object sender, MenuChangedEventArgs e)
         {
-            this.TriggerItemChangedEvent();
+            if (e.NewMenu != null)
+                this.RestoreVanillaObjects();
+            else
+                this.TriggerItemChangedEvent();
         }
 
         private void TriggerItemChangedEvent()

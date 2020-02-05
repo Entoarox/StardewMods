@@ -31,5 +31,27 @@ namespace SundropCity.Json
             ["Decoration"] = new List<string>(),
             ["Hat"] = new List<string>()
         };
+        public readonly Dictionary<string, List<string>> Boy = new Dictionary<string, List<string>>()
+        {
+            ["Body"] = new List<string>(),
+            ["Top"] = new List<string>(),
+            ["Bottom"] = new List<string>(),
+            ["Shoe"] = new List<string>(),
+            ["Accessory"] = new List<string>(),
+            ["Hair"] = new List<string>(),
+            ["Decoration"] = new List<string>(),
+            ["Hat"] = new List<string>()
+        };
+        public readonly Dictionary<string, List<string>> Girl = new Dictionary<string, List<string>>()
+        {
+            ["Body"] = new List<string>(),
+            ["Top"] = new List<string>(),
+            ["Bottom"] = new List<string>(),
+            ["Shoe"] = new List<string>(),
+            ["Accessory"] = new List<string>(),
+            ["Hair"] = new List<string>(),
+            ["Decoration"] = new List<string>(),
+            ["Hat"] = new List<string>()
+        };
     }
 }

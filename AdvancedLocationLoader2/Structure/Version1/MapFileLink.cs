@@ -8,8 +8,10 @@ namespace Entoarox.AdvancedLocationLoader2.Structure.Version1
 {
     class MapFileLink
     {
+#pragma warning disable CS0649
         public string Conditions;
         public string FilePath;
         public string MapName;
+#pragma warning restore CS0649
     }
 }

@@ -29,9 +29,9 @@ namespace Entoarox.Framework
             this.name = this.Item.Name;
         }
 
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
+        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
-            this.Item.drawInMenu(spriteBatch, location, scaleSize, transparency, layerDepth, false);
+            this.Item.drawInMenu(spriteBatch, location, scaleSize, transparency, layerDepth, StackDrawType.Hide);
             float _scale = 0.5f + scaleSize;
             Game1.drawWithBorder(this.getStackNumber().ToString(), Color.Black, Color.White, location + new Vector2(Game1.tileSize - Game1.tinyFont.MeasureString(this.getStackNumber().ToString()).X * _scale, Game1.tileSize - (float)((double)Game1.tinyFont.MeasureString(this.getStackNumber().ToString()).Y * 3.0f / 4.0f) * _scale), 0.0f, _scale, 1f, true);
         }
@@ -51,9 +51,9 @@ namespace Entoarox.Framework
             return this.MaxStackSize;
         }
 
-        public new bool canStackWith(Item obj)
+        public override bool canStackWith(ISalable other)
         {
-            return obj.canStackWith(this) && obj is StackableShopObject && this.Stack + obj.Stack < this.maximumStackSize();
+            return other.canStackWith(this) && other is StackableShopObject && this.Stack + other.Stack < this.maximumStackSize();
         }
 
         public override string getDescription()

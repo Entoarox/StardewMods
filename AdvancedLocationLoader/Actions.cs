@@ -104,7 +104,7 @@ namespace Entoarox.AdvancedLocationLoader
             {
                 if (!ModEntry.PatchData.Shops.Any(p => p.Name == arguments[0]))
                 {
-                    Game1.activeClickableMenu = new ShopMenu(new List<Item>());
+                    Game1.activeClickableMenu = new ShopMenu(new Dictionary<ISalable, int[]>());
                     ModEntry.Logger.Log("Unable to open shop, shop not found: " + arguments[0], LogLevel.Error);
                 }
                 else
@@ -131,11 +131,10 @@ namespace Entoarox.AdvancedLocationLoader
 
                     if (stock.Count == 0)
                         ModEntry.Logger.Log("No stock: " + arguments[0] + ", if this is intended this message can be ignored.", LogLevel.Warn);
-                    Game1.activeClickableMenu = new ShopMenu(stock)
-                    {
-                        portraitPerson = portrait,
-                        potraitPersonDialogue = shop.Messages[Actions.Random.Next(shop.Messages.Count)]
-                    };
+                    var menu = new ShopMenu(stock.ToDictionary(_ => _ as ISalable, _ => new int[] { _.Stack }));
+                    menu.portraitPerson = portrait;
+                    menu.potraitPersonDialogue = shop.Messages[Actions.Random.Next(shop.Messages.Count)];
+                    Game1.activeClickableMenu = menu;
                 }
             }
             catch (Exception err)

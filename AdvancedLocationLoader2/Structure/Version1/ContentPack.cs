@@ -8,6 +8,7 @@ namespace Entoarox.AdvancedLocationLoader2.Structure.Version1
 {
     class ContentPack
     {
+#pragma warning disable CS0649
         public int Version;
         public string[] Includes=new string[0];
         public MapFileLink[] Locations = new MapFileLink[0];
@@ -16,5 +17,6 @@ namespace Entoarox.AdvancedLocationLoader2.Structure.Version1
         public Patch[] Patches = new Patch[0];
         public TileEdit[] TileEdits = new TileEdit[0];
         public Shop[] Shops = new Shop[0];
+#pragma warning restore CS0649
     }
 }

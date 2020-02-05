@@ -37,6 +37,11 @@ namespace Entoarox.CustomPaths
             return !CustomPathsMod.Map.ContainsKey(this.Id);
         }
 
+        public override bool canStackWith(ISalable other)
+        {
+            return other is CustomPathObject obj && obj.Id == this.Id;
+        }
+
         public override string getCategoryName()
         {
             return "Path";
@@ -112,11 +117,11 @@ namespace Entoarox.CustomPaths
             return true;
         }
 
-        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, bool drawStackNumber, Color color, bool drawShadow)
+        public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
             Texture2D texture = CustomPathsMod.Map[this.Id].GetTexture();
             spriteBatch.Draw(texture, location + new Vector2((int)(Game1.tileSize / 2 * scaleSize), (int)(Game1.tileSize / 2 * scaleSize)), new Rectangle(0, 0, 16, 16), Color.White * transparency, 0f, new Vector2(8f, 8f) * scaleSize, Game1.pixelZoom * scaleSize, SpriteEffects.None, layerDepth);
-            if (drawStackNumber && this.maximumStackSize() > 1 && scaleSize > 0.3 && this.Stack != 2147483647 && this.Stack > 1)
+            if (drawStackNumber != StackDrawType.Hide && this.maximumStackSize() > 1 && scaleSize > 0.3 && this.Stack != 2147483647 && this.Stack > 1)
                 Utility.drawTinyDigits(this.Stack, spriteBatch, location + new Vector2((Game1.tileSize - Utility.getWidthOfTinyDigitString(this.Stack, 3f * scaleSize)) + 3f * scaleSize, Game1.tileSize - 18f * scaleSize + 2f), 3f * scaleSize, 1f, Color.White);
         }
 

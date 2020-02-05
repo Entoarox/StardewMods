@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using xTile;
 using xTile.Layers;
 using xTile.Tiles;
-using xTile.Dimensions;
-using xTile.Display;
 using xTile.ObjectModel;
+
+using ICSharpCode.SharpZipLib.GZip;
 
 namespace Entoarox.TDiffMaker
 {
@@ -32,6 +32,8 @@ namespace Entoarox.TDiffMaker
         AddLayer,
         RemoveLayer,
         ResizeLayer,
+
+        EOF=255
     }
     class Program
     {
@@ -43,11 +45,14 @@ namespace Entoarox.TDiffMaker
             string source = Path.GetFullPath(Console.ReadLine());
             if (Path.GetExtension(source).Equals(string.Empty))
                 source += ".tbin";
-            while (!File.Exists(source))
+            while (!File.Exists(source) || !Path.GetExtension(source).Equals(".tbin"))
             {
                 var memory = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("File not found, please try again.");
+                if (!Path.GetExtension(source).Equals(".tbin"))
+                    Console.WriteLine("File does not have the tbin extension, please try again.");
+                else
+                    Console.WriteLine("File not found, please try again.");
                 Console.ForegroundColor = memory;
                 Console.WriteLine("Source file:");
                 source = Path.GetFullPath(Console.ReadLine());
@@ -62,7 +67,10 @@ namespace Entoarox.TDiffMaker
             {
                 var memory = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("File not found, please try again.");
+                if(!Path.GetExtension(target).Equals(".tbin"))
+                    Console.WriteLine("File does not have the tbin extension, please try again.");
+                else
+                    Console.WriteLine("File not found, please try again.");
                 Console.ForegroundColor = memory;
                 Console.WriteLine("Target file:");
                 target = Path.GetFullPath(Console.ReadLine());
@@ -93,9 +101,10 @@ namespace Entoarox.TDiffMaker
                 Map targetMap = manager.LoadMap(target);
                 Console.WriteLine("Parsing maps, this might take a while...");
                 using (var stream = File.OpenWrite(output))
-                using (var writer = new BinaryWriter(stream))
+                using (var zipStream = new GZipOutputStream(stream))
+                using (var writer = new BinaryWriter(zipStream))
                 {
-                    writer.Write("TDIFF".ToCharArray().Select(_ => (byte)_).ToArray());
+                    writer.Write("TDIFF".ToCharArray());
                     writer.Write((byte)0);
                     // Anything that needs the layers
                     foreach (Layer layer in sourceMap.Layers)
@@ -128,12 +137,12 @@ namespace Entoarox.TDiffMaker
                             for (byte y = 0; y < layer.LayerHeight; y++)
                             {
                                 // Check if we should just completely skip checking this tile
-                                if ((x >= sLayer.LayerWidth || y >= sLayer.LayerHeight || sLayer.Tiles[x, y] == null) && layer.Tiles[x, y] == null)
+                                if (sLayer!=null && (x >= sLayer.LayerWidth || y >= sLayer.LayerHeight || sLayer.Tiles[x, y] == null) && layer.Tiles[x, y] == null)
                                     continue;
                                 // If we should do something with the current tile
-                                if (!AreEqualTiles(sLayer.Tiles[x, y], layer.Tiles[x, y]))
+                                if (sLayer==null || !AreEqualTiles(sLayer.Tiles[x, y], layer.Tiles[x, y]))
                                 {
-                                    if (layer.Tiles[x, y] == null)
+                                    if (sLayer!=null && layer.Tiles[x, y] == null)
                                     {
                                         writer.Write((byte)Actions.RemoveTile);
                                         writer.WriteTiny(layer.Id);
@@ -153,7 +162,7 @@ namespace Entoarox.TDiffMaker
                                         preface.WriteTiny(layer.Id);
                                         preface.Write(x);
                                         preface.Write(y);
-                                        MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer.Tiles[x, y].Properties, layer.Tiles[x, y].Properties);
+                                        MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer?.Tiles[x, y]?.Properties ?? new PropertyCollection(), layer.Tiles[x, y].Properties);
                                     }
                                     else if (layer.Tiles[x, y] is AnimatedTile aTile)
                                     {
@@ -173,7 +182,7 @@ namespace Entoarox.TDiffMaker
                                         preface.WriteTiny(layer.Id);
                                         preface.Write(x);
                                         preface.Write(y);
-                                        MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer.Tiles[x, y].Properties, layer.Tiles[x, y].Properties);
+                                        MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer?.Tiles[x, y]?.Properties ?? new PropertyCollection(), layer.Tiles[x, y].Properties);
                                     }
                                 }
                                 else
@@ -183,13 +192,13 @@ namespace Entoarox.TDiffMaker
                                     preface.WriteTiny(layer.Id);
                                     preface.Write(x);
                                     preface.Write(y);
-                                    MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer.Tiles[x, y].Properties, layer.Tiles[x, y].Properties);
+                                    MapProperties(writer, Actions.RemoveTileProperty, Actions.SetTileProperty, buffer.ToArray(), sLayer?.Tiles[x, y]?.Properties ?? new PropertyCollection(), layer.Tiles[x, y].Properties);
                                 }
                             }
                         var lbuffer = new MemoryStream();
                         var lpreface = new BinaryWriter(lbuffer);
                         lpreface.WriteTiny(layer.Id);
-                        MapProperties(writer, Actions.RemoveLayerProperty, Actions.SetLayerProperty, lbuffer.ToArray(), sLayer.Properties, layer.Properties);
+                        MapProperties(writer, Actions.RemoveLayerProperty, Actions.SetLayerProperty, lbuffer.ToArray(), sLayer?.Properties ?? new PropertyCollection(), layer.Properties);
                     }
                     MapProperties(writer, Actions.RemoveMapProperty, Actions.SetMapProperty, new byte[0], sourceMap.Properties, targetMap.Properties);
                     foreach (var sheet in targetMap.TileSheets)
@@ -210,8 +219,12 @@ namespace Entoarox.TDiffMaker
                             MapProperties(writer, Actions.RemoveTileIndexProperty, Actions.SetTileIndexProperty, tBuffer.ToArray(), sheet.TileIndexProperties[c], sSheet.TileIndexProperties[c]);
                         }
                     }
+                    writer.Write((byte)Actions.EOF);
                 }
-                Console.Write("Parsing complete, tdiff file has been created... Press any key to exit.");
+                var memory = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("Parsing complete, tdiff file has been created!");
+                Console.ForegroundColor = memory;
             }
             catch(Exception err)
             {
@@ -221,8 +234,8 @@ namespace Entoarox.TDiffMaker
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Patching failed, error follows:\n" + err);
                 Console.ForegroundColor = memory;
-                Console.WriteLine("\nPress any key to exit.");
             }
+            Console.WriteLine("\nPress any key to exit.");
             Console.ReadKey();
         }
         private static bool AreEqualTiles(Tile first, Tile second)

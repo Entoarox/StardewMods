@@ -45,7 +45,9 @@ namespace Entoarox.CustomBooks.Menu
             {
                 if (this.Deleting)
                 {
+#pragma warning disable AvoidNetField // Avoid Netcode types when possible
                     Game1.player.items.Filter(a => (a as Book)?.Id.Equals(this.Menu.Id) != true);
+#pragma warning restore AvoidNetField // Avoid Netcode types when possible
                     ModEntry.Shelf.Books.Remove(this.Menu.Id);
                     Game1.playSound("trashcan");
                     this.Menu.exitThisMenu(false);

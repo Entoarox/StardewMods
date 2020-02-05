@@ -10,6 +10,7 @@ namespace SundropCity.Hotel
 {
     class FurnitureInfo
     {
+#pragma warning disable CS0649
         public Rectangle ImageRect;
         public Point TileSize;
         public bool NeedsWall;
@@ -19,5 +20,6 @@ namespace SundropCity.Hotel
         public bool HasSlots;
         public bool Flipped;
         public Point[] Slots;
+#pragma warning restore CS0649
     }
 }

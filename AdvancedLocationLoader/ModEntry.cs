@@ -48,13 +48,13 @@ namespace Entoarox.AdvancedLocationLoader
 
             MoreEvents.ActionTriggered += this.OnActionTriggered;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-            helper.Events.Specialised.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
+            helper.Events.Specialized.UnvalidatedUpdateTicked += this.OnUnvalidatedUpdateTick;
             helper.Events.Player.Warped += this.OnWarped;
 
-            this.Helper.Content.RegisterSerializerType<Greenhouse>();
-            this.Helper.Content.RegisterSerializerType<Sewer>();
-            this.Helper.Content.RegisterSerializerType<Desert>();
-            this.Helper.Content.RegisterSerializerType<DecoratableLocation>();
+            //this.Helper.Content.RegisterSerializerType<Greenhouse>();
+            //this.Helper.Content.RegisterSerializerType<Sewer>();
+            //this.Helper.Content.RegisterSerializerType<Desert>();
+            //this.Helper.Content.RegisterSerializerType<DecoratableLocation>();
         }
 
         internal static void UpdateConditionalEdits()
@@ -125,7 +125,7 @@ namespace Entoarox.AdvancedLocationLoader
             // wait until game loaded
             if (!this.IsSaveLoaded)
                 return;
-            this.Helper.Events.Specialised.UnvalidatedUpdateTicked -= this.OnUnvalidatedUpdateTick;
+            this.Helper.Events.Specialized.UnvalidatedUpdateTicked -= this.OnUnvalidatedUpdateTick;
 
             // apply patcher
             this.Patcher.ApplyPatches(out Compound compoundData);

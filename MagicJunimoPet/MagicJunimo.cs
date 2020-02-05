@@ -177,7 +177,7 @@ namespace MagicJunimoPet
                     case 2:
                         if (this.Sprite.currentFrame != 18 && this.Sprite.CurrentAnimation == null)
                         {
-                            this.initiateCurrentBehavior();
+                            this._OnNewBehavior();
                         }
                         else if (this.Sprite.currentFrame == 18 && Game1.random.NextDouble() < 0.01)
                         {
@@ -246,7 +246,7 @@ namespace MagicJunimoPet
                                 case 0:
                                 case 1:
                                 case 2:
-                                    this.initiateCurrentBehavior();
+                                    this._OnNewBehavior();
                                     break;
                                 case 3:
                                     switch (this.FacingDirection)

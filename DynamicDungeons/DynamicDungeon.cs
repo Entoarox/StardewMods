@@ -24,7 +24,11 @@ namespace Entoarox.DynamicDungeons
         private static readonly Random Random = new Random();
 
         private readonly int Seed;
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649
         private int Time;
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning restore CS0649
 
 
         /*********
@@ -156,22 +160,22 @@ namespace Entoarox.DynamicDungeons
             base.UpdateWhenCurrentLocation(time);
         }
 
-        public override SObject getFish(float millisecondsAfterNibble, int bait, int waterDepth, Farmer who, double baitPotency)
+        public override SObject getFish(float millisecondsAfterNibble, int bait, int waterDepth, Farmer who, double baitPotency, Vector2 bobberTile, string locationName = null)
         {
             return LootHandler.LootTables["Fishing"].GetDrop(this.Seed, (this.Difficulty + baitPotency) / (30 - waterDepth));
         }
 
-        public override string checkForBuriedItem(int xLocation, int yLocation, bool explosion, bool detectOnly)
+        public override string checkForBuriedItem(int xLocation, int yLocation, bool explosion, bool detectOnly, Farmer who)
         {
             if (Game1.random.NextDouble() < 0.15)
                 Game1.createItemDebris(LootHandler.LootTables["Digging"].GetDrop(this.Seed, this.Difficulty / 30), new Vector2(xLocation, yLocation), 1);
             return "";
         }
 
-        public override void monsterDrop(Monster monster, int x, int y)
+        public override void monsterDrop(Monster monster, int x, int y, Farmer who)
         {
             //TODO: Consider implementing custom monster loot?
-            base.monsterDrop(monster, x, y);
+            base.monsterDrop(monster, x, y, who);
         }
 
         public override void draw(SpriteBatch b)
@@ -190,7 +194,7 @@ namespace Entoarox.DynamicDungeons
             return base.isCollidingPosition(position, viewport, isFarmer, damagesFarmer, glider, character);
         }
 
-        public override bool isTileOccupied(Vector2 tileLocation, string characterToIgnore = "")
+        public override bool isTileOccupied(Vector2 tileLocation, string characterToIgnore = "", bool ignoreAllCharacters = false)
         {
             foreach (ResourceClump current in this.ResourceClumps)
                 if (current.occupiesTile((int)tileLocation.X, (int)tileLocation.Y))

@@ -151,21 +151,23 @@ namespace Entoarox.CustomPaths
 
                 if (CustomPathsMod.Map.Any(a => a.Value.Salesman.Equals(shopOwner)))
                 {
-                    IReflectedField<Dictionary<Item, int[]>> refStock = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(Game1.activeClickableMenu, "itemPriceAndStock");
-                    IReflectedField<List<Item>> refSale = this.Helper.Reflection.GetField<List<Item>>(Game1.activeClickableMenu, "forSale");
+                    //IReflectedField<Dictionary<Item, int[]>> refStock = this.Helper.Reflection.GetField<Dictionary<Item, int[]>>(Game1.activeClickableMenu, "itemPriceAndStock");
+                    //IReflectedField<List<Item>> refSale = this.Helper.Reflection.GetField<List<Item>>(Game1.activeClickableMenu, "forSale");
                     this.Monitor.Log("Shop owned by `" + shopOwner + "` gets edited, adding paths", LogLevel.Trace);
-                    Dictionary<Item, int[]> stock = refStock.GetValue();
-                    List<Item> sale = refSale.GetValue();
+                    //Dictionary<Item, int[]> stock = refStock.GetValue();
+                    //List<Item> sale = refSale.GetValue();
                     // Add our custom items to the shop
                     foreach (KeyValuePair<string, CustomPathInfo> item in CustomPathsMod.Map.Where(a => a.Value.Salesman.Equals(shopOwner) && (string.IsNullOrEmpty(a.Value.Requirements) || this.Helper.Conditions().ValidateConditions(a.Value.Requirements))))
                     {
                         CustomPathObject obj = new CustomPathObject(item.Key) { Stack = int.MaxValue };
-                        stock.Add(obj, new[] { item.Value.Price * 2, int.MaxValue });
-                        sale.Add(obj);
+                        //stock.Add(obj, new[] { item.Value.Price * 2, int.MaxValue });
+                        //sale.Add(obj);
+                        menu.itemPriceAndStock.Add(obj, new[] { item.Value.Price * 2, int.MaxValue });
+                        menu.forSale.Add(obj);
                     }
 
-                    refStock.SetValue(stock);
-                    refSale.SetValue(sale);
+                    //refStock.SetValue(stock);
+                    //refSale.SetValue(sale);
                 }
                 else
                 {

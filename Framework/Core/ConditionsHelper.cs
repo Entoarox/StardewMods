@@ -142,7 +142,7 @@ namespace Entoarox.Framework.Core
             this.RegisterConditionResolver("house", (args, resolver) => resolver(args[0], Game1.MasterPlayer.HouseUpgradeLevel.ToString()));
             this.RegisterConditionResolver("farm", (args, resolver) => resolver(args[0], ConditionsHelper.FarmMap[Math.Min(ConditionsHelper.FarmMap.Length - 1, Game1.whichFarm)]));
             this.RegisterConditionResolver("event", (args, resolver) => resolver(args[0], Game1.MasterPlayer.eventsSeen.Select(a => a.ToString()).ToArray()));
-            this.RegisterConditionResolver("money", (args, resolver) => resolver(args[0], Game1.MasterPlayer.money.ToString()));
+            this.RegisterConditionResolver("money", (args, resolver) => resolver(args[0], Game1.MasterPlayer.Money.ToString()));
             this.RegisterConditionResolver("carries", (args, resolver) =>
             {
                 IEnumerable<Item> matches = Game1.MasterPlayer.Items.Where(a => a.Name == args[0]);

@@ -39,10 +39,10 @@ namespace Entoarox.AdvancedLocationLoader
         {
             if (answer == "n")
                 return;
-            if ((this.Conditional.Item == -1 && who.money >= this.Conditional.Amount) || who.hasItemInInventory(this.Conditional.Item, this.Conditional.Amount))
+            if ((this.Conditional.Item == -1 && who.Money >= this.Conditional.Amount) || who.hasItemInInventory(this.Conditional.Item, this.Conditional.Amount))
             {
                 if (this.Conditional.Item == -1)
-                    who.money -= this.Conditional.Amount;
+                    who.Money -= this.Conditional.Amount;
                 else
                     who.removeItemsFromInventory(this.Conditional.Item, this.Conditional.Amount);
                 who.mailReceived.Add("ALLCondition_" + this.Conditional.Name);

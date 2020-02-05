@@ -18,13 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inactive", "Inactive", "{17
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdvancedLocationLoader", "AdvancedLocationLoader\AdvancedLocationLoader.csproj", "{2093F499-7320-41D9-82E2-3D48C225DBEF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdvancedLocationLoader2", "AdvancedLocationLoader2\AdvancedLocationLoader2.csproj", "{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomBooks", "CustomBooks\CustomBooks.csproj", "{4DC6749D-6EBB-402C-8B56-1051384C2B4B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomPaths", "CustomPaths\CustomPaths.csproj", "{07B262A9-699B-4BB8-A412-C7A6E62C947F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DialogueFramework", "DialogueFramework\DialogueFramework.csproj", "{04AB4256-D592-4074-8FA4-8CC2C12555BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicDungeons", "DynamicDungeons\DynamicDungeons.csproj", "{46B6E397-C741-45C7-B753-EE1A098F8A66}"
 EndProject
@@ -56,7 +52,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TDiffPatcherV1R0P0", "DiffP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TDiffMaker", "TDiffMaker\TDiffMaker.csproj", "{9B01CFFB-CFF9-47A1-8115-B698EAFD6A14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntoaroxUtilities", "EntoaroxUtilities\EntoaroxUtilities.csproj", "{62778992-31F3-433A-9405-920EA6254AB5}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -70,12 +71,6 @@ Global
 		{2093F499-7320-41D9-82E2-3D48C225DBEF}.Release|Any CPU.ActiveCfg = Release|x86
 		{2093F499-7320-41D9-82E2-3D48C225DBEF}.Release|x86.ActiveCfg = Release|x86
 		{2093F499-7320-41D9-82E2-3D48C225DBEF}.Release|x86.Build.0 = Release|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Debug|x86.ActiveCfg = Debug|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Debug|x86.Build.0 = Debug|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Release|Any CPU.ActiveCfg = Release|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Release|x86.ActiveCfg = Release|x86
-		{212C70A2-F2CB-4F49-8BB2-7678B0E828A7}.Release|x86.Build.0 = Release|x86
 		{4DC6749D-6EBB-402C-8B56-1051384C2B4B}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{4DC6749D-6EBB-402C-8B56-1051384C2B4B}.Debug|x86.ActiveCfg = Debug|x86
 		{4DC6749D-6EBB-402C-8B56-1051384C2B4B}.Debug|x86.Build.0 = Debug|x86
@@ -88,12 +83,6 @@ Global
 		{07B262A9-699B-4BB8-A412-C7A6E62C947F}.Release|Any CPU.ActiveCfg = Release|x86
 		{07B262A9-699B-4BB8-A412-C7A6E62C947F}.Release|x86.ActiveCfg = Release|x86
 		{07B262A9-699B-4BB8-A412-C7A6E62C947F}.Release|x86.Build.0 = Release|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Debug|x86.ActiveCfg = Debug|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Debug|x86.Build.0 = Debug|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Release|Any CPU.ActiveCfg = Release|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Release|x86.ActiveCfg = Release|x86
-		{04AB4256-D592-4074-8FA4-8CC2C12555BC}.Release|x86.Build.0 = Release|x86
 		{46B6E397-C741-45C7-B753-EE1A098F8A66}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{46B6E397-C741-45C7-B753-EE1A098F8A66}.Debug|x86.ActiveCfg = Debug|x86
 		{46B6E397-C741-45C7-B753-EE1A098F8A66}.Debug|x86.Build.0 = Debug|x86
@@ -188,13 +177,21 @@ Global
 		{9B01CFFB-CFF9-47A1-8115-B698EAFD6A14}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B01CFFB-CFF9-47A1-8115-B698EAFD6A14}.Release|x86.ActiveCfg = Release|Any CPU
 		{9B01CFFB-CFF9-47A1-8115-B698EAFD6A14}.Release|x86.Build.0 = Release|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Debug|x86.Build.0 = Debug|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Release|x86.ActiveCfg = Release|Any CPU
+		{62778992-31F3-433A-9405-920EA6254AB5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{2093F499-7320-41D9-82E2-3D48C225DBEF} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{4DC6749D-6EBB-402C-8B56-1051384C2B4B} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
-		{07B262A9-699B-4BB8-A412-C7A6E62C947F} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{46B6E397-C741-45C7-B753-EE1A098F8A66} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
 		{75F03B32-DB19-4239-9967-D82C9C3365A2} = {819BEEFF-4CCF-4A5A-9B04-05DD857009E6}
 		{EC78598A-BACD-4CF8-A657-1FDD0C9FEC49} = {17A2E74C-37E0-4E64-9F6D-0E7560415BD9}
@@ -203,5 +200,17 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71BE6CBB-13AD-4DAC-8B44-35F22FBE1E8F}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

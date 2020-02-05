@@ -17,10 +17,14 @@ namespace MagicJunimoPet
         public Character Target = null;
         public Dictionary<string, Ability> Abilities;
         public Dictionary<string, Behaviour> Behaviours;
+#pragma warning disable CS0067
         public event Action<SmartPet> OnLevelUp;
+#pragma warning restore CS0067
+#pragma warning disable CS0414
         public string CurrentBehaviour = "Default";
 
         private bool ExperienceDecay = true;
+#pragma warning restore CS0414
 
         public SmartPet(AnimatedSprite sprite, Behaviour defaultBehaviour, Dictionary<string, Ability> defaultAbilities = null, Action<SmartPet> levelCallback=null)
         {
@@ -37,7 +41,7 @@ namespace MagicJunimoPet
         public void ModExperience(int amount)
         {
             this.ExperienceDecay = false;
-            this.friendshipTowardFarmer += amount;
+            this.friendshipTowardFarmer.Value += amount;
         }
         public void AddAbility(Ability ability)
         {

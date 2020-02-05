@@ -11,11 +11,13 @@ namespace SundropCity.Hotel
 {
     abstract class Furniture
     {
+#pragma warning disable CS0649
         public string Type;
         public int Subtype;
         public int Picture;
         public bool IsLit;
         public Furniture[] Slotted;
+#pragma warning disable CS0649
 
         public abstract void Draw(SpriteBatch b);
     }

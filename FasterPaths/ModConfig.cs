@@ -16,6 +16,7 @@ namespace Entoarox.FasterPaths
         public int StoneFloorBoost = 3;
         public int CobblePathBoost = 3;
         public int SteppingStoneBoost = 3;
+        public int BrickFloorBoost = 3;
 
         public int CrystalFloorBoost = 4;
         public int CrystalPathBoost = 4;

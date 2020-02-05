@@ -298,7 +298,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                 this.moving = true;
             }
 
-            if (this.okButton.containsPoint(x, y) && string.IsNullOrEmpty(this.TargetLocation) && Game1.player.money >= this.price && this.blueprints[this.currentBlueprintIndex].doesFarmerHaveEnoughResourcesToBuild())
+            if (this.okButton.containsPoint(x, y) && string.IsNullOrEmpty(this.TargetLocation) && Game1.player.Money >= this.price && this.blueprints[this.currentBlueprintIndex].doesFarmerHaveEnoughResourcesToBuild())
             {
                 Game1.globalFadeToBlack(this.setUpForBuildingPlacement, 0.02f);
                 Game1.playSound("smallSelect");
@@ -486,7 +486,7 @@ namespace Entoarox.AdvancedLocationLoader.Menus
                     Utility.drawTextWithShadow(b, this.price + "g", Game1.dialogueFont, new Vector2((float)(location.X + Game1.tileSize + Game1.pixelZoom - 1.0), location.Y + Game1.pixelZoom * 2), Game1.textColor * 0.25f, 1f, -1f, -1, -1, this.magicalConstruction ? 0.0f : 0.25f, 3);
                 }
 
-                Utility.drawTextWithShadow(b, this.price + "g", Game1.dialogueFont, new Vector2(location.X + Game1.tileSize + Game1.pixelZoom, location.Y + Game1.pixelZoom), Game1.player.money >= this.price ? this.magicalConstruction ? Color.PaleGoldenrod : Game1.textColor : Color.Red, 1f, -1f, -1, -1, this.magicalConstruction ? 0.0f : 0.25f, 3);
+                Utility.drawTextWithShadow(b, this.price + "g", Game1.dialogueFont, new Vector2(location.X + Game1.tileSize + Game1.pixelZoom, location.Y + Game1.pixelZoom), Game1.player.Money >= this.price ? this.magicalConstruction ? Color.PaleGoldenrod : Game1.textColor : Color.Red, 1f, -1f, -1, -1, this.magicalConstruction ? 0.0f : 0.25f, 3);
                 location.X -= Game1.tileSize / 4;
                 location.Y -= Game1.tileSize / 3;
                 foreach (Item obj in this.ingredients)

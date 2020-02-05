@@ -31,7 +31,7 @@ namespace Entoarox.DynamicDungeons
             batch.Draw(Game1.mouseCursors, pos, PaymentPage.ItemBox, Color.White, 0, Vector2.Zero, boxscale, SpriteEffects.None, 0);
             pos.X += 6;
             pos.Y += 6;
-            item.drawInMenu(batch, pos, 1, 1, 0, false);
+            item.drawInMenu(batch, pos, 1, 1, 0, StackDrawType.Hide);
             Utility.drawTextWithShadow(batch, diffEasy, Game1.smallFont, new Vector2(region.X + PaymentPage.ItemBox.Width * boxscale + 4, region.Y + offset + (PaymentPage.ItemBox.Height * boxscale - diffEasyHeight) / 2), Game1.textColor);
 
             offset += PaymentPage.ItemBox.Height * boxscale + 4;
@@ -40,7 +40,7 @@ namespace Entoarox.DynamicDungeons
             batch.Draw(Game1.mouseCursors, pos, PaymentPage.ItemBox, Color.White, 0, Vector2.Zero, boxscale, SpriteEffects.None, 0);
             pos.X += 6;
             pos.Y += 6;
-            item.drawInMenu(batch, pos, 1, 1, 0, false);
+            item.drawInMenu(batch, pos, 1, 1, 0, StackDrawType.Hide);
             Utility.drawTextWithShadow(batch, ModEntry.SHelper.Translation.Get("Difficulty_Medium"), Game1.smallFont, new Vector2(region.X + PaymentPage.ItemBox.Width * boxscale + 4, region.Y + offset + (PaymentPage.ItemBox.Height * boxscale - diffEasyHeight) / 2), Game1.textColor);
 
             offset += PaymentPage.ItemBox.Height * boxscale + 4;
@@ -49,7 +49,7 @@ namespace Entoarox.DynamicDungeons
             batch.Draw(Game1.mouseCursors, pos, PaymentPage.ItemBox, Color.White, 0, Vector2.Zero, boxscale, SpriteEffects.None, 0);
             pos.X += 6;
             pos.Y += 6;
-            item.drawInMenu(batch, pos, 1, 1, 0, false);
+            item.drawInMenu(batch, pos, 1, 1, 0, StackDrawType.Hide);
             Utility.drawTextWithShadow(batch, ModEntry.SHelper.Translation.Get("Difficulty_Hard"), Game1.smallFont, new Vector2(region.X + PaymentPage.ItemBox.Width * boxscale + 4, region.Y + offset + (PaymentPage.ItemBox.Height * boxscale - diffEasyHeight) / 2), Game1.textColor);
         }
     }

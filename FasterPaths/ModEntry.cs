@@ -56,7 +56,8 @@ namespace Entoarox.FasterPaths
                 new PlayerModifier { WalkSpeedModifier = this.Config.WoodPathBoost, RunSpeedModifier = this.Config.WoodPathBoost },
                 new PlayerModifier { WalkSpeedModifier = this.Config.CrystalPathBoost, RunSpeedModifier = this.Config.CrystalPathBoost },
                 new PlayerModifier { WalkSpeedModifier = this.Config.CobblePathBoost, RunSpeedModifier = this.Config.CobblePathBoost },
-                new PlayerModifier { WalkSpeedModifier = this.Config.SteppingStoneBoost, RunSpeedModifier = this.Config.SteppingStoneBoost }
+                new PlayerModifier { WalkSpeedModifier = this.Config.SteppingStoneBoost, RunSpeedModifier = this.Config.SteppingStoneBoost },
+                new PlayerModifier { WalkSpeedModifier = this.Config.BrickFloorBoost, RunSpeedModifier = this.Config.BrickFloorBoost }
             };
             this.Helper.Player().Modifiers.Add(new PlayerModifier { WalkSpeedModifier = this.Config.WalkSpeedBoost, RunSpeedModifier = this.Config.RunSpeedBoost });
         }
@@ -69,7 +70,7 @@ namespace Entoarox.FasterPaths
             if (!Context.IsPlayerFree)
                 return;
             Vector2 pos = Game1.player.getTileLocation();
-            if (Game1.currentLocation.terrainFeatures.TryGetValue(pos, out TerrainFeature terrainFeature) && terrainFeature is Flooring flooring)
+            if (Game1.currentLocation.terrainFeatures.TryGetValue(pos, out TerrainFeature terrainFeature) && terrainFeature is Flooring flooring && flooring.whichFloor.Value >= 0 && flooring.whichFloor.Value < this.Modifiers.Length)
             {
                 PlayerModifier newBoost = this.Modifiers[flooring.whichFloor.Value];
                 if (this.CurrentBoost != null && this.CurrentBoost == newBoost)

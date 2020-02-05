@@ -21,11 +21,7 @@ namespace Entoarox.ShopExpander
         private ModConfig Config;
         private bool EventsActive;
         private byte SkippedTicks;
-        private Dictionary<Item, int[]> ItemPriceAndStock;
-        private List<Item> ForSale;
         private readonly List<string> AffectedShops = new List<string>();
-        private readonly FieldInfo Stock = typeof(ShopMenu).GetField("itemPriceAndStock", BindingFlags.NonPublic | BindingFlags.Instance);
-        private readonly FieldInfo Sale = typeof(ShopMenu).GetField("forSale", BindingFlags.NonPublic | BindingFlags.Instance);
 
 
         /*********
@@ -120,7 +116,7 @@ namespace Entoarox.ShopExpander
         }
 
         // Add a modified "stack" item to the shop
-        private void AddItem(SObject item, string location)
+        private void AddItem(ShopMenu menu, SObject item, string location)
         {
             // Check that makes sure only the items that the current shop is supposed to sell are added
             if (location != item.targetedShop)
@@ -139,14 +135,14 @@ namespace Entoarox.ShopExpander
             {
                 this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=false}", LogLevel.Trace);
                 Item reverted = item.Revert();
-                this.ForSale.Add(reverted);
-                this.ItemPriceAndStock.Add(reverted, new int[2] { reverted.salePrice(), int.MaxValue });
+                menu.forSale.Add(reverted);
+                menu.itemPriceAndStock.Add(reverted, new int[2] { reverted.salePrice(), int.MaxValue });
             }
             else
             {
                 this.Monitor.Log("Item(" + item.Name + ':' + item.stackAmount + '*' + item.maximumStackSize() + "){Location=true,Condition=true,Stack=true}", LogLevel.Trace);
-                this.ForSale.Add(item);
-                this.ItemPriceAndStock.Add(item, new int[2] { item.salePrice(), int.MaxValue });
+                menu.forSale.Add(item);
+                menu.itemPriceAndStock.Add(item, new int[2] { item.salePrice(), int.MaxValue });
             }
         }
 
@@ -216,15 +212,10 @@ namespace Entoarox.ShopExpander
                     // Register to inventory changes so we can immediately replace bought stacks
                     this.EventsActive = true;
                     this.Helper.Events.Player.InventoryChanged += this.OnInventoryChanged;
-                    // Reflect the required fields to be able to edit a shops stock
-                    this.ItemPriceAndStock = (Dictionary<Item, int[]>)this.Stock.GetValue(Game1.activeClickableMenu);
-                    this.ForSale = (List<Item>)this.Sale.GetValue(Game1.activeClickableMenu);
                     // Add our custom items to the shop
                     foreach (string key in ModEntry.AddedObjects.Keys)
-                        this.AddItem(ModEntry.AddedObjects[key], shopOwner);
+                        this.AddItem(menu, ModEntry.AddedObjects[key], shopOwner);
                     // Use reflection to set the changed values
-                    this.Stock.SetValue(Game1.activeClickableMenu, this.ItemPriceAndStock);
-                    this.Sale.SetValue(Game1.activeClickableMenu, this.ForSale);
                 }
                 else
                 {

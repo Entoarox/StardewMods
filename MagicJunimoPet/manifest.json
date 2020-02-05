@@ -1,7 +1,7 @@
 {
   "Name": "Magic Junimo Pet",
   "Author": "Entoarox",
-  "Version": "1.2.1-beta.1",
+  "Version": "1.2.2",
   "Description": "Adds a magic junimo who will come to live on your farm after you finish aiding his family.",
   "UniqueID": "Entoarox.MagicJunimoPet",
   "EntryDll": "MagicJunimoPet.dll",

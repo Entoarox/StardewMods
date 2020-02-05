@@ -1,7 +1,7 @@
 {
   "Name": "Advanced Location Loader",
   "Author": "Entoarox",
-  "Version": "1.5.0",
+  "Version": "1.5.1",
   "Description": "Get your content into stardew without replacing any xnb files.",
   "UniqueID": "Entoarox.AdvancedLocationLoader",
   "EntryDll": "AdvancedLocationLoader.dll",
