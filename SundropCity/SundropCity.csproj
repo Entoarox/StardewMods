@@ -23,6 +23,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiffPatcherV1R0P0\TDiffPatcherV1R0P0.csproj" />
+    <ProjectReference Include="..\EntoaroxUtilities\EntoaroxUtilities.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="changelog.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Import Project="$(SolutionDir)\common.targets" />

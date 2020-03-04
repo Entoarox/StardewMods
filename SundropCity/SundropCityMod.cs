@@ -23,15 +23,16 @@ using xTile.Layers;
 using xTile.ObjectModel;
 using xTile.Tiles;
 
-using Microsoft.Xna.Framework.Media;
-
-using Netcode;
-
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
+using Entoarox.Utilities.Tools;
 
 namespace SundropCity
 {
     using Json;
+    using Internal;
+    using Characters;
+    using Toolbox;
     using Microsoft.Xna.Framework.Audio;
 
     /// <summary>The mod entry class.</summary>
@@ -39,6 +40,10 @@ namespace SundropCity
     {
         internal static IModHelper SHelper;
         internal static IMonitor SMonitor;
+        internal static Config Config;
+        internal static SystemData SystemData;
+        internal static Dictionary<string, CustomFeature[]> AlphaFeatures;
+        internal static SoundEffect Sound;
 
         internal static Dictionary<string, ParkingSpot[]> ParkingSpots = new Dictionary<string, ParkingSpot[]>();
 
@@ -48,13 +53,36 @@ namespace SundropCity
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            this.Monitor.Log("Performing entry....", LogLevel.Debug);
             // Define internals
             SHelper = helper;
             SMonitor = this.Monitor;
+            Config = helper.ReadConfig<Config>();
 #if DEBUG
-            this.TriggerDebugCode();
-#else
-            // We only register content handlers in release builds, debug builds skip this so that SDV can load faster and the debug stuff can be tested quicker
+            Config.DebugFlags |= DebugFlags.Functions;
+#endif
+            this.Monitor.Log("Reading JSON data...", LogLevel.Trace);
+            SystemData = helper.Data.ReadJsonFile<SystemData>("assets/Data/SystemData.json");
+            AlphaFeatures = helper.Data.ReadJsonFile<Dictionary<string, CustomFeature[]>>("assets/Data/AlphaFeatures.json");
+
+
+            this.Monitor.Log("Checking blacklisted files...", LogLevel.Trace);
+            // Handle asset blacklist
+            if (!Config.DebugFlags.HasFlag(DebugFlags.Files))
+                foreach (string file in SystemData.FileBlacklist)
+                {
+                    if (file.Contains("../") || file.Contains("./"))
+                        continue;
+                    string path = Path.Combine(helper.DirectoryPath, "assets", file);
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+
+            // Check if the quickload debug flag is set, if so, skip most of sundrop's loading process so the game loads ASAP
+            if (Config.DebugFlags.HasFlag(DebugFlags.Quickload))
+                return;
+
+            this.Monitor.Log("Registering events...", LogLevel.Trace);
             helper.Content.AssetLoaders.Add(new SundropTreeLoader());
             helper.Content.AssetEditors.Add(new SundropTownEditor());
             // Same with events
@@ -64,9 +92,9 @@ namespace SundropCity
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.Input.ButtonReleased += this.OnButtonReleased;
             helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
-            helper.Events.World.LocationListChanged += this.OnWorldLocationListChanged;
             helper.Events.Player.Warped += this.OnWarped;
-#endif
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+            helper.Events.World.LocationListChanged += this.OnWorldLocationListChanged;
         }
 
         private void TriggerDebugCode()
@@ -225,6 +253,8 @@ namespace SundropCity
             List<Task> tasks = new List<Task>();
             var start = DateTime.Now;
             var helper = this.Helper;
+            /*
+            // Load sounds
             tasks.Add(Task.Run(() =>
             {
                 using (var monitor = new LogBuffer(this.Monitor))
@@ -232,7 +262,7 @@ namespace SundropCity
                     monitor.Log("Initializing sounds...", LogLevel.Trace);
                     try
                     {
-                        //Music = new SoundManager();
+                        Sound = SoundEffect.FromStream(File.OpenRead(Path.Combine(this.Helper.DirectoryPath, "assets", "Sounds", "SundropBeachNight.wav")));
                     }
                     catch (Exception err)
                     {
@@ -240,6 +270,7 @@ namespace SundropCity
                     }
                 }
             }));
+            */
             // Load maps
             tasks.Add(Task.Run(() =>
             {
@@ -258,9 +289,14 @@ namespace SundropCity
                         {
                             monitor.Log("Map found: " + map, LogLevel.Trace);
                             var mapFile = this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
-                            foreach (string prop in new[] { "Light", "Warps" })
+                            foreach (string prop in SystemData.Layers)
                                 if (mapFile.Properties.ContainsKey(prop))
-                                    mapFile.Properties[prop] = mapFile.Properties[prop].ToString().Replace("\n", " ").Replace(";", " ").Replace("  ", " ");
+                                {
+                                    string rep=mapFile.Properties[prop].ToString().Replace("\n", " ").Replace(";", " ").Replace("  ", " ");
+                                    while(rep.Contains("  "))
+                                        rep = rep.Replace("  ", " ");
+                                    mapFile.Properties[prop] = rep;
+                                }
                             foreach (TileSheet sheet in mapFile.TileSheets)
                                 if (sheet.ImageSource.EndsWith(".png"))
                                 {
@@ -377,44 +413,59 @@ namespace SundropCity
             tasks.Add(Task.Run(() =>
             {
                 this.Monitor.Log("Registering commands...", LogLevel.Trace);
-                helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
-                 {
-                     if (args.Length == 0)
-                     {
-                         this.Monitor.Log("Debug command should only be used if you are asked to by a Sundrop developer!", LogLevel.Error);
-                         return;
-                     }
-                     switch (args[0])
-                     {
-                         case "car":
-                             Facing facing = (Facing)Enum.Parse(typeof(Facing), args[1]);
-                             Game1.currentLocation.largeTerrainFeatures.Add(new SundropCar(Game1.player.getTileLocation(), facing));
-                             this.Monitor.Log("Spawned car.", LogLevel.Alert);
-                             break;
-                         case "parking":
-                             this.SpawnCars(Game1.currentLocation, Convert.ToDouble(args[1]));
-                             this.Monitor.Log("Performed car spawning algorithm.", LogLevel.Alert);
-                             break;
-                         case "tourist":
-                             Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
-                             this.Monitor.Log("Spawned ", LogLevel.Alert);
-                             break;
-                         case "touristHorde":
-                             int amount = Convert.ToInt32(args[1]);
-                             var loc = Game1.player.currentLocation;
-                             SundropCityMod.SpawnTourists(loc, amount);
-                             break;
-                         case "code":
-                             this.TriggerDebugCode();
-                             break;
-                         case "warp":
-                             Game1.warpFarmer("Town", 100, 58, 1);
-                             break;
-                         case "hotel":
-                             Game1.activeClickableMenu = new Hotel.Menu();
-                             break;
-                     }
-                 });
+                if (Config.DebugFlags.HasFlag(DebugFlags.Functions))
+                    helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
+                    {
+                         if (args.Length == 0)
+                         {
+                             this.Monitor.Log("Debug command should only be used if you are asked to by a Sundrop developer!", LogLevel.Error);
+                             return;
+                         }
+                         switch (args[0])
+                         {
+                             case "car":
+                                 Facing facing = (Facing)Enum.Parse(typeof(Facing), args[1]);
+                                 Game1.currentLocation.largeTerrainFeatures.Add(new SundropCar(Game1.player.getTileLocation(), facing));
+                                 this.Monitor.Log("Spawned car.", LogLevel.Alert);
+                                 break;
+                             case "parking":
+                                 this.SpawnCars(Game1.currentLocation, Convert.ToDouble(args[1]));
+                                 this.Monitor.Log("Performed car spawning algorithm.", LogLevel.Alert);
+                                 break;
+                             case "tourist":
+                                 Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
+                                 this.Monitor.Log("Spawned ", LogLevel.Alert);
+                                 break;
+                             case "touristHorde":
+                                 int amount = Convert.ToInt32(args[1]);
+                                 var loc = Game1.player.currentLocation;
+                                 SundropCityMod.SpawnTourists(loc, amount);
+                                 break;
+                             case "code":
+                                 this.TriggerDebugCode();
+                                 break;
+                             case "warp":
+                                 Game1.warpFarmer("Town", 100, 58, 1);
+                                 break;
+                             case "hotel":
+                                 Game1.activeClickableMenu = new Hotel.Menu();
+                                 break;
+                             case "music":
+                                 this.Monitor.Log("Playing custom music...", LogLevel.Alert);
+                                 Game1.stopMusicTrack(Game1.MusicContext.Default);
+                                 Sound.Play(1, 1, 1);
+                                 break;
+                             case "report":
+                                 this.Monitor.Log("AudioEngine Wrapper: " + Game1.audioEngine.GetType().Name, LogLevel.Alert);
+                                 this.Monitor.Log("Wrapper Disposed: " + Game1.audioEngine.IsDisposed, LogLevel.Alert);
+                                 this.Monitor.Log("AudioEngine Source: " + Game1.audioEngine.Engine.GetType().Name, LogLevel.Alert);
+                                 this.Monitor.Log("Source Disposed: " + Game1.audioEngine.Engine.IsDisposed, LogLevel.Alert);
+                                 break;
+                            case "map":
+                                this.Monitor.Log("Name of current map: " + Game1.currentLocation.Name, LogLevel.Alert);
+                                break;
+                         }
+                    });
             }));
             Task.WaitAll(tasks.ToArray());
             var end = DateTime.Now;
@@ -454,6 +505,7 @@ namespace SundropCity
             // Report how long EarlySetup took
             var end = DateTime.Now;
             var time = end.Subtract(start);
+            this.OnWorldLocationListChanged(null, null);
             this.Monitor.Log("Early setup took " + time.TotalMilliseconds + " milliseconds.", LogLevel.Debug);
 
             // TEMP STUFF
@@ -463,17 +515,6 @@ namespace SundropCity
             town.warps.Add(new Warp(120, 58, "SundropPromenade", 1, 30, false));
             town.warps.Add(new Warp(120, 59, "SundropPromenade", 1, 31, false));
             town.warps.Add(new Warp(120, 60, "SundropPromenade", 1, 32, false));
-
-            // Lock residential in the 0.2.0 release, it is not release ready
-            if(this.ModManifest.Version.IsOlderThan("0.3.0"))
-            {
-                var layer = Game1.getLocationFromName("SundropShoppingDistrict")?.map.GetLayer("Buildings");
-                if (layer == null)
-                    return;
-                var sheet = Game1.getLocationFromName("SundropShoppingDistrict").map.GetTileSheet("sundropOutdoor");
-                for(int y=47;y<=51;y++)
-                    layer.Tiles[99, y] = new StaticTile(layer, sheet, BlendMode.Additive, 0);
-            }
         }
 
         private void LateSetup()
@@ -561,8 +602,6 @@ namespace SundropCity
                 promenade?.addCharacter(cake);
             }
             SundropCityMod.FixBushes();
-            this.Monitor.Log("Forcing custom layer hooks to reload...");
-            this.OnWorldLocationListChanged(null, null);
             var end = DateTime.Now;
             var time = end.Subtract(start);
             this.Monitor.Log("Late setup took " + time.TotalMilliseconds + " milliseconds, sundrop is now ready for you - enjoy!", LogLevel.Debug);
@@ -644,6 +683,7 @@ namespace SundropCity
                      });
                 });
             }
+            /*
             var layer = location.map.GetLayer("Back");
             var sheet = location.map.TileSheets.FirstOrDefault(_ => _.ImageSource.Contains("SundropPaths.png"));
             if (sheet == null)
@@ -660,6 +700,7 @@ namespace SundropCity
                         layer.Tiles[x, y] = new StaticTile(layer, sheet, BlendMode.Additive, 2);
                 });
             });
+            */
         }
         private void SpawnCars(GameLocation location, double chance)
         {
@@ -683,13 +724,37 @@ namespace SundropCity
         private static void SpawnTourists(GameLocation loc, int amount)
         {
             SundropCityMod.SMonitor.Log("Spawning tourists...", LogLevel.Trace);
+            List<Exception> errs = new List<Exception>();
             if (!Tourist.SpawnCache.ContainsKey(loc.Name))
                 return;
             var validPoints = Tourist.SpawnCache[loc.Name];
-            if (validPoints.Count == 0)
+            if (validPoints.Count < 1)
+            return;
+            SundropCityMod.SMonitor.Log($"Attempting to spawn {amount} tourists across {validPoints.Count} spawning spaces.", LogLevel.Trace);
+            int total = amount;
+            int max = amount * 2;
+            for (int c = 0; c < total; c++)
+            {
+                int n = Game1.random.Next(validPoints.Count);
+                try
+                {
+                    loc.addCharacter(new Tourist(validPoints[n] * 64f));
+                }
+                catch (Exception err)
+                {
+                    if (err is IndexOutOfRangeException)
+                        errs.Add(new AggregateException(new IndexOutOfRangeException("Index out of range with value: " + n), err));
+                    else
+                        errs.Add(err);
+                    if (total < max)
+                        total++;
+                }
+            }
+            if (errs.Count == 0)
                 return;
-            for (int c = 0; c < amount; c++)
-                loc.addCharacter(new Tourist(validPoints[Game1.random.Next(validPoints.Count)] * 64f));
+            SundropCityMod.SMonitor.Log("Encountered one or more errors while spawning tourists:", LogLevel.Warn);
+            foreach (var err in errs)
+                SundropCityMod.SMonitor.Log(err.ToString(), LogLevel.Warn);
         }
 
         private void OnButtonReleased(object sender, ButtonReleasedEventArgs e)
@@ -735,17 +800,14 @@ namespace SundropCity
         {
             foreach (var location in Game1.locations.Where(_ => _.map.Properties.ContainsKey("IsSundropLocation")).ToArray())
             {
-                if (location.largeTerrainFeatures.Any(_ => _ is SundropCar))
-                    foreach (LargeTerrainFeature car in location.largeTerrainFeatures.Where(_ => _ is SundropCar).ToArray())
+                if (location.largeTerrainFeatures.Any(_ => _ is ISundropTransient))
+                    foreach (LargeTerrainFeature car in location.largeTerrainFeatures.Where(_ => _ is ISundropTransient).ToArray())
                         location.largeTerrainFeatures.Remove(car);
-                if (location.terrainFeatures.Pairs.Any(_ => _.Value is SundropGrass))
-                    foreach (var feature in location.terrainFeatures.Pairs.Where(_ => _.Value is SundropGrass).Select(_ => _.Key).ToArray())
+                if (location.terrainFeatures.Pairs.Any(_ => _.Value is ISundropTransient))
+                    foreach (var feature in location.terrainFeatures.Pairs.Where(_ => _.Value is ISundropTransient).Select(_ => _.Key).ToArray())
                         location.terrainFeatures.Remove(feature);
-                if (location.characters.Any(_ => _ is Tourist))
-                    foreach (var character in location.characters.Where(_ => _ is Tourist).ToArray())
-                        location.characters.Remove(character);
-                if (location.characters.Any(_ => _ is MrCake))
-                    foreach (var character in location.characters.Where(_ => _ is MrCake).ToArray())
+                if (location.characters.Any(_ => _ is ISundropTransient))
+                    foreach (var character in location.characters.Where(_ => _ is ISundropTransient).ToArray())
                         location.characters.Remove(character);
                 if (location.characters.Any(_ => _.DefaultMap.StartsWith("Sundrop")))
                     foreach (var character in location.characters.Where(_ => _.DefaultMap.StartsWith("Sundrop")).ToArray())
@@ -776,56 +838,43 @@ namespace SundropCity
         }
         private void OnWorldLocationListChanged(object s, EventArgs e)
         {
-            this.Monitor.Log("LocationList changed, resetting custom layer hooks.");
+            this.Monitor.Log("Injecting AlphaFeature support...");
             Parallel.ForEach(Game1.locations, location =>
             {
-                var strs = new List<string>();
-                if (location.map.GetLayer("FarBack") != null || location.map.GetLayer("MidBack") != null)
+                if (!AlphaFeatures.ContainsKey(location.Name))
+                    return;
+                location.map.GetLayer("Front").BeforeDraw -= this.DrawBuildingFeatures;
+                location.map.GetLayer("Front").BeforeDraw += this.DrawBuildingFeatures;
+                if (location.map.GetLayer("AlwaysFront") != null)
                 {
-                    strs.Add("FarBack/MidBack");
-                    location.map.GetLayer("Back").BeforeDraw -= this.DrawExtraLayers1;
-                    location.map.GetLayer("Back").BeforeDraw += this.DrawExtraLayers1;
+                    location.map.GetLayer("AlwaysFront").BeforeDraw -= this.DrawAlwaysFrontFeatures;
+                    location.map.GetLayer("AlwaysFront").BeforeDraw += this.DrawAlwaysFrontFeatures;
                 }
-                if (location.map.GetLayer("Shadows") != null)
-                {
-                    strs.Add("Shadows");
-                    location.map.GetLayer("Back").AfterDraw -= this.DrawExtraLayers4;
-                    location.map.GetLayer("Back").AfterDraw += this.DrawExtraLayers4;
-                }
-                if (location.map.GetLayer("LowFront") != null)
-                {
-                    strs.Add("LowFront");
-                    location.map.GetLayer("Front").BeforeDraw -= this.DrawExtraLayers2;
-                    location.map.GetLayer("Front").BeforeDraw += this.DrawExtraLayers2;
-                }
-                if (location.map.GetLayer("AlwaysFront2") != null)
-                {
-                    strs.Add("AlwaysFront2");
-                    location.map.GetLayer("AlwaysFront").AfterDraw -= this.DrawExtraLayers3;
-                    location.map.GetLayer("AlwaysFront").AfterDraw += this.DrawExtraLayers3;
-                }
-                if(strs.Count>0)
-                    this.Monitor.Log("Location: " + location.Name + " (" + string.Join(", ", strs) + ")");
             });
-            this.Monitor.Log("Custom hooks have been reset.");
+            this.Monitor.Log("Custom hooks have been injected.");
         }
 
-        private void DrawExtraLayers1(object s, LayerEventArgs e)
+        private void OnRenderedWorld(object s, EventArgs e)
         {
-            Game1.currentLocation.map.GetLayer("FarBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
-            Game1.currentLocation.map.GetLayer("MidBack")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+            if (!AlphaFeatures.ContainsKey(Game1.currentLocation?.Name))
+                return;
+            if (Game1.currentLocation.map.GetLayer("AlwaysFront") == null)
+                this.DrawAlwaysFrontFeatures(null, null);
+            foreach (var feature in AlphaFeatures[Game1.currentLocation.Name].Where(_ => _.Type == FeatureType.AboveAlwaysFront))
+                feature.Render(Game1.spriteBatch);
         }
-        private void DrawExtraLayers2(object s, LayerEventArgs e)
+        private void DrawBuildingFeatures(object s, LayerEventArgs e)
         {
+            if (AlphaFeatures.ContainsKey(Game1.currentLocation?.Name))
+                foreach (var feature in AlphaFeatures[Game1.currentLocation.Name].Where(_ => _.Type == FeatureType.Inline))
+                feature.Render(Game1.spriteBatch);
             Game1.currentLocation.map.GetLayer("LowFront")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
         }
-        private void DrawExtraLayers3(object s, LayerEventArgs e)
+        private void DrawAlwaysFrontFeatures(object s, LayerEventArgs e)
         {
-            Game1.currentLocation.map.GetLayer("AlwaysFront2")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
-        }
-        private void DrawExtraLayers4(object s, LayerEventArgs e)
-        {
-            Game1.currentLocation.map.GetLayer("Shadows")?.Draw(Game1.mapDisplayDevice, Game1.viewport, Location.Origin, false, 4);
+            if (AlphaFeatures.ContainsKey(Game1.currentLocation?.Name))
+                foreach (var feature in AlphaFeatures[Game1.currentLocation.Name].Where(_ => _.Type == FeatureType.BelowAlwaysFront))
+                    feature.Render(Game1.spriteBatch);
         }
     }
 }

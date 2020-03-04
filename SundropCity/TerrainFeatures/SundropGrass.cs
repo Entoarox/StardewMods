@@ -4,7 +4,7 @@ using StardewValley;
 
 namespace SundropCity.TerrainFeatures
 {
-    class SundropGrass : StardewValley.TerrainFeatures.Grass
+    class SundropGrass : StardewValley.TerrainFeatures.Grass, Internal.ISundropTransient
     {
         public SundropGrass() : base()
         {

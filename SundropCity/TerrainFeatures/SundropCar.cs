@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,7 +11,8 @@ using StardewValley.TerrainFeatures;
 namespace SundropCity.TerrainFeatures
 {
     using Json;
-    class SundropCar : LargeTerrainFeature
+    using Toolbox;
+    class SundropCar : LargeTerrainFeature, Internal.ISundropTransient
     {
         private readonly bool Mirror;
         private readonly Facing Facing;

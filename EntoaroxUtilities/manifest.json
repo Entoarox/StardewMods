@@ -1,10 +1,10 @@
 {
     "Name": "Entoarox Modding Utilities",
     "Author": "Entoarox",
-    "Version": "0.1.0-internal.5",
+    "Version": "0.1.0",
     "Description": "Contains utilities to help make modding easier and provide cross-mod support for common things.",
     "UniqueID": "Entoarox.Utilities",
-    "MinimumApiVersion": "2.11.3",
+    "MinimumApiVersion": "3.0.0",
     "EntryDll": "EntoaroxUtilities.dll",
-    "UpdateKeys": [ "nexus:0" ]
+    "UpdateKeys": [ "nexus:5521" ]
 }
