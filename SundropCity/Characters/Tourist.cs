@@ -262,14 +262,13 @@ namespace SundropCity.Characters
                                     for (int c = 0; c < rarity; c++)
                                         cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
                                     break;
-                                case 'g':
+                                case 'a':
                                     for (int c = 0; c < rarity; c++)
                                     {
                                         cache.Female[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
                                         cache.Male[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
                                     }
                                     break;
-                                /*
                                 case 'g':
                                     for (int c = 0; c < rarity; c++)
                                         cache.Girl[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
@@ -285,7 +284,6 @@ namespace SundropCity.Characters
                                         cache.Boy[folder].Add(SundropCityMod.SHelper.Content.GetActualAssetKey(key));
                                     }
                                     break;
-                                */
                             }
                         }
                         i++;

@@ -43,7 +43,9 @@ namespace SundropCity
         internal static Config Config;
         internal static SystemData SystemData;
         internal static Dictionary<string, CustomFeature[]> AlphaFeatures;
+#if !DISABLE_SOUND
         internal static SoundEffect Sound;
+#endif
 
         internal static Dictionary<string, ParkingSpot[]> ParkingSpots = new Dictionary<string, ParkingSpot[]>();
 
@@ -82,10 +84,10 @@ namespace SundropCity
             if (Config.DebugFlags.HasFlag(DebugFlags.Quickload))
                 return;
 
-            this.Monitor.Log("Registering events...", LogLevel.Trace);
+            this.Monitor.Log("Registering asset managers...", LogLevel.Trace);
             helper.Content.AssetLoaders.Add(new SundropTreeLoader());
             helper.Content.AssetEditors.Add(new SundropTownEditor());
-            // Same with events
+            this.Monitor.Log("Registering events...", LogLevel.Trace);
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saved += this.OnSaved;
@@ -253,7 +255,7 @@ namespace SundropCity
             List<Task> tasks = new List<Task>();
             var start = DateTime.Now;
             var helper = this.Helper;
-            /*
+#if !DISABLE_SOUND
             // Load sounds
             tasks.Add(Task.Run(() =>
             {
@@ -270,7 +272,7 @@ namespace SundropCity
                     }
                 }
             }));
-            */
+#endif
             // Load maps
             tasks.Add(Task.Run(() =>
             {
@@ -416,55 +418,60 @@ namespace SundropCity
                 if (Config.DebugFlags.HasFlag(DebugFlags.Functions))
                     helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
                     {
-                         if (args.Length == 0)
-                         {
-                             this.Monitor.Log("Debug command should only be used if you are asked to by a Sundrop developer!", LogLevel.Error);
-                             return;
-                         }
-                         switch (args[0])
-                         {
-                             case "car":
-                                 Facing facing = (Facing)Enum.Parse(typeof(Facing), args[1]);
-                                 Game1.currentLocation.largeTerrainFeatures.Add(new SundropCar(Game1.player.getTileLocation(), facing));
-                                 this.Monitor.Log("Spawned car.", LogLevel.Alert);
-                                 break;
-                             case "parking":
-                                 this.SpawnCars(Game1.currentLocation, Convert.ToDouble(args[1]));
-                                 this.Monitor.Log("Performed car spawning algorithm.", LogLevel.Alert);
-                                 break;
-                             case "tourist":
-                                 Game1.player.currentLocation.addCharacter(new Tourist(Utility.getRandomAdjacentOpenTile(Game1.player.getTileLocation(), Game1.player.currentLocation) * 64));
-                                 this.Monitor.Log("Spawned ", LogLevel.Alert);
-                                 break;
-                             case "touristHorde":
-                                 int amount = Convert.ToInt32(args[1]);
-                                 var loc = Game1.player.currentLocation;
-                                 SundropCityMod.SpawnTourists(loc, amount);
-                                 break;
-                             case "code":
-                                 this.TriggerDebugCode();
-                                 break;
-                             case "warp":
-                                 Game1.warpFarmer("Town", 100, 58, 1);
-                                 break;
-                             case "hotel":
-                                 Game1.activeClickableMenu = new Hotel.Menu();
-                                 break;
-                             case "music":
+                        if (args.Length == 0)
+                        {
+                            this.Monitor.Log("Debug command should only be used if you are asked to by a Sundrop developer!", LogLevel.Error);
+                            return;
+                        }
+                        switch (args[0])
+                        {
+                            case "tourists":
+                                SundropCityMod.SpawnTourists(Game1.player.currentLocation, Convert.ToInt32(args[1]));
+                                this.Monitor.Log("Executed tourist spawning algorithm.", LogLevel.Alert);
+                                break;
+                            case "code":
+                                this.TriggerDebugCode();
+                                this.Monitor.Log("Debug code triggered.", LogLevel.Alert);
+                                break;
+                            case "warp":
+                                if (args.Length == 1)
+                                    Game1.warpFarmer("Town", 100, 58, 1);
+                                else
+                                {
+                                    if (Game1.getLocationFromName(args[1]) == null)
+                                    {
+                                        this.Monitor.Log("Unable to warp, target destination does not exist.", LogLevel.Error);
+                                        break;
+                                    }
+                                    Game1.warpFarmer(args[1], Convert.ToSByte(args[2]) + 64, Convert.ToSByte(args[3]) + 64, false);
+                                }
+                                this.Monitor.Log("Warping player to target.", LogLevel.Alert);
+                                break;
+                            case "hotelMenu":
+                                Game1.activeClickableMenu = new Hotel.Menu();
+                                this.Monitor.Log("Menu for hotel triggered.", LogLevel.Alert);
+                                break;
+#if !DISABLE_SOUND
+                            case "playSound":
                                  this.Monitor.Log("Playing custom music...", LogLevel.Alert);
                                  Game1.stopMusicTrack(Game1.MusicContext.Default);
                                  Sound.Play(1, 1, 1);
                                  break;
-                             case "report":
+                             case "reportSound":
                                  this.Monitor.Log("AudioEngine Wrapper: " + Game1.audioEngine.GetType().Name, LogLevel.Alert);
                                  this.Monitor.Log("Wrapper Disposed: " + Game1.audioEngine.IsDisposed, LogLevel.Alert);
                                  this.Monitor.Log("AudioEngine Source: " + Game1.audioEngine.Engine.GetType().Name, LogLevel.Alert);
                                  this.Monitor.Log("Source Disposed: " + Game1.audioEngine.Engine.IsDisposed, LogLevel.Alert);
                                  break;
+#endif
                             case "map":
                                 this.Monitor.Log("Name of current map: " + Game1.currentLocation.Name, LogLevel.Alert);
                                 break;
-                         }
+                            case "position":
+                                var p = Game1.player.getTileLocationPoint();
+                                this.Monitor.Log($"Current tile position: {p.X}x {p.Y}y", LogLevel.Alert);
+                                break;
+                        }
                     });
             }));
             Task.WaitAll(tasks.ToArray());
@@ -623,35 +630,6 @@ namespace SundropCity
             }
             SundropCityMod.SMonitor.Log("Removed (" + bushes + ") bushes that are in the way.", LogLevel.Trace);
         }
-
-        private void LoadTouristParts(string root, string relative, string folder, List<string> male, List<string> female)
-        {
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(root, relative, folder)))
-            {
-                string ext = Path.GetExtension(file);
-                if (ext==null || !ext.Equals(".png"))
-                    continue;
-                string part = Path.GetFileNameWithoutExtension(file);
-                if (part == null || part[part.Length-1]=='h')
-                    continue;
-                string path = Path.Combine(relative, folder, part + ext);
-                string key = this.Helper.Content.GetActualAssetKey(path);
-                this.Helper.Content.Load<Texture2D>(path);
-                switch (part[0])
-                {
-                    case 'f':
-                        female.Add(key);
-                        break;
-                    case 'm':
-                        male.Add(key);
-                        break;
-                    case 'g':
-                        female.Add(key);
-                        male.Add(key);
-                        break;
-                }
-            }
-        }
         private void SetupLocation(GameLocation location)
         {
             if (!location.map.Properties.ContainsKey("IsSundropLocation"))
@@ -776,6 +754,9 @@ namespace SundropCity
                     {
                         case "SundropMessage":
                             Game1.drawDialogueNoTyping(this.Helper.Translation.Get(args[0]));
+                            break;
+                        case "SundropTravel":
+                            TravelManager.Instance.Trigger(args[0]);
                             break;
                     }
                 }

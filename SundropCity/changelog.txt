@@ -15,3 +15,6 @@
 
 0.3.2-internal.2
 - [CODE] Improved error handling for edge-case issues in tourist code
+- [CODE] Implemented Travel system (Minecart equivalent for sundrop)
+- [CODE] Overhauled debug command to clear old debug options, add useful new ones and improve existing ones
+- [DATA] Fixed tourist spawning issues
