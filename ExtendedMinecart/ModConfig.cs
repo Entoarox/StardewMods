@@ -8,6 +8,7 @@ namespace Entoarox.ExtendedMinecart
         ** Accessors
         *********/
         public bool RefuelingEnabled = true;
+        public double RefuelRequiredChance = 0.05;
         public bool AlternateDesertMinecart = false;
         public bool AlternateFarmMinecart = false;
         public bool FarmDestinationEnabled = true;

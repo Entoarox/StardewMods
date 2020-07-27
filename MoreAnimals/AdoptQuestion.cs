@@ -67,8 +67,14 @@ namespace Entoarox.MorePetsAndAnimals
                     skins[pet.Manners] *= 0.5;
                 skins = skins.ToDictionary(k => k.Key, v => v.Value / totalSkin);
                 double skinMax = skins.Values.OrderByDescending(a => a).First();
-                double skinChance = random.NextDouble();
-                int[] validSkins = skins.Where(a => a.Value >= skinChance).Select(a => a.Key).ToArray();
+                int[] validSkins;
+                if (ModEntry.Config.ForceUniqueSkins)
+                    validSkins = skins.Where(a => a.Value == skinMax).Select(a => a.Key).ToArray();
+                else
+                {
+                    double skinChance = Math.Min(random.NextDouble(), skinMax);
+                    validSkins = skins.Where(a => a.Value >= skinChance).Select(a => a.Key).ToArray();
+                }
                 int id = 0;
                 if (validSkins.Length > 0)
                     id = validSkins[random.Next(validSkins.Length)];

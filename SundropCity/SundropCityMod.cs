@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Newtonsoft.Json.Linq;
-
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 
@@ -25,6 +23,7 @@ using xTile.Tiles;
 
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+using Entoarox.Utilities;
 using Entoarox.Utilities.Tools;
 
 namespace SundropCity
@@ -32,8 +31,6 @@ namespace SundropCity
     using Json;
     using Internal;
     using Characters;
-    using Toolbox;
-    using Microsoft.Xna.Framework.Audio;
 
     /// <summary>The mod entry class.</summary>
     public class SundropCityMod : Mod
@@ -43,6 +40,7 @@ namespace SundropCity
         internal static Config Config;
         internal static SystemData SystemData;
         internal static Dictionary<string, CustomFeature[]> AlphaFeatures;
+        internal static IEntoUtilsApi EMUApi;
 #if !DISABLE_SOUND
         internal static SoundEffect Sound;
 #endif
@@ -251,170 +249,203 @@ namespace SundropCity
         /// <param name="e">The event data.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
+            Dictionary<string, Task> tasks = new Dictionary<string, Task>();
+            Dictionary<string, double> taskTimes = new Dictionary<string, double>();
+            void SetupTask(string id, Action<LogBuffer> func)
+            {
+                if (taskTimes.ContainsKey(id))
+                    throw new Exception("Unable to perform Sundrop::Init, duplicate task: " + id);
+                taskTimes.Add(id, -1);
+                tasks.Add(id, Task.Run(() =>
+                {
+                    using (var logBuffer = new LogBuffer(this.Monitor))
+                    {
+                        var tstart = DateTime.Now;
+                        func(logBuffer);
+                        var tEnd = DateTime.Now;
+                        var tTime = tEnd.Subtract(tstart);
+                        logBuffer.Log("Init." + id + " completed after " + tTime.TotalMilliseconds + " milliseconds.", LogLevel.Trace);
+                        taskTimes[id] = tTime.TotalMilliseconds;
+                    }
+                }));
+            }
             this.Monitor.Log("Performing init...", LogLevel.Debug);
-            List<Task> tasks = new List<Task>();
             var start = DateTime.Now;
             var helper = this.Helper;
+            EMUApi = helper.ModRegistry.GetApi<IEntoUtilsApi>("Entoarox.Utilities");
 #if !DISABLE_SOUND
             // Load sounds
-            tasks.Add(Task.Run(() =>
+            SetupTask("Sounds", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
+                monitor.Log("Initializing sounds...", LogLevel.Trace);
+                try
                 {
-                    monitor.Log("Initializing sounds...", LogLevel.Trace);
+                    Sound = SoundEffect.FromStream(File.OpenRead(Path.Combine(this.Helper.DirectoryPath, "assets", "Sounds", "SundropBeachNight.wav")));
+                }
+                catch (Exception err)
+                {
+                    monitor.Log("Exception loading Sundrop music: " + err, LogLevel.Error);
+                }
+            });
+#endif
+            // Load maps
+            SetupTask("Maps", monitor =>
+            {
+                monitor.Log("Initializing maps...", LogLevel.Trace);
+                var tstart = DateTime.Now;
+                List<Task> mapTasks = new List<Task>();
+                foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
+                {
+                    string ext = Path.GetExtension(file);
+                    if (ext == null || !ext.Equals(".tbin"))
+                        continue;
+                    string map = Path.GetFileName(file);
+                    if (map == null)
+                        continue;
                     try
                     {
-                        Sound = SoundEffect.FromStream(File.OpenRead(Path.Combine(this.Helper.DirectoryPath, "assets", "Sounds", "SundropBeachNight.wav")));
+                        monitor.Log("Map found: " + map, LogLevel.Trace);
+                        var mapFile = this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
+                        foreach (string prop in SystemData.Properties)
+                            if (mapFile.Properties.ContainsKey(prop))
+                            {
+                                string rep = mapFile.Properties[prop].ToString().Replace("\n", " ").Replace(";", " ").Replace("  ", " ");
+                                while (rep.Contains("  "))
+                                    rep = rep.Replace("  ", " ");
+                                mapFile.Properties[prop] = rep;
+                            }
+                        foreach (TileSheet sheet in mapFile.TileSheets)
+                            if (sheet.ImageSource.EndsWith(".png"))
+                            {
+                                monitor.Log(sheet.ImageSource, LogLevel.Trace);
+                                string xnb = sheet.ImageSource.Substring(0, sheet.ImageSource.Length - 4);
+                                try
+                                {
+                                    Game1.content.Load<Texture2D>(xnb);
+                                    sheet.ImageSource = xnb;
+                                }
+                                catch
+                                {
+                                    Game1.content.Load<Texture2D>(sheet.ImageSource);
+                                }
+                            }
+                        string mapName = Path.GetFileNameWithoutExtension(map);
+                        var mapInst = new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), mapName);
+                        this.Maps.Add(map);
+                        mapTasks.Add(Task.Run(() =>
+                        {
+                            using (var tmonitor = new LogBuffer(this.Monitor))
+                            {
+                                tmonitor.Log("Reading paths data from map: " + map, LogLevel.Trace);
+                                var layer = mapFile.GetLayer("SundropPaths");
+                                if (layer != null)
+                                {
+                                    tmonitor.Log("Retrieving parking data from map...", LogLevel.Trace);
+                                    var spots = new List<ParkingSpot>();
+                                    for (int x = 0; x < layer.LayerWidth; x++)
+                                        for (int y = 0; y < layer.LayerHeight; y++)
+                                        {
+                                            var tile = layer.Tiles[x, y];
+                                            if (tile == null)
+                                                continue;
+                                            if (tile.TileIndex == 2)
+                                                spots.Add(new ParkingSpot(new Vector2(x, y), new Facing[] { Facing.Left, Facing.Right }));
+                                            else if (tile.TileIndex == 3)
+                                                spots.Add(new ParkingSpot(new Vector2(x, y), new Facing[] { Facing.Up, Facing.Down }));
+                                        }
+                                    if (spots.Count > 0)
+                                        ParkingSpots.Add(mapName, spots.ToArray());
+                                }
+                                if (mapFile.GetLayer("Tourists") == null)
+                                    return;
+                                tmonitor.Log("Retrieving tourist data from map...", LogLevel.Trace);
+                                Tourist.WarpCache.Add(mapName, Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_WARP_DOWN, Tourist.TILE_WARP_LEFT, Tourist.TILE_WARP_RIGHT, Tourist.TILE_WARP_UP }));
+                                Tourist.SpawnCache.Add(mapName, Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_ARROW_DOWN, Tourist.TILE_ARROW_LEFT, Tourist.TILE_ARROW_RIGHT, Tourist.TILE_ARROW_UP, Tourist.TILE_BROWSE, Tourist.TILE_SPAWN }));
+                            }
+                        }));
                     }
                     catch (Exception err)
                     {
-                        monitor.Log("Exception loading Sundrop music: " + err, LogLevel.Error);
+                        monitor.Log("Unable to prepare `" + map + "` location, error follows\n" + err, LogLevel.Error);
                     }
                 }
-            }));
-#endif
-            // Load maps
-            tasks.Add(Task.Run(() =>
+                var tend1 = DateTime.Now;
+                var ttime1 = tend1.Subtract(tstart);
+                monitor.Log("Init.Maps completed part 1 after " + ttime1.TotalMilliseconds + " milliseconds.", LogLevel.Trace);
+                Task.WaitAll(mapTasks.ToArray());
+                var tend2 = DateTime.Now;
+                var ttime2 = tend2.Subtract(tend1);
+                if(ttime2.TotalMilliseconds == 0)
+                    monitor.Log("Init.Maps completed part 2 before part 1 finished.", LogLevel.Trace);
+                else
+                    monitor.Log("Init.Maps completed part 2 after " + ttime2.TotalMilliseconds + " milliseconds.", LogLevel.Trace);
+            });
+            SetupTask("Tourists", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
-                {
-                    monitor.Log("Initializing maps...", LogLevel.Trace);
-                    foreach (string file in Directory.EnumerateFiles(Path.Combine(this.Helper.DirectoryPath, "assets", "Maps")))
-                    {
-                        string ext = Path.GetExtension(file);
-                        if (ext == null || !ext.Equals(".tbin"))
-                            continue;
-                        string map = Path.GetFileName(file);
-                        if (map == null)
-                            continue;
-                        try
-                        {
-                            monitor.Log("Map found: " + map, LogLevel.Trace);
-                            var mapFile = this.Helper.Content.Load<Map>(Path.Combine("assets", "Maps", map));
-                            foreach (string prop in SystemData.Layers)
-                                if (mapFile.Properties.ContainsKey(prop))
-                                {
-                                    string rep=mapFile.Properties[prop].ToString().Replace("\n", " ").Replace(";", " ").Replace("  ", " ");
-                                    while(rep.Contains("  "))
-                                        rep = rep.Replace("  ", " ");
-                                    mapFile.Properties[prop] = rep;
-                                }
-                            foreach (TileSheet sheet in mapFile.TileSheets)
-                                if (sheet.ImageSource.EndsWith(".png"))
-                                {
-                                    monitor.Log(sheet.ImageSource, LogLevel.Trace);
-                                    string xnb = sheet.ImageSource.Substring(0, sheet.ImageSource.Length - 4);
-                                    try
-                                    {
-                                        Game1.content.Load<Texture2D>(xnb);
-                                        sheet.ImageSource = xnb;
-                                    }
-                                    catch
-                                    {
-                                        Game1.content.Load<Texture2D>(sheet.ImageSource);
-                                    }
-                                }
-                            var mapInst = new GameLocation(this.Helper.Content.GetActualAssetKey(Path.Combine("assets", "Maps", map)), Path.GetFileNameWithoutExtension(map));
-                            this.Maps.Add(map);
-                            Tourist.WarpCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_WARP_DOWN, Tourist.TILE_WARP_LEFT, Tourist.TILE_WARP_RIGHT, Tourist.TILE_WARP_UP }));
-                            Tourist.SpawnCache.Add(Path.GetFileNameWithoutExtension(map), Tourist.GetSpawnPoints(mapInst, new HashSet<int>() { Tourist.TILE_ARROW_DOWN, Tourist.TILE_ARROW_LEFT, Tourist.TILE_ARROW_RIGHT, Tourist.TILE_ARROW_UP, Tourist.TILE_BROWSE, Tourist.TILE_SPAWN }));
-                        }
-                        catch (Exception err)
-                        {
-                            monitor.Log("Unable to prepare `" + map + "` location, error follows\n" + err, LogLevel.Error);
-                        }
-                    }
-                }
-            }));
-            tasks.Add(Task.Run(() =>
-            {
-                this.Monitor.Log("Mapping tourist graphics...", LogLevel.Trace);
+                monitor.Log("Mapping tourist graphics...", LogLevel.Trace);
                 Tourist.LoadResources();
-            }));
-            tasks.Add(Task.Run(() =>
+            });
+            SetupTask("Cars", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
+                monitor.Log("Reading car data...", LogLevel.Trace);
+                SundropCar.CarTypes = helper.Data.ReadJsonFile<List<CarType>>("assets/Data/Cars.json");
+                if (SundropCar.CarTypes == null)
                 {
-                    monitor.Log("Reading parking data...", LogLevel.Trace);
-                    foreach (var map in helper.Content.Load<JObject>("assets/Data/ParkingSpots.json").Properties())
+                    monitor.Log("Unable to read Cars.json for car data, cars will not be able to spawn!", LogLevel.Error);
+                    SundropCar.CarTypes = new List<CarType>();
+                }
+                else
+                    Parallel.ForEach(SundropCar.CarTypes, car =>
                     {
-                        monitor.Log("Parsing parking data for the `" + map.Name + "` map, found (" + (map.Value as JArray)?.Count + ") parking spaces.", LogLevel.Trace);
-                        var spotsArr = map.Value.ToObject<JArray>();
-                        string name = map.Name;
-                        var spots = new List<ParkingSpot>();
-                        foreach (var spotArr in spotsArr.Cast<JArray>())
-                        {
-                            var values = spotArr.Children().ToArray();
-                            spots.Add(new ParkingSpot(new Vector2(values[0].ToObject<int>(), values[1].ToObject<int>()), (from JValue facing in values[2].ToObject<JArray>() select (Facing)Enum.Parse(typeof(Facing), facing.ToObject<string>())).ToArray()));
-                        }
-                        ParkingSpots.Add(map.Name, spots.ToArray());
-                    }
-                }
-            }));
-            tasks.Add(Task.Run(() =>
+                        car.Base = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + car.Base + ".png");
+                        car.Recolor = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + car.Recolor + ".png");
+                        car.Decals = car.Decals.Select(pair => new KeyValuePair<string, string>(pair.Key, helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + pair.Value + ".png"))).ToDictionary(pair => pair.Key, pair => pair.Value);
+                    });
+            });
+            SetupTask("Characters", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
-                {
-                    monitor.Log("Reading car data...", LogLevel.Trace);
-                    SundropCar.CarTypes = helper.Data.ReadJsonFile<List<CarType>>("assets/Data/Cars.json");
-                    if (SundropCar.CarTypes == null)
+                monitor.Log("Preparing characters...", LogLevel.Trace);
+                // NPC Spawning
+                foreach (var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"))
+                    try
                     {
-                        monitor.Log("Unable to read Cars.json for car data, cars will not be able to spawn!", LogLevel.Error);
-                        SundropCar.CarTypes = new List<CarType>();
+                        // ReSharper disable once ObjectCreationAsStatement
+                        new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
+                        {
+                            Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
+                        };
                     }
-                    else
-                        Parallel.ForEach(SundropCar.CarTypes, car =>
-                        {
-                            car.Base = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + car.Base + ".png");
-                            car.Recolor = helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + car.Recolor + ".png");
-                            car.Decals = car.Decals.Select(pair => new KeyValuePair<string, string>(pair.Key, helper.Content.GetActualAssetKey("assets/TerrainFeatures/Drivables/" + pair.Value + ".png"))).ToDictionary(pair => pair.Key, pair => pair.Value);
-                        });
-                }
-            }));
-            tasks.Add(Task.Run(() =>
+                    catch (Exception err)
+                    {
+                        monitor.Log("Unable to prepare villager by name of `" + info.Name + "` due to a unexpected issue.\n" + err, LogLevel.Error);
+                    }
+            });
+            SetupTask("Cameos", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
-                {
-                    monitor.Log("Preparing characters...", LogLevel.Trace);
-                    // NPC Spawning
-                    foreach (var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CharacterSpawns.json"))
-                        try
+                monitor.Log("Preparing cameos...", LogLevel.Trace);
+                foreach (var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CameoSpawns.json"))
+                    try
+                    {
+                        // ReSharper disable once ObjectCreationAsStatement
+                        new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
                         {
-                            // ReSharper disable once ObjectCreationAsStatement
-                            new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Sprites/" + info.Texture + ".png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
-                            {
-                                Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Portraits/" + info.Texture + ".png"),
-                            };
-                        }
-                        catch (Exception err)
-                        {
-                            monitor.Log("Unable to prepare villager by name of `" + info.Name + "` due to a unexpected issue.\n" + err, LogLevel.Error);
-                        }
-                }
-            }));
-            tasks.Add(Task.Run(() =>
+                            Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
+                        };
+                    }
+                    catch (Exception err)
+                    {
+                        monitor.Log("Unable to prepare cameo character for `" + info.Name + "` due to a unexpected issue.\n" + err, LogLevel.Warn);
+                    }
+            });
+            SetupTask("JSON", monitor =>
             {
-                using (var monitor = new LogBuffer(this.Monitor))
-                {
-                    monitor.Log("Preparing cameos...", LogLevel.Trace);
-                    foreach (var info in this.Helper.Data.ReadJsonFile<CharacterInfo[]>("assets/Data/CameoSpawns.json"))
-                        try
-                        {
-                            // ReSharper disable once ObjectCreationAsStatement
-                            new NPC(new AnimatedSprite(this.Helper.Content.GetActualAssetKey("assets/Characters/Cameos/" + info.Name + "Sprite.png"), 18, 16, 32), Vector2.Zero, 2, info.Name)
-                            {
-                                Portrait = this.Helper.Content.Load<Texture2D>("assets/Characters/Cameos/" + info.Name + "Portrait.png"),
-                            };
-                        }
-                        catch (Exception err)
-                        {
-                            monitor.Log("Unable to prepare cameo character for `" + info.Name + "` due to a unexpected issue.\n" + err, LogLevel.Warn);
-                        }
-                }
-            }));
-            tasks.Add(Task.Run(() =>
+                monitor.Log("Loading JSON data...", LogLevel.Trace);
+                monitor.Log("JSON: MarketStalls", LogLevel.Trace);
+                MarketStall.Stalls = this.Helper.Data.ReadJsonFile<List<ShopData>>("assets/Data/MarketStalls.json");
+            });
+            SetupTask("Commands", monitor =>
             {
-                this.Monitor.Log("Registering commands...", LogLevel.Trace);
+                monitor.Log("Registering commands...", LogLevel.Trace);
                 if (Config.DebugFlags.HasFlag(DebugFlags.Functions))
                     helper.ConsoleCommands.Add("sundrop_debug", "For debug use only", (cmd, args) =>
                     {
@@ -435,7 +466,7 @@ namespace SundropCity
                                 break;
                             case "warp":
                                 if (args.Length == 1)
-                                    Game1.warpFarmer("Town", 100, 58, 1);
+                                    Game1.warpFarmer("SundropPromenade", 27, 27, 1);
                                 else
                                 {
                                     if (Game1.getLocationFromName(args[1]) == null)
@@ -443,7 +474,7 @@ namespace SundropCity
                                         this.Monitor.Log("Unable to warp, target destination does not exist.", LogLevel.Error);
                                         break;
                                     }
-                                    Game1.warpFarmer(args[1], Convert.ToSByte(args[2]) + 64, Convert.ToSByte(args[3]) + 64, false);
+                                    Game1.warpFarmer(args[1], Convert.ToSByte(args[2]) + 64, Convert.ToSByte(args[3]) + 64, 2);
                                 }
                                 this.Monitor.Log("Warping player to target.", LogLevel.Alert);
                                 break;
@@ -473,11 +504,29 @@ namespace SundropCity
                                 break;
                         }
                     });
-            }));
-            Task.WaitAll(tasks.ToArray());
-            var end = DateTime.Now;
-            var time = end.Subtract(start);
-            this.Monitor.Log("Init took " + time.TotalMilliseconds + " milliseconds.", LogLevel.Debug);
+            });
+            var all = Task.WhenAll(tasks.Values.ToArray());
+            all.Wait(5000);
+            if (all.IsCompleted)
+            {
+                var end = DateTime.Now;
+                var time = end.Subtract(start);
+                this.Monitor.Log("Init took " + time.TotalMilliseconds + " milliseconds.", LogLevel.Debug);
+                KeyValuePair<string, double> longest = new KeyValuePair<string, double>("Default", 0);
+                foreach (var pair in taskTimes)
+                    if (pair.Value > longest.Value)
+                        longest = pair;
+                this.Monitor.Log("The Init." + longest.Key + " task took the longest to complete at " + longest.Value + " milliseconds.", LogLevel.Trace);
+            }
+            else
+            {
+                this.Monitor.Log("Init took more then 5 seconds to complete, init has been cancelled, details follow.", LogLevel.Error);
+                foreach (var faulted in tasks.Where(_ => _.Value.IsFaulted))
+                    this.Monitor.Log("Init." + faulted.Key + " encountered a exception and did not complete: " + faulted.Value.Exception, LogLevel.Warn);
+                foreach (var faulted in tasks.Where(_ => !_.Value.IsCompleted))
+                    this.Monitor.Log("Init." + faulted.Key + " did not complete before the 5 second time limit was reached.", LogLevel.Warn);
+                throw new TimeoutException();
+            }
         }
 
         private void EarlySetup()

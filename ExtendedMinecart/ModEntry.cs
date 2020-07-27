@@ -24,15 +24,15 @@ namespace Entoarox.ExtendedMinecart
         *********/
         private static readonly List<KeyValuePair<string, string>> DestinationData = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("Farm", "Farm"),
-            new KeyValuePair<string, string>("Town", "Town"),
-            new KeyValuePair<string, string>("Mine", "Mine"),
-            new KeyValuePair<string, string>("BusStop", "Bus"),
-            new KeyValuePair<string, string>("Mountain", "Quarry"),
-            new KeyValuePair<string, string>("Desert", "Desert"),
-            new KeyValuePair<string, string>("Woods", "Woods"),
-            new KeyValuePair<string, string>("Beach", "Beach"),
-            new KeyValuePair<string, string>("Forest", "Wizard")
+            new KeyValuePair<string, string>("Farm", "farm"),
+            new KeyValuePair<string, string>("Town", "town"),
+            new KeyValuePair<string, string>("Mine", "mine"),
+            new KeyValuePair<string, string>("BusStop", "bus"),
+            new KeyValuePair<string, string>("Mountain", "quarry"),
+            new KeyValuePair<string, string>("Desert", "desert"),
+            new KeyValuePair<string, string>("Woods", "woods"),
+            new KeyValuePair<string, string>("Beach", "beach"),
+            new KeyValuePair<string, string>("Forest", "wizard")
         };
         private static readonly Random Random = new Random();
         private static FrameworkMenu Menu;
@@ -63,40 +63,45 @@ namespace Entoarox.ExtendedMinecart
             this.Monitor.Log("DayStarted event, preparing custom minecarts...", LogLevel.Trace);
             if (Context.IsMultiplayer)
                 this.Monitor.Log("Multiplayer game detected, you are using Extended Minecarts at your own risk!", LogLevel.Warn);
-            ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
-            foreach (KeyValuePair<string, string> item in ModEntry.DestinationData)
+            if(Game1.IsMasterGame && !Game1.MasterPlayer.mailReceived.Contains("BeachBridgeFixed") && (Game1.getLocationFromName("Beach") as Beach).bridgeFixed.Value)
+                    Game1.MasterPlayer.mailReceived.Add("BeachBridgeFixed");
+            if (ModEntry.Destinations == null)
             {
-                switch (item.Key)
+                ModEntry.Destinations = new Dictionary<string, ButtonFormComponent>();
+                foreach (KeyValuePair<string, string> item in ModEntry.DestinationData)
                 {
-                    case "Farm":
-                        if (!this.Config.FarmDestinationEnabled)
-                            continue;
-                        break;
-                    case "Desert":
-                        if (!this.Config.DesertDestinationEnabled)
-                            continue;
-                        break;
-                    case "Woods":
-                        if (!this.Config.WoodsDestinationEnabled)
-                            continue;
-                        break;
-                    case "Beach":
-                        if (!this.Config.BeachDestinationEnabled)
-                            continue;
-                        break;
-                    case "Forest":
-                        if (!this.Config.WizardDestinationEnabled)
-                            continue;
-                        break;
+                    switch (item.Key)
+                    {
+                        case "Farm":
+                            if (!this.Config.FarmDestinationEnabled)
+                                continue;
+                            break;
+                        case "Desert":
+                            if (!this.Config.DesertDestinationEnabled)
+                                continue;
+                            break;
+                        case "Woods":
+                            if (!this.Config.WoodsDestinationEnabled)
+                                continue;
+                            break;
+                        case "Beach":
+                            if (!this.Config.BeachDestinationEnabled)
+                                continue;
+                            break;
+                        case "Forest":
+                            if (!this.Config.WizardDestinationEnabled)
+                                continue;
+                            break;
+                    }
+
+                    ModEntry.Destinations.Add(item.Key, new ButtonFormComponent(new Point(-1, 3 + 11 * ModEntry.Destinations.Count), 65, this.Helper.Translation.Get("destination." + item.Value), (t, p, m) => this.AnswerResolver(item.Key)));
                 }
 
-                ModEntry.Destinations.Add(item.Key, new ButtonFormComponent(new Point(-1, 3 + 11 * ModEntry.Destinations.Count), 65, item.Value, (t, p, m) => this.AnswerResolver(item.Key)));
+                ModEntry.Menu = new FrameworkMenu(new Point(85, ModEntry.Destinations.Count * 11 + 22));
+                ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), this.Helper.Translation.Get("choose-destination")));
+                foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
+                    ModEntry.Menu.AddComponent(c);
             }
-
-            ModEntry.Menu = new FrameworkMenu(new Point(85, ModEntry.Destinations.Count * 11 + 22));
-            ModEntry.Menu.AddComponent(new LabelComponent(new Point(-3, -16), this.Helper.Translation.Get("choose-destination")));
-            foreach (ButtonFormComponent c in ModEntry.Destinations.Values)
-                ModEntry.Menu.AddComponent(c);
             Dictionary<string, string> Status = new Dictionary<string, string>()
             {
                 ["Farm"] = "Unknown",
@@ -354,27 +359,26 @@ namespace Entoarox.ExtendedMinecart
             Game1.currentLocation.lastQuestionKey = null;
             Game1.dialogueUp = false;
             Game1.player.CanMove = true;
-            if (this.Config.RefuelingEnabled)
+            if (!this.Config.RefuelingEnabled)
+                this.Config.RefuelRequiredChance = 0;
+            if (this.CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && ModEntry.Random.NextDouble() < this.Config.RefuelRequiredChance)
+                Game1.player.mailReceived.Add("MinecartNeedsRefuel");
+            if (Game1.player.mailReceived.Contains("MinecartNeedsRefuel"))
             {
-                if (this.CheckRefuel && !Game1.player.mailReceived.Contains("MinecartNeedsRefuel") && ModEntry.Random.NextDouble() < 0.05)
-                    Game1.player.mailReceived.Add("MinecartNeedsRefuel");
-                if (Game1.player.mailReceived.Contains("MinecartNeedsRefuel"))
+                if (Game1.player.hasItemInInventory(382, 5))
                 {
-                    if (Game1.player.hasItemInInventory(382, 5))
-                    {
-                        Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("needs-refuel.question"), Game1.currentLocation.createYesNoResponses(), (farmer, choice) =>
+                    Game1.currentLocation.createQuestionDialogue(this.Helper.Translation.Get("needs-refuel.question"), Game1.currentLocation.createYesNoResponses(), (farmer, choice) =>
+                      {
+                          if (choice == "Yes")
                           {
-                              if (choice == "Yes")
-                              {
-                                  farmer.removeItemsFromInventory(382, 5);
-                                  farmer.mailReceived.Remove("MinecartNeedsRefuel");
-                              }
-                          });
-                    }
-                    else
-                        Game1.drawObjectDialogue(this.Helper.Translation.Get("needs-refuel.no-coal"));
-                    return;
+                              farmer.removeItemsFromInventory(382, 5);
+                              farmer.mailReceived.Remove("MinecartNeedsRefuel");
+                          }
+                      });
                 }
+                else
+                    Game1.drawObjectDialogue(this.Helper.Translation.Get("needs-refuel.no-coal"));
+                return;
             }
 
             foreach (KeyValuePair<string, ButtonFormComponent> item in ModEntry.Destinations)
@@ -385,7 +389,7 @@ namespace Entoarox.ExtendedMinecart
                 ModEntry.Destinations["Desert"].Disabled = true;
             if (this.Config.WoodsDestinationEnabled && !Game1.MasterPlayer.mailReceived.Contains("beenToWoods"))
                 ModEntry.Destinations["Woods"].Disabled = true;
-            if (this.Config.BeachDestinationEnabled && (!(Game1.getLocationFromName("Beach") as Beach).bridgeFixed.Value || (Game1.currentSeason.Equals("winter") && Game1.dayOfMonth >= 15 && Game1.dayOfMonth <= 17)))
+            if (this.Config.BeachDestinationEnabled && (!Game1.MasterPlayer.mailReceived.Contains("BeachBridgeFixed") || (Game1.currentSeason.Equals("winter") && Game1.dayOfMonth >= 15 && Game1.dayOfMonth <= 17)))
                 ModEntry.Destinations["Beach"].Disabled = true;
             this.CheckRefuel = false;
             Game1.activeClickableMenu = ModEntry.Menu;
