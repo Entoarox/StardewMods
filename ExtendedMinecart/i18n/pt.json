@@ -1,0 +1,15 @@
+{
+    "choose-destination": "Escolher Destino",
+    "needs-refuel.question": "O carrinho ficou sem combustível. Usar 5 carvões para reabastecer?",
+    "needs-refuel.no-coal": "O carrinho está sem combustível é necessário 5 carvões para voltar a funcionar.",
+
+    "destination.farm": "Fazenda",
+    "destination.town": "Cidade",
+    "destination.mine": "Mina",
+    "destination.bus": "Ônibus",
+    "destination.quarry": "Pedreira",
+    "destination.desert": "Deserto",
+    "destination.woods": "Floresta Abandonada",
+    "destination.beach": "Praia",
+    "destination.wizard": "Feiticeiro"
+}

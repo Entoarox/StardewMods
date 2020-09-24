@@ -5,7 +5,7 @@ using StardewModdingAPI;
 
 namespace Entoarox.Utilities.Tools
 {
-    public class LogBuffer : IDisposable
+    public class LogBuffer : IDisposable, IMonitor
     {
         private readonly List<KeyValuePair<string, LogLevel>> Buffer = new List<KeyValuePair<string, LogLevel>>();
         private readonly IMonitor Monitor;
@@ -19,6 +19,9 @@ namespace Entoarox.Utilities.Tools
             this.Buffer.Add(new KeyValuePair<string, LogLevel>(message, logLevel));
         }
         private bool disposedValue = false;
+
+        public bool IsVerbose => this.Monitor.IsVerbose;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposedValue)
@@ -26,7 +29,9 @@ namespace Entoarox.Utilities.Tools
                 if (disposing)
                 {
                     foreach (var pair in this.Buffer)
+                    {
                         this.Monitor.Log(pair.Key, pair.Value);
+                    }
                 }
 
                 this.disposedValue = true;
@@ -35,6 +40,14 @@ namespace Entoarox.Utilities.Tools
         public void Dispose()
         {
             this.Dispose(true);
+        }
+
+        public void VerboseLog(string message)
+        {
+            if(this.IsVerbose)
+            {
+                this.Log(message);
+            }
         }
     }
 }

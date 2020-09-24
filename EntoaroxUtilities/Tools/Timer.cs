@@ -22,9 +22,9 @@ namespace Entoarox.Utilities.Tools
         }
         public static TimeSpan StopTimer(this IMonitor monitor, string id, string message = null)
         {
-            if (!Timers.ContainsKey(monitor))
-                Timers.Add(monitor, new Dictionary<string, DateTime>());
-            var time = DateTime.Now.Subtract(Timers[monitor][id]);
+            TimeSpan time = TimeSpan.Zero;
+            if (Timers.ContainsKey(monitor) && Timers[monitor].ContainsKey(id))
+                time = DateTime.Now.Subtract(Timers[monitor][id]);
             if (message != null)
                 monitor.Log(message.Replace("{{TIME}}", time.TotalMilliseconds.ToString()));
             return time;
