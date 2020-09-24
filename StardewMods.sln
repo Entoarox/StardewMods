@@ -44,8 +44,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeasonalImmersion", "Season
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShopExpander", "ShopExpander\ShopExpander.csproj", "{4D1A9CED-F1DA-4045-80AE-134557D760DA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SundropCity", "SundropCity\SundropCity.csproj", "{D6162223-CE03-4713-8D7E-102A1D445379}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XnbLoader", "XnbLoader\XnbLoader.csproj", "{78F8CDEE-5EC7-48E1-AE12-E6D76F1E15D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TDiffPatcherV1R0P0", "DiffPatcherV1R0P0\TDiffPatcherV1R0P0.csproj", "{D71D541B-B5E7-4F60-8E28-B64E8847CA1D}"
@@ -55,9 +53,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntoaroxUtilities", "EntoaroxUtilities\EntoaroxUtilities.csproj", "{62778992-31F3-433A-9405-920EA6254AB5}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -149,12 +144,6 @@ Global
 		{4D1A9CED-F1DA-4045-80AE-134557D760DA}.Release|Any CPU.ActiveCfg = Release|x86
 		{4D1A9CED-F1DA-4045-80AE-134557D760DA}.Release|x86.ActiveCfg = Release|x86
 		{4D1A9CED-F1DA-4045-80AE-134557D760DA}.Release|x86.Build.0 = Release|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Debug|x86.ActiveCfg = Debug|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Debug|x86.Build.0 = Debug|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Release|Any CPU.ActiveCfg = Release|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Release|x86.ActiveCfg = Release|x86
-		{D6162223-CE03-4713-8D7E-102A1D445379}.Release|x86.Build.0 = Release|x86
 		{78F8CDEE-5EC7-48E1-AE12-E6D76F1E15D7}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{78F8CDEE-5EC7-48E1-AE12-E6D76F1E15D7}.Debug|x86.ActiveCfg = Debug|x86
 		{78F8CDEE-5EC7-48E1-AE12-E6D76F1E15D7}.Debug|x86.Build.0 = Debug|x86
@@ -200,6 +189,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71BE6CBB-13AD-4DAC-8B44-35F22FBE1E8F}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
