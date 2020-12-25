@@ -9,6 +9,7 @@ namespace Entoarox.FasterPaths
 
         public int WoodFloorBoost = 1;
         public int WoodPathBoost = 1;
+        public int PlankFloorBoost = 1;
 
         public int WeatheredFloorBoost = 2;
         public int StrawFloorBoost = 2;
@@ -17,6 +18,7 @@ namespace Entoarox.FasterPaths
         public int CobblePathBoost = 3;
         public int SteppingStoneBoost = 3;
         public int BrickFloorBoost = 3;
+        public int TownFloorBoost = 3;
 
         public int CrystalFloorBoost = 4;
         public int CrystalPathBoost = 4;

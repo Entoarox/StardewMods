@@ -57,7 +57,9 @@ namespace Entoarox.FasterPaths
                 new PlayerModifier { WalkSpeedModifier = this.Config.CrystalPathBoost, RunSpeedModifier = this.Config.CrystalPathBoost },
                 new PlayerModifier { WalkSpeedModifier = this.Config.CobblePathBoost, RunSpeedModifier = this.Config.CobblePathBoost },
                 new PlayerModifier { WalkSpeedModifier = this.Config.SteppingStoneBoost, RunSpeedModifier = this.Config.SteppingStoneBoost },
-                new PlayerModifier { WalkSpeedModifier = this.Config.BrickFloorBoost, RunSpeedModifier = this.Config.BrickFloorBoost }
+                new PlayerModifier { WalkSpeedModifier = this.Config.BrickFloorBoost, RunSpeedModifier = this.Config.BrickFloorBoost },
+                new PlayerModifier { WalkSpeedModifier = this.Config.PlankFloorBoost, RunSpeedModifier = this.Config.PlankFloorBoost },
+                new PlayerModifier { WalkSpeedModifier = this.Config.TownFloorBoost, RunSpeedModifier = this.Config.TownFloorBoost },
             };
             this.Helper.Player().Modifiers.Add(new PlayerModifier { WalkSpeedModifier = this.Config.WalkSpeedBoost, RunSpeedModifier = this.Config.RunSpeedBoost });
         }
