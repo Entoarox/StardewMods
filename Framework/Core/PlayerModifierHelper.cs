@@ -22,9 +22,6 @@ namespace Entoarox.Framework.Core
         /// <summary>The unique ID for the glow light source.</summary>
         private readonly int GlowID = (int)DateTime.Now.Ticks;
 
-        /// <summary>The current vanilla buff values.</summary>
-        private readonly FieldInfo BuffAttributes = typeof(Buff).GetField("buffAttributes", BindingFlags.Instance | BindingFlags.NonPublic);
-
         /// <summary>The health regen remainder after applying the integer amount.</summary>
         private float HealthRegenRemainder;
 
@@ -182,21 +179,21 @@ namespace Entoarox.Framework.Core
             int boost = 0, v = 0;
             foreach (Buff b in Game1.buffsDisplay.otherBuffs)
             {
-                v = ((int[])this.BuffAttributes.GetValue(b))[9];
+                v = b.buffAttributes[9];
                 if (v != 0)
                     boost += v;
             }
 
             if (Game1.buffsDisplay.food != null)
             {
-                v = ((int[])this.BuffAttributes.GetValue(Game1.buffsDisplay.food))[9];
+                v = Game1.buffsDisplay.food.buffAttributes[9];
                 if (v != 0)
                     boost += v;
             }
 
             if (Game1.buffsDisplay.drink != null)
             {
-                v = ((int[])this.BuffAttributes.GetValue(Game1.buffsDisplay.drink))[9];
+                v = Game1.buffsDisplay.drink.buffAttributes[9];
                 if (v != 0)
                     boost += v;
             }

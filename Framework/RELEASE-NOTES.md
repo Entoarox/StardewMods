@@ -1,4 +1,16 @@
 ## Release notes
+## 2.5.2
+Released 22 December 2020
+* Fix issue with the buff logic due to visibility change for Buff.buffAttributes field in 1.5
+
+## 2.5.1
+Released 22 December 2020
+* Actually compile against SDV 1.5
+
+## 2.5.0
+Released 22 December 2020
+* Update for SDV 1.5
+
 ## 2.4.7
 Released 22 August 2019
 * Fixed the Vortex mod manager seeing this as a XNB rather then SMAPI mod

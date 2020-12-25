@@ -52,6 +52,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TDiffMaker", "TDiffMaker\TD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntoaroxUtilities", "EntoaroxUtilities\EntoaroxUtilities.csproj", "{62778992-31F3-433A-9405-920EA6254AB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SitForStaminaFailed", "SitForStamina\SitForStaminaFailed.csproj", "{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SitForStaminaMod", "SitForStaminaMod\SitForStaminaMod.csproj", "{E1238C67-9CFA-4EDB-8B24-19C10E752857}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -174,6 +178,22 @@ Global
 		{62778992-31F3-433A-9405-920EA6254AB5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62778992-31F3-433A-9405-920EA6254AB5}.Release|x86.ActiveCfg = Release|Any CPU
 		{62778992-31F3-433A-9405-920EA6254AB5}.Release|x86.Build.0 = Release|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Debug|x86.Build.0 = Debug|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Release|x86.ActiveCfg = Release|Any CPU
+		{A60B9F31-C136-4F9B-810F-3EAA6731BEDB}.Release|x86.Build.0 = Release|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Debug|x86.Build.0 = Debug|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Release|x86.ActiveCfg = Release|Any CPU
+		{E1238C67-9CFA-4EDB-8B24-19C10E752857}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
