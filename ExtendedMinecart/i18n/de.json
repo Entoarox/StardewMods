@@ -1,0 +1,16 @@
+{
+    "choose-destination": "Ziel auswählen",
+    "needs-refuel.question": "Der Minenwagen hat keinen Treibstoff mehr. {{Amount}} Kohle zum Auftanken verwenden?",
+    "needs-refuel.no-coal": "Der Minenwagen hat keinen Treibstoff mehr und es muss {{Amount}} Kohle aufgetankt werden.",
+
+    "destination.farm": "Farm",
+    "destination.town": "Stadt",
+    "destination.mine": "Mine",
+    "destination.bus": "Bus",
+    "destination.quarry": "Steinbruch",
+    "destination.desert": "Wüste",
+    "destination.woods": "Wälder",
+    "destination.beach": "Strand",
+    "destination.wizard": "Zauberer",
+    "destination.cancel": "Hier bleiben"
+}
